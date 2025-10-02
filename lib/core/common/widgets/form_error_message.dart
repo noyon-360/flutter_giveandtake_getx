@@ -17,7 +17,7 @@ class FormErrorMessage extends StatelessWidget {
       child: Text(
         message,
         style: const TextStyle(
-          color: AppColors.error,
+          color: AppColors.deleteButtonBackground,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),

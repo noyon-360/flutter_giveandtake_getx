@@ -19,8 +19,8 @@ class PrimaryButton extends StatelessWidget {
     this.width,
     this.height,
     this.isLoading = false,
-    this.backgroundColor = AppColors.white,
-    this.textColor = AppColors.buttonText,
+    this.backgroundColor = AppColors.primaryBlue,
+    this.textColor = AppColors.primaryWhite,
     this.borderRadius = 8.0,
   });
 
@@ -79,9 +79,9 @@ class SecondaryButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     required this.text,
-    this.backgroundColor = Colors.transparent,
-    this.textColor = AppColors.white,
-    this.borderColor = AppColors.white,
+    this.backgroundColor = AppColors.primaryWhite,
+    this.textColor = AppColors.textBlack,
+    this.borderColor = AppColors.textBlue,
     this.width,
     this.height,
     this.isLoading = false,

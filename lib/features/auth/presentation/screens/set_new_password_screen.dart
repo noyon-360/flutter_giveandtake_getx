@@ -66,7 +66,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
               Text(
                 'Reset password',
                 style: TextStyle(
-                  color: AppColors.white,
+                  color: AppColors.primaryWhite,
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                 ),
@@ -77,7 +77,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.rememberMeColor,
+                  color: AppColors.textGrey,
                 ),
               ),
               SizedBox(height: 32),
@@ -94,24 +94,24 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                           focusNode: _passwordFocus,
                           obscureText: obscure,
                           textInputAction: TextInputAction.next,
-                          style: TextStyle(color: AppColors.primaryText),
+                          style: TextStyle(color: AppColors.textGrey),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "New Password",
                             hintStyle: TextStyle(
-                              color: AppColors.prefixIconColor,
+                              color: AppColors.textFieldLightGrey,
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                             ),
                             prefixIcon: Icon(
                               Icons.lock_outline,
-                              color: AppColors.prefixIconColor,
+                              color: AppColors.textFieldLightGrey,
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 obscure
                                     ? Icons.visibility_off
                                     : Icons.visibility,
-                                color: AppColors.prefixIconColor,
+                                color: AppColors.textFieldLightGrey,
                               ),
                               onPressed: () =>
                                   _obscurePassword.value = !obscure,
@@ -133,24 +133,24 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                           focusNode: _confirmPasswordFocus,
                           obscureText: obscure,
                           textInputAction: TextInputAction.done,
-                          style: TextStyle(color: AppColors.primaryText),
+                          style: TextStyle(color: AppColors.textBlack),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Confirm Password",
                             hintStyle: TextStyle(
-                              color: AppColors.prefixIconColor,
+                              color: AppColors.textFieldLightGrey,
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                             ),
                             prefixIcon: Icon(
                               Icons.lock_outline,
-                              color: AppColors.prefixIconColor,
+                              color: AppColors.textFieldLightGrey,
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 obscure
                                     ? Icons.visibility_off
                                     : Icons.visibility,
-                                color: AppColors.prefixIconColor,
+                                color: AppColors.textFieldLightGrey,
                               ),
                               onPressed: () =>
                                   _obscurePassword.value = !obscure,

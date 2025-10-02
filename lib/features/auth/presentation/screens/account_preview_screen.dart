@@ -5,7 +5,6 @@ import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/auth/presentation/controller/remember_me_controller.dart';
 import '../../../../core/theme/app_buttoms.dart';
-import '../../../home/presentation/screens/home_screen.dart';
 import '../../../../core/common/constants/app_images.dart';
 
 class AccountPreviewScreen extends StatefulWidget {
@@ -63,14 +62,14 @@ class _AccountPreviewScreenState extends State<AccountPreviewScreen> {
 
               Text(
                 email.value,
-                style: const TextStyle(fontSize: 18, color: AppColors.white),
+                style: const TextStyle(fontSize: 18, color: AppColors.primaryWhite),
               ),
               const SizedBox(height: 10),
 
               // Hidden password
               Text(
                 '*' * password.value.length,
-                style: const TextStyle(fontSize: 18, letterSpacing: 3, color: AppColors.white),
+                style: const TextStyle(fontSize: 18, letterSpacing: 3, color: AppColors.primaryWhite),
               ),
               const SizedBox(height: 30),
 
@@ -98,7 +97,7 @@ class _AccountPreviewScreenState extends State<AccountPreviewScreen> {
 
               // login might already navigate; if not, you can safely navigate here:
 
-                Get.offAll(() => const HomeScreen());
+                // Get.offAll(() => const HomeScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             },
             text: "This is your account",
           )),

@@ -14,7 +14,7 @@ import 'package:karlfive/features/auth/presentation/widgets/different_login_appr
 import '../../../../core/common/widgets/app_logo.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/common/widgets/form_error_message.dart';
-import '../../../../core/common/widgets/or_divider_with_circle.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../controller/auth_controller.dart';
 
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen>
                         Text(
                           'Log In Your Account',
                           style: TextStyle(
-                            color: AppColors.white,
+                            color: AppColors.primaryWhite,
                             fontWeight: FontWeight.w700,
                             fontSize: 24,
                           ),
@@ -139,13 +139,13 @@ class _LoginScreenState extends State<LoginScreen>
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.white,
+                            color: AppColors.primaryWhite,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter your email",
                             prefixIcon: Icon(
                               Icons.email_outlined,
-                              color: AppColors.prefixIconColor,
+                              color: AppColors.textFieldLightGrey,
                             ),
                           ),
                           validator: Validators.email,
@@ -166,20 +166,20 @@ class _LoginScreenState extends State<LoginScreen>
                               focusNode: _passwordFocus,
                               obscureText: obscure,
                               textInputAction: TextInputAction.done,
-                              style: TextStyle(color: AppColors.primaryText),
+                              style: TextStyle(color: AppColors.textGrey),
                               decoration: context.primaryInputDecoration
                                   .copyWith(
                                     hintText: "Enter your Password",
                                     prefixIcon: Icon(
                                       Icons.lock_open_outlined,
-                                      color: AppColors.prefixIconColor,
+                                      color: AppColors.textFieldLightGrey,
                                     ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         obscure
                                             ? Icons.visibility_off
                                             : Icons.visibility,
-                                        color: AppColors.buttonText,
+                                        color: AppColors.textFieldLightGrey,
                                       ),
                                       onPressed: () =>
                                           _obscurePassword.value = !obscure,
@@ -202,9 +202,9 @@ class _LoginScreenState extends State<LoginScreen>
                                   () => Checkbox(
                                     value:
                                         rememberMeController.rememberMe.value,
-                                    activeColor: AppColors.checkboxColor,
+                                    activeColor: AppColors.primaryBlue,
                                     // fill color when checked
-                                    checkColor: AppColors.prefixIconColor,
+                                    checkColor: AppColors.primaryBlue,
                                     //  tick color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(2),
@@ -217,13 +217,13 @@ class _LoginScreenState extends State<LoginScreen>
                                       )) {
                                         //  Border when checked
                                         return BorderSide(
-                                          color: AppColors.prefixIconColor,
+                                          color: AppColors.primaryBlue,
                                           width: 2,
                                         );
                                       }
                                       // Border when unchecked
                                       return BorderSide(
-                                        color: AppColors.prefixIconColor,
+                                        color: AppColors.primaryBlue,
                                         width: 1,
                                       );
                                     }),
@@ -238,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   child: const Text(
                                     "Remember Me",
                                     style: TextStyle(
-                                      color: AppColors.rememberMeColor,
+                                      color: AppColors.primaryBlue,
                                     ),
                                   ),
                                 ),
@@ -252,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen>
                               child: Text(
                                 'Forgot Password?',
                                 style: TextStyle(
-                                  color: AppColors.primaryGreen,
+                                  color: AppColors.textGreen,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w400,
                                 ),
@@ -290,7 +290,7 @@ class _LoginScreenState extends State<LoginScreen>
                               style: TextStyle(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 12,
-                                color: AppColors.rememberMeColor,
+                                color: AppColors.textGreen,
                               ),
                               children: [
                                 TextSpan(
@@ -298,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w400,
-                                    color: AppColors.primaryGreen,
+                                    color: AppColors.textGreen,
                                   ),
                                   recognizer: _signUpRecognizer,
                                 ),
@@ -308,8 +308,6 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
 
                         SizedBox(height: 16),
-
-                        OrDividerWithCircle(),
 
                         Gap.h16,
 

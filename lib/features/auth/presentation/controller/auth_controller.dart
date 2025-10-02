@@ -2,7 +2,6 @@ import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
 import 'package:karlfive/core/services/get_user_profile_service.dart';
-import 'package:karlfive/features/EntireScreen/screens/enter_screen.dart';
 import 'package:karlfive/features/auth/data/models/login_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
@@ -15,11 +14,9 @@ import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
 import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
-import 'package:karlfive/features/join_league/presentation/screens/form_screen/join_league_screen.dart';
-
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
-import '../../../home/presentation/screens/home_screen.dart';
+
 import 'remember_me_controller.dart';
 
 class AuthController extends BaseController {
@@ -65,7 +62,7 @@ class AuthController extends BaseController {
             secureStore.storeData('password', password);
 
           }
-          Get.to(() => HomeScreen());
+          //  Get.to(() => HomeScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         } else {
           setError("You are not authorized to login as Manager");
         }
@@ -184,7 +181,7 @@ class AuthController extends BaseController {
       },
       (success) {
         DPrint.log("verify otp success result : ${success.data.message}");
-        Get.to(EnterScreen());
+        // Get.to(EnterScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         setLoading(false);
       },
     );
@@ -238,7 +235,7 @@ class AuthController extends BaseController {
         await _authStorageService.storeRefreshToken(success.data.refreshToken);
         // _authStorageService.clearAuthData();
         setLoading(false);
-        Get.to(() => JoinLeagueScreen(), transition: Transition.rightToLeft);
+        //  Get.to(() => JoinLeagueScreen(), transition: Transition.rightToLeft); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         return _isSuccess = true;
       },
     );

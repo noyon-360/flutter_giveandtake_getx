@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/core/validation/validators.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/core/common/widgets/or_divider_with_circle.dart';
 import 'package:karlfive/core/theme/app_buttoms.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
@@ -37,9 +36,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
   final TextEditingController _nameTEController = TextEditingController();
   final TextEditingController _emailTEController = TextEditingController();
-  final TextEditingController _phoneNumberTEController = TextEditingController();
+  final TextEditingController _phoneNumberTEController =
+      TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
-  final TextEditingController _confirmPasswordTEController = TextEditingController();
+  final TextEditingController _confirmPasswordTEController =
+      TextEditingController();
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
 
@@ -116,7 +117,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.white,
+                    color: AppColors.primaryWhite,
                   ),
                 ),
 
@@ -129,7 +130,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       Text(
                         'Name',
                         style: TextStyle(
-                          color: AppColors.textFieldTitle,
+                          color: AppColors.textFieldLightGrey,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -143,18 +144,18 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: AppColors.white,
+                          color: AppColors.primaryWhite,
                         ),
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter your Full Name",
                           hintStyle: TextStyle(
-                            color: AppColors.prefixIconColor,
+                            color: AppColors.textFieldLightGrey,
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                           ),
                           prefixIcon: Icon(
                             Icons.person_outline,
-                            color: AppColors.prefixIconColor,
+                            color: AppColors.textFieldLightGrey,
                           ),
                         ),
                         validator: Validators.name,
@@ -165,7 +166,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       Text(
                         'Email',
                         style: TextStyle(
-                          color: AppColors.textFieldTitle,
+                          color: AppColors.textFieldLightGrey,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -176,17 +177,20 @@ class _SignupScreenState extends State<SignupScreen> {
                         focusNode: _emailFocus,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
-                        style: TextStyle(fontSize: 16, color: AppColors.white),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.primaryWhite,
+                        ),
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter your email",
                           hintStyle: TextStyle(
-                            color: AppColors.prefixIconColor,
+                            color: AppColors.textFieldLightGrey,
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                           ),
                           prefixIcon: Icon(
                             Icons.email_outlined,
-                            color: AppColors.prefixIconColor,
+                            color: AppColors.textFieldLightGrey,
                           ),
                         ),
                         validator: Validators.email,
@@ -197,7 +201,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       Text(
                         'Phone Number',
                         style: TextStyle(
-                          color: AppColors.textFieldTitle,
+                          color: AppColors.textFieldLightGrey,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -208,17 +212,20 @@ class _SignupScreenState extends State<SignupScreen> {
                         focusNode: _phoneNumberFocus,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
-                        style: TextStyle(fontSize: 16, color: AppColors.white),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.primaryWhite,
+                        ),
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter your Phone Number",
                           hintStyle: TextStyle(
-                            color: AppColors.prefixIconColor,
+                            color: AppColors.textFieldLightGrey,
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                           ),
                           prefixIcon: Icon(
                             Icons.phone_outlined,
-                            color: AppColors.prefixIconColor,
+                            color: AppColors.textFieldLightGrey,
                           ),
                         ),
                         validator: Validators.phone,
@@ -229,7 +236,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       Text(
                         'Password',
                         style: TextStyle(
-                          color: AppColors.textFieldTitle,
+                          color: AppColors.textFieldLightGrey,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -243,24 +250,24 @@ class _SignupScreenState extends State<SignupScreen> {
                             focusNode: _passwordFocus,
                             obscureText: obscure,
                             textInputAction: TextInputAction.next,
-                            style: TextStyle(color: AppColors.primaryText),
+                            style: TextStyle(color: AppColors.textBlack),
                             decoration: context.primaryInputDecoration.copyWith(
                               hintText: "Create a Password",
                               hintStyle: TextStyle(
-                                color: AppColors.prefixIconColor,
+                                color: AppColors.textFieldLightGrey,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                               ),
                               prefixIcon: Icon(
                                 Icons.lock_outlined,
-                                color: AppColors.prefixIconColor,
+                                color: AppColors.textFieldLightGrey,
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   obscure
                                       ? Icons.visibility_off
                                       : Icons.visibility,
-                                  color: AppColors.prefixIconColor,
+                                  color: AppColors.textFieldLightGrey,
                                 ),
                                 onPressed: () =>
                                     _obscurePassword.value = !obscure,
@@ -277,7 +284,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       Text(
                         'Confirm Password',
                         style: TextStyle(
-                          color: AppColors.textFieldTitle,
+                          color: AppColors.textFieldLightGrey,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -291,24 +298,26 @@ class _SignupScreenState extends State<SignupScreen> {
                             focusNode: _confirmPasswordFocus,
                             obscureText: obscure,
                             textInputAction: TextInputAction.done,
-                            style: TextStyle(color: AppColors.primaryText),
+                            style: TextStyle(
+                              color: AppColors.textFieldLightGrey,
+                            ),
                             decoration: context.primaryInputDecoration.copyWith(
                               hintText: "Confirm a Password",
                               hintStyle: TextStyle(
-                                color: AppColors.prefixIconColor,
+                                color: AppColors.textFieldLightGrey,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                               ),
                               prefixIcon: Icon(
                                 Icons.lock_open_outlined,
-                                color: AppColors.prefixIconColor,
+                                color: AppColors.textFieldLightGrey,
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   obscure
                                       ? Icons.visibility_off
                                       : Icons.visibility,
-                                  color: AppColors.prefixIconColor,
+                                  color: AppColors.textFieldLightGrey,
                                 ),
                                 onPressed: () =>
                                     _obscurePassword.value = !obscure,
@@ -328,26 +337,24 @@ class _SignupScreenState extends State<SignupScreen> {
                           Obx(
                             () => Checkbox(
                               value: controller.privacy.value,
-                              activeColor: AppColors.checkboxColor,
+                              activeColor: AppColors.textFieldLightGrey,
                               // fill color when checked
-                              checkColor: AppColors.prefixIconColor,
+                              checkColor: AppColors.textFieldLightGrey,
                               //  tick color
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(2),
                               ),
-                              side: WidgetStateBorderSide.resolveWith((
-                                states,
-                              ) {
+                              side: WidgetStateBorderSide.resolveWith((states) {
                                 if (states.contains(WidgetState.selected)) {
                                   //  Border when checked
                                   return BorderSide(
-                                    color: AppColors.prefixIconColor,
+                                    color: AppColors.textFieldLightGrey,
                                     width: 2,
                                   );
                                 }
                                 // Border when unchecked
                                 return BorderSide(
-                                  color: AppColors.prefixIconColor,
+                                  color: AppColors.textFieldLightGrey,
                                   width: 1,
                                 );
                               }),
@@ -362,7 +369,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w400,
-                                  color: AppColors.white,
+                                  color: AppColors.primaryWhite,
                                 ),
                                 children: [
                                   TextSpan(
@@ -370,7 +377,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
-                                      color: AppColors.primaryGreen,
+                                      color: AppColors.textGreen,
                                     ),
                                     recognizer: _termsRecognizer,
                                   ),
@@ -380,7 +387,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
-                                      color: AppColors.white,
+                                      color: AppColors.primaryWhite,
                                     ),
                                   ),
 
@@ -389,7 +396,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
-                                      color: AppColors.primaryGreen,
+                                      color: AppColors.textGreen,
                                     ),
                                     recognizer: _privacyRecognizer,
                                   ),
@@ -421,7 +428,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             style: TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 12,
-                              color: AppColors.rememberMeColor,
+                              color: AppColors.textFieldLightGrey,
                             ),
                             children: [
                               TextSpan(
@@ -429,7 +436,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w400,
-                                  color: AppColors.primaryGreen,
+                                  color: AppColors.textGreen,
                                 ),
                                 recognizer: _signInRecognizer,
                               ),
@@ -439,8 +446,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
 
                       SizedBox(height: 16),
-
-                      OrDividerWithCircle(),
 
                       SizedBox(height: 16),
                       DifferentLoginApproach(

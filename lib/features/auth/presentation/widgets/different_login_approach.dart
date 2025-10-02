@@ -13,7 +13,7 @@ class DifferentLoginApproach extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.googleBorderColor),
+        border: Border.all(color: AppColors.textBlack),
         borderRadius: BorderRadius.circular(8),
       ),
       child: IconButton(
@@ -27,7 +27,7 @@ class DifferentLoginApproach extends StatelessWidget {
               image: AssetImage(image),
             ),
             SizedBox(width: 12,),
-            Text(text, style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.white, fontSize: 16),)
+            Text(text, style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primaryWhite, fontSize: 16),)
           ],
         ),
       ),

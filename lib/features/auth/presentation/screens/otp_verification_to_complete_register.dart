@@ -63,7 +63,7 @@ class _OtpVerificationToCompleteRegisterState
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.white,
+                  color: AppColors.primaryWhite,
                 ),
               ),
               SizedBox(height: 12),
@@ -72,7 +72,7 @@ class _OtpVerificationToCompleteRegisterState
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.rememberMeColor,
+                  color: AppColors.textGrey,
                 ),
               ),
               SizedBox(height: 32),
@@ -96,7 +96,7 @@ class _OtpVerificationToCompleteRegisterState
                     style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 12,
-                      color: AppColors.rememberMeColor,
+                      color: AppColors.textGrey,
                     ),
                     children: [
                       TextSpan(
@@ -104,7 +104,7 @@ class _OtpVerificationToCompleteRegisterState
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w400,
-                          color: AppColors.primaryGreen,
+                          color: AppColors.textGreen,
                         ),
                         recognizer: _resendOtp,
                       ),

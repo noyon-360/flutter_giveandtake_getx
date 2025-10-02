@@ -54,7 +54,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.white,
+                  color: AppColors.primaryWhite,
                 ),
               ),
               SizedBox(height: 12),
@@ -63,7 +63,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.rememberMeColor,
+                  color: AppColors.textGrey,
                 ),
               ),
 
@@ -78,12 +78,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       focusNode: _emailFocus,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      style: TextStyle(fontSize: 16, color: AppColors.white),
+                      style: TextStyle(fontSize: 16, color: AppColors.primaryWhite),
                       decoration: context.primaryInputDecoration.copyWith(
                         hintText: "Enter your email",
                         prefixIcon: Icon(
                           Icons.email_outlined,
-                          color: AppColors.prefixIconColor,
+                          color: AppColors.textFieldLightGrey,
                         ),
                       ),
                       validator: Validators.email,
