@@ -49,8 +49,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return AppScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: const BackButton(color: AppColors.textBlack),
+        iconTheme: const IconThemeData(color: AppColors.textBlack),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -73,123 +72,127 @@ class _PaymentScreenState extends State<PaymentScreen> {
         children: [
           const SizedBox(height: 28),
           Expanded(
-            child: Container(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Summary",
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textBlack,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Recurring Payment Terms:",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textBlack,
-                    ),
-                  ),
-                  const SizedBox(height: 7.5),
-                  Text(
-                    "  •  Charges includes Applicable VAT/GST and/or Sale Taxes ",
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textBlack,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Divider(color: Color(0xff282828)),
-                  Row(
-                    children: [
-                      Text(
-                        "Total:",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textBlack,
-                        ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Summary",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textBlack,
                       ),
-                      Spacer(),
-                      Text(
-                        "\$${widget.amount.toStringAsFixed(2)}",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textBlack,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Divider(color: Color(0xff282828)),
-                  const SizedBox(height: 30),
-                  Text(
-                    "Safe & secure payment :",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textBlack,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "By clicking the Pay button, you are agreeing to our Terms of Service and Privacy Statement. You are also authorizing us to charge your credit/debit card at the price above now and before each new subscription term. For any questions please contact support@tipnenka.com",
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textBlack,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Loading indicator
-                  if (_isProcessing)
-                    const Center(child: CircularProgressIndicator()),
-
-                  const Spacer(),
-
-                  // Pay Now button
-                  Center(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
-                        minimumSize: Size(200, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "Recurring Payment Terms:",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textBlack,
                       ),
-                      onPressed: _isProcessing ? null : _handlePayment,
-                      child: _isProcessing
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation(
-                                  Colors.white,
+                    ),
+                    const SizedBox(height: 7.5),
+                    Text(
+                      "  •  Charges includes Applicable VAT/GST and/or Sale Taxes ",
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textBlack,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Divider(color: Color(0xff282828)),
+                    Row(
+                      children: [
+                        Text(
+                          "Total:",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textBlack,
+                          ),
+                        ),
+                        Spacer(),
+                        Text(
+                          "\$${widget.amount.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textBlack,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(color: Color(0xff282828)),
+                    const SizedBox(height: 30),
+                    Text(
+                      "Safe & secure payment :",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textBlack,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "By clicking the Pay button, you are agreeing to our Terms of Service and Privacy Statement. You are also authorizing us to charge your credit/debit card at the price above now and before each new subscription term. For any questions please contact support@tipnenka.com",
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textBlack,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Loading indicator
+                    if (_isProcessing)
+                      const Center(child: CircularProgressIndicator()),
+
+                    // Responsive spacing instead of Spacer inside scrollable
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.12),
+
+                    // Pay Now button
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryBlue,
+                          minimumSize: Size(200, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        onPressed: _isProcessing ? null : _handlePayment,
+                        child: _isProcessing
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                "Pay Now \$${widget.amount.toStringAsFixed(2)}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
                                 ),
                               ),
-                            )
-                          : Text(
-                              "Pay Now \$${widget.amount.toStringAsFixed(2)}",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
-                ],
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
           ),

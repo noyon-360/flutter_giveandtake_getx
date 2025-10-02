@@ -16,8 +16,7 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _isLoading = true;
-  List<dynamic> _plans =
-      []; 
+  List<dynamic> _plans = [];
 
   @override
   void initState() {
@@ -40,7 +39,6 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
   }
 
   Future<void> _fetchPlans() async {
-
     // Mock data for demonstration
     await Future.delayed(Duration(seconds: 1));
     setState(() {
@@ -219,6 +217,7 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 40), 
               ],
             ),
     );
