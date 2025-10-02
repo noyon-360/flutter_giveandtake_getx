@@ -4,8 +4,6 @@ import 'package:karlfive/features/auth/presentation/screens/account_preview_scre
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 
-import '../screens/login_screen.dart';
-import 'auth_controller.dart';
 
 
 class SplashController extends GetxController {

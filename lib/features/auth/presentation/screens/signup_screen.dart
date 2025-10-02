@@ -449,8 +449,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
                       SizedBox(height: 16),
                       DifferentLoginApproach(
-                        text: 'Continue With Google',
-                        image: AppImages.googleLogo,
+                        image1: AppImages.googleLogo,
+                        image2: AppImages.appleLogo,
                       ),
                     ],
                   ),
