@@ -9,6 +9,8 @@ import 'package:karlfive/features/auth/presentation/screens/set_new_password_scr
 import 'features/auth/presentation/screens/splash_screen.dart';
 import 'package:karlfive/core/common/constants/stripe_key.dart';
 
+import 'features/company_pricing/presentation/screens/plan_pricing_screen.dart';
+
 void main() async {
   await AppInitializer.initializeApp();
 
