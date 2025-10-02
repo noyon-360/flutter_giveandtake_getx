@@ -10,6 +10,7 @@ import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 
 import '../controller/auth_controller.dart';
+import 'otp_verification_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -37,72 +38,84 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       body: SafeArea(
-        child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 51),
-              AppLogo(
-                images: AppImages.appLogoLandscape,
-                width: 193,
-                height: 193,
-              ),
-
-              SizedBox(height: 109),
-              Text(
-                'Reset password',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryWhite,
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 51),
+                AppLogo(
+                  images: AppImages.appLogoLandscape,
+                  width: 220,
+                  height: 220,
                 ),
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Enter your email to receive the OTP',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textGrey,
+                SizedBox(height: 64),
+                Text(
+                  'Reset password',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryWhite,
+                  ),
                 ),
-              ),
+                SizedBox(height: 12),
+                Text(
+                  'Enter your email to receive the OTP',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textGrey,
+                  ),
+                ),
 
-              SizedBox(height: 32),
+                SizedBox(height: 32),
 
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _emailController,
-                      focusNode: _emailFocus,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      style: TextStyle(fontSize: 16, color: AppColors.primaryWhite),
-                      decoration: context.primaryInputDecoration.copyWith(
-                        hintText: "Enter your email",
-                        prefixIcon: Icon(
-                          Icons.email_outlined,
-                          color: AppColors.textFieldLightGrey,
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _emailController,
+                        focusNode: _emailFocus,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textBlack,
+                        ),
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter your email",
+                          prefixIcon: Icon(
+                            Icons.email_outlined,
+                            color: AppColors.textFieldLightGrey,
+                          ),
+                        ),
+                        validator: Validators.email,
+                        autofillHints: const [AutofillHints.email],
+                      ),
+
+                      Gap.h16,
+
+                      Obx(
+                        () => PrimaryButton(
+                          // onPressed: _submit,
+                          onPressed: () {
+                            Get.to(
+                              //! <--- Need to change Later
+                              () => OtpVerificationScreen(
+                                email: _emailController.text,
+                              ),
+                            );
+                          },
+                          isLoading: _authController.isLoading.value,
+                          text: 'Sent OTP',
                         ),
                       ),
-                      validator: Validators.email,
-                      autofillHints: const [AutofillHints.email],
-                    ),
-
-                    Gap.h16,
-
-                    Obx(
-                      () => PrimaryButton(
-                        onPressed: _submit,
-                        isLoading: _authController.isLoading.value,
-                        text: 'Sent OTP',
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

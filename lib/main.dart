@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/init/app_initializer.dart';
 import 'package:karlfive/core/theme/app_theme.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
+import 'package:karlfive/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 import 'package:karlfive/core/common/constants/stripe_key.dart';
 
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'GiveAndTake',
       theme: AppTheme.dark,
       // home: SplashScreen(),
-      home: LoginScreen(),
+      home: ResetPasswordScreen(),
     );
   }
 }
