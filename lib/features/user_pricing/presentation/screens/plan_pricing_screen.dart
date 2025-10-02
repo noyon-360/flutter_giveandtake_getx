@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
-
 import '../widgets/plan_pricing_card.dart';
+import '../widgets/payment_option_dialog.dart';
 // Import your model: import 'package:karlfive/models/subscription_plan.dart';
 
 class PlanPricingScreen extends StatefulWidget {
@@ -17,7 +17,7 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
   int _currentPage = 0;
   bool _isLoading = true;
   List<dynamic> _plans =
-      []; // Replace with List<SubscriptionPlan> when using the model
+      []; 
 
   @override
   void initState() {
@@ -40,6 +40,7 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
   }
 
   Future<void> _fetchPlans() async {
+
     // Mock data for demonstration
     await Future.delayed(Duration(seconds: 1));
     setState(() {
@@ -140,52 +141,84 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
                 ),
                 const SizedBox(height: 45),
 
-                // PageView for plans - One card at a time with dynamic height
+                // PageView for plans with dynamic indicator positioning
                 Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: _plans.length,
-                    itemBuilder: (context, index) {
-                      final plan = _plans[index];
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          child: PlanPricingCard(
-                            title: plan['title'],
-                            price: plan['price'].toDouble(),
-                            description: plan['description'],
-                            features: List<String>.from(plan['features']),
-                            onSubscribe: () {
-                              // Handle subscription
-                              print('Subscribe to: ${plan['title']}');
-                            },
+                  child: Stack(
+                    children: [
+                      // PageView for plans
+                      PageView.builder(
+                        controller: _pageController,
+                        itemCount: _plans.length,
+                        itemBuilder: (context, index) {
+                          final plan = _plans[index];
+                          return SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24.0,
+                                  ),
+                                  child: PlanPricingCard(
+                                    title: plan['title'],
+                                    price: plan['price'].toDouble(),
+                                    description: plan['description'],
+                                    features: List<String>.from(
+                                      plan['features'],
+                                    ),
+                                    onSubscribe: () {
+                                      // Show payment options dialog
+                                      showPaymentMethodDialog(
+                                        context,
+                                        planTitle: plan['title'],
+                                        price: plan['price'].toDouble(),
+                                        onPayNow: () {
+                                          // Handle payment processing here
+                                          print(
+                                            'Processing payment for: ${plan['title']}',
+                                          );
+                                          // You can add your payment processing logic here
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 60,
+                                ), // Space for indicators + padding
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+
+                      // Page indicator dots - positioned dynamically
+                      if (_plans.length > 1)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 16, // 16px from bottom of available space
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(_plans.length, (index) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                width: _currentPage == index ? 8 : 6,
+                                height: _currentPage == index ? 8 : 6,
+                                decoration: BoxDecoration(
+                                  color: _currentPage == index
+                                      ? Color(0xff3B9EFF)
+                                      : Color(0xffD9D9D9),
+                                  shape: BoxShape.circle,
+                                ),
+                              );
+                            }),
                           ),
                         ),
-                      );
-                    },
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // Page indicator dots
-                if (_plans.length > 1)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(_plans.length, (index) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: _currentPage == index ? 8 : 6,
-                        height: _currentPage == index ? 8 : 6,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? Color(0xff3B9EFF)
-                              : Color(0xffD9D9D9),
-                          shape: BoxShape.circle,
-                        ),
-                      );
-                    }),
-                  ),
               ],
             ),
     );
