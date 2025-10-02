@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
+
+import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
 
 class ProfileDashboardScreen extends StatelessWidget {
   const ProfileDashboardScreen({super.key});
@@ -37,6 +38,7 @@ class ProfileDashboardScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottomNavBar(),
     );
   }
 

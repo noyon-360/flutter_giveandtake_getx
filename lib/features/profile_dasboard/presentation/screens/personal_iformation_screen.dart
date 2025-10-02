@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 
+import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
 import 'edit_personal_information_screen.dart';
 
 
@@ -163,13 +164,12 @@ class PersonalInfoScreen extends StatelessWidget {
                   ),
                 ],
               ),
-        
-        
               const SizedBox(height: 30),
             ],
           ),
         ),
       ),
+      bottomNavigationBar: CustomBottomNavBar(),
     );
   }
 

@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 
+import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
+
 
 class EditProfile extends StatelessWidget {
   const EditProfile({super.key});
@@ -117,6 +119,7 @@ class EditProfile extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: CustomBottomNavBar(),
     );
   }
 
