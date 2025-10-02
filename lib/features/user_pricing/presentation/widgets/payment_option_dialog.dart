@@ -1,7 +1,8 @@
-// widgets/payment_method_dialog.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:karlfive/core/common/constants/app_images.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:karlfive/features/user_pricing/presentation/screens/payment_screen.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final String planTitle;
@@ -86,10 +87,12 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pop(context);
-                  if (widget.onPayNow != null) {
-                    widget.onPayNow!();
-                  }
+                  Get.to(
+                    PaymentScreen(
+                      planTitle: widget.planTitle,
+                      amount: widget.price,
+                    ),
+                  );
                 },
                 child: const Text(
                   "Pay Now",
@@ -109,7 +112,6 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
   }
 }
 
-// Helper function to show the dialog
 void showPaymentMethodDialog(
   BuildContext context, {
   required String planTitle,
@@ -118,7 +120,7 @@ void showPaymentMethodDialog(
 }) {
   showDialog(
     context: context,
-    barrierDismissible: true, // Allow tapping outside to close
+    barrierDismissible: true,
     builder: (context) => PaymentMethodDialog(
       planTitle: planTitle,
       price: price,
