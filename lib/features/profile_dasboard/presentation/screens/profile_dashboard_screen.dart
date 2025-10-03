@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/change_pass_screen.dart';
+import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
+import 'package:karlfive/features/profile_dasboard/presentation/screens/payment_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
 
 import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
@@ -10,8 +13,8 @@ class ProfileDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return AppScaffold(
+      // backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -35,8 +38,12 @@ class ProfileDashboardScreen extends StatelessWidget {
             _menuTile("assets/icons/changepass.png", "Change Password", () {
               Get.to(() => ChangePasswordScreen());
             }),
-            _menuTile("assets/icons/jobhistory.png", "Job History", () {}),
-            _menuTile("assets/icons/paymenthistory.png", "Payment History", () {}),
+            _menuTile("assets/icons/jobhistory.png", "Job History", () {
+              Get.to(() =>  const JobHistoryScreen());
+            }),
+            _menuTile("assets/icons/paymenthistory.png", "Payment History", () {
+              Get.to(() => const PaymentHistoryScreen());
+            }),
             _menuTile("assets/icons/logout.png", "Log out", () {}),
           ],
         ),

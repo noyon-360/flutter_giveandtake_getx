@@ -7,7 +7,9 @@ import 'package:karlfive/features/profile_dasboard/presentation/screens/profile_
 import 'package:karlfive/features/auth/presentation/screens/splash_screen.dart';
 import 'package:karlfive/core/common/constants/stripe_key.dart';
 
-import 'features/Navbar/controllers/bottom_nav_controller.dart';
+import 'core/bottomNavbar/controllers/bottom_nav_controller.dart';
+
+
 
 
 void main() async {

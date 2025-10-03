@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/Navbar/controllers/bottom_nav_controller.dart';
 import '../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
-import '../../profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
+import '../../../features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
+import '../controllers/bottom_nav_controller.dart';
+
 
 
 class DashboardScreen extends StatelessWidget {
