@@ -1,13 +1,32 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
+import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
 import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
 
-
-class EditProfile extends StatelessWidget {
+class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
+
+  @override
+  State<EditProfile> createState() => _EditProfileState();
+}
+
+class _EditProfileState extends State<EditProfile> {
+  File? _image;
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile =
+    await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,28 +53,39 @@ class EditProfile extends StatelessWidget {
                   Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 50,
-                        backgroundImage: AssetImage("assets/images/profile.jpg"), // user image
+                        backgroundImage: _image != null
+                            ? FileImage(_image!)
+                            : const AssetImage("assets/images/profile.jpg")
+                        as ImageProvider,
                       ),
                       Positioned(
                         bottom: 7.33,
                         right: 7.33,
-                        child: CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.black,
-                          child: Image.asset("assets/icons/camera.png", width: 11, height: 11, color: Colors.white),
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.black,
+                            child: Image.asset(
+                              "assets/icons/camera.png",
+                              width: 13,
+                              height: 13,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   const Text(
                     "Brooklyn Simmons",
                     style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF212121)
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF212121),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -68,35 +98,33 @@ class EditProfile extends StatelessWidget {
                     thickness: 1,
                     color: Color(0xFFE0E0E0),
                   ),
-        
                 ],
               ),
-              const SizedBox(height: 60,),
-        
-        
+              const SizedBox(height: 60),
+
               /// Editable Fields
               _textField(label: "First Name", hint: "Brooklyn"),
               _textField(label: "Last Name", hint: "Simmons"),
-              _textField(label: "Email Address", hint: "brooklynsimmons@gmail.com"),
+              _textField(
+                  label: "Email Address", hint: "brooklynsimmons@gmail.com"),
               _textField(label: "Phone", hint: "(58) 474748574"),
               _textField(label: "Country", hint: "USA"),
               _textField(label: "City/State", hint: "Alabama"),
               _textField(label: "Town", hint: "Berlin"),
               _textField(label: "Zip/Postal Code (Optional)", hint: "1212"),
-        
+
               const SizedBox(height: 30),
-        
+
               /// Action Buttons
               Row(
                 children: [
-        
                   Expanded(
                     child: SizedBox(
                       height: 40,
                       child: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF2B7FD0),
+                          backgroundColor: const Color(0xFF2B7FD0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(2),
                           ),
@@ -151,15 +179,17 @@ class EditProfile extends StatelessWidget {
                   color: Color(0xFF595959),
                 ),
                 filled: true,
-                fillColor: Colors.white, // background color
+                fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8), // radius
-                  borderSide: const BorderSide(color: Color(0xFF595959), width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide:
+                  const BorderSide(color: Color(0xFF595959), width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF1A3E74), width: 1.5), // focus color
+                  borderSide: const BorderSide(
+                      color: Color(0xFF1A3E74), width: 1.5), // focus color
                 ),
               ),
             ),
@@ -168,5 +198,4 @@ class EditProfile extends StatelessWidget {
       ),
     );
   }
-
 }

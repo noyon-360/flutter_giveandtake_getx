@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/features/profile_dasboard/presentation/screens/change_pass_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
 
 import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
@@ -31,7 +32,9 @@ class ProfileDashboardScreen extends StatelessWidget {
             _menuTile("assets/icons/personalinfo.png", "Personal Information", () {
               Get.to(() => const PersonalInfoScreen());
             }),
-            _menuTile("assets/icons/changepass.png", "Change Password", () {}),
+            _menuTile("assets/icons/changepass.png", "Change Password", () {
+              Get.to(() => ChangePasswordScreen());
+            }),
             _menuTile("assets/icons/jobhistory.png", "Job History", () {}),
             _menuTile("assets/icons/paymenthistory.png", "Payment History", () {}),
             _menuTile("assets/icons/logout.png", "Log out", () {}),
