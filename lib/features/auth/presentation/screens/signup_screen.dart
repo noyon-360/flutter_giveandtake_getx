@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/validation/validators.dart';
+import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/core/theme/app_buttoms.dart';
@@ -107,355 +108,498 @@ class _SignupScreenState extends State<SignupScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: AppScaffold(
-        body: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 59),
-                Text(
-                  'Create Your Account',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryWhite,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Gap.h32,
+
+                  Center(
+                    child: Image(
+                      image: AssetImage(AppImages.appLogoLandscape),
+                      height: 40,
+                      width: 100,
+                    ),
                   ),
-                ),
+                  SizedBox(height: 59),
 
-                SizedBox(height: 16),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Name',
-                        style: TextStyle(
-                          color: AppColors.textFieldLightGrey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                  Text(
+                    'Create Your Account',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textBlack,
+                    ),
+                  ),
+
+                  Gap.h8,
+
+                  Text(
+                    'Join us and start applying today',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+
+                  SizedBox(height: 16),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        //* <----------------- First name ----------------->*//
+                        Text(
+                          'First Name',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 8),
-                      TextFormField(
-                        controller: _nameTEController,
-                        focusNode: _nameFocus,
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.next,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.primaryWhite,
-                        ),
-                        decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter your Full Name",
-                          hintStyle: TextStyle(
-                            color: AppColors.textFieldLightGrey,
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: _nameTEController,
+                          focusNode: _nameFocus,
+                          keyboardType: TextInputType.text,
+                          textInputAction: TextInputAction.next,
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
+                            color: AppColors.primaryWhite,
                           ),
-                          prefixIcon: Icon(
-                            Icons.person_outline,
-                            color: AppColors.textFieldLightGrey,
-                          ),
-                        ),
-                        validator: Validators.name,
-                      ),
-
-                      ///Email
-                      SizedBox(height: 16),
-                      Text(
-                        'Email',
-                        style: TextStyle(
-                          color: AppColors.textFieldLightGrey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      TextFormField(
-                        controller: _emailTEController,
-                        focusNode: _emailFocus,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppColors.primaryWhite,
-                        ),
-                        decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter your email",
-                          hintStyle: TextStyle(
-                            color: AppColors.textFieldLightGrey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.email_outlined,
-                            color: AppColors.textFieldLightGrey,
-                          ),
-                        ),
-                        validator: Validators.email,
-                        autofillHints: const [AutofillHints.email],
-                      ),
-
-                      SizedBox(height: 16),
-                      Text(
-                        'Phone Number',
-                        style: TextStyle(
-                          color: AppColors.textFieldLightGrey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      TextFormField(
-                        controller: _phoneNumberTEController,
-                        focusNode: _phoneNumberFocus,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppColors.primaryWhite,
-                        ),
-                        decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter your Phone Number",
-                          hintStyle: TextStyle(
-                            color: AppColors.textFieldLightGrey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.phone_outlined,
-                            color: AppColors.textFieldLightGrey,
-                          ),
-                        ),
-                        validator: Validators.phone,
-                        autofillHints: const [AutofillHints.email],
-                      ),
-
-                      SizedBox(height: 16),
-                      Text(
-                        'Password',
-                        style: TextStyle(
-                          color: AppColors.textFieldLightGrey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: _obscurePassword,
-                        builder: (context, obscure, _) {
-                          return TextFormField(
-                            controller: _passwordTEController,
-                            focusNode: _passwordFocus,
-                            obscureText: obscure,
-                            textInputAction: TextInputAction.next,
-                            style: TextStyle(color: AppColors.textBlack),
-                            decoration: context.primaryInputDecoration.copyWith(
-                              hintText: "Create a Password",
-                              hintStyle: TextStyle(
-                                color: AppColors.textFieldLightGrey,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.lock_outlined,
-                                color: AppColors.textFieldLightGrey,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  obscure
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: AppColors.textFieldLightGrey,
-                                ),
-                                onPressed: () =>
-                                    _obscurePassword.value = !obscure,
-                              ),
+                          decoration: context.primaryInputDecoration.copyWith(
+                            hintText: "Enter First Name",
+                            hintStyle: TextStyle(
+                              color: AppColors.textFieldLightGrey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
                             ),
-                            //
-                            validator: Validators.password,
-                            // onFieldSubmitted: (_) => _submit(),
-                          );
-                        },
-                      ),
-
-                      SizedBox(height: 16),
-                      Text(
-                        'Confirm Password',
-                        style: TextStyle(
-                          color: AppColors.textFieldLightGrey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: _obscurePassword,
-                        builder: (context, obscure, _) {
-                          return TextFormField(
-                            controller: _confirmPasswordTEController,
-                            focusNode: _confirmPasswordFocus,
-                            obscureText: obscure,
-                            textInputAction: TextInputAction.done,
-                            style: TextStyle(
+                            prefixIcon: Icon(
+                              Icons.person_outline,
                               color: AppColors.textFieldLightGrey,
                             ),
-                            decoration: context.primaryInputDecoration.copyWith(
-                              hintText: "Confirm a Password",
-                              hintStyle: TextStyle(
-                                color: AppColors.textFieldLightGrey,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.lock_open_outlined,
-                                color: AppColors.textFieldLightGrey,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  obscure
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: AppColors.textFieldLightGrey,
-                                ),
-                                onPressed: () =>
-                                    _obscurePassword.value = !obscure,
-                              ),
-                            ),
-                            validator: Validators.password,
-                            onFieldSubmitted: (_) => _submit(),
-                          );
-                        },
-                      ),
+                          ),
+                          validator:
+                              Validators.name, //! <---------- Need to change
+                        ),
 
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        //crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Obx(
-                            () => Checkbox(
-                              value: controller.privacy.value,
-                              activeColor: AppColors.textFieldLightGrey,
-                              // fill color when checked
-                              checkColor: AppColors.textFieldLightGrey,
-                              //  tick color
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(2),
+                        Gap.h16,
+
+                        Text(
+                          'Surname',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: _nameTEController,
+                          focusNode: _nameFocus,
+                          keyboardType: TextInputType.text,
+                          textInputAction: TextInputAction.next,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.primaryWhite,
+                          ),
+                          decoration: context.primaryInputDecoration.copyWith(
+                            hintText: "Enter Surname",
+                            hintStyle: TextStyle(
+                              color: AppColors.textFieldLightGrey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.person_outline,
+                              color: AppColors.textFieldLightGrey,
+                            ),
+                          ),
+                          validator:
+                              Validators.name, //! <---------- Need to change
+                        ),
+
+                        Gap.h16,
+
+                        //* <-----------------Email----------------->*//
+                        Text(
+                          'Email',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: _emailTEController,
+                          focusNode: _emailFocus,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.primaryWhite,
+                          ),
+                          decoration: context.primaryInputDecoration.copyWith(
+                            hintText: "Enter Email",
+                            hintStyle: TextStyle(
+                              color: AppColors.textFieldLightGrey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.email_outlined,
+                              color: AppColors.textFieldLightGrey,
+                            ),
+                          ),
+                          validator: Validators.email,
+                          autofillHints: const [AutofillHints.email],
+                        ),
+
+                        Gap.h16,
+
+                        //* <-----------------Country----------------->*//
+                        Text(
+                          'Country',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: _emailTEController,
+                          focusNode: _emailFocus,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.primaryWhite,
+                          ),
+                          decoration: context.primaryInputDecoration.copyWith(
+                            hintText: "Country",
+                            hintStyle: TextStyle(
+                              color: AppColors.textFieldLightGrey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          validator:
+                              Validators.email, //! <---------- Need to change
+                          autofillHints: const [AutofillHints.email],
+                        ),
+
+                        Gap.h16,
+
+                        //*<-------------Phone Number--------------->*//
+                        Text(
+                          'Phone Number',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: _phoneNumberTEController,
+                          focusNode: _phoneNumberFocus,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.primaryWhite,
+                          ),
+                          decoration: context.primaryInputDecoration.copyWith(
+                            hintText: "Enter Phone Number",
+                            hintStyle: TextStyle(
+                              color: AppColors.textFieldLightGrey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.phone_outlined,
+                              color: AppColors.textFieldLightGrey,
+                            ),
+                          ),
+                          validator: Validators.phone,
+                          autofillHints: const [AutofillHints.email],
+                        ),
+
+                        Gap.h16,
+
+                        //*<-------------Date of Birth--------------->*//
+                        Text(
+                          'Date of Birth',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: _phoneNumberTEController,
+                          focusNode: _phoneNumberFocus,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.primaryWhite,
+                          ),
+                          decoration: context.primaryInputDecoration.copyWith(
+                            hintText: "MM/DD/YYYY",
+                            hintStyle: TextStyle(
+                              color: AppColors.textFieldLightGrey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.calendar_today_outlined,
+                              color: AppColors.textFieldLightGrey,
+                            ),
+                          ),
+                          validator:
+                              Validators.phone, //! <---------- Need to change
+                          autofillHints: const [AutofillHints.email],
+                        ),
+
+                        Gap.h16,
+
+                        //* <-----------------Password----------------->*//
+                        Text(
+                          'Password',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _obscurePassword,
+                          builder: (context, obscure, _) {
+                            return TextFormField(
+                              controller: _passwordTEController,
+                              focusNode: _passwordFocus,
+                              obscureText: obscure,
+                              textInputAction: TextInputAction.next,
+                              style: TextStyle(color: AppColors.textBlack),
+                              decoration: context.primaryInputDecoration
+                                  .copyWith(
+                                    hintText: "Create a Password",
+                                    hintStyle: TextStyle(
+                                      color: AppColors.textFieldLightGrey,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_outlined,
+                                      color: AppColors.textFieldLightGrey,
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        obscure
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: AppColors.textFieldLightGrey,
+                                      ),
+                                      onPressed: () =>
+                                          _obscurePassword.value = !obscure,
+                                    ),
+                                  ),
+                              //
+                              validator: Validators.password,
+                              // onFieldSubmitted: (_) => _submit(),
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: 16),
+                        Text(
+                          'Confirm Password',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _obscurePassword,
+                          builder: (context, obscure, _) {
+                            return TextFormField(
+                              controller: _confirmPasswordTEController,
+                              focusNode: _confirmPasswordFocus,
+                              obscureText: obscure,
+                              textInputAction: TextInputAction.done,
+                              style: TextStyle(
+                                color: AppColors.textFieldLightGrey,
                               ),
-                              side: WidgetStateBorderSide.resolveWith((states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  //  Border when checked
+                              decoration: context.primaryInputDecoration
+                                  .copyWith(
+                                    hintText: "Confirm a Password",
+                                    hintStyle: TextStyle(
+                                      color: AppColors.textFieldLightGrey,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_open_outlined,
+                                      color: AppColors.textFieldLightGrey,
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        obscure
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: AppColors.textFieldLightGrey,
+                                      ),
+                                      onPressed: () =>
+                                          _obscurePassword.value = !obscure,
+                                    ),
+                                  ),
+                              validator: Validators.password,
+                              onFieldSubmitted: (_) => _submit(),
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          //crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Obx(
+                              () => Checkbox(
+                                value: controller.privacy.value,
+                                activeColor: AppColors.textFieldLightGrey,
+                                // fill color when checked
+                                checkColor: AppColors.textFieldLightGrey,
+                                //  tick color
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                side: WidgetStateBorderSide.resolveWith((
+                                  states,
+                                ) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    //  Border when checked
+                                    return BorderSide(
+                                      color: AppColors.textFieldLightGrey,
+                                      width: 2,
+                                    );
+                                  }
+                                  // Border when unchecked
                                   return BorderSide(
                                     color: AppColors.textFieldLightGrey,
-                                    width: 2,
+                                    width: 1,
                                   );
-                                }
-                                // Border when unchecked
-                                return BorderSide(
-                                  color: AppColors.textFieldLightGrey,
-                                  width: 1,
-                                );
-                              }),
-                              onChanged: (_) => controller.toggleprivacy(),
-                            ),
-                          ),
-
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                text: 'By Registration, You agree to the ',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.primaryWhite,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: 'term of services ',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: AppColors.textGreen,
-                                    ),
-                                    recognizer: _termsRecognizer,
-                                  ),
-
-                                  TextSpan(
-                                    text: 'and ',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: AppColors.primaryWhite,
-                                    ),
-                                  ),
-
-                                  TextSpan(
-                                    text: 'privacy policy.',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: AppColors.textGreen,
-                                    ),
-                                    recognizer: _privacyRecognizer,
-                                  ),
-                                ],
+                                }),
+                                onChanged: (_) => controller.toggleprivacy(),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
 
-                      SizedBox(height: 16),
-
-                      Obx(
-                        () => PrimaryButton(
-                          isLoading: _authController.isLoading.value,
-                          onPressed: () {
-                            _submit();
-                          },
-                          text: "Sign Up",
-                        ),
-                      ),
-
-                      SizedBox(height: 16),
-
-                      Center(
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Already You Have Account? ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 12,
-                              color: AppColors.textFieldLightGrey,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: 'Sign In Here',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.textGreen,
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  text: 'I agree to the ',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.textBlack,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: 'Terms & Conditions',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primaryBlue,
+                                      ),
+                                      recognizer: _privacyRecognizer,
+                                    ),
+                                  ],
                                 ),
-                                recognizer: _signInRecognizer,
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 16),
+
+                        Obx(
+                          () => PrimaryButton(
+                            isLoading: _authController.isLoading.value,
+                            onPressed: () {
+                              _submit();
+                            },
+                            text: "Sign Up",
                           ),
                         ),
-                      ),
 
-                      SizedBox(height: 16),
+                        Gap.h32,
 
-                      SizedBox(height: 16),
-                      DifferentLoginApproach(
-                        text: 'Continue With Google',
-                        image: AppImages.googleLogo,
-                      ),
-                    ],
+                        Center(
+                          child: RichText(
+                            text: TextSpan(
+                              text: 'Already You Have Account? ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 12,
+                                color: AppColors.textFieldLightGrey,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'Sign In Here',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primaryBlue,
+                                  ),
+                                  recognizer: _signInRecognizer,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        Gap.h16,
+
+                        DifferentLoginApproach(
+                          image1: AppImages.googleLogo,
+                          image2: AppImages.appleLogo,
+                        ),
+
+                        Gap.h16,
+
+                        SecondaryButton(
+                          onPressed: () {},
+                          text: "Join as a Recruiter",
+                          width: double.infinity - 40,
+                          height: 48,
+                        ),
+
+                        Gap.h8,
+
+                        SecondaryButton(
+                          onPressed: () {},
+                          text: "Join as a Company",
+                          width: double.infinity - 40,
+                          height: 48,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

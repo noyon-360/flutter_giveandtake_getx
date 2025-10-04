@@ -3,33 +3,24 @@ import 'package:karlfive/core/theme/app_colors.dart';
 
 class DifferentLoginApproach extends StatelessWidget {
   const DifferentLoginApproach({
-    super.key, required this.text, required this.image,
+    super.key,
+    required this.image1,
+    required this.image2,
   });
-
-  final String text;
-  final String image;
+  final String image1;
+  final String image2;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.textBlack),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        onPressed: () {},
-        icon: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image(
-              width: 24,
-              height: 24,
-              image: AssetImage(image),
-            ),
-            SizedBox(width: 12,),
-            Text(text, style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primaryWhite, fontSize: 16),)
-          ],
-        ),
+    return IconButton(
+      onPressed: () {},
+      icon: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image(width: 40, height: 40, image: AssetImage(image1)),
+          SizedBox(width: 40),
+          Image(width: 40, height: 40, image: AssetImage(image2)),
+        ],
       ),
     );
   }

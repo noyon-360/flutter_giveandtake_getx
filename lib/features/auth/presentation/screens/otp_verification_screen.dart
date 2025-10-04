@@ -1,14 +1,15 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/constants/app_images.dart';
 import 'package:karlfive/core/common/widgets/app_logo.dart';
 import 'package:karlfive/core/theme/app_buttoms.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
 import 'package:karlfive/features/auth/presentation/widgets/otp_code_field.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
-import '../../../../core/common/widgets/form_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -35,10 +36,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     super.initState();
   }
 
-  _submit() {
-    _authController.verifyOTP(widget.email, otpController.text);
-  }
-
   @override
   void dispose() {
     _resendOtp.dispose();
@@ -51,20 +48,24 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       body: SafeArea(
         child: Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 51),
-              AppLogo(images: AppImages.appLogoLandscape),
-              SizedBox(height: 74),
+              SizedBox(height: 25),
+              Center(child: AppLogo(images: AppImages.appLogoLandscape)),
+              SizedBox(height: 50),
 
               Text(
                 'Enter OTP',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primaryWhite,
+                  color: AppColors.textBlack,
                 ),
               ),
-              SizedBox(height: 12),
+
+              Gap.h8,
+
               Text(
                 'Enter your receive OTP',
                 style: TextStyle(
@@ -74,50 +75,58 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 ),
               ),
 
-              Obx(() {
-                final error = _authController.errorMessage.value;
-                if (error.isNotEmpty) {
-                  return FormErrorMessage(message: error);
-                }
-                return const SizedBox.shrink(); // return empty widget
-              }),
-
-              SizedBox(height: 32),
+              // Obx(() {
+              //   final error = _authController.errorMessage.value;
+              //   if (error.isNotEmpty) {
+              //     return FormErrorMessage(message: error);
+              //   }
+              //   return const SizedBox.shrink(); // return empty widget
+              // }),
+              Gap.h64,
 
               PinCode(otpController: otpController),
 
               SizedBox(height: 24),
 
+              Obx(
+                () => PrimaryButton(
+                  // onPressed: _submit,
+                  onPressed: () {
+                    Get.to(
+                      () => SetNewPasswordScreen(
+                        email: widget.email,
+                        otp: otpController.text,
+                      ),
+                    );
+                  },
+                  isLoading: _authController.isLoading.value,
+                  text: 'Verify',
+                ),
+              ),
+
+              Gap.h32,
+
               Center(
                 child: RichText(
                   text: TextSpan(
-                    text: 'Didn\'t Receive OTP? ',
+                    text: 'Didn\'t get a code? ',
                     style: TextStyle(
                       fontWeight: FontWeight.w400,
-                      fontSize: 12,
+                      fontSize: 14,
                       color: AppColors.textGrey,
                     ),
                     children: [
                       TextSpan(
-                        text: 'RESEND OTP',
+                        text: 'Resend',
                         style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textGreen,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryLightBlue,
                         ),
                         recognizer: _resendOtp,
                       ),
                     ],
                   ),
-                ),
-              ),
-
-              SizedBox(height: 12),
-              Obx(
-                () => PrimaryButton(
-                  onPressed: _submit,
-                  isLoading: _authController.isLoading.value,
-                  text: 'Verify Now',
                 ),
               ),
             ],

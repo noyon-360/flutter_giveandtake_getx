@@ -73,10 +73,12 @@ class _LoginScreenState extends State<LoginScreen>
     // Hide keyboard immediately
     if (mounted) FocusScope.of(context).unfocus();
 
-
-    _authController.login(email:  _emailController.text, password:  _passwordController.text, rememberMeController);
+    _authController.login(
+      email: _emailController.text,
+      password: _passwordController.text,
+      rememberMeController,
+    );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -86,32 +88,31 @@ class _LoginScreenState extends State<LoginScreen>
         body: SafeArea(
           child: Column(
             children: [
+              AppLogo(
+                images: AppImages.appLogoLandscape,
+                height: 128,
+                width: 128,
+              ),
+
               Expanded(
                 child: SingleChildScrollView(
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      //crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AppLogo(
-                          images: AppImages.appLogoLandscape,
-                          height: 193,
-                          width: 193,
-                        ),
-
-                        SizedBox(height: 37),
-
                         Text(
-                          'Log In Your Account',
+                          'Welcome back',
+                          textAlign: TextAlign.start,
                           style: TextStyle(
-                            color: AppColors.primaryWhite,
-                            fontWeight: FontWeight.w700,
+                            color: AppColors.textBlack,
+                            fontWeight: FontWeight.w900,
                             fontSize: 24,
                           ),
                         ),
 
-                        SizedBox(height: 16),
+                        SizedBox(height: 48),
 
                         /// [Api Error messages]
                         ///
@@ -192,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen>
                           },
                         ),
 
-                        SizedBox(height: 16),
+                        SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -237,9 +238,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   // tap text also toggles
                                   child: const Text(
                                     "Remember Me",
-                                    style: TextStyle(
-                                      color: AppColors.primaryBlue,
-                                    ),
+                                    style: TextStyle(color: AppColors.textGrey),
                                   ),
                                 ),
                               ],
@@ -252,9 +251,11 @@ class _LoginScreenState extends State<LoginScreen>
                               child: Text(
                                 'Forgot Password?',
                                 style: TextStyle(
-                                  color: AppColors.textGreen,
+                                  color: AppColors.primaryBlue,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w400,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.primaryBlue,
                                 ),
                               ),
                             ),
@@ -262,17 +263,6 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                         Gap.h16,
 
-                        /// [Button] Sign In
-                        // ListenableBuilder(
-                        //   listenable: _authController,
-                        //   builder: (context, _) {
-                        //     return PrimaryButton(
-                        //       isLoading: _authController.isLoading.value,
-                        //       onPressed: _submit,
-                        //       text: "Sign In",
-                        //     );
-                        //   },
-                        // ),
                         Obx(
                           () => PrimaryButton(
                             isLoading: _authController.isLoading.value,
@@ -281,24 +271,24 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
 
-                        Gap.h16,
+                        Gap.h32,
 
                         Center(
                           child: RichText(
                             text: TextSpan(
-                              text: 'New To our Platform? ',
+                              text: 'Forgot your Password? ',
                               style: TextStyle(
                                 fontWeight: FontWeight.w400,
-                                fontSize: 12,
-                                color: AppColors.textGreen,
+                                fontSize: 14,
+                                color: AppColors.textGrey,
                               ),
                               children: [
                                 TextSpan(
-                                  text: 'Sign Up Here',
+                                  text: 'click here',
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w400,
-                                    color: AppColors.textGreen,
+                                    color: AppColors.primaryBlue,
                                   ),
                                   recognizer: _signUpRecognizer,
                                 ),
@@ -307,13 +297,29 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
 
-                        SizedBox(height: 16),
+                        SizedBox(height: 32),
 
                         Gap.h16,
 
-                        DifferentLoginApproach(
-                          text: 'Continue With Google',
-                          image: AppImages.googleLogo,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'or continue with,',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.textFieldLightGrey,
+                              ),
+                            ),
+                            SizedBox(height: 16),
+
+                            DifferentLoginApproach(
+                              image1: AppImages.googleLogo,
+                              image2: AppImages.appleLogo,
+                            ),
+                          ],
                         ),
                       ],
                     ),
