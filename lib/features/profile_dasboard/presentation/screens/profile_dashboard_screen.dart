@@ -28,24 +28,28 @@ class ProfileDashboardScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _menuTile("assets/icons/personalinfo.png", "Personal Information", () {
-              Get.to(() => const PersonalInfoScreen());
-            }),
-            _menuTile("assets/icons/changepass.png", "Change Password", () {
-              Get.to(() => ChangePasswordScreen());
-            }),
-            _menuTile("assets/icons/jobhistory.png", "Job History", () {
-              Get.to(() =>  const JobHistoryScreen());
-            }),
-            _menuTile("assets/icons/paymenthistory.png", "Payment History", () {
-              Get.to(() => const PaymentHistoryScreen());
-            }),
-            _menuTile("assets/icons/logout.png", "Log out", () {}),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _menuTile("assets/icons/personalinfo.png", "Personal Information", () {
+                  Get.to(() => const PersonalInfoScreen());
+                }),
+                _menuTile("assets/icons/changepass.png", "Change Password", () {
+                  Get.to(() => ChangePasswordScreen());
+                }),
+                _menuTile("assets/icons/jobhistory.png", "Job History", () {
+                  Get.to(() =>  const JobHistoryScreen());
+                }),
+                _menuTile("assets/icons/paymenthistory.png", "Payment History", () {
+                  Get.to(() => const PaymentHistoryScreen());
+                }),
+                _menuTile("assets/icons/logout.png", "Log out", () {}),
+              ],
+            ),
+          ),
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(),

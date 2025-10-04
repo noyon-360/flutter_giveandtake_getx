@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
       title: 'GiveAndTake',
       theme: AppTheme.dark,
       // home: SplashScreen(),
-      home: ResetPasswordScreen(),
+      home: ProfileDashboardScreen(),
     );
   }
 }

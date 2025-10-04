@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../features/company_pricing/presentation/screens/plan_pricing_screen.dart';
 import '../../../features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 import '../controllers/bottom_nav_controller.dart';
 
@@ -16,8 +17,13 @@ class CustomBottomNavBar extends StatelessWidget {
       onTap: (index) {
         navController.changeIndex(index);
         if (index == 3) {
-          Get.to(() => const ProfileDashboardScreen());
+          Get.offAll(() => const ProfileDashboardScreen());
         }
+
+        if (index == 2) {
+          Get.to(() => const PlanPricingScreen());
+        }
+
       },
       type: BottomNavigationBarType.fixed,
       backgroundColor: const Color(0xFFF4F6FF),

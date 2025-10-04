@@ -8,19 +8,6 @@ class PaymentHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final payments = List.generate(
-      8,
-          (index) => {
-        "txn": "TXN23007891",
-        "date": "2025-06-20 10:45 AM",
-        "plan": "Resume Highlight",
-        "amount": "150",
-        "method": "PayPal",
-        "status": "Successful",
-        "receipt": "Download"
-      },
-    );
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -33,231 +20,162 @@ class PaymentHistoryScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            /// Profile Info
-            const CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage("assets/images/profile.jpg"),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              "Brooklyn Simmons",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF212121),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              /// Profile Info
+              const CircleAvatar(
+                radius: 50,
+                backgroundImage: AssetImage("assets/images/profile.jpg"),
               ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              "brooklynsimmons@gmail.com",
-              style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
-            ),
-            const SizedBox(height: 24),
-            const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
-
-            const SizedBox(height: 22),
-
-            /// Payment History Title
-            const Text(
-              "Payment History",
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF212121),
+              const SizedBox(height: 12),
+              const Text(
+                "Brooklyn Simmons",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF212121),
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-
-            /// Table Header
-            Container(
-              height: 40,
-              child: Row(
-                children: const [
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "Transaction ID",
-                        style: TextStyle(
-                          fontSize: 6.36,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8), // gap
-
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "Date & Time",
-                        style: TextStyle(
-                          fontSize: 6.36,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "Plan Name",
-                        style: TextStyle(
-                          fontSize: 6.36,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "Amount Paid",
-                        style: TextStyle(
-                          fontSize: 6.36,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "Payment Method",
-                        style: TextStyle(
-                          fontSize: 6.36,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "Status",
-                        style: TextStyle(
-                          fontSize: 6.36,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "Receipt",
-                        style: TextStyle(
-                          fontSize: 6.36,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 4),
+              const Text(
+                "brooklynsimmons@gmail.com",
+                style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
               ),
-            ),
-
-
-            const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
-
-            /// Table Rows
-            ...payments.map((payment) {
-              return Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const SizedBox(height: 24),
+              const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
+        
+              const SizedBox(height: 22),
+        
+              /// Current Plan Title
+              const Text(
+                "Current Plan",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF212121),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+        
+              /// Current Plan Card
+              SizedBox(
+                height: 349.94,
+                width: 250.63,
+                child: Container(
+                  padding: const EdgeInsets.all(22),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2B7FD0),
+                    borderRadius: BorderRadius.circular(11.08),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Center(
-                          child: Text(payment["txn"]!,
-                              style: const TextStyle(fontSize: 6)),
+                      const Text(
+                        "PREMIUM PLAN",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.6,
                         ),
                       ),
-                      const SizedBox(width: 8),
-
-                      Expanded(
-                        child: Center(
-                          child: Text(payment["date"]!,
-                              style: const TextStyle(fontSize: 6)),
+                      const SizedBox(height: 14),
+        
+                      /// Price Row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: const [
+                          Text(
+                            "\$49.99",
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 45),
+                            child: Text(
+                              "Per year",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+        
+                      // const SizedBox(height: 0),
+                      const Align(
+                        alignment: Alignment.centerRight,
+                        child: const Text(
+                          "What the user will get",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.5,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-
-                      Expanded(
-                        child: Center(
-                          child: Text(payment["plan"]!,
-                              style: const TextStyle(fontSize: 6)),
+        
+                      const SizedBox(height: 13),
+        
+                      const Text(
+                        "Plan description: Lorem ipsum is a dummy or placeholder text commonly used in graphic design, publishing, and web development.",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          height: 1.8,
                         ),
                       ),
-                      const SizedBox(width: 8),
-
-                      Expanded(
-                        child: Center(
-                          child: Text(payment["amount"]!,
-                              style: const TextStyle(fontSize: 6)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      Expanded(
-                        child: Center(
-                          child: Text(payment["method"]!,
-                              style: const TextStyle(fontSize: 6)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      Expanded(
-                        child: Center(
-                          child: Text(payment["status"]!,
-                              style: const TextStyle(
-                                fontSize: 6,
-
-                              )),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      Expanded(
-                        child: Center(
-                          child: Text(payment["receipt"]!,
-                              style: const TextStyle(
-                                fontSize: 6,
-                              )),
-                        ),
-                      ),
+        
+                      const SizedBox(height: 16),
+                      Divider(color: Colors.white.withOpacity(0.4)),
+        
+                      const SizedBox(height: 12),
+        
+                      /// Features list
+                      _buildFeature("A 60-sec elevator pitch"),
+                      const SizedBox(height: 11),
+                      _buildFeature("A free CV review and alteration online"),
                     ],
                   ),
-                  const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
-                ],
-              );
-            }).toList(),
-
-          ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(),
+    );
+  }
+
+  /// Helper function to build a feature row
+  Widget _buildFeature(String text) {
+    return Row(
+      children: [
+        const Icon(Icons.check_circle, color: Colors.white, size: 16),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              height: 1,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
