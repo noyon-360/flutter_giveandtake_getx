@@ -61,11 +61,12 @@ class AuthController extends BaseController {
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
           }
+          setLoading(false);
           //  Get.to(() => HomeScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         } else {
           setError("You are not authorized to login as Manager");
+          setLoading(false);
         }
-        setLoading(false);
       },
     );
   }
@@ -97,8 +98,8 @@ class AuthController extends BaseController {
       },
       (success) {
         DPrint.log("Register success result : ${success.data.id}");
-        Get.to(OtpVerificationToCompleteRegister(email: email));
         setLoading(false);
+        Get.to(OtpVerificationToCompleteRegister(email: email));
       },
     );
   }
@@ -118,8 +119,8 @@ class AuthController extends BaseController {
       },
       (success) {
         DPrint.log("reset pass success result : ${success.data.message}");
-        Get.offAll(() => OtpVerificationScreen(email: email));
         setLoading(false);
+        Get.offAll(() => OtpVerificationScreen(email: email));
       },
     );
   }
@@ -160,8 +161,8 @@ class AuthController extends BaseController {
       },
       (success) {
         DPrint.log("verify otp success result : ${success.data.message}");
-        Get.to(SetNewPasswordScreen(email: email, otp: otp));
         setLoading(false);
+        Get.to(SetNewPasswordScreen(email: email, otp: otp));
       },
     );
   }
@@ -208,8 +209,8 @@ class AuthController extends BaseController {
         DPrint.log(
           "New Password set successfully result : ${success.data.message}",
         );
-        Get.to(LoginScreen());
         setLoading(false);
+        Get.to(LoginScreen());
       },
     );
   }
@@ -251,6 +252,8 @@ class AuthController extends BaseController {
     // await secureStore.deleteData('email');
     // await secureStore.deleteData('password');
 
+    setLoading(false);
+    setError('');
     Get.offAll(() => LoginScreen());
   }
 }

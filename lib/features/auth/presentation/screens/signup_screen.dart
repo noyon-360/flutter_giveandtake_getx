@@ -59,6 +59,11 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
+    
+    // Reset loading state when entering the screen
+    _authController.setLoading(false);
+    _authController.setError('');
+    
     _termsRecognizer = TapGestureRecognizer()
       ..onTap = () {
         Get.to('page');
@@ -78,16 +83,22 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void dispose() {
     _obscurePassword.dispose();
-
-    _passwordTEController.dispose();
-
-    _passwordFocus.dispose();
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
     _signInRecognizer.dispose();
+    _dateOfBirthTEController.dispose();
+    _passwordTEController.dispose();
+    _confirmPasswordTEController.dispose();
     _firstNameTEController.dispose();
     _surnameTEController.dispose();
     _emailTEController.dispose();
+    _firstNameFocus.dispose();
+    _surnameFocus.dispose();
+    _emailFocus.dispose();
+    _countryFocus.dispose();
+    _phoneNumberFocus.dispose();
+    _passwordFocus.dispose();
+    _dateOfBirthFocus.dispose();
     // TODO: implement dispose
     super.dispose();
   }
@@ -608,7 +619,10 @@ class _SignupScreenState extends State<SignupScreen> {
                             Text("Already Have An Account?"),
                             GestureDetector(
                               onTap: () {
-                                Get.to(LoginScreen());
+                                Get.to(
+                                  LoginScreen(),
+                                  transition: Transition.fade,
+                                );
                               },
                               child: Text(
                                 "  Sign In Here",

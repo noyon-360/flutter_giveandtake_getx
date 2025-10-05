@@ -42,12 +42,16 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void initState() {
+    super.initState();
+    
+    // Reset loading state when entering the screen
+    _authController.setLoading(false);
+    _authController.setError('');
+    
     _signUpRecognizer = TapGestureRecognizer()
       ..onTap = () {
         Get.to(SignupScreen());
       };
-
-    super.initState();
   }
 
   @override
