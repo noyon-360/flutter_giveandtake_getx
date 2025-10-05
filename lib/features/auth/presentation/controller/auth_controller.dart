@@ -1,4 +1,4 @@
-import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
@@ -122,13 +122,27 @@ class AuthController extends BaseController {
     result.fold(
       (fail) {
         setError(fail.message);
-        DPrint.log("reset pass success result : ${fail.message}");
+        DPrint.log("reset pass failed: ${fail.message}");
+        Get.snackbar(
+          'Error',
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
         setLoading(false);
       },
       (success) {
-        DPrint.log("reset pass success result : ${success.data.message}");
+        DPrint.log("reset pass success: ${success.data.message}");
+        Get.snackbar(
+          'OTP Sent',
+          'We have sent an OTP to $email',
+          backgroundColor: const Color(0xFF10B287),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
         setLoading(false);
-        Get.offAll(() => OtpVerificationScreen(email: email));
+        Get.to(() => OtpVerificationScreen(email: email));
       },
     );
   }
@@ -206,6 +220,36 @@ class AuthController extends BaseController {
     );
   }
 
+  /// Verify OTP for forgot password flow
+  Future verifyOTPForPasswordReset(String email, String otp) async {
+    setLoading(true);
+    setError("");
+
+    final request = OtpVerificationRequestModel(email: email, otp: otp);
+    final result = await _authRepository.otpVerify(request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("OTP verification failed: ${fail.message}");
+        Get.snackbar(
+          'Verification Failed',
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("OTP verified successfully: ${success.data.message}");
+        setLoading(false);
+        // Navigate to set new password screen after OTP verification
+        Get.to(() => SetNewPasswordScreen(email: email, otp: otp));
+      },
+    );
+  }
+
   Future setNewPass(String email, String otp, String newPassword) async {
     setLoading(true);
     setError("");
@@ -221,6 +265,13 @@ class AuthController extends BaseController {
       (fail) {
         setError(fail.message);
         DPrint.log("New Password set failed result : ${fail.message}");
+        Get.snackbar(
+          'Error',
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
         setLoading(false);
       },
       (success) {
@@ -228,7 +279,19 @@ class AuthController extends BaseController {
           "New Password set successfully result : ${success.data.message}",
         );
         setLoading(false);
-        Get.to(LoginScreen());
+        // Show success message
+        Get.snackbar(
+          'Success',
+          'Password reset successfully! Please login with your new password.',
+          backgroundColor: const Color(0xFF10B287),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+        );
+        // Navigate to login screen after a short delay
+        Future.delayed(const Duration(seconds: 1), () {
+          Get.offAll(() => LoginScreen());
+        });
       },
     );
   }

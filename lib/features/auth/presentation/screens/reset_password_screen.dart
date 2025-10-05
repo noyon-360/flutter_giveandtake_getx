@@ -10,7 +10,6 @@ import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 
 import '../controller/auth_controller.dart';
-import 'otp_verification_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -44,11 +43,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 51),
-                AppLogo(
-                  images: AppImages.appLogoBlue,
-                  width: 220,
-                  height: 220,
-                ),
+                AppLogo(images: AppImages.appLogoBlue, width: 220, height: 220),
                 SizedBox(height: 64),
                 Text(
                   'Reset password',
@@ -98,14 +93,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                       Obx(
                         () => PrimaryButton(
-                          // onPressed: _submit,
                           onPressed: () {
-                            Get.to(
-                              //! <--- Need to change Later
-                              () => OtpVerificationScreen(
-                                email: _emailController.text,
-                              ),
-                            );
+                            if (_formKey.currentState!.validate()) {
+                              _submit();
+                            }
                           },
                           isLoading: _authController.isLoading.value,
                           text: 'Send OTP',
