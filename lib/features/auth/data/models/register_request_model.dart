@@ -2,14 +2,19 @@ class RegisterRequestModel {
   final String name;
   final String email;
   final String password;
-  final String phoneNumber;
+  final String phoneNum;
+  final String address;
+  final String role;
+  final String? dateOfbirth;
 
   RegisterRequestModel({
     required this.name,
     required this.email,
     required this.password,
-    required this.phoneNumber,
-
+    required this.phoneNum,
+    required this.address,
+    this.role = 'candidate',
+    this.dateOfbirth,
   });
 
   /// Convert Dart object → JSON (for API request)
@@ -18,7 +23,10 @@ class RegisterRequestModel {
       'name': name,
       'email': email,
       'password': password,
-      'phoneNumber': phoneNumber,
+      'phoneNum': phoneNum,
+      'address': address,
+      'role': role,
+      'dateOfbirth': dateOfbirth ?? '',
     };
   }
 }

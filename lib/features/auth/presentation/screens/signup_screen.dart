@@ -10,10 +10,7 @@ import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/auth/presentation/controller/term_of_services_and_privacy_policy_controller.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
-
 import '../../../../core/common/constants/app_images.dart';
-import '../../../../core/common/widgets/form_error_message.dart';
 import '../widgets/different_login_approach.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -110,11 +107,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
     _authController.register(
       _firstNameTEController.text.toString(),
-      _surnameTEController.text.toString(),
       _emailTEController.text,
       _passwordTEController.text,
       _phoneNumberTEController.text,
-      // _dateOfBirthTEController.text,
+      '', // Address - to be added to form later
     );
   }
 
@@ -307,8 +303,12 @@ class _SignupScreenState extends State<SignupScreen> {
                               fontWeight: FontWeight.w400,
                             ),
                           ),
-                          validator: Validators
-                              .email, //! <---------- Need to change ----------->
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter your country';
+                            }
+                            return null;
+                          },
                           autofillHints: const [AutofillHints.email],
                         ),
 

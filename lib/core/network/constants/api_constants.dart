@@ -1,11 +1,7 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'https://karlfive223-backend.onrender.com';
+  static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
-
-  /// soykot ip
-
-  static const String soyDomain = 'http://10.10.5.91:5002';
 
   /// [Headers]
   static Map<String, String> get defaultHeaders => {
@@ -39,15 +35,29 @@ class ApiConstants {
 
 /// [Authentication Endpoints]
 class AuthEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/auth';
+  static const String _base = '${ApiConstants.baseUrl}/user';
 
   final String login = '$_base/login';
   final String register = '$_base/register';
-  final String resetPass = '$_base/send-reset-otp';
-  final String refreshToken = '$_base/refresh-token';
-  final String otpVerify = '$_base/verify-reset-otp';
-  final String otpVerifyRegister = '$_base/verify-otp';
-  final String setNewPass = '$_base/reset-password';
+  final String verify = '$_base/verify';
+  final String refreshToken = '${ApiConstants.baseUrl}/auth/refresh-token';
+
+  // Legacy endpoints - mapping to new API
+  final String resetPass =
+      '$_base/forgot-password'; // Send OTP for forgot password
+  final String otpVerify = '$_base/verify'; // OTP verification (login flow)
+  final String otpVerifyRegister =
+      '$_base/verify'; // OTP verification (register flow)
+  final String setNewPass = '$_base/verify'; // Set new password
+
+  // Security Questions
+  final String defaultSecurityQuestions =
+      '${ApiConstants.baseUrl}/default-security-questions';
+  final String securityAnswers = '${ApiConstants.baseUrl}/security-answers';
+  final String verifySecurityAnswers =
+      '${ApiConstants.baseUrl}/security-answers/verify';
+  final String resetPasswordWithToken =
+      '${ApiConstants.baseUrl}/security-answers/reset-password';
 }
 
 class UserEndpoints {

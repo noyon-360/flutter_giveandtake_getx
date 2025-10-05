@@ -1,8 +1,12 @@
-
 import 'package:karlfive/features/auth/data/models/auth_response_model.dart';
+import 'package:karlfive/features/auth/data/models/default_security_questions_response_model.dart';
 import 'package:karlfive/features/auth/data/models/login_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
 import 'package:karlfive/features/auth/data/models/otp_response_model_register.dart';
+import 'package:karlfive/features/auth/data/models/reset_password_with_token_request_model.dart';
+import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
+import 'package:karlfive/features/auth/data/models/security_questions_response_model.dart';
+import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
@@ -104,6 +108,49 @@ class AuthRepositoryImpl implements AuthRepository {
     return _apiClient.get<UserModel>(
       ApiConstants.user.getUserProfile,
       fromJsonT: (json) => UserModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<DefaultSecurityQuestionsResponseModel>
+  getDefaultSecurityQuestions() {
+    return _apiClient.get<DefaultSecurityQuestionsResponseModel>(
+      ApiConstants.auth.defaultSecurityQuestions,
+      fromJsonT: (json) => DefaultSecurityQuestionsResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<SecurityQuestionsResponseModel> submitSecurityAnswers(
+    SecurityQuestionsRequestModel request,
+  ) {
+    return _apiClient.post<SecurityQuestionsResponseModel>(
+      ApiConstants.auth.securityAnswers,
+      data: request.toJson(),
+      fromJsonT: (json) => SecurityQuestionsResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<SecurityQuestionsResponseModel> verifySecurityAnswers(
+    VerifySecurityAnswersRequestModel request,
+  ) {
+    return _apiClient.post<SecurityQuestionsResponseModel>(
+      ApiConstants.auth.verifySecurityAnswers,
+      data: request.toJson(),
+      fromJsonT: (json) => SecurityQuestionsResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<SecurityQuestionsResponseModel> resetPasswordWithToken(
+    String token,
+    ResetPasswordWithTokenRequestModel request,
+  ) {
+    return _apiClient.post<SecurityQuestionsResponseModel>(
+      '${ApiConstants.auth.resetPasswordWithToken}?token=$token',
+      data: request.toJson(),
+      fromJsonT: (json) => SecurityQuestionsResponseModel.fromJson(json),
     );
   }
 }

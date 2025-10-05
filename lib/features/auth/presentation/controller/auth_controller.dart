@@ -8,11 +8,16 @@ import 'package:karlfive/features/auth/data/models/otp_request_model_register.da
 import 'package:karlfive/features/auth/data/models/refresh_token_request_model.dart';
 import 'package:karlfive/features/auth/data/models/register_request_model.dart';
 import 'package:karlfive/features/auth/data/models/reset_password_request_model.dart';
+import 'package:karlfive/features/auth/data/models/reset_password_with_token_request_model.dart';
+import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
 import 'package:karlfive/features/auth/data/models/set_new_password_request_model.dart';
+import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
 import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
+import 'package:karlfive/features/auth/presentation/screens/home_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
+import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
@@ -50,7 +55,7 @@ class AuthController extends BaseController {
       },
       (success) async {
         final user = success.data.user;
-        if (user.role == 'player') {
+        if (user.role == 'candidate') {
           await _authStorageService.storeAuthData(
             accessToken: success.data.accessToken,
             refreshToken: success.data.refreshToken,
@@ -62,9 +67,9 @@ class AuthController extends BaseController {
             secureStore.storeData('password', password);
           }
           setLoading(false);
-          //  Get.to(() => HomeScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+          Get.offAll(() => const HomeScreen());
         } else {
-          setError("You are not authorized to login as Manager");
+          setError("You are not authorized to login as candidate");
           setLoading(false);
         }
       },
@@ -76,7 +81,7 @@ class AuthController extends BaseController {
     String email,
     String password,
     String phoneNumber,
-    String text,
+    String address,
   ) async {
     setLoading(true);
     setError('');
@@ -85,7 +90,8 @@ class AuthController extends BaseController {
       name: name,
       email: email,
       password: password,
-      phoneNumber: phoneNumber,
+      phoneNum: phoneNumber,
+      address: address,
     );
 
     final result = await _authRepository.register(request);
@@ -162,7 +168,8 @@ class AuthController extends BaseController {
       (success) {
         DPrint.log("verify otp success result : ${success.data.message}");
         setLoading(false);
-        Get.to(SetNewPasswordScreen(email: email, otp: otp));
+        // Navigate to security questions screen for forgot password flow
+        Get.to(() => const SecurityQuestionsScreen());
       },
     );
   }
@@ -182,8 +189,9 @@ class AuthController extends BaseController {
       },
       (success) {
         DPrint.log("verify otp success result : ${success.data.message}");
-        // Get.to(EnterScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         setLoading(false);
+        // Navigate to security questions screen after OTP verification
+        Get.to(() => const SecurityQuestionsScreen());
       },
     );
   }
@@ -241,6 +249,129 @@ class AuthController extends BaseController {
       },
     );
     return navi;
+  }
+
+  // Security Questions
+  List<dynamic> _securityQuestions = [];
+  List<dynamic> get securityQuestions => _securityQuestions;
+
+  String? _securityToken;
+  String? get securityToken => _securityToken;
+
+  Future<void> getDefaultSecurityQuestions() async {
+    setLoading(true);
+    setError("");
+
+    final result = await _authRepository.getDefaultSecurityQuestions();
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("Get security questions failed: ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        // Note: API returns "date" instead of "data" - handle typo
+        _securityQuestions = success.data.date;
+        DPrint.log("Got ${_securityQuestions.length} security questions");
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> submitSecurityAnswers({
+    required String email,
+    required List<SecurityQuestionAnswer> questions,
+    bool isRegistration = true,
+  }) async {
+    setLoading(true);
+    setError("");
+
+    final request = SecurityQuestionsRequestModel(
+      email: email,
+      securityQuestions: questions,
+    );
+    final result = await _authRepository.submitSecurityAnswers(request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("Submit security answers failed: ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("Security answers submitted successfully");
+        setLoading(false);
+
+        if (isRegistration) {
+          // After registration flow completes, go to login
+          Get.offAll(() => LoginScreen());
+        }
+      },
+    );
+  }
+
+  Future<void> verifySecurityAnswers({
+    required String email,
+    required List<String> answers,
+  }) async {
+    setLoading(true);
+    setError("");
+
+    final request = VerifySecurityAnswersRequestModel(
+      email: email,
+      answers: answers,
+    );
+    final result = await _authRepository.verifySecurityAnswers(request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("Verify security answers failed: ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        _securityToken = success.data.token;
+        DPrint.log("Security answers verified, got token");
+        setLoading(false);
+
+        if (_securityToken != null) {
+          // Navigate to set new password screen with token
+          Get.to(
+            () => SetNewPasswordScreen(
+              email: email,
+              otp: '', // Not used in new flow
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Future<void> resetPasswordWithToken({
+    required String token,
+    required String newPassword,
+  }) async {
+    setLoading(true);
+    setError("");
+
+    final request = ResetPasswordWithTokenRequestModel(
+      newPassword: newPassword,
+    );
+    final result = await _authRepository.resetPasswordWithToken(token, request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("Reset password failed: ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("Password reset successfully");
+        setLoading(false);
+        Get.offAll(() => LoginScreen());
+      },
+    );
   }
 
   Future<void> logout() async {
