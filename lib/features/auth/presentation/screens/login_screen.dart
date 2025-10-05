@@ -275,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen>
                         Center(
                           child: RichText(
                             text: TextSpan(
-                              text: 'Forgot your Password? ',
+                              text: 'Don\'t have an account? ',
                               style: TextStyle(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14,

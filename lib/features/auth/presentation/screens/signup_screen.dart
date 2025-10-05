@@ -364,7 +364,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         TextFormField(
                           controller: _dateOfBirthTEController,
                           focusNode: _dateOfBirthFocus,
-                          keyboardType: TextInputType.emailAddress,
+                          readOnly: true,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
@@ -382,9 +382,45 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: AppColors.textFieldLightGrey,
                             ),
                           ),
-                          validator: Validators
-                              .phone, //! <---------- Need to change ----------->
-                          autofillHints: const [AutofillHints.email],
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please select your date of birth';
+                            }
+                            return null;
+                          },
+                          onTap: () async {
+                            // Close keyboard if open
+                            FocusScope.of(context).unfocus();
+
+                            // Show date picker
+                            final DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime(2000, 1, 1),
+                              firstDate: DateTime(1950),
+                              lastDate: DateTime.now(),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.light(
+                                      primary: AppColors.primaryBlue,
+                                      onPrimary: AppColors.primaryWhite,
+                                      onSurface: AppColors.textBlack,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
+                            );
+
+                            if (pickedDate != null) {
+                              // Format the date as MM/DD/YYYY
+                              final formattedDate =
+                                  '${pickedDate.month.toString().padLeft(2, '0')}/'
+                                  '${pickedDate.day.toString().padLeft(2, '0')}/'
+                                  '${pickedDate.year}';
+                              _dateOfBirthTEController.text = formattedDate;
+                            }
+                          },
                         ),
 
                         Gap.h16,

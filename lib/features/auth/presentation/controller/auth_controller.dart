@@ -183,9 +183,17 @@ class AuthController extends BaseController {
 
     result.fold(
       (fail) {
-        setError(fail.message);
-        DPrint.log("verify otp success result : ${fail.message}");
-        setLoading(false);
+        // Check if the error is "User already verified"
+        // In this case, still proceed to security questions
+        if (fail.message.toLowerCase().contains('already verified')) {
+          DPrint.log("User already verified, proceeding to security questions");
+          setLoading(false);
+          Get.to(() => const SecurityQuestionsScreen());
+        } else {
+          setError(fail.message);
+          DPrint.log("verify otp failed: ${fail.message}");
+          setLoading(false);
+        }
       },
       (success) {
         DPrint.log("verify otp success result : ${success.data.message}");
