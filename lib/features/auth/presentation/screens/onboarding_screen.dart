@@ -8,8 +8,15 @@ import '../../../../core/common/constants/app_images.dart';
 import '../../../../core/common/widgets/app_logo.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  // No animation controller needed - Hero handles the transition
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +30,7 @@ class OnboardingScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // App Logo
+            // App Logo with Hero animation
             Stack(
               alignment: Alignment.center,
               children: [
@@ -34,17 +41,21 @@ class OnboardingScreen extends StatelessWidget {
                     bottomRight: Radius.circular(40),
                   ),
                   child: Image.asset(
-                    AppImages.onboardingBG, // replace with your image path
+                    AppImages.onboardingBG,
                     height: screenHeight * 0.45,
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
                 ),
+                // Hero widget wraps the logo for smooth transition
                 Center(
-                  child: AppLogo(
-                    images: AppImages.appLogoWhite,
-                    height: 250,
-                    width: 250,
+                  child: Hero(
+                    tag: 'app_logo_transition',
+                    child: AppLogo(
+                      images: AppImages.appLogoWhite,
+                      height: 250,
+                      width: 250,
+                    ),
                   ),
                 ),
               ],

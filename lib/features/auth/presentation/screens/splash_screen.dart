@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import 'package:karlfive/core/common/widgets/app_logo.dart';
 import 'package:karlfive/features/auth/presentation/controller/splash_screen_controller.dart';
+import 'package:karlfive/features/auth/presentation/screens/onboarding_screen.dart';
 
 import '../../../../core/common/constants/app_images.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -47,6 +48,19 @@ class _SplashScreenState extends State<SplashScreen>
 
     // start the animation sequence
     _ctrl.forward();
+
+    // Navigate to onboarding after animation completes
+    _ctrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Future.delayed(const Duration(milliseconds: 600), () {
+          Get.off(
+            () => const OnboardingScreen(),
+            transition: Transition.fadeIn,
+            duration: const Duration(milliseconds: 900),
+          );
+        });
+      }
+    });
   }
 
   @override
@@ -98,10 +112,13 @@ class _SplashScreenState extends State<SplashScreen>
                       begin: 0.8,
                       end: 1.0,
                     ).animate(_fgAnimation),
-                    child: AppLogo(
-                      images: AppImages.appLogoWhite,
-                      height: 180,
-                      width: 220,
+                    child: Hero(
+                      tag: 'app_logo_transition',
+                      child: AppLogo(
+                        images: AppImages.appLogoWhite,
+                        height: 180,
+                        width: 220,
+                      ),
                     ),
                   ),
                 ),
