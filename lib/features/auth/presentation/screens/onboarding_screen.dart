@@ -1,85 +1,80 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
+import 'package:karlfive/features/auth/presentation/screens/signup_screen.dart';
 
 import '../../../../core/common/constants/app_images.dart';
+import '../../../../core/common/widgets/app_logo.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primaryWhite,
       body: SafeArea(
+        top: false,
+        bottom: true,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-
             // App Logo
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Stack(
+              alignment: Alignment.center,
               children: [
-                Container(
-                  height: 48,
-                  width: 48,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.blue[300],
+                // Top image with rounded bottom edges
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
+                  ),
+                  child: Image.asset(
+                    AppImages.onboardingBG, // replace with your image path
+                    height: screenHeight * 0.45,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(width: 8),
-                const Text(
-                  "YOUR LOGO",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                Center(
+                  child: AppLogo(
+                    images: AppImages.appLogoWhite,
+                    height: 250,
+                    width: 250,
                   ),
                 ),
               ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Top image with rounded bottom edges
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
-              child: Image.asset(
-                AppImages.onboardingBG, // replace with your image path
-                height: MediaQuery.of(context).size.height * 0.35,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
             ),
 
             const SizedBox(height: 32),
 
             // Rich text title
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: RichText(
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.start,
                 text: const TextSpan(
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
                   children: [
                     TextSpan(
                       text: "Build Your ",
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: AppColors.textGrey),
                     ),
                     TextSpan(
                       text: "Personal Brand ",
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(color: AppColors.textBlack),
                     ),
                     TextSpan(
                       text: "& ",
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: AppColors.textGrey),
                     ),
                     TextSpan(
                       text: "Get Hired Faster.",
-                      style: TextStyle(color: Colors.blue),
+                      style: TextStyle(color: AppColors.primaryBlue),
                     ),
                   ],
                 ),
@@ -90,13 +85,13 @@ class OnboardingScreen extends StatelessWidget {
 
             // Description text
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 "Create a powerful profile, showcase your video pitch, and connect with top recruiters all in one app. Create a powerful profile, showcase your video pitch, and connect with top recruiters all in one app.",
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.start,
                 style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
+                  fontSize: 14.0,
+                  color: AppColors.textGrey,
                   height: 1.5,
                 ),
               ),
@@ -106,19 +101,19 @@ class OnboardingScreen extends StatelessWidget {
 
             // Get Started Button
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppColors.primaryBlue,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   onPressed: () {
-                    // TODO: Navigate to next screen
+                    Get.to(() => SignupScreen());
                   },
                   child: const Text(
                     "Get Started",
@@ -146,13 +141,13 @@ class OnboardingScreen extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // TODO: Navigate to Login screen
+                      Get.to(() => LoginScreen());
                     },
                     child: const Text(
                       "Log In",
                       style: TextStyle(
-                        color: Colors.lightBlueAccent,
-                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryLightBlue,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),

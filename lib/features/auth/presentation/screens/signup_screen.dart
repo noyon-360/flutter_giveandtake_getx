@@ -415,9 +415,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                           _obscurePassword.value = !obscure,
                                     ),
                                   ),
-                              //
+
                               validator: Validators.password,
-                              // onFieldSubmitted: (_) => _submit(),
                             );
                           },
                         ),
@@ -480,9 +479,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             Obx(
                               () => Checkbox(
                                 value: controller.privacy.value,
-                                activeColor: AppColors.textFieldLightGrey,
+                                activeColor: AppColors.primaryBlue,
                                 // fill color when checked
-                                checkColor: AppColors.textFieldLightGrey,
+                                checkColor: AppColors.primaryWhite,
                                 //  tick color
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(2),
@@ -493,13 +492,13 @@ class _SignupScreenState extends State<SignupScreen> {
                                   if (states.contains(WidgetState.selected)) {
                                     //  Border when checked
                                     return BorderSide(
-                                      color: AppColors.textFieldLightGrey,
-                                      width: 2,
+                                      color: AppColors.textGrey,
+                                      width: 1,
                                     );
                                   }
                                   // Border when unchecked
                                   return BorderSide(
-                                    color: AppColors.textFieldLightGrey,
+                                    color: AppColors.textGrey,
                                     width: 1,
                                   );
                                 }),
@@ -584,6 +583,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           onPressed: () {},
                           text: "Join as a Recruiter",
                           width: double.infinity - 40,
+                          textColor: AppColors.primaryBlue,
                           height: 48,
                         ),
 
@@ -593,8 +593,30 @@ class _SignupScreenState extends State<SignupScreen> {
                           onPressed: () {},
                           text: "Join as a Company",
                           width: double.infinity - 40,
+                          textColor: AppColors.primaryBlue,
                           height: 48,
                         ),
+                        Gap.h32,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text("Already Have An Account?"),
+                            GestureDetector(
+                              onTap: () {
+                                Get.to(LoginScreen());
+                              },
+                              child: Text(
+                                "  Sign In Here",
+                                style: TextStyle(
+                                  color: AppColors.primaryLightBlue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 32),
                       ],
                     ),
                   ),
