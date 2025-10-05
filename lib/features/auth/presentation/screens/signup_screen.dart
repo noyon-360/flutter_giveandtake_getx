@@ -119,7 +119,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   Center(
                     child: Image(
-                      image: AssetImage(AppImages.appLogoLandscape),
+                      image: AssetImage(AppImages.appLogoBlue),
                       height: 40,
                       width: 100,
                     ),

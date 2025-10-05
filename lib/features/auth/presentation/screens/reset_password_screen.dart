@@ -45,7 +45,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               children: [
                 SizedBox(height: 51),
                 AppLogo(
-                  images: AppImages.appLogoLandscape,
+                  images: AppImages.appLogoBlue,
                   width: 220,
                   height: 220,
                 ),

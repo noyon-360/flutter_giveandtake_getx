@@ -55,7 +55,7 @@ class _OtpVerificationToCompleteRegisterState
           child: Column(
             children: [
               SizedBox(height: 51),
-              AppLogo(images: AppImages.appLogoLandscape),
+              AppLogo(images: AppImages.appLogoBlue),
               SizedBox(height: 74),
 
               Text(

@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1500),
     );
 
     // background bubbles: start slightly earlier
@@ -72,8 +72,8 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 // keep exact Positioned values, but animate opacity/scale
                 Positioned(
-                  right: -screenWidth * 0.05,
-                  bottom: -screenHeight * 0.15,
+                  right: -screenWidth * 0.25,
+                  bottom: -screenHeight * 0.25,
                   child: FadeTransition(
                     opacity: _bgAnimation,
                     child: ScaleTransition(
@@ -83,8 +83,8 @@ class _SplashScreenState extends State<SplashScreen>
                       ).animate(_bgAnimation),
                       child: AppLogo(
                         images: AppImages.splashBubbles,
-                        height: 285,
-                        width: 285,
+                        height: 300,
+                        width: 300,
                       ),
                     ),
                   ),
@@ -99,9 +99,9 @@ class _SplashScreenState extends State<SplashScreen>
                       end: 1.0,
                     ).animate(_fgAnimation),
                     child: AppLogo(
-                      images: AppImages.appLogoPortrait,
-                      height: 220,
-                      width: 320,
+                      images: AppImages.appLogoWhite,
+                      height: 180,
+                      width: 220,
                     ),
                   ),
                 ),

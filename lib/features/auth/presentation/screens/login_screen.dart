@@ -88,11 +88,7 @@ class _LoginScreenState extends State<LoginScreen>
         body: SafeArea(
           child: Column(
             children: [
-              AppLogo(
-                images: AppImages.appLogoLandscape,
-                height: 128,
-                width: 128,
-              ),
+              AppLogo(images: AppImages.appLogoBlue, height: 128, width: 128),
 
               Expanded(
                 child: SingleChildScrollView(
@@ -140,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen>
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter your email",
@@ -205,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen>
                                         rememberMeController.rememberMe.value,
                                     activeColor: AppColors.primaryBlue,
                                     // fill color when checked
-                                    checkColor: AppColors.primaryBlue,
+                                    checkColor: AppColors.primaryWhite,
                                     //  tick color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(2),
@@ -218,13 +214,13 @@ class _LoginScreenState extends State<LoginScreen>
                                       )) {
                                         //  Border when checked
                                         return BorderSide(
-                                          color: AppColors.primaryBlue,
-                                          width: 2,
+                                          color: AppColors.textBlack,
+                                          width: 1,
                                         );
                                       }
                                       // Border when unchecked
                                       return BorderSide(
-                                        color: AppColors.primaryBlue,
+                                        color: AppColors.textBlack,
                                         width: 1,
                                       );
                                     }),

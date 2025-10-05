@@ -85,7 +85,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
               children: [
                 SizedBox(height: 51),
 
-                Center(child: AppLogo(images: AppImages.appLogoLandscape)),
+                Center(child: AppLogo(images: AppImages.appLogoBlue)),
 
                 SizedBox(height: 49),
 

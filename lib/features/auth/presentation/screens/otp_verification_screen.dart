@@ -52,7 +52,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 25),
-              Center(child: AppLogo(images: AppImages.appLogoLandscape)),
+              Center(child: AppLogo(images: AppImages.appLogoBlue)),
               SizedBox(height: 50),
 
               Text(
