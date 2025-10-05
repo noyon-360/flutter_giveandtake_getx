@@ -59,11 +59,11 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Reset loading state when entering the screen
     _authController.setLoading(false);
     _authController.setError('');
-    
+
     _termsRecognizer = TapGestureRecognizer()
       ..onTap = () {
         Get.to('page');
