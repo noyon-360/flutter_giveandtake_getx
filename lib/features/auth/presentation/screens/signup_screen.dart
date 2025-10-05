@@ -175,7 +175,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter First Name",
@@ -189,8 +189,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: AppColors.textFieldLightGrey,
                             ),
                           ),
-                          validator:
-                              Validators.name, //! <---------- Need to change ----------->
+                          validator: Validators
+                              .name, //! <---------- Need to change ----------->
                         ),
 
                         Gap.h16,
@@ -212,7 +212,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter Surname",
@@ -226,8 +226,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: AppColors.textFieldLightGrey,
                             ),
                           ),
-                          validator:
-                              Validators.name, //! <---------- Need to change ----------->
+                          validator: Validators
+                              .name, //! <---------- Need to change ----------->
                         ),
 
                         Gap.h16,
@@ -249,7 +249,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter Email",
@@ -286,7 +286,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Country",
@@ -296,8 +296,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               fontWeight: FontWeight.w400,
                             ),
                           ),
-                          validator:
-                              Validators.email, //! <---------- Need to change ----------->
+                          validator: Validators
+                              .email, //! <---------- Need to change ----------->
                           autofillHints: const [AutofillHints.email],
                         ),
 
@@ -320,7 +320,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter Phone Number",
@@ -357,7 +357,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "MM/DD/YYYY",
@@ -371,9 +371,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: AppColors.textFieldLightGrey,
                             ),
                           ),
-                          validator:
-                              Validators.phone, //! <---------- Need to change ----------->
-                          autofillHints: const [AutofillHints.email], 
+                          validator: Validators
+                              .phone, //! <---------- Need to change ----------->
+                          autofillHints: const [AutofillHints.email],
                         ),
 
                         Gap.h16,
@@ -444,9 +444,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               focusNode: _confirmPasswordFocus,
                               obscureText: obscure,
                               textInputAction: TextInputAction.done,
-                              style: TextStyle(
-                                color: AppColors.textFieldLightGrey,
-                              ),
+                              style: TextStyle(color: AppColors.textBlack),
                               decoration: context.primaryInputDecoration
                                   .copyWith(
                                     hintText: "Confirm a Password",
@@ -470,7 +468,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                           _obscurePassword.value = !obscure,
                                     ),
                                   ),
-                              validator: Validators.password, //! <---------- Need to change ----------->
+                              validator: Validators
+                                  .password, //! <---------- Need to change ----------->
                               onFieldSubmitted: (_) => _submit(),
                             );
                           },

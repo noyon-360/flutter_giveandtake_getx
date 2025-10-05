@@ -38,7 +38,7 @@ class SplashController extends GetxController {
       if (success) {
         // Get.offAll(() => HomeScreen());
       } else {
-        Get.offAll(() => OnboardingScreen());
+        Get.offAll(() => OnboardingScreen(), transition: Transition.fadeIn);
       }
     }
   }
