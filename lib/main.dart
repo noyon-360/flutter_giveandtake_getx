@@ -17,8 +17,6 @@ import 'package:karlfive/core/common/constants/stripe_key.dart';
 
 import 'core/bottomNavbar/controllers/bottom_nav_controller.dart';
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -47,7 +45,7 @@ class MyApp extends StatelessWidget {
       title: 'GiveAndTake',
       theme: AppTheme.light,
       // home: SplashScreen(),
-      home: ResetPasswordScreen(),
+      home: SplashScreen(),
     );
   }
 }
