@@ -108,7 +108,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             );
                           },
                           isLoading: _authController.isLoading.value,
-                          text: 'Sent OTP',
+                          text: 'Send OTP',
                         ),
                       ),
                     ],

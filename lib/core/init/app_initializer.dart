@@ -10,7 +10,7 @@ class AppInitializer {
   static Future<void> initializeApp() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    await HiveInitialization.initHive();
+    // await HiveInitialization.initHive();
 
     setupServiceLocator();
 

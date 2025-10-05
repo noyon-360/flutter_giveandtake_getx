@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'GiveAndTake',
-      theme: AppTheme.dark,
+      theme: AppTheme.light,
       // home: SplashScreen(),
       home: ResetPasswordScreen(),
     );

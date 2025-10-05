@@ -5,6 +5,5 @@ import '../network/services/auth_storage_service.dart';
 
 void setupCore() {
   Get.lazyPut<ApiClient>(() => ApiClient());
-  
   Get.lazyPut<AuthStorageService>(() => AuthStorageService());
 }

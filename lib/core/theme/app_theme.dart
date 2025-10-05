@@ -4,18 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
-  static ThemeData get dark => ThemeData(
+  static ThemeData get light => ThemeData(
     scaffoldBackgroundColor: AppColors.primaryWhite,
     primaryColor: AppColors.primaryBlue,
-    colorScheme: ColorScheme.dark(primary: AppColors.primaryBlue),
-
+    colorScheme: ColorScheme.light(primary: AppColors.primaryBlue),
     textTheme: GoogleFonts.interTextTheme(),
-    // appBarTheme: AppBarTheme(
-    //   titleTextStyle: TextStyle(
-    //     color: AppColors.,
-    //     fontSize: 16,
-    //     fontWeight: FontWeight.w600,
-    //   ),
-    // ),
   );
 }
