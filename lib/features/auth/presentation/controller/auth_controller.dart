@@ -30,7 +30,7 @@ class AuthController extends BaseController {
 
   // Login
   Future<void> login(
-   RememberMeController?  rememberMeController, {
+    RememberMeController? rememberMeController, {
     required String email,
     required String password,
   }) async {
@@ -60,7 +60,6 @@ class AuthController extends BaseController {
             final secureStore = SecureStoreServices();
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
-
           }
           //  Get.to(() => HomeScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         } else {
@@ -76,6 +75,7 @@ class AuthController extends BaseController {
     String email,
     String password,
     String phoneNumber,
+    String text,
   ) async {
     setLoading(true);
     setError('');
@@ -245,7 +245,9 @@ class AuthController extends BaseController {
   Future<void> logout() async {
     await _authStorageService.clearAuthData();
     final secureStore = SecureStoreServices();
-    await secureStore.deleteData('previewConfirmed'); // or storeData('previewConfirmed', 'false');
+    await secureStore.deleteData(
+      'previewConfirmed',
+    ); // or storeData('previewConfirmed', 'false');
     // await secureStore.deleteData('email');
     // await secureStore.deleteData('password');
 

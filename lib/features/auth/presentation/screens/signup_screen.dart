@@ -29,19 +29,26 @@ class _SignupScreenState extends State<SignupScreen> {
   final _authController = Get.find<AuthController>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final FocusNode _nameFocus = FocusNode();
+  final FocusNode _firstNameFocus = FocusNode();
+  final FocusNode _surnameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
+  final FocusNode _countryFocus = FocusNode();
   final FocusNode _phoneNumberFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
   final FocusNode _confirmPasswordFocus = FocusNode();
+  final FocusNode _dateOfBirthFocus = FocusNode();
 
-  final TextEditingController _nameTEController = TextEditingController();
+  final TextEditingController _firstNameTEController = TextEditingController();
+  final TextEditingController _surnameTEController = TextEditingController();
   final TextEditingController _emailTEController = TextEditingController();
+  final TextEditingController _countryTEController = TextEditingController();
   final TextEditingController _phoneNumberTEController =
       TextEditingController();
-  final TextEditingController _passwordTEController = TextEditingController();
+  final TextEditingController _dateOfBirthTEController =
+      TextEditingController();
   final TextEditingController _confirmPasswordTEController =
       TextEditingController();
+  final TextEditingController _passwordTEController = TextEditingController();
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
 
@@ -54,20 +61,16 @@ class _SignupScreenState extends State<SignupScreen> {
     super.initState();
     _termsRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        // Navigate to Terms of Service page
-
         Get.to('page');
       };
 
     _privacyRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        // Navigate to Privacy Policy page
         Get.to('');
       };
 
     _signInRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        // Navigate to Privacy Policy page
         Get.to(LoginScreen());
       };
   }
@@ -82,24 +85,25 @@ class _SignupScreenState extends State<SignupScreen> {
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
     _signInRecognizer.dispose();
+    _firstNameTEController.dispose();
+    _surnameTEController.dispose();
+    _emailTEController.dispose();
     // TODO: implement dispose
     super.dispose();
   }
 
-  /// [Submit the form]
-  /// Check the email and password validations
-  ///
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Hide keyboard immediately
     if (mounted) FocusScope.of(context).unfocus();
 
     _authController.register(
-      _nameTEController.text.toString(),
+      _firstNameTEController.text.toString(),
+      _surnameTEController.text.toString(),
       _emailTEController.text,
       _passwordTEController.text,
       _phoneNumberTEController.text,
+      // _dateOfBirthTEController.text,
     );
   }
 
@@ -108,6 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: AppScaffold(
+        appBar: AppBar(),
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -163,8 +168,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: _nameTEController,
-                          focusNode: _nameFocus,
+                          controller: _firstNameTEController,
+                          focusNode: _firstNameFocus,
                           keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
@@ -185,7 +190,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ),
                           validator:
-                              Validators.name, //! <---------- Need to change
+                              Validators.name, //! <---------- Need to change ----------->
                         ),
 
                         Gap.h16,
@@ -200,8 +205,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: _nameTEController,
-                          focusNode: _nameFocus,
+                          controller: _surnameTEController,
+                          focusNode: _surnameFocus,
                           keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
@@ -222,7 +227,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ),
                           validator:
-                              Validators.name, //! <---------- Need to change
+                              Validators.name, //! <---------- Need to change ----------->
                         ),
 
                         Gap.h16,
@@ -275,8 +280,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: _emailTEController,
-                          focusNode: _emailFocus,
+                          controller: _countryTEController,
+                          focusNode: _countryFocus,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
@@ -292,7 +297,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ),
                           validator:
-                              Validators.email, //! <---------- Need to change
+                              Validators.email, //! <---------- Need to change ----------->
                           autofillHints: const [AutofillHints.email],
                         ),
 
@@ -346,8 +351,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: _phoneNumberTEController,
-                          focusNode: _phoneNumberFocus,
+                          controller: _dateOfBirthTEController,
+                          focusNode: _dateOfBirthFocus,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
@@ -367,8 +372,8 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ),
                           validator:
-                              Validators.phone, //! <---------- Need to change
-                          autofillHints: const [AutofillHints.email],
+                              Validators.phone, //! <---------- Need to change ----------->
+                          autofillHints: const [AutofillHints.email], 
                         ),
 
                         Gap.h16,
@@ -465,7 +470,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                           _obscurePassword.value = !obscure,
                                     ),
                                   ),
-                              validator: Validators.password,
+                              validator: Validators.password, //! <---------- Need to change ----------->
                               onFieldSubmitted: (_) => _submit(),
                             );
                           },
