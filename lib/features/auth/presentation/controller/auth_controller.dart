@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
@@ -22,6 +23,7 @@ import 'package:karlfive/features/auth/presentation/screens/set_new_password_scr
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import 'remember_me_controller.dart';
 
 class AuthController extends BaseController {
@@ -169,7 +171,7 @@ class AuthController extends BaseController {
         DPrint.log("verify otp success result : ${success.data.message}");
         setLoading(false);
         // Navigate to security questions screen for forgot password flow
-        Get.to(() => const SecurityQuestionsScreen());
+        Get.to(() => SecurityQuestionsScreen(email: email));
       },
     );
   }
@@ -188,7 +190,7 @@ class AuthController extends BaseController {
         if (fail.message.toLowerCase().contains('already verified')) {
           DPrint.log("User already verified, proceeding to security questions");
           setLoading(false);
-          Get.to(() => const SecurityQuestionsScreen());
+          Get.to(() => SecurityQuestionsScreen(email: email));
         } else {
           setError(fail.message);
           DPrint.log("verify otp failed: ${fail.message}");
@@ -199,7 +201,7 @@ class AuthController extends BaseController {
         DPrint.log("verify otp success result : ${success.data.message}");
         setLoading(false);
         // Navigate to security questions screen after OTP verification
-        Get.to(() => const SecurityQuestionsScreen());
+        Get.to(() => SecurityQuestionsScreen(email: email));
       },
     );
   }
@@ -312,8 +314,22 @@ class AuthController extends BaseController {
         setLoading(false);
 
         if (isRegistration) {
-          // After registration flow completes, go to login
-          Get.offAll(() => LoginScreen());
+          // Show success message
+          Get.snackbar(
+            'Success!',
+            'Security questions saved successfully',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: AppColors.primaryLightBlue,
+            colorText: AppColors.primaryWhite,
+            duration: const Duration(seconds: 2),
+            margin: EdgeInsets.all(16),
+            borderRadius: 8,
+          );
+
+          // Wait for snackbar to show, then navigate to login
+          Future.delayed(const Duration(seconds: 2), () {
+            Get.offAll(() => LoginScreen());
+          });
         }
       },
     );
