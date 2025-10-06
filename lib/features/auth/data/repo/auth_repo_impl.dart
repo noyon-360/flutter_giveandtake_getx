@@ -64,7 +64,7 @@ class AuthRepositoryImpl implements AuthRepository {
     OtpVerificationRequestModel request,
   ) {
     return _apiClient.post(
-      ApiConstants.auth.otpVerify,
+      ApiConstants.auth.otpVerifyResetPassword,
       data: request.toJson(),
       fromJsonT: (json) => OtpVerificationResponseModel.fromJson(json),
     );
@@ -87,7 +87,7 @@ class AuthRepositoryImpl implements AuthRepository {
     SetNewPasswordRequestModel request,
   ) {
     return _apiClient.post(
-      ApiConstants.auth.setNewPass,
+      ApiConstants.auth.changePassword,
       data: request.toJson(),
       fromJsonT: (json) => SetNewPasswordResponseModel.fromJson(json),
     );

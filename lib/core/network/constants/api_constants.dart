@@ -43,14 +43,14 @@ class AuthEndpoints {
   final String verify = '$_base/verify';
   final String refreshToken = '${ApiConstants.baseUrl}/auth/refresh-token';
 
-  // Legacy endpoints - mapping to new API
-  final String resetPass =
-      '$_base/forgot-password'; // Send OTP for forgot password
-  final String otpVerify =
-      '$_base/verify-reset-password'; // OTP verification (login flow)
+  // Password Reset Flow
+  final String resetPass = '$_base/forget'; // Send OTP for forgot password
+  final String otpVerifyResetPassword =
+      '$_base/verify-reset-otp'; // OTP verification for password reset
   final String otpVerifyRegister =
       '$_base/verify'; // OTP verification (register flow)
-  final String setNewPass = '$_base/forget'; // Reset password with OTP
+  final String changePassword =
+      '$_base/change-password'; // Change password with old and new
 
   // Security Questions
   final String defaultSecurityQuestions =

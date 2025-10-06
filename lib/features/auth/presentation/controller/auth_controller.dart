@@ -11,12 +11,10 @@ import 'package:karlfive/features/auth/data/models/register_request_model.dart';
 import 'package:karlfive/features/auth/data/models/reset_password_request_model.dart';
 import 'package:karlfive/features/auth/data/models/reset_password_with_token_request_model.dart';
 import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
-import 'package:karlfive/features/auth/data/models/set_new_password_request_model.dart';
 import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
 import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
 import 'package:karlfive/features/auth/presentation/screens/home_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
 import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
@@ -145,13 +143,14 @@ class AuthController extends BaseController {
         DPrint.log("reset pass success: ${success.data.message}");
         Get.snackbar(
           'OTP Sent',
-          'We have sent an OTP to $email',
+          'We have sent an OTP to $email. Please check your email.',
           backgroundColor: const Color(0xFF10B287),
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
         setLoading(false);
-        Get.to(() => OtpVerificationScreen(email: email));
+        // Navigate directly to SetNewPasswordScreen where user enters OTP and new password
+        Get.to(() => SetNewPasswordScreen(email: email, otp: ''));
       },
     );
   }
@@ -177,23 +176,40 @@ class AuthController extends BaseController {
     );
   }
 
-  Future verifyOTP(String email, String otp) async {
+  // This method is now only used for registration OTP verification
+  // For password reset, we navigate directly to SetNewPasswordScreen from resetPass
+  Future verifyOTPForRegistration(String email, String otp) async {
     setLoading(true);
     setError("");
 
-    final request = OtpVerificationRequestModel(email: email, otp: otp);
-    final result = await _authRepository.otpVerify(request);
+    final result = await _authRepository.otpVerifyRegister(
+      OtpRequestModelRegister(email: email, otp: otp),
+    );
 
     result.fold(
       (fail) {
         setError(fail.message);
-        DPrint.log("verify otp success result : ${fail.message}");
+        DPrint.log("verify otp failed: ${fail.message}");
+        Get.snackbar(
+          'Error',
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
         setLoading(false);
       },
       (success) {
-        DPrint.log("verify otp success result : ${success.data.message}");
+        DPrint.log("verify otp success: ${success.message}");
         setLoading(false);
-        // Navigate to security questions screen for forgot password flow
+        Get.snackbar(
+          'Success',
+          'Registration completed successfully!',
+          backgroundColor: const Color(0xFF10B287),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        // Navigate to security questions for new users
         Get.to(() => SecurityQuestionsScreen(email: email));
       },
     );
@@ -291,12 +307,13 @@ class AuthController extends BaseController {
     setLoading(true);
     setError("");
 
-    final request = SetNewPasswordRequestModel(
+    // For reset password flow, we use the OTP verification endpoint with the new password
+    final request = OtpVerificationRequestModel(
       email: email,
       otp: otp,
       newPassword: newPassword,
     );
-    final result = await _authRepository.setNewPassword(request);
+    final result = await _authRepository.otpVerify(request);
 
     result.fold(
       (fail) {
