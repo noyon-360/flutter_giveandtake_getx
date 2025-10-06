@@ -7,6 +7,7 @@ import 'package:karlfive/features/profile_dasboard/presentation/screens/payment_
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
 
 import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
+import '../../../home_static_screens/presantation/screen/aboutus_screen.dart';
 
 class ProfileDashboardScreen extends StatelessWidget {
   const ProfileDashboardScreen({super.key});
@@ -47,12 +48,16 @@ class ProfileDashboardScreen extends StatelessWidget {
                   Get.to(() => const PaymentHistoryScreen());
                 }),
                 _menuTile("assets/icons/logout.png", "Log out", () {}),
+
+                _menuTile("assets/icons/personalinfo.png", "About Us", (){
+                  Get.to (() => const AboutUsScreen());
+                })
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
+      // bottomNavigationBar: CustomBottomNavBar(),
     );
   }
 

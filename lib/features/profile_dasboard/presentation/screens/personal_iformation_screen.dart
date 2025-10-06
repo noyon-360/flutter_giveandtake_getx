@@ -169,7 +169,6 @@ class PersonalInfoScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
     );
   }
 
