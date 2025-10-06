@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-
-class AboutUs extends StatelessWidget {
-  const AboutUs({super.key});
+class PrivacyPolicy extends StatelessWidget {
+  const PrivacyPolicy({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,7 @@ class AboutUs extends StatelessWidget {
         title: const Padding(
           padding: EdgeInsets.only(left: 4),
           child: Text(
-            "About Us",
+            "Privacy Policy",
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -29,33 +28,40 @@ class AboutUs extends StatelessWidget {
         ),
         centerTitle: false,
 
-        // Bottom text aligned left
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(70),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(60, 0, 16, 12),
-            child: Text(
-              "Elevator Video Pitches was initially conceived in 2016 at a time of high employment amidst a 'skills shortage' which has abated. Today, millions of knowledgeable, highly skilled and competent professionals, graduates, and school leavers have tried unsuccessfully for years to find a job. We see you, we hear you, we care.",
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                fontSize: 10,
-                height: 1.4,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF424242),
+        // Bottom text perfectly aligned with title
+          bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(10),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 2, bottom: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Transform.translate(
+                    offset: const Offset(60, 0),
+                    child: const Text(
+                      "Your data is protected—learn how we collect,\nuse, and safeguard your information.",
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        fontSize: 10,
+                        height: 1.4,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF424242),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
           ),
-        ),
       ),
+
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(17),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-           // Our Vision
+            // Our Vision
             const Text(
-              "Our Vision",
+              "Privacy Policy",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -64,7 +70,7 @@ class AboutUs extends StatelessWidget {
             ),
             const SizedBox(height: 3),
             const Text(
-              "To amplify the voices of millions of jobseekers globally and get everyone their desired jobs.",
+              "we value and respect your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website [yourwebsite.com] or make a purchase from us.By using our website, you agree to the practices described in this Privacy Policy. Please read it carefully to understand our views and practices regarding your personal data",
               style: TextStyle(
                   fontSize: 10,
                   height: 1.2,
@@ -75,9 +81,9 @@ class AboutUs extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            /// Our Mission
+            // Information we collect
             const Text(
-              "Our Mission",
+              "Information We Collect",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -85,15 +91,37 @@ class AboutUs extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 3),
-            const Text(
-              "To provide jobseekers and professionals globally with a platform to be seen and heard by leading employers, beyond a paper resume.",
-              style: TextStyle(
-                  fontSize: 10,
-                  height: 1.2,
-                  letterSpacing: 0.4,
-                  color: Color(0xFF545454)
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  "We collect various types of information to provide and improve our auction services, including:",
+                  style: TextStyle(
+                    fontSize: 10,
+                    height: 1.4,
+                    color: Color(0xFF645949),
+                  ),
+                ),
+                SizedBox(height: 8),
+                Padding(
+                  padding: EdgeInsets.only(left: 14), // 🔹 indent bullets slightly
+                  child: Text(
+                    "\u2022 Personal Information: When you register for an account, place a bid, or use certain features on our Site, we may collect your name, email address, phone number, billing address, shipping address, and payment details.\n\n"
+                        "\u2022 Transaction Information: We collect details of your bidding activity, including bids placed, items purchased, and payment history.\n\n"
+                        "\u2022 Usage Data: We collect information about your interactions with the Site, including IP address, browser type, device type, pages visited, and time spent on the Site. This helps us improve your user experience and optimize our services.\n\n"
+                        "\u2022 Cookies and Tracking Technologies: We use cookies, web beacons, and other tracking technologies to enhance your experience and collect information about how you use our Site.",
+                    style: TextStyle(
+                      fontSize: 10,
+                      height: 1.4,
+                      color: Color(0xFF645949),
+                    ),
+                  ),
+                ),
+              ],
             ),
+
+
+
 
             const SizedBox(height: 24),
 

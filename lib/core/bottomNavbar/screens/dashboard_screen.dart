@@ -14,10 +14,13 @@ class DashboardScreen extends StatelessWidget {
   final BottomNavController navController = Get.put(BottomNavController());
 
   final List<Widget> screens = const [
-    AboutUsScreen(),
+
+    AboutUs(),
     Center(child: Text("Chat Screen")),
     Center(child: Text("Notifications")),
+
     ProfileDashboardScreen(),
+
 
 
   ];

@@ -5,9 +5,8 @@ import 'package:karlfive/features/profile_dasboard/presentation/screens/change_p
 import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/payment_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
-
-import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
 import '../../../home_static_screens/presantation/screen/aboutus_screen.dart';
+import '../../../home_static_screens/presantation/screen/privacy_policy.dart';
 
 class ProfileDashboardScreen extends StatelessWidget {
   const ProfileDashboardScreen({super.key});
@@ -51,7 +50,10 @@ class ProfileDashboardScreen extends StatelessWidget {
                 _menuTile("assets/icons/logout.png", "Log out", () {}),
 
                 _menuTile("assets/icons/personalinfo.png", "About Us", (){
-                  Get.to (() => const AboutUsScreen());
+                  Get.to (() => const AboutUs());
+                }),
+                _menuTile("assets/icons/personalinfo.png", "Privacy Policy", (){
+                  Get.to (() => const PrivacyPolicy());
                 })
               ],
             ),
