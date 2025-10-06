@@ -155,7 +155,7 @@ class PaymentHistoryScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
+
     );
   }
 

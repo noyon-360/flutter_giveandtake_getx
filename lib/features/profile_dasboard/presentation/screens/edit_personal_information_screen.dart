@@ -147,7 +147,7 @@ class _EditProfileState extends State<EditProfile> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
+
     );
   }
 

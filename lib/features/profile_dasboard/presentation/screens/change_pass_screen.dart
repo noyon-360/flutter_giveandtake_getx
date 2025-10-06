@@ -147,7 +147,7 @@ class ChangePasswordScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
+
     );
   }
 

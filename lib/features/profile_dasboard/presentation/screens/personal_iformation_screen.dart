@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 
 import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
@@ -18,7 +19,7 @@ class PersonalInfoScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           onPressed: () {
-            Get.to(() => const ProfileDashboardScreen());
+            Get.to(() =>  DashboardScreen());
           },
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
         ),
@@ -169,6 +170,7 @@ class PersonalInfoScreen extends StatelessWidget {
           ),
         ),
       ),
+
     );
   }
 

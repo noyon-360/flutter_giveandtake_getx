@@ -192,7 +192,7 @@ class JobHistoryScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
+
     );
   }
 }

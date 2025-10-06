@@ -18,6 +18,7 @@ class ProfileDashboardScreen extends StatelessWidget {
       // backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
         elevation: 0,
         centerTitle: true,
         title: const Text(
@@ -57,7 +58,7 @@ class ProfileDashboardScreen extends StatelessWidget {
           ),
         ),
       ),
-      // bottomNavigationBar: CustomBottomNavBar(),
+
     );
   }
 
