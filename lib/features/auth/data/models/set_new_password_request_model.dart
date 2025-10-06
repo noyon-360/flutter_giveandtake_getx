@@ -13,7 +13,7 @@ class SetNewPasswordRequestModel {
   Map<String, dynamic> toJson() {
     return {
       'email': email,
-      'newPassword': newPassword,
+      'password': newPassword, // API expects 'password' not 'newPassword'
       'otp': otp,
     };
   }

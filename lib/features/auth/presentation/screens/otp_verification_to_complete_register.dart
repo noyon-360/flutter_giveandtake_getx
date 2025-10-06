@@ -28,17 +28,30 @@ class _OtpVerificationToCompleteRegisterState
 
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
+
+    // Reset controller state when entering this screen
+    _authController.setLoading(false);
+    _authController.setError('');
+
     _resendOtp = TapGestureRecognizer()
       ..onTap = () {
         _authController.resendOTP(widget.email);
       };
-
-    super.initState();
   }
 
   _submit() {
-    _authController.verifyOTPRegister(widget.email, otpController.text);
+    if (otpController.text.length == 6) {
+      _authController.verifyOTPRegister(widget.email, otpController.text);
+    } else {
+      Get.snackbar(
+        'Invalid OTP',
+        'Please enter a 6-digit OTP',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override
@@ -51,77 +64,79 @@ class _OtpVerificationToCompleteRegisterState
   Widget build(BuildContext context) {
     return AppScaffold(
       body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
-              SizedBox(height: 51),
-              AppLogo(images: AppImages.appLogoBlue),
-              SizedBox(height: 74),
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                SizedBox(height: 51),
+                AppLogo(images: AppImages.appLogoBlue),
+                SizedBox(height: 74),
 
-              Text(
-                'Enter OTP',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryWhite,
-                ),
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Enter your receive OTP',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textGrey,
-                ),
-              ),
-              SizedBox(height: 32),
-
-              Obx(() {
-                final error = _authController.errorMessage.value;
-                if (error.isNotEmpty) {
-                  return FormErrorMessage(message: error);
-                }
-                return const SizedBox.shrink(); // return empty widget
-              }),
-
-              PinCode(otpController: otpController),
-
-              SizedBox(height: 24),
-
-              Center(
-                child: RichText(
-                  text: TextSpan(
-                    text: 'Didn\'t Receive OTP? ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12,
-                      color: AppColors.textGrey,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: 'RESEND OTP',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textGreen,
-                        ),
-                        recognizer: _resendOtp,
-                      ),
-                    ],
+                Text(
+                  'Enter OTP',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryWhite,
                   ),
                 ),
-              ),
-
-              SizedBox(height: 12),
-              Obx(
-                () => PrimaryButton(
-                  onPressed: _submit,
-                  isLoading: _authController.isLoading.value,
-                  text: 'Verify Now',
+                SizedBox(height: 12),
+                Text(
+                  'Enter your receive OTP',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textGrey,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: 32),
+
+                Obx(() {
+                  final error = _authController.errorMessage.value;
+                  if (error.isNotEmpty) {
+                    return FormErrorMessage(message: error);
+                  }
+                  return const SizedBox.shrink(); // return empty widget
+                }),
+
+                PinCode(otpController: otpController),
+
+                SizedBox(height: 24),
+
+                Center(
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'Didn\'t Receive OTP? ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12,
+                        color: AppColors.textGrey,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'RESEND OTP',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.textGreen,
+                          ),
+                          recognizer: _resendOtp,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 12),
+                Obx(
+                  () => PrimaryButton(
+                    onPressed: _submit,
+                    isLoading: _authController.isLoading.value,
+                    text: 'Verify Now',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

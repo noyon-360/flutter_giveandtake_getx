@@ -78,22 +78,31 @@ class AuthController extends BaseController {
     );
   }
 
-  Future<void> register(
-    String name,
-    String email,
-    String password,
-    String phoneNumber,
-    String address,
-  ) async {
+  Future<void> register({
+    required String firstName,
+    required String surname,
+    required String email,
+    required String password,
+    required String phoneNumber,
+    required String address,
+    required String dateOfBirth,
+    String role =
+        'candidate', // Default to 'candidate', can be 'recruiter' or 'company' later
+  }) async {
     setLoading(true);
     setError('');
 
+    // Merge firstName and surname to create full name
+    final String fullName = '$firstName $surname'.trim();
+
     final request = RegisterRequestModel(
-      name: name,
+      name: fullName,
       email: email,
       password: password,
       phoneNum: phoneNumber,
       address: address,
+      role: role,
+      dateOfbirth: dateOfBirth,
     );
 
     final result = await _authRepository.register(request);
@@ -204,18 +213,46 @@ class AuthController extends BaseController {
         if (fail.message.toLowerCase().contains('already verified')) {
           DPrint.log("User already verified, proceeding to security questions");
           setLoading(false);
-          Get.to(() => SecurityQuestionsScreen(email: email));
+          // Show info snackbar
+          Get.snackbar(
+            'Already Verified',
+            'Your account is already verified. Proceeding to security questions.',
+            backgroundColor: const Color(0xFF10B287),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 2),
+          );
+          // Small delay for user to see the message
+          Future.delayed(const Duration(milliseconds: 500), () {
+            Get.to(() => SecurityQuestionsScreen(email: email));
+          });
         } else {
           setError(fail.message);
           DPrint.log("verify otp failed: ${fail.message}");
           setLoading(false);
+          // Don't show snackbar here - the error dialog will show
         }
       },
       (success) {
-        DPrint.log("verify otp success result : ${success.data.message}");
+        DPrint.log("verify otp success: ${success.message}");
         setLoading(false);
-        // Navigate to security questions screen after OTP verification
-        Get.to(() => SecurityQuestionsScreen(email: email));
+        // Clear any previous errors
+        setError("");
+        // Show success message
+        Get.snackbar(
+          'Success',
+          success.message.isNotEmpty
+              ? success.message
+              : 'OTP verified successfully',
+          backgroundColor: const Color(0xFF10B287),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+        // Small delay to let user see the success message
+        Future.delayed(const Duration(milliseconds: 500), () {
+          Get.to(() => SecurityQuestionsScreen(email: email));
+        });
       },
     );
   }
@@ -315,7 +352,7 @@ class AuthController extends BaseController {
         DPrint.log("Refresh token success: ${success.message}");
         await _authStorageService.storeAccessToken(success.data.accessToken);
         await _authStorageService.storeRefreshToken(success.data.refreshToken);
-        // _authStorageService.clearAuthData();
+
         setLoading(false);
         //  Get.to(() => JoinLeagueScreen(), transition: Transition.rightToLeft); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         return _isSuccess = true;
@@ -371,6 +408,15 @@ class AuthController extends BaseController {
         setError(fail.message);
         DPrint.log("Submit security answers failed: ${fail.message}");
         setLoading(false);
+        // Show error snackbar
+        Get.snackbar(
+          'Error',
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+        );
       },
       (success) {
         DPrint.log("Security answers submitted successfully");

@@ -10,7 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 
 class SecurityQuestionsScreen extends StatefulWidget {
   const SecurityQuestionsScreen({super.key, required this.email});
-  
+
   final String email;
 
   @override
@@ -20,13 +20,16 @@ class SecurityQuestionsScreen extends StatefulWidget {
 
 class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
   final _authController = Get.find<AuthController>();
-  
+
   List<Map<String, String>> questions = [];
   bool _isLoadingQuestions = true;
 
   @override
   void initState() {
     super.initState();
+    // Reset controller loading state when entering this screen
+    _authController.setLoading(false);
+    _authController.setError('');
     _loadSecurityQuestions();
   }
 
@@ -36,6 +39,16 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
     });
 
     await _authController.getDefaultSecurityQuestions();
+
+    // Check if we got questions successfully
+    if (_authController.securityQuestions.isEmpty &&
+        _authController.errorMessage.value.isNotEmpty) {
+      // API failed, show error and stop loading
+      setState(() {
+        _isLoadingQuestions = false;
+      });
+      return;
+    }
 
     setState(() {
       questions = _authController.securityQuestions
@@ -64,22 +77,20 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(
-                      color: AppColors.primaryBlue,
-                    ),
+                    CircularProgressIndicator(color: AppColors.primaryBlue),
                     SizedBox(height: 16),
                     Text(
                       'Loading security questions...',
-                      style: TextStyle(
-                        color: AppColors.textGrey,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: AppColors.textGrey, fontSize: 14),
                     ),
                   ],
                 ),
               )
             : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -96,7 +107,10 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
                     const SizedBox(height: 12),
                     const Text(
                       "Set Up Your Security Questions",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -126,7 +140,8 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
                               const SizedBox(height: 6),
                               TextFormField(
                                 initialValue: question['answer'],
-                                onChanged: (val) => _onAnswerChanged(val, index),
+                                onChanged: (val) =>
+                                    _onAnswerChanged(val, index),
                                 decoration: InputDecoration(
                                   hintText: "Write Here",
                                   hintStyle: const TextStyle(
@@ -179,7 +194,9 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
                                 vertical: 12,
                               ),
                             ),
-                            onPressed: answeredCount >= 3 && !_authController.isLoading.value
+                            onPressed:
+                                answeredCount >= 3 &&
+                                    !_authController.isLoading.value
                                 ? _showConfirmationDialog
                                 : null,
                             child: _authController.isLoading.value
@@ -274,10 +291,12 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
   void _submitSecurityAnswers() {
     final answeredQuestions = questions
         .where((q) => q['answer']!.trim().isNotEmpty)
-        .map((q) => SecurityQuestionAnswer(
-              question: q['question']!,
-              answer: q['answer']!,
-            ))
+        .map(
+          (q) => SecurityQuestionAnswer(
+            question: q['question']!,
+            answer: q['answer']!,
+          ),
+        )
         .toList();
 
     if (answeredQuestions.length < 3) {

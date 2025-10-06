@@ -77,6 +77,7 @@ class AuthRepositoryImpl implements AuthRepository {
     return _apiClient.post(
       ApiConstants.auth.otpVerifyRegister,
       data: request.toJson(),
+      // Pass whatever is in the data field (empty string, null, or object)
       fromJsonT: (json) => OtpResponseModelRegister.fromJson(json),
     );
   }

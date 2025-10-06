@@ -48,7 +48,7 @@ class AuthEndpoints {
   final String otpVerify = '$_base/verify'; // OTP verification (login flow)
   final String otpVerifyRegister =
       '$_base/verify'; // OTP verification (register flow)
-  final String setNewPass = '$_base/verify'; // Set new password
+  final String setNewPass = '$_base/forget'; // Reset password with OTP
 
   // Security Questions
   final String defaultSecurityQuestions =

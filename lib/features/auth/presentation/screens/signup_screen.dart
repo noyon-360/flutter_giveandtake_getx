@@ -53,13 +53,43 @@ class _SignupScreenState extends State<SignupScreen> {
   late TapGestureRecognizer _privacyRecognizer;
   late TapGestureRecognizer _signInRecognizer;
 
+  late Worker _errorWorker;
+
   @override
   void initState() {
     super.initState();
 
-    // Reset loading state when entering the screen
     _authController.setLoading(false);
     _authController.setError('');
+
+    //* <--- Show an error dialog ONLY when this screen is mounted --->
+    _errorWorker = ever<String>(_authController.errorMessage, (msg) {
+      // Only show dialog if screen is still mounted and visible
+      if (msg.isNotEmpty &&
+          mounted &&
+          ModalRoute.of(context)?.isCurrent == true) {
+        Get.defaultDialog(
+          contentPadding: const EdgeInsets.all(16.0),
+          title: 'Registration Error',
+          middleText: msg,
+          confirm: TextButton(
+            onPressed: () {
+              _authController.clearError();
+              Get.back();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: AppColors.primaryBlue,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            child: const Text('OK'),
+          ),
+        );
+      }
+    });
 
     _termsRecognizer = TapGestureRecognizer()
       ..onTap = () {
@@ -79,6 +109,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
+    _errorWorker.dispose(); // Dispose the error listener
     _obscurePassword.dispose();
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
@@ -96,7 +127,6 @@ class _SignupScreenState extends State<SignupScreen> {
     _phoneNumberFocus.dispose();
     _passwordFocus.dispose();
     _dateOfBirthFocus.dispose();
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -105,12 +135,21 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (mounted) FocusScope.of(context).unfocus();
 
+    // Basic client-side confirm password check to avoid needless trips
+    // to the server and to provide immediate feedback.
+    if (_passwordTEController.text != _confirmPasswordTEController.text) {
+      _authController.setError('Passwords do not match');
+      return;
+    }
+
     _authController.register(
-      _firstNameTEController.text.toString(),
-      _emailTEController.text,
-      _passwordTEController.text,
-      _phoneNumberTEController.text,
-      '', // Address - to be added to form later
+      firstName: _firstNameTEController.text.trim(),
+      surname: _surnameTEController.text.trim(),
+      email: _emailTEController.text.trim(),
+      password: _passwordTEController.text,
+      phoneNumber: _phoneNumberTEController.text.trim(),
+      address: _countryTEController.text.trim(),
+      dateOfBirth: _dateOfBirthTEController.text,
     );
   }
 
@@ -597,37 +636,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
                         Gap.h32,
 
-                        Center(
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Already You Have Account? ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 12,
-                                color: AppColors.textFieldLightGrey,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: 'Sign In Here',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.primaryBlue,
-                                  ),
-                                  recognizer: _signInRecognizer,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
                         Gap.h16,
 
-                        DifferentLoginApproach(
-                          image1: AppImages.googleLogo,
-                          image2: AppImages.appleLogo,
-                        ),
-
+                        // DifferentLoginApproach(
+                        //   image1: AppImages.googleLogo,
+                        //   image2: AppImages.appleLogo,
+                        // ),
                         Gap.h16,
 
                         SecondaryButton(
