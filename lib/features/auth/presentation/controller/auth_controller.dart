@@ -15,6 +15,7 @@ import 'package:karlfive/features/auth/data/models/verify_security_answers_reque
 import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
 import 'package:karlfive/features/auth/presentation/screens/home_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
+import 'package:karlfive/features/auth/presentation/screens/otp_verification_for_password_reset_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
 import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
@@ -149,8 +150,8 @@ class AuthController extends BaseController {
           snackPosition: SnackPosition.BOTTOM,
         );
         setLoading(false);
-        // Navigate directly to SetNewPasswordScreen where user enters OTP and new password
-        Get.to(() => SetNewPasswordScreen(email: email, otp: ''));
+        // Navigate to OTP verification screen for password reset
+        Get.to(() => OtpVerificationForPasswordResetScreen(email: email));
       },
     );
   }
@@ -297,6 +298,14 @@ class AuthController extends BaseController {
       (success) {
         DPrint.log("OTP verified successfully: ${success.data.message}");
         setLoading(false);
+        Get.snackbar(
+          'OTP Verified',
+          'Please enter your new password',
+          backgroundColor: const Color(0xFF10B287),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
         // Navigate to set new password screen after OTP verification
         Get.to(() => SetNewPasswordScreen(email: email, otp: otp));
       },
