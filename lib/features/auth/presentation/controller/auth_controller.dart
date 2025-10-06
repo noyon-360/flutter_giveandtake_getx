@@ -381,10 +381,10 @@ class AuthController extends BaseController {
         setLoading(false);
       },
       (success) {
-        // Note: API returns "date" instead of "data" - handle typo
-        _securityQuestions = success.data.date;
+        _securityQuestions = success.data.questions;
         DPrint.log("Got ${_securityQuestions.length} security questions");
         setLoading(false);
+        update();
       },
     );
   }

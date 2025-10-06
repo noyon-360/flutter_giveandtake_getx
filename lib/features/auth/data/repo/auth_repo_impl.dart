@@ -115,6 +115,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   NetworkResult<DefaultSecurityQuestionsResponseModel>
   getDefaultSecurityQuestions() {
+    // Note: API returns questions in 'date' field at root level, not in 'data' field
+    // Our model's fromJson handles both 'data' and 'date' fields
     return _apiClient.get<DefaultSecurityQuestionsResponseModel>(
       ApiConstants.auth.defaultSecurityQuestions,
       fromJsonT: (json) => DefaultSecurityQuestionsResponseModel.fromJson(json),

@@ -7,7 +7,7 @@ import 'package:karlfive/core/common/constants/stripe_key.dart';
 import 'core/bottomNavbar/controllers/bottom_nav_controller.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 
-void main() async {
+ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // App initialize
