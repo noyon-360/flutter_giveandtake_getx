@@ -45,7 +45,8 @@ class AuthEndpoints {
   // Legacy endpoints - mapping to new API
   final String resetPass =
       '$_base/forgot-password'; // Send OTP for forgot password
-  final String otpVerify = '$_base/verify'; // OTP verification (login flow)
+  final String otpVerify =
+      '$_base/verify-reset-password'; // OTP verification (login flow)
   final String otpVerifyRegister =
       '$_base/verify'; // OTP verification (register flow)
   final String setNewPass = '$_base/forget'; // Reset password with OTP
