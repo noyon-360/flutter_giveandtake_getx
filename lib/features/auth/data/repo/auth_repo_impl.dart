@@ -63,9 +63,13 @@ class AuthRepositoryImpl implements AuthRepository {
   NetworkResult<OtpVerificationResponseModel> otpVerify(
     OtpVerificationRequestModel request,
   ) {
+    final requestData = request.toJson();
+    print('=== OTP VERIFY API CALL ===');
+    print('Endpoint: ${ApiConstants.auth.otpVerifyResetPassword}');
+    print('Request Data: $requestData');
     return _apiClient.post(
       ApiConstants.auth.otpVerifyResetPassword,
-      data: request.toJson(),
+      data: requestData,
       fromJsonT: (json) => OtpVerificationResponseModel.fromJson(json),
     );
   }

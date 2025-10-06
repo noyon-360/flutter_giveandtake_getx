@@ -14,6 +14,7 @@ class OtpVerificationRequestModel {
     if (newPassword != null) {
       map['newPassword'] = newPassword!;
     }
+    print('OtpVerificationRequestModel.toJson() => $map');
     return map;
   }
 }

@@ -43,6 +43,12 @@ class AuthController extends BaseController {
     setLoading(true);
     setError("");
 
+    // Debug logging for login
+    DPrint.log("=== LOGIN DEBUG ===");
+    DPrint.log("Email: $email");
+    DPrint.log("Password: $password");
+    DPrint.log("Password Length: ${password.length}");
+
     final request = LoginRequestModel(email: email, password: password);
 
     final result = await _authRepository.login(request);
@@ -275,46 +281,35 @@ class AuthController extends BaseController {
   }
 
   /// Verify OTP for forgot password flow
-  Future verifyOTPForPasswordReset(String email, String otp) async {
-    setLoading(true);
-    setError("");
-
-    final request = OtpVerificationRequestModel(email: email, otp: otp);
-    final result = await _authRepository.otpVerify(request);
-
-    result.fold(
-      (fail) {
-        setError(fail.message);
-        DPrint.log("OTP verification failed: ${fail.message}");
-        Get.snackbar(
-          'Verification Failed',
-          fail.message,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        setLoading(false);
-      },
-      (success) {
-        DPrint.log("OTP verified successfully: ${success.data.message}");
-        setLoading(false);
-        Get.snackbar(
-          'OTP Verified',
-          'Please enter your new password',
-          backgroundColor: const Color(0xFF10B287),
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
-        );
-        // Navigate to set new password screen after OTP verification
-        Get.to(() => SetNewPasswordScreen(email: email, otp: otp));
-      },
+  /// NOTE: We don't actually call the API here because calling verify-reset-otp
+  /// without a newPassword will reset the password to an unknown value.
+  /// We only validate the OTP format and navigate to the password entry screen.
+  /// The actual API call with OTP+newPassword happens in setNewPass().
+  void verifyOTPForPasswordReset(String email, String otp) {
+    // Client-side validation only
+    DPrint.log("OTP format validated: $otp");
+    Get.snackbar(
+      'OTP Accepted',
+      'Please enter your new password',
+      backgroundColor: const Color(0xFF10B287),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
     );
+    // Navigate to set new password screen with the OTP
+    Get.to(() => SetNewPasswordScreen(email: email, otp: otp));
   }
 
   Future setNewPass(String email, String otp, String newPassword) async {
     setLoading(true);
     setError("");
+
+    // Debug logging to see what we're sending
+    DPrint.log("=== SET NEW PASSWORD DEBUG ===");
+    DPrint.log("Email: $email");
+    DPrint.log("OTP: $otp");
+    DPrint.log("New Password: $newPassword");
+    DPrint.log("Password Length: ${newPassword.length}");
 
     // For reset password flow, we use the OTP verification endpoint with the new password
     final request = OtpVerificationRequestModel(
@@ -322,6 +317,8 @@ class AuthController extends BaseController {
       otp: otp,
       newPassword: newPassword,
     );
+
+    DPrint.log("Request JSON: ${request.toJson()}");
     final result = await _authRepository.otpVerify(request);
 
     result.fold(

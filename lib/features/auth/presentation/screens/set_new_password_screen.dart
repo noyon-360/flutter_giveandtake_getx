@@ -57,10 +57,20 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
 
     _showValidationError.value = false;
 
+    // Trim whitespace from password to avoid issues
+    final cleanPassword = _passwordTEController.text.trim();
+
+    print('=== PASSWORD RESET SCREEN ===');
+    print('Email: ${widget.email}');
+    print('OTP: ${widget.otp}');
+    print('Original Password: "${_passwordTEController.text}"');
+    print('Cleaned Password: "$cleanPassword"');
+    print('Password Length: ${cleanPassword.length}');
+
     _authController.setNewPass(
-      widget.email,
-      widget.otp,
-      _passwordTEController.text,
+      widget.email.trim(),
+      widget.otp.trim(),
+      cleanPassword,
     );
   }
 
