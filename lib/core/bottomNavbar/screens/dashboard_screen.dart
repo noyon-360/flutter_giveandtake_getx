@@ -15,7 +15,7 @@ class DashboardScreen extends StatelessWidget {
 
   final List<Widget> screens = const [
 
-    AboutUs(),
+    Center(child: Text("Home screen")),
     Center(child: Text("Chat Screen")),
     Center(child: Text("Notifications")),
 

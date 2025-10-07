@@ -148,7 +148,7 @@ class FrequentlyQuestions extends StatelessWidget {
   }
 }
 
-/// Reusable FAQ widget
+// FAQ widget
 class _FaqItem extends StatefulWidget {
   final String question;
   final String answer;
