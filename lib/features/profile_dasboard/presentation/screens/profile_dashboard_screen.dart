@@ -5,7 +5,9 @@ import 'package:karlfive/features/profile_dasboard/presentation/screens/change_p
 import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/payment_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
+import '../../../home_static_screens/presantation/screen/Terms & Conditions.DART';
 import '../../../home_static_screens/presantation/screen/aboutus_screen.dart';
+import '../../../home_static_screens/presantation/screen/frequently_questions.dart';
 import '../../../home_static_screens/presantation/screen/privacy_policy.dart';
 
 class ProfileDashboardScreen extends StatelessWidget {
@@ -54,6 +56,14 @@ class ProfileDashboardScreen extends StatelessWidget {
                 }),
                 _menuTile("assets/icons/personalinfo.png", "Privacy Policy", (){
                   Get.to (() => const PrivacyPolicy());
+                }),
+
+                _menuTile("assets/icons/personalinfo.png", "Terms & Conditions", (){
+                  Get.to (() => const TermsandConditions());
+                }),
+
+                _menuTile("assets/icons/personalinfo.png", "FrequentlyQuestions", (){
+                  Get.to (() => const FrequentlyQuestions());
                 })
               ],
             ),

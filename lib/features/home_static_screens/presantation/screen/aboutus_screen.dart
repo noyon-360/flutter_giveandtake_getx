@@ -89,7 +89,7 @@ class AboutUs extends StatelessWidget {
               "To provide jobseekers and professionals globally with a platform to be seen and heard by leading employers, beyond a paper resume.",
               style: TextStyle(
                   fontSize: 10,
-                  height: 1.2,
+                  height: 1.4,
                   letterSpacing: 0.4,
                   color: Color(0xFF545454)
               ),
@@ -111,7 +111,7 @@ class AboutUs extends StatelessWidget {
               "We offer the opportunity for each candidate to pitch yourself to companies and companies and recruiters to pitch their corporate culture to you, after all it’s often said that job interviews are two-way meetings between a candidate and a company!",
               style: TextStyle(
                   fontSize: 10,
-                  height: 1.2,
+                  height: 1.4,
                   letterSpacing: 0.4,
                   color: Color(0xFF545454)
               ),
@@ -131,13 +131,13 @@ class AboutUs extends StatelessWidget {
             const SizedBox(height: 4),
             const Text(
               "Our platform is the first global portal where you can:\n"
-                  "• Upload your elevator video pitch for free (in most cases).\n"
-                  "• Apply for jobs seamlessly.\n"
-                  "• Receive timely feedback, positive or constructive, through our intuitive EVP dashboard.\n"
-                  "• Stay confident—your dream job is on its way!",
+                  "\u00A0\u00A0\u00A0\u00A0\u2022 Upload your elevator video pitch for free (in most cases).\n"
+                  "\u00A0\u00A0\u00A0\u00A0\u2022 Apply for jobs seamlessly.\n"
+                  "\u00A0\u00A0\u00A0\u00A0\u2022 Receive timely feedback, positive or constructive, through our intuitive EVP dashboard.\n"
+                  "Stay confident—your dream job is on its way!",
               style: TextStyle(
                   fontSize: 10,
-                  height: 1.2,
+                  height: 1.8,
                   letterSpacing: 0.4,
                   color: Color(0xFF545454)
               ),
