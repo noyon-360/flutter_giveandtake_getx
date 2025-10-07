@@ -3,6 +3,7 @@ import 'package:flutx_core/core/validation/validators.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/image_controller.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
 import 'package:karlfive/features/recruiter_account/presentation/widgets/experience_dropdown.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../controller/country_city_controller.dart';
@@ -866,14 +867,17 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
 
                 SizedBox(height: 15),
 
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(() => RecruiterPageScreen());
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
-                    child: Text(
+                    child: const Text(
                       'Save',
                       style: TextStyle(
                         color: Colors.white,
@@ -883,6 +887,7 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                     ),
                   ),
                 ),
+
               ],
             ),
           ),
