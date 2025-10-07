@@ -205,10 +205,22 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
       }
     }
 
+    // Convert to list and reorder to put Pay as You Go first
+    List<Map<String, dynamic>> planList = planGroups.values
+        .where((plan) => plan['monthlyPrice'] != null)
+        .toList();
+
+    // Sort plans: Pay as You Go first, then others
+    planList.sort((a, b) {
+      if (a['title'].toString().toLowerCase().contains('pay as you go'))
+        return -1;
+      if (b['title'].toString().toLowerCase().contains('pay as you go'))
+        return 1;
+      return 0;
+    });
+
     setState(() {
-      _plans = planGroups.values
-          .where((plan) => plan['monthlyPrice'] != null)
-          .toList();
+      _plans = planList;
       _isLoading = false;
     });
   }
@@ -295,6 +307,10 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
                                     features: List<String>.from(
                                       plan['features'],
                                     ),
+                                    isPayAsYouGo: plan['title']
+                                        .toString()
+                                        .toLowerCase()
+                                        .contains('pay as you go'),
                                     onSubscribe: () {
                                       showPaymentMethodDialog(
                                         context,
@@ -309,9 +325,7 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
                                     },
                                   ),
                                 ),
-                                const SizedBox(
-                                  height: 60,
-                                ), 
+                                const SizedBox(height: 60),
                               ],
                             ),
                           );
@@ -322,7 +336,7 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
                         Positioned(
                           left: 0,
                           right: 0,
-                          bottom: 16, 
+                          bottom: 16,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(_plans.length, (index) {
