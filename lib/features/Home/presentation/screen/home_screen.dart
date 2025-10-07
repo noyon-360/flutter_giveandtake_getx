@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
+import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+import '../../../job_listing/presentation/screens/job_listing_screen.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/custom_searchbox.dart';
 import '../widgets/home_main_card.dart';
@@ -131,7 +131,7 @@ class HomeScreen extends StatelessWidget {
                       title: "Explore our Jobs",
                       subtitle: "Explore thousands of our job listings.",
                       onTap: () {
-                        //TODO: Navigate to explore jobs screen
+                        Get.to(() => const JobListingScreen());
                       },
                     ),
                     const SizedBox(height: 16),
