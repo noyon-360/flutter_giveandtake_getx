@@ -19,20 +19,20 @@ extension InputDecorationExtensions on BuildContext {
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppSizes.paddingSm.size),
-      borderSide: BorderSide(color: AppColors.textFieldLightGrey, width: 1.5),
+      borderSide: BorderSide(color: AppColors.textBlack, width: 1),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppSizes.paddingSm.size),
       borderSide: const BorderSide(
         color: AppColors.deleteButtonBackground,
-        width: 1.5,
+        width: 1,
       ),
     ),
     focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppSizes.paddingSm.size),
       borderSide: const BorderSide(
         color: AppColors.deleteButtonBackground,
-        width: 1.5,
+        width: 1,
       ),
     ),
     hintStyle: TextStyle(
