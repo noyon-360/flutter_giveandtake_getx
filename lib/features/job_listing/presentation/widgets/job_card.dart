@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
 
 class JobCard extends StatelessWidget {
   final String title;
@@ -42,115 +41,116 @@ class JobCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with company logo and close button
-            Row(
-              children: [
-                // Company logo placeholder
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.business,
-                    color: AppColors.primaryBlue,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Job title and company
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // Company logo with green chart icon
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.show_chart,
+                color: Color(0xFF4CAF50),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Job details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with title and close button
+                  Row(
                     children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textBlack,
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '$company | $location | $duration',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textGrey,
-                          fontWeight: FontWeight.w400,
+                      GestureDetector(
+                        onTap: () {},
+                        child: const Icon(
+                          Icons.close,
+                          size: 20,
+                          color: Colors.grey,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                ),
-                // Close button
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.close,
-                    size: 20,
-                    color: AppColors.textGrey,
-                  ),
-                  constraints: const BoxConstraints(),
-                  padding: EdgeInsets.zero,
-                ),
-              ],
-            ),
+                  const SizedBox(height: 4),
 
-            const SizedBox(height: 12),
-
-            // Salary and time posted
-            Row(
-              children: [
-                Text(
-                  salary,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textBlack,
+                  // Company and location info
+                  Text(
+                    '$company | $location ($duration)',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  timePosted,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textGrey,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
+                  const SizedBox(height: 8),
 
-            const SizedBox(height: 12),
-
-            // Easy Apply button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onEasyApply,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  // Salary and time posted row
+                  Row(
+                    children: [
+                      Text(
+                        salary,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        timePosted,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Easy Apply button
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: GestureDetector(
+                          onTap: onEasyApply,
+                          child: const Text(
+                            'Easy Apply',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Easy Apply',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                ),
+                ],
               ),
             ),
           ],
