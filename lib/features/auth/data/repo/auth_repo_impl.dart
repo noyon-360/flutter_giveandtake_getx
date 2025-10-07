@@ -1,7 +1,12 @@
 import 'package:karlfive/features/auth/data/models/auth_response_model.dart';
+import 'package:karlfive/features/auth/data/models/default_security_questions_response_model.dart';
 import 'package:karlfive/features/auth/data/models/login_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
 import 'package:karlfive/features/auth/data/models/otp_response_model_register.dart';
+import 'package:karlfive/features/auth/data/models/reset_password_with_token_request_model.dart';
+import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
+import 'package:karlfive/features/auth/data/models/security_questions_response_model.dart';
+import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
@@ -58,9 +63,13 @@ class AuthRepositoryImpl implements AuthRepository {
   NetworkResult<OtpVerificationResponseModel> otpVerify(
     OtpVerificationRequestModel request,
   ) {
+    final requestData = request.toJson();
+    print('=== OTP VERIFY API CALL ===');
+    print('Endpoint: ${ApiConstants.auth.otpVerifyResetPassword}');
+    print('Request Data: $requestData');
     return _apiClient.post(
-      ApiConstants.auth.otpVerify,
-      data: request.toJson(),
+      ApiConstants.auth.otpVerifyResetPassword,
+      data: requestData,
       fromJsonT: (json) => OtpVerificationResponseModel.fromJson(json),
     );
   }
@@ -72,6 +81,7 @@ class AuthRepositoryImpl implements AuthRepository {
     return _apiClient.post(
       ApiConstants.auth.otpVerifyRegister,
       data: request.toJson(),
+      // Pass whatever is in the data field (empty string, null, or object)
       fromJsonT: (json) => OtpResponseModelRegister.fromJson(json),
     );
   }
@@ -81,7 +91,7 @@ class AuthRepositoryImpl implements AuthRepository {
     SetNewPasswordRequestModel request,
   ) {
     return _apiClient.post(
-      ApiConstants.auth.setNewPass,
+      ApiConstants.auth.changePassword,
       data: request.toJson(),
       fromJsonT: (json) => SetNewPasswordResponseModel.fromJson(json),
     );
@@ -103,6 +113,51 @@ class AuthRepositoryImpl implements AuthRepository {
     return _apiClient.get<UserModel>(
       ApiConstants.user.getUserProfile,
       fromJsonT: (json) => UserModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<DefaultSecurityQuestionsResponseModel>
+  getDefaultSecurityQuestions() {
+    // Note: API returns questions in 'date' field at root level, not in 'data' field
+    // Our model's fromJson handles both 'data' and 'date' fields
+    return _apiClient.get<DefaultSecurityQuestionsResponseModel>(
+      ApiConstants.auth.defaultSecurityQuestions,
+      fromJsonT: (json) => DefaultSecurityQuestionsResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<SecurityQuestionsResponseModel> submitSecurityAnswers(
+    SecurityQuestionsRequestModel request,
+  ) {
+    return _apiClient.post<SecurityQuestionsResponseModel>(
+      ApiConstants.auth.securityAnswers,
+      data: request.toJson(),
+      fromJsonT: (json) => SecurityQuestionsResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<SecurityQuestionsResponseModel> verifySecurityAnswers(
+    VerifySecurityAnswersRequestModel request,
+  ) {
+    return _apiClient.post<SecurityQuestionsResponseModel>(
+      ApiConstants.auth.verifySecurityAnswers,
+      data: request.toJson(),
+      fromJsonT: (json) => SecurityQuestionsResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<SecurityQuestionsResponseModel> resetPasswordWithToken(
+    String token,
+    ResetPasswordWithTokenRequestModel request,
+  ) {
+    return _apiClient.post<SecurityQuestionsResponseModel>(
+      '${ApiConstants.auth.resetPasswordWithToken}?token=$token',
+      data: request.toJson(),
+      fromJsonT: (json) => SecurityQuestionsResponseModel.fromJson(json),
     );
   }
 }

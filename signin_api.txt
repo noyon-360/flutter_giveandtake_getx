@@ -1,0 +1,26 @@
+POST {{base_url}}/user/login
+
+The body of the signin is:
+{
+    "email":"niloyshams21@gmail.com",
+    "password":"123456"
+}
+
+The body of the response is: 
+{
+    "success": true,
+    "message": "User Logged in successfully",
+    "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OGUyMzJmY2FmNGVkNGEyMjM3ODk5ZjEiLCJlbWFpbCI6Im5pbG95c2hhbXMyMUBnbWFpbC5jb20iLCJyb2xlIjoiY2FuZGlkYXRlIiwiaWF0IjoxNzU5NjU0OTA0LCJleHAiOjE3NTk3NDEzMDR9.mTbXkmXgAE_5TOTja01aO5MGwjkxnsarz5it0ksjLTU",
+        "role": "candidate",
+        "_id": "68e232fcaf4ed4a2237899f1",
+        "name": "Iftikhar Niloy",
+        "email": "niloyshams21@gmail.com",
+        "address": "Bangladash",
+        "phoneNum": "1234567890",
+        "dateOfbirth": null,
+        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OGUyMzJmY2FmNGVkNGEyMjM3ODk5ZjEiLCJlbWFpbCI6Im5pbG95c2hhbXMyMUBnbWFpbC5jb20iLCJyb2xlIjoiY2FuZGlkYXRlIiwiaWF0IjoxNzU5NjU0OTA0LCJleHAiOjE3Njc0MzA5MDR9.qHqW2Rch4l0sXKWh067JlGL1xzBxkGYwzfQFZIiBkMg",
+        "isValid": false,
+        "payAsYouGo": false
+    }
+}

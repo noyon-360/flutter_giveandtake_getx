@@ -19,14 +19,42 @@ class BaseResponse<T> {
     Map<String, dynamic> json,
     T Function(dynamic) fromJsonT,
   ) {
+    // Handle data field - it can be null, empty string, or actual data
+    // Also check for 'date' field as a fallback (some APIs have typos)
+    T? parsedData;
+    final dataField = json['data'] ?? json['date'];
+
+    if (dataField != null) {
+      // Check if data is an empty string or non-map primitive
+      if (dataField is String && dataField.isEmpty) {
+        // Empty string - don't try to parse
+        parsedData = null;
+      } else if (dataField is Map || dataField is List) {
+        // Valid JSON structure - parse it
+        try {
+          parsedData = fromJsonT(dataField);
+        } catch (e) {
+          // Parsing failed - set to null
+          parsedData = null;
+        }
+      } else {
+        // Primitive value (number, bool, etc.) - pass directly
+        try {
+          parsedData = fromJsonT(dataField);
+        } catch (e) {
+          parsedData = null;
+        }
+      }
+    }
+
     return BaseResponse<T>(
-      success: json['success'] ?? json['status'] ?? false, // Handle both 'success' and 'status'
+      success: json['success'] ?? json['status'] ?? false,
       message: json['message'] ?? '',
-      data: json['data'] != null ? fromJsonT(json['data']) : null,
+      data: parsedData,
       errorSources: json['errorSources'] != null
           ? (json['errorSources'] as List)
-              .map((e) => ErrorSource.fromJson(e))
-              .toList()
+                .map((e) => ErrorSource.fromJson(e))
+                .toList()
           : null,
     );
   }

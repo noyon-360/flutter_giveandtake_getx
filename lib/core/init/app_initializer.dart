@@ -15,7 +15,6 @@ class AppInitializer {
     setupServiceLocator();
 
     StripeInitializer.intiStripe();
-  
 
     // SocketService.initializeSocket(sl());
   }

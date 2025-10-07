@@ -235,7 +235,9 @@ class ApiClient {
         );
       }
 
-      // final data = (baseResponse.data as T);
+      // Handle null data - if data is null but response is successful,
+      // try to create a default instance using fromJsonT with null
+      final T responseData = baseResponse.data ?? fromJsonT(null);
 
       // Ensure message and statusCode are non-null
       final message = baseResponse.message;
@@ -243,7 +245,7 @@ class ApiClient {
 
       return Right(
         NetworkSuccess<T>(
-          data: baseResponse.data as T,
+          data: responseData,
           message: message,
           statusCode: statusCode,
         ),
@@ -492,4 +494,3 @@ class ApiClient {
   /// Get connectivity service instance
   ConnectivityService get connectivityService => _connectivityService;
 }
-

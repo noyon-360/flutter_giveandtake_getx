@@ -5,11 +5,10 @@ import 'app_colors.dart';
 
 class AppTheme {
   static ThemeData get light => ThemeData(
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: AppColors.primaryWhite,
     primaryColor: AppColors.primaryBlue,
     colorScheme: ColorScheme.light(primary: AppColors.primaryBlue),
-
-    textTheme: GoogleFonts.robotoTextTheme(),
+    textTheme: GoogleFonts.interTextTheme(),
     appBarTheme: AppBarTheme(
       iconTheme: IconThemeData(color: Color(0xFF1A3E74)),
       backgroundColor: Colors.white,

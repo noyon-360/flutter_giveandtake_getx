@@ -7,6 +7,10 @@ class ApiConstants {
 
   //static const String soyDomain = 'http://10.10.5.91:5002';
 
+  // static const String baseDomain = 'https://api.evpitch.com';
+  // static const String baseDomain = 'http://10.10.5.3:5000'; // iftikhar
+  // static const String baseUrl = '$baseDomain/api/v1';
+
   /// [Headers]
   static Map<String, String> get defaultHeaders => {
     'Content-Type': 'application/json',
@@ -36,24 +40,38 @@ class ApiConstants {
 
   static PaymentEndpoints get payment => PaymentEndpoints();
   static RecruiterAccountApi get recruiter => RecruiterAccountApi();
-
-
 }
-class RecruiterAccountApi{
+
+class RecruiterAccountApi {
   final String getCompany = '${ApiConstants.baseUrl}/all/companies';
 }
 
 /// [Authentication Endpoints]
 class AuthEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/auth';
+  static const String _base = '${ApiConstants.baseUrl}/user';
 
   final String login = '$_base/login';
   final String register = '$_base/register';
-  final String resetPass = '$_base/send-reset-otp';
-  final String refreshToken = '$_base/refresh-token';
-  final String otpVerify = '$_base/verify-reset-otp';
-  final String otpVerifyRegister = '$_base/verify-otp';
-  final String setNewPass = '$_base/reset-password';
+  final String verify = '$_base/verify';
+  final String refreshToken = '${ApiConstants.baseUrl}/auth/refresh-token';
+
+  // Password Reset Flow
+  final String resetPass = '$_base/forget'; // Send OTP for forgot password
+  final String otpVerifyResetPassword =
+      '$_base/verify-reset-otp'; // OTP verification for password reset
+  final String otpVerifyRegister =
+      '$_base/verify'; // OTP verification (register flow)
+  final String changePassword =
+      '$_base/change-password'; // Change password with old and new
+
+  // Security Questions
+  final String defaultSecurityQuestions =
+      '${ApiConstants.baseUrl}/default-security-questions';
+  final String securityAnswers = '${ApiConstants.baseUrl}/security-answers';
+  final String verifySecurityAnswers =
+      '${ApiConstants.baseUrl}/security-answers/verify';
+  final String resetPasswordWithToken =
+      '${ApiConstants.baseUrl}/security-answers/reset-password';
 }
 
 class UserEndpoints {

@@ -11,17 +11,17 @@ import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/common/widgets/form_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class OtpVerificationToCompleteRegister extends StatefulWidget {
-  const OtpVerificationToCompleteRegister({super.key, required this.email});
+class OtpVerificationForPasswordResetScreen extends StatefulWidget {
+  const OtpVerificationForPasswordResetScreen({super.key, required this.email});
   final String email;
 
   @override
-  State<OtpVerificationToCompleteRegister> createState() =>
-      _OtpVerificationToCompleteRegisterState();
+  State<OtpVerificationForPasswordResetScreen> createState() =>
+      _OtpVerificationForPasswordResetScreenState();
 }
 
-class _OtpVerificationToCompleteRegisterState
-    extends State<OtpVerificationToCompleteRegister> {
+class _OtpVerificationForPasswordResetScreenState
+    extends State<OtpVerificationForPasswordResetScreen> {
   late TapGestureRecognizer _resendOtp;
   final _authController = Get.find<AuthController>();
   final TextEditingController otpController = TextEditingController();
@@ -42,7 +42,10 @@ class _OtpVerificationToCompleteRegisterState
 
   _submit() {
     if (otpController.text.length == 6) {
-      _authController.verifyOTPRegister(widget.email, otpController.text);
+      _authController.verifyOTPForPasswordReset(
+        widget.email,
+        otpController.text,
+      );
     } else {
       Get.snackbar(
         'Invalid OTP',
@@ -77,12 +80,12 @@ class _OtpVerificationToCompleteRegisterState
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primaryWhite,
+                    color: AppColors.textBlack,
                   ),
                 ),
                 SizedBox(height: 12),
                 Text(
-                  'Enter your receive OTP',
+                  'Enter the OTP sent to your email',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -132,7 +135,7 @@ class _OtpVerificationToCompleteRegisterState
                   () => PrimaryButton(
                     onPressed: _submit,
                     isLoading: _authController.isLoading.value,
-                    text: 'Verify Now',
+                    text: 'Verify OTP',
                   ),
                 ),
               ],

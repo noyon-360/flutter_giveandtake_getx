@@ -10,10 +10,7 @@ import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/auth/presentation/controller/term_of_services_and_privacy_policy_controller.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
-
 import '../../../../core/common/constants/app_images.dart';
-import '../../../../core/common/widgets/form_error_message.dart';
 import '../widgets/different_login_approach.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -29,19 +26,26 @@ class _SignupScreenState extends State<SignupScreen> {
   final _authController = Get.find<AuthController>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final FocusNode _nameFocus = FocusNode();
+  final FocusNode _firstNameFocus = FocusNode();
+  final FocusNode _surnameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
+  final FocusNode _countryFocus = FocusNode();
   final FocusNode _phoneNumberFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
   final FocusNode _confirmPasswordFocus = FocusNode();
+  final FocusNode _dateOfBirthFocus = FocusNode();
 
-  final TextEditingController _nameTEController = TextEditingController();
+  final TextEditingController _firstNameTEController = TextEditingController();
+  final TextEditingController _surnameTEController = TextEditingController();
   final TextEditingController _emailTEController = TextEditingController();
+  final TextEditingController _countryTEController = TextEditingController();
   final TextEditingController _phoneNumberTEController =
       TextEditingController();
-  final TextEditingController _passwordTEController = TextEditingController();
+  final TextEditingController _dateOfBirthTEController =
+      TextEditingController();
   final TextEditingController _confirmPasswordTEController =
       TextEditingController();
+  final TextEditingController _passwordTEController = TextEditingController();
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
 
@@ -49,57 +53,103 @@ class _SignupScreenState extends State<SignupScreen> {
   late TapGestureRecognizer _privacyRecognizer;
   late TapGestureRecognizer _signInRecognizer;
 
+  late Worker _errorWorker;
+
   @override
   void initState() {
     super.initState();
+
+    _authController.setLoading(false);
+    _authController.setError('');
+
+    //* <--- Show an error dialog ONLY when this screen is mounted --->
+    _errorWorker = ever<String>(_authController.errorMessage, (msg) {
+      // Only show dialog if screen is still mounted and visible
+      if (msg.isNotEmpty &&
+          mounted &&
+          ModalRoute.of(context)?.isCurrent == true) {
+        Get.defaultDialog(
+          contentPadding: const EdgeInsets.all(16.0),
+          title: 'Registration Error',
+          middleText: msg,
+          confirm: TextButton(
+            onPressed: () {
+              _authController.clearError();
+              Get.back();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: AppColors.primaryBlue,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            child: const Text('OK'),
+          ),
+        );
+      }
+    });
+
     _termsRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        // Navigate to Terms of Service page
-
         Get.to('page');
       };
 
     _privacyRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        // Navigate to Privacy Policy page
         Get.to('');
       };
 
     _signInRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        // Navigate to Privacy Policy page
         Get.to(LoginScreen());
       };
   }
 
   @override
   void dispose() {
+    _errorWorker.dispose(); // Dispose the error listener
     _obscurePassword.dispose();
-
-    _passwordTEController.dispose();
-
-    _passwordFocus.dispose();
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
     _signInRecognizer.dispose();
-    // TODO: implement dispose
+    _dateOfBirthTEController.dispose();
+    _passwordTEController.dispose();
+    _confirmPasswordTEController.dispose();
+    _firstNameTEController.dispose();
+    _surnameTEController.dispose();
+    _emailTEController.dispose();
+    _firstNameFocus.dispose();
+    _surnameFocus.dispose();
+    _emailFocus.dispose();
+    _countryFocus.dispose();
+    _phoneNumberFocus.dispose();
+    _passwordFocus.dispose();
+    _dateOfBirthFocus.dispose();
     super.dispose();
   }
 
-  /// [Submit the form]
-  /// Check the email and password validations
-  ///
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Hide keyboard immediately
     if (mounted) FocusScope.of(context).unfocus();
 
+    // Basic client-side confirm password check to avoid needless trips
+    // to the server and to provide immediate feedback.
+    if (_passwordTEController.text != _confirmPasswordTEController.text) {
+      _authController.setError('Passwords do not match');
+      return;
+    }
+
     _authController.register(
-      _nameTEController.text.toString(),
-      _emailTEController.text,
-      _passwordTEController.text,
-      _phoneNumberTEController.text,
+      firstName: _firstNameTEController.text.trim(),
+      surname: _surnameTEController.text.trim(),
+      email: _emailTEController.text.trim(),
+      password: _passwordTEController.text,
+      phoneNumber: _phoneNumberTEController.text.trim(),
+      address: _countryTEController.text.trim(),
+      dateOfBirth: _dateOfBirthTEController.text,
     );
   }
 
@@ -108,6 +158,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: AppScaffold(
+        appBar: AppBar(),
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -119,7 +170,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   Center(
                     child: Image(
-                      image: AssetImage(AppImages.appLogoLandscape),
+                      image: AssetImage(AppImages.appLogoBlue),
                       height: 40,
                       width: 100,
                     ),
@@ -163,14 +214,14 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: _nameTEController,
-                          focusNode: _nameFocus,
+                          controller: _firstNameTEController,
+                          focusNode: _firstNameFocus,
                           keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter First Name",
@@ -184,8 +235,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: AppColors.textFieldLightGrey,
                             ),
                           ),
-                          validator:
-                              Validators.name, //! <---------- Need to change
+                          validator: Validators
+                              .name, //! <---------- Need to change ----------->
                         ),
 
                         Gap.h16,
@@ -200,14 +251,14 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: _nameTEController,
-                          focusNode: _nameFocus,
+                          controller: _surnameTEController,
+                          focusNode: _surnameFocus,
                           keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter Surname",
@@ -221,8 +272,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: AppColors.textFieldLightGrey,
                             ),
                           ),
-                          validator:
-                              Validators.name, //! <---------- Need to change
+                          validator: Validators
+                              .name, //! <---------- Need to change ----------->
                         ),
 
                         Gap.h16,
@@ -244,7 +295,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter Email",
@@ -275,13 +326,13 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: _emailTEController,
-                          focusNode: _emailFocus,
+                          controller: _countryTEController,
+                          focusNode: _countryFocus,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Country",
@@ -291,8 +342,12 @@ class _SignupScreenState extends State<SignupScreen> {
                               fontWeight: FontWeight.w400,
                             ),
                           ),
-                          validator:
-                              Validators.email, //! <---------- Need to change
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter your country';
+                            }
+                            return null;
+                          },
                           autofillHints: const [AutofillHints.email],
                         ),
 
@@ -315,7 +370,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter Phone Number",
@@ -346,13 +401,13 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: _phoneNumberTEController,
-                          focusNode: _phoneNumberFocus,
-                          keyboardType: TextInputType.emailAddress,
+                          controller: _dateOfBirthTEController,
+                          focusNode: _dateOfBirthFocus,
+                          readOnly: true,
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "MM/DD/YYYY",
@@ -366,9 +421,45 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: AppColors.textFieldLightGrey,
                             ),
                           ),
-                          validator:
-                              Validators.phone, //! <---------- Need to change
-                          autofillHints: const [AutofillHints.email],
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please select your date of birth';
+                            }
+                            return null;
+                          },
+                          onTap: () async {
+                            // Close keyboard if open
+                            FocusScope.of(context).unfocus();
+
+                            // Show date picker
+                            final DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime(2000, 1, 1),
+                              firstDate: DateTime(1950),
+                              lastDate: DateTime.now(),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.light(
+                                      primary: AppColors.primaryBlue,
+                                      onPrimary: AppColors.primaryWhite,
+                                      onSurface: AppColors.textBlack,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
+                            );
+
+                            if (pickedDate != null) {
+                              // Format the date as MM/DD/YYYY
+                              final formattedDate =
+                                  '${pickedDate.month.toString().padLeft(2, '0')}/'
+                                  '${pickedDate.day.toString().padLeft(2, '0')}/'
+                                  '${pickedDate.year}';
+                              _dateOfBirthTEController.text = formattedDate;
+                            }
+                          },
                         ),
 
                         Gap.h16,
@@ -415,9 +506,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                           _obscurePassword.value = !obscure,
                                     ),
                                   ),
-                              //
+
                               validator: Validators.password,
-                              // onFieldSubmitted: (_) => _submit(),
                             );
                           },
                         ),
@@ -440,9 +530,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               focusNode: _confirmPasswordFocus,
                               obscureText: obscure,
                               textInputAction: TextInputAction.done,
-                              style: TextStyle(
-                                color: AppColors.textFieldLightGrey,
-                              ),
+                              style: TextStyle(color: AppColors.textBlack),
                               decoration: context.primaryInputDecoration
                                   .copyWith(
                                     hintText: "Confirm a Password",
@@ -466,7 +554,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                           _obscurePassword.value = !obscure,
                                     ),
                                   ),
-                              validator: Validators.password,
+                              validator: Validators
+                                  .password, //! <---------- Need to change ----------->
                               onFieldSubmitted: (_) => _submit(),
                             );
                           },
@@ -480,9 +569,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             Obx(
                               () => Checkbox(
                                 value: controller.privacy.value,
-                                activeColor: AppColors.textFieldLightGrey,
+                                activeColor: AppColors.primaryBlue,
                                 // fill color when checked
-                                checkColor: AppColors.textFieldLightGrey,
+                                checkColor: AppColors.primaryWhite,
                                 //  tick color
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(2),
@@ -493,13 +582,13 @@ class _SignupScreenState extends State<SignupScreen> {
                                   if (states.contains(WidgetState.selected)) {
                                     //  Border when checked
                                     return BorderSide(
-                                      color: AppColors.textFieldLightGrey,
-                                      width: 2,
+                                      color: AppColors.textGrey,
+                                      width: 1,
                                     );
                                   }
                                   // Border when unchecked
                                   return BorderSide(
-                                    color: AppColors.textFieldLightGrey,
+                                    color: AppColors.textGrey,
                                     width: 1,
                                   );
                                 }),
@@ -547,43 +636,19 @@ class _SignupScreenState extends State<SignupScreen> {
 
                         Gap.h32,
 
-                        Center(
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Already You Have Account? ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 12,
-                                color: AppColors.textFieldLightGrey,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: 'Sign In Here',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.primaryBlue,
-                                  ),
-                                  recognizer: _signInRecognizer,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
                         Gap.h16,
 
-                        DifferentLoginApproach(
-                          image1: AppImages.googleLogo,
-                          image2: AppImages.appleLogo,
-                        ),
-
+                        // DifferentLoginApproach(
+                        //   image1: AppImages.googleLogo,
+                        //   image2: AppImages.appleLogo,
+                        // ),
                         Gap.h16,
 
                         SecondaryButton(
                           onPressed: () {},
                           text: "Join as a Recruiter",
                           width: double.infinity - 40,
+                          textColor: AppColors.primaryBlue,
                           height: 48,
                         ),
 
@@ -593,8 +658,33 @@ class _SignupScreenState extends State<SignupScreen> {
                           onPressed: () {},
                           text: "Join as a Company",
                           width: double.infinity - 40,
+                          textColor: AppColors.primaryBlue,
                           height: 48,
                         ),
+                        Gap.h32,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text("Already Have An Account?"),
+                            GestureDetector(
+                              onTap: () {
+                                Get.to(
+                                  LoginScreen(),
+                                  transition: Transition.fade,
+                                );
+                              },
+                              child: Text(
+                                "  Sign In Here",
+                                style: TextStyle(
+                                  color: AppColors.primaryLightBlue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 32),
                       ],
                     ),
                   ),

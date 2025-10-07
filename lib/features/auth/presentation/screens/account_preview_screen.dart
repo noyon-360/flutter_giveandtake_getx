@@ -99,7 +99,7 @@ class _AccountPreviewScreenState extends State<AccountPreviewScreen> {
 
                 // Get.offAll(() => const HomeScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             },
-            text: "This is your account",
+            text: "Is this your account?",
           )),
             ],
           ),

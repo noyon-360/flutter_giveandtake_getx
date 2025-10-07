@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/constants/app_images.dart';
-import 'package:karlfive/core/network/services/secure_store_services.dart';
 import 'package:karlfive/core/theme/app_buttoms.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import 'package:karlfive/features/auth/presentation/controller/remember_me_controller.dart';
@@ -43,13 +42,16 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
+
+    // Reset loading state when entering the screen
+    _authController.setLoading(false);
+    _authController.setError('');
+
     _signUpRecognizer = TapGestureRecognizer()
       ..onTap = () {
         Get.to(SignupScreen());
       };
-
-    super.initState();
   }
 
   @override
@@ -85,14 +87,11 @@ class _LoginScreenState extends State<LoginScreen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: AppScaffold(
+        appBar: AppBar(),
         body: SafeArea(
           child: Column(
             children: [
-              AppLogo(
-                images: AppImages.appLogoLandscape,
-                height: 128,
-                width: 128,
-              ),
+              AppLogo(images: AppImages.appLogoBlue, height: 128, width: 128),
 
               Expanded(
                 child: SingleChildScrollView(
@@ -140,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen>
                           textInputAction: TextInputAction.next,
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.primaryWhite,
+                            color: AppColors.textBlack,
                           ),
                           decoration: context.primaryInputDecoration.copyWith(
                             hintText: "Enter your email",
@@ -205,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen>
                                         rememberMeController.rememberMe.value,
                                     activeColor: AppColors.primaryBlue,
                                     // fill color when checked
-                                    checkColor: AppColors.primaryBlue,
+                                    checkColor: AppColors.primaryWhite,
                                     //  tick color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(2),
@@ -218,13 +217,13 @@ class _LoginScreenState extends State<LoginScreen>
                                       )) {
                                         //  Border when checked
                                         return BorderSide(
-                                          color: AppColors.primaryBlue,
-                                          width: 2,
+                                          color: AppColors.textBlack,
+                                          width: 1,
                                         );
                                       }
                                       // Border when unchecked
                                       return BorderSide(
-                                        color: AppColors.primaryBlue,
+                                        color: AppColors.textBlack,
                                         width: 1,
                                       );
                                     }),
@@ -276,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen>
                         Center(
                           child: RichText(
                             text: TextSpan(
-                              text: 'Forgot your Password? ',
+                              text: 'Don\'t have an account? ',
                               style: TextStyle(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14,

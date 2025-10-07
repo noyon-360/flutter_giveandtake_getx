@@ -1,10 +1,8 @@
 import 'package:get/get.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/auth/presentation/screens/account_preview_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
+import 'package:karlfive/features/auth/presentation/screens/onboarding_screen.dart';
 import '../../../../core/network/services/secure_store_services.dart';
-
-
 
 class SplashController extends GetxController {
   final _authController = Get.find<AuthController>();
@@ -21,14 +19,16 @@ class SplashController extends GetxController {
     final secureStore = SecureStoreServices();
     final savedEmail = await secureStore.retrieveData("email");
     final savedPassword = await secureStore.retrieveData("password");
-    final previewConfirmed = await secureStore.retrieveData("previewConfirmed"); // 'true' or null
+    final previewConfirmed = await secureStore.retrieveData(
+      "previewConfirmed",
+    ); // 'true' or null
 
     final success = await _authController.refreshToken();
 
     if (savedEmail != null && savedPassword != null) {
       // if they previously confirmed preview, go straight to Home
       if (previewConfirmed == 'true') {
-        // Get.offAll(() => HomeScreen()); 
+        // Get.offAll(() => HomeScreen());
       } else {
         // show preview until they confirm
         Get.offAll(() => const AccountPreviewScreen());
@@ -36,9 +36,9 @@ class SplashController extends GetxController {
     } else {
       // no saved credentials — try token refresh flow
       if (success) {
-        // Get.offAll(() => HomeScreen()); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        // Get.offAll(() => HomeScreen());
       } else {
-        Get.offAll(() => LoginScreen());
+        Get.offAll(() => OnboardingScreen(), transition: Transition.fadeIn);
       }
     }
   }

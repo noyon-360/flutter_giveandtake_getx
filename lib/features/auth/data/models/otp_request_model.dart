@@ -1,16 +1,21 @@
 class OtpVerificationRequestModel {
   final String email;
   final String otp;
+  final String? newPassword; // Optional for reset password flow
 
   OtpVerificationRequestModel({
     required this.email,
     required this.otp,
+    this.newPassword,
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      'email': email,
-      'otp': otp,
-    };
+    final map = {'email': email, 'otp': otp};
+    if (newPassword != null) {
+      map['password'] = newPassword!;
+    }
+    // keep debug print for visibility
+    print('OtpVerificationRequestModel.toJson() => $map');
+    return map;
   }
 }

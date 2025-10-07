@@ -6,7 +6,6 @@ import 'package:karlfive/core/common/constants/app_images.dart';
 import 'package:karlfive/core/common/widgets/app_logo.dart';
 import 'package:karlfive/core/theme/app_buttoms.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
 import 'package:karlfive/features/auth/presentation/widgets/otp_code_field.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
@@ -52,7 +51,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 25),
-              Center(child: AppLogo(images: AppImages.appLogoLandscape)),
+              Center(child: AppLogo(images: AppImages.appLogoBlue)),
               SizedBox(height: 50),
 
               Text(
@@ -90,14 +89,20 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
               Obx(
                 () => PrimaryButton(
-                  // onPressed: _submit,
                   onPressed: () {
-                    Get.to(
-                      () => SetNewPasswordScreen(
-                        email: widget.email,
-                        otp: otpController.text,
-                      ),
-                    );
+                    if (otpController.text.length == 6) {
+                      _authController.verifyOTPForPasswordReset(
+                        widget.email,
+                        otpController.text,
+                      );
+                    } else {
+                      Get.snackbar(
+                        'Invalid OTP',
+                        'Please enter a 6-digit OTP',
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                    }
                   },
                   isLoading: _authController.isLoading.value,
                   text: 'Verify',
