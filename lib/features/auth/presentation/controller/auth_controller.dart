@@ -280,13 +280,8 @@ class AuthController extends BaseController {
     );
   }
 
-  /// Verify OTP for forgot password flow
-  /// NOTE: We don't actually call the API here because calling verify-reset-otp
-  /// without a newPassword will reset the password to an unknown value.
-  /// We only validate the OTP format and navigate to the password entry screen.
-  /// The actual API call with OTP+newPassword happens in setNewPass().
   void verifyOTPForPasswordReset(String email, String otp) {
-    // Client-side validation only
+    //* <--- Client-side validation only ---> *//
     DPrint.log("OTP format validated: $otp");
     Get.snackbar(
       'OTP Accepted',
@@ -296,7 +291,7 @@ class AuthController extends BaseController {
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
     );
-    // Navigate to set new password screen with the OTP
+    //* <--- Navigate to set new password screen with the OTP ---> *//
     Get.to(() => SetNewPasswordScreen(email: email, otp: otp));
   }
 
@@ -304,14 +299,14 @@ class AuthController extends BaseController {
     setLoading(true);
     setError("");
 
-    // Debug logging to see what we're sending
-    DPrint.log("=== SET NEW PASSWORD DEBUG ===");
+    //* <--- Debug logging to see what we're sending --->
+    DPrint.log("=== NEW PASSWORD DEBUG ===");
     DPrint.log("Email: $email");
     DPrint.log("OTP: $otp");
     DPrint.log("New Password: $newPassword");
     DPrint.log("Password Length: ${newPassword.length}");
 
-    // For reset password flow, we use the OTP verification endpoint with the new password
+    //* <--- For reset password flow, we use the OTP verification endpoint with the new password --->
     final request = OtpVerificationRequestModel(
       email: email,
       otp: otp,
@@ -431,7 +426,7 @@ class AuthController extends BaseController {
         setError(fail.message);
         DPrint.log("Submit security answers failed: ${fail.message}");
         setLoading(false);
-        // Show error snackbar
+        //* <--- Show error snackbar --->
         Get.snackbar(
           'Error',
           fail.message,
@@ -446,7 +441,7 @@ class AuthController extends BaseController {
         setLoading(false);
 
         if (isRegistration) {
-          // Show success message
+          //* <--- Show success message --->
           Get.snackbar(
             'Success!',
             'Security questions saved successfully',
@@ -458,7 +453,7 @@ class AuthController extends BaseController {
             borderRadius: 8,
           );
 
-          // Wait for snackbar to show, then navigate to login
+          //* <--- Wait for snackbar to show, then navigate to login --->
           Future.delayed(const Duration(seconds: 2), () {
             Get.offAll(() => LoginScreen());
           });
@@ -492,11 +487,11 @@ class AuthController extends BaseController {
         setLoading(false);
 
         if (_securityToken != null) {
-          // Navigate to set new password screen with token
+          //* <--- Navigate to set new password screen with token --->
           Get.to(
             () => SetNewPasswordScreen(
               email: email,
-              otp: '', // Not used in new flow
+              otp: '', 
             ),
           );
         }

@@ -12,8 +12,9 @@ class OtpVerificationRequestModel {
   Map<String, dynamic> toJson() {
     final map = {'email': email, 'otp': otp};
     if (newPassword != null) {
-      map['newPassword'] = newPassword!;
+      map['password'] = newPassword!;
     }
+    // keep debug print for visibility
     print('OtpVerificationRequestModel.toJson() => $map');
     return map;
   }

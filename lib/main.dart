@@ -17,7 +17,7 @@ import 'features/auth/presentation/screens/splash_screen.dart';
   Stripe.publishableKey = StripeKey.publishableKey;
   Stripe.merchantIdentifier = 'merchant.com.yourapp';
   await Stripe.instance.applySettings();
-
+ 
   // Inject BottomNavController globally
   Get.put(BottomNavController());
 
