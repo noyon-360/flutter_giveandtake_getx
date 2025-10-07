@@ -41,7 +41,11 @@ class ExperienceDropdown extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           )
         ),
-        hint: Text("Select Experience"),
+        hint: Text("Select Experience", style: TextStyle(
+          color: Color(0xFF787878),
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),),
         value: controller.selectedExperience.value.isEmpty
             ? null
             : controller.selectedExperience.value,

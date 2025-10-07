@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import '../../data/models/get_company_response_model.dart';
 import '../controller/recruiter_controller.dart';
 
@@ -20,10 +21,14 @@ class CompanyDropdown extends StatelessWidget {
       }
 
       return DropdownButtonFormField<GetCompanyResponseModel>(
-        decoration: InputDecoration(
+        decoration: context.primaryInputDecoration.copyWith(
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        hint:Text('Select Company'),
+        hint:Text('Select Company', style: TextStyle(
+          color: Color(0xFF787878),
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),),
         value: controller.selectedCompany.value,
         onChanged: (value) {
           controller.selectedCompany.value = value;
@@ -40,8 +45,7 @@ class CompanyDropdown extends StatelessWidget {
                     backgroundImage: NetworkImage(company.clogo),
                     radius: 15,
                   ),
-                  const SizedBox(width: 10),
-                  Text(company.cname),
+                  Expanded(child: Text(company.cname, overflow: TextOverflow.ellipsis,)),
                 ],
               ),
             ),

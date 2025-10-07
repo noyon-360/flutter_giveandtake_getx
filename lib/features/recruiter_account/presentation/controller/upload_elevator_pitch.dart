@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 
 class ElevatorPitchController extends GetxController {
   final picker = ImagePicker();

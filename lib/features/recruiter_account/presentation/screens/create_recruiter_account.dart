@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/core/validation/validators.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import 'package:karlfive/features/recruiter_account/presentation/controller/image_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/widgets/experience_dropdown.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../controller/country_city_controller.dart';
@@ -36,6 +37,8 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
   final TextEditingController _tiktokTEController = TextEditingController();
 
   final RecruiterController reCruiController = Get.find<RecruiterController>();
+
+  final ImageController imagePickerController = Get.put(ImageController());
 
   final FocusNode _firstNameFocusNode = FocusNode();
   final FocusNode _surNameFocusNode = FocusNode();
@@ -113,7 +116,7 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                   ),
                   const SizedBox(height: 10),
 
-                  // 📜 Scrollable List
+                  // Scrollable List
                   Expanded(
                     child: ListView.builder(
                       itemCount: filteredItems.length,
@@ -122,7 +125,7 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                         return ListTile(
                           title: Text(item),
                           onTap: () {
-                            onSelected(item); // ✅ safe call
+                            onSelected(item); //  safe call
                             Get.back();
                           },
                         );
@@ -167,9 +170,10 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                   ),
                 ),
                 const SizedBox(height: 5),
+
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Upload a 60-second elevator video'
                         'pitch introducing your agency and what'
@@ -181,10 +185,6 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                         ),
                       ),
                     ),
-
-                    SizedBox(width: 16),
-
-
                   ],
                 ),
 
@@ -232,6 +232,22 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                   ),
                 ),
 
+                SizedBox(height: 10),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: Text(
+                      'Upload Video',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+
                 SizedBox(height: 16),
 
                 Row(
@@ -239,42 +255,46 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          height: 110,
-                          width: 110,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Color(0xFFD9D9D9),
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2B7FD0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                6,
-                              ), // custom shape
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 12,
-                            ),
-                          ),
-                          child: Text(
-                            'photo/recruiter logo',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                        SizedBox(height: 25),
+                        GestureDetector(
+                          onTap: imagePickerController.showPickerOptions,
+                          child: Obx(() {
+                            return Container(
+                              height: 110,
+                              width: 110,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: Color(0xFFD9D9D9),
+                              ),
+                              child: Center(
+                                child: imagePickerController.selectedImage.value != null
+                                    ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8), // same as container
+                                  child: Image.file(
+                                    imagePickerController.selectedImage.value!,
+                                    height: 110,
+                                    width: 110,
+                                    fit: BoxFit.cover, // makes image fill the container
+                                  ),
+                                )
+                                    : const Text(
+                                  'photo/recruiter logo',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        )
+                        ,
                       ],
                     ),
+
 
                     SizedBox(width: 10),
 
@@ -568,10 +588,9 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
 
                 CountryCitySearchableDropdown(controller: controller),
 
-                SizedBox(height: 9),
+                SizedBox(height: 10),
 
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Column(
@@ -605,20 +624,9 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                   ],
                 ),
 
-                SizedBox(height: 15),
-                Text(
-                  'View your company',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-
-                SizedBox(height: 20),
+                SizedBox(height: 10),
 
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Column(
@@ -633,15 +641,33 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                           ),
                           SizedBox(height: 6),
                           CompanyDropdown(),
-                          const SizedBox(height: 20),
-                          // Obx(() {
-                          //   final selected = reCruiController.selectedCompany.value;
-                          //   return selected != null
-                          //       ? Text("Selected: ${selected.cname}")
-                          //       : const Text("No company selected");
-                          // }),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
 
-                          SizedBox(height: 12),
+                // Row(
+                //   children: [
+                //     Expanded(
+                //       child:
+                //     ),
+                //
+                //     SizedBox(width: 19,),
+                //     Expanded(
+                //       child:
+                //     )
+                //   ],
+                // ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 20),
 
                           Container(
                             decoration: BoxDecoration(
@@ -838,14 +864,23 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                   ],
                 ),
 
-                SizedBox(height: 10),
+                SizedBox(height: 15),
 
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {},
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                    child: Text('Save', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
