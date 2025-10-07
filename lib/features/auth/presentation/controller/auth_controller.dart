@@ -1,7 +1,6 @@
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/core/services/get_user_profile_service.dart';
 import 'package:karlfive/features/auth/data/models/login_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
@@ -26,7 +25,6 @@ class AuthController extends BaseController {
 
   AuthController(this._authRepository, this._authStorageService);
 
-  final userProfileService = Get.find<GetUserProfileService>();
 
   // Login
   Future<void> login(

@@ -1,11 +1,11 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'https://karlfive223-backend.onrender.com';
+  static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
   /// soykot ip
 
-  static const String soyDomain = 'http://10.10.5.91:5002';
+  //static const String soyDomain = 'http://10.10.5.91:5002';
 
   /// [Headers]
   static Map<String, String> get defaultHeaders => {
@@ -35,6 +35,12 @@ class ApiConstants {
   static ContactEndpoints get contact => ContactEndpoints();
 
   static PaymentEndpoints get payment => PaymentEndpoints();
+  static RecruiterAccountApi get recruiter => RecruiterAccountApi();
+
+
+}
+class RecruiterAccountApi{
+  final String getCompany = '${ApiConstants.baseUrl}/all/companies';
 }
 
 /// [Authentication Endpoints]
