@@ -5,7 +5,7 @@ import 'package:karlfive/features/profile_dasboard/presentation/screens/change_p
 import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/payment_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
-import '../../../home_static_screens/presantation/screen/Terms & Conditions.DART';
+import '../../../home_static_screens/presantation/screen/Terms & Conditions.dart';
 import '../../../home_static_screens/presantation/screen/aboutus_screen.dart';
 import '../../../home_static_screens/presantation/screen/frequently_questions.dart';
 import '../../../home_static_screens/presantation/screen/privacy_policy.dart';
@@ -79,7 +79,7 @@ class ProfileDashboardScreen extends StatelessWidget {
       onTap: onTap,
       leading: Image.asset(
         iconPath,
-        width: 24,
+        width: 22,
         height: 24,
       ),
       title: Text(

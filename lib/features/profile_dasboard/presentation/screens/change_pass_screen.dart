@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/bottomNavbar/widgets/custom_bottom_navbar.dart';
-
 import '../../controller/change_pass_controller.dart';
 
 class ChangePasswordScreen extends StatelessWidget {
