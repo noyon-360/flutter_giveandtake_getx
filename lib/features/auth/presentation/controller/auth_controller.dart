@@ -216,7 +216,7 @@ class AuthController extends BaseController {
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
-        // Navigate to security questions for new users
+        //* <--- Navigate to security questions for Sign Up --->
         Get.to(() => SecurityQuestionsScreen(email: email));
       },
     );
@@ -423,7 +423,10 @@ class AuthController extends BaseController {
         await _authStorageService.storeRefreshToken(success.data.refreshToken);
 
         setLoading(false);
-        //  Get.to(() => JoinLeagueScreen(), transition: Transition.rightToLeft); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        Get.to(
+          () => HomeScreen(),
+          transition: Transition.rightToLeft,
+        ); //! <<< If the user is already logged in, go to home screen >>>
         return _isSuccess = true;
       },
     );
@@ -574,11 +577,7 @@ class AuthController extends BaseController {
   Future<void> logout() async {
     await _authStorageService.clearAuthData();
     final secureStore = SecureStoreServices();
-    await secureStore.deleteData(
-      'previewConfirmed',
-    ); // or storeData('previewConfirmed', 'false');
-    // await secureStore.deleteData('email');
-    // await secureStore.deleteData('password');
+    await secureStore.deleteData('previewConfirmed');
 
     setLoading(false);
     setError('');
