@@ -307,11 +307,11 @@ class ContactUsScreen extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Color(0xFF484848)),
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(6),
             ),
             focusedBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Color(0xFF484848)),
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(6),
             ),
             fillColor: Colors.white,
             filled: true,

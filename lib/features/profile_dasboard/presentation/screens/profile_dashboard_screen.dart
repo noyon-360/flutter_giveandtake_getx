@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
 import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
+import 'package:karlfive/features/home_static_screens/presantation/screen/blog.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/change_pass_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/payment_history.dart';
@@ -73,6 +74,10 @@ class ProfileDashboardScreen extends StatelessWidget {
 
                 _menuTile("assets/icons/personalinfo.png", "ContactUsScreen", (){
                   Get.to (() =>  ContactUsScreen(member: EditProfileModel()));
+                }),
+
+                _menuTile("assets/icons/personalinfo.png", "Blog", (){
+                  Get.to (() =>  BlogScreen());
                 })
               ],
             ),
