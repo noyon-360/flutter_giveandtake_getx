@@ -10,7 +10,7 @@ class ContactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      color: Colors.white,
+      color: AppColors.primaryWhite,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -23,18 +23,21 @@ class ContactCard extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
+                  //* <--- PROFILE IMAGE --->
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               const SizedBox(height: 12),
               const Text(
+                //! <--- NAME (update dynamically) --->
                 "John D.",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               const Text(
+                //! <--- DESIGNATION (update dynamically) --->
                 "Product Designer",
-                style: TextStyle(color: Colors.grey, fontSize: 13),
+                style: TextStyle(color: AppColors.textGrey, fontSize: 13),
               ),
               const SizedBox(height: 10),
               // Social icons
@@ -77,13 +80,14 @@ class ContactCard extends StatelessWidget {
                   thickness: 1,
                   color: AppColors.textGrey,
                 ),
-
+                //! <--- LOCATION & EMAIL (update dynamically) --->
                 _infoRow(
                   "Location",
                   "New York, USA",
                   "Email",
                   "youremail@gmail.com",
                 ),
+                //! <--- PHONE & WEBSITE (update dynamically) --->
                 const SizedBox(height: 12),
                 _infoRow(
                   "Phone",
@@ -92,6 +96,7 @@ class ContactCard extends StatelessWidget {
                   "yourwebsite.com",
                 ),
                 const SizedBox(height: 12),
+                //! <--- AVAILABILITY (update dynamically) --->
                 _infoRow("Availability to start", "+999 454 433", "", ""),
               ],
             ),
@@ -120,7 +125,10 @@ class ContactCard extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 2),
-              Text(leftValue, style: const TextStyle(color: Colors.grey)),
+              Text(
+                leftValue,
+                style: const TextStyle(color: AppColors.textGrey),
+              ),
             ],
           ),
         ),
@@ -135,7 +143,10 @@ class ContactCard extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
-                Text(rightValue, style: const TextStyle(color: Colors.grey)),
+                Text(
+                  rightValue,
+                  style: const TextStyle(color: AppColors.textGrey),
+                ),
               ],
             ),
           ),

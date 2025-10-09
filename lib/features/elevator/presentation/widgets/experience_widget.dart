@@ -8,12 +8,14 @@ class ExperienceWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final experienceList = [
       {
+        "image": "assets/images/applied_jobs_sample_logo.png",
         "position": "Software Engineer",
         "company": "Betacom",
         "duration": "Jun 2020 – April 2023 – 3 years",
         "location": "Willshire Glen, GA",
       },
       {
+        "image": "assets/images/applied_jobs_sample_logo.png",
         "position": "Software Engineer",
         "company": "Betacom",
         "duration": "Jun 2020 – April 2023 – 3 years",

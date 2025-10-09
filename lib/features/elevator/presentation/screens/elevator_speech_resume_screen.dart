@@ -134,8 +134,8 @@ class ElevatorSpeechResumeScreen extends StatelessWidget {
 
                   SizedBox(height: 16),
 
-                  //! <----- AWARD ----->
-                  AwardsWidget(),
+                  //! <----- EDUCATION ----->
+                  EducationWidget(),
 
                   SizedBox(height: 16),
 
@@ -148,8 +148,8 @@ class ElevatorSpeechResumeScreen extends StatelessWidget {
 
                   SizedBox(height: 16),
 
-                  //! <----- EDUCATION ----->
-                  EducationWidget(),
+                  //! <----- AWARD ----->
+                  AwardsWidget(),
                 ],
               ),
             ],
