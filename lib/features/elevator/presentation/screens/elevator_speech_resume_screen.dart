@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/title_with_edit_logo.dart';
+
 class ElevatorSpeechResumeScreen extends StatelessWidget {
   const ElevatorSpeechResumeScreen({super.key});
 
@@ -16,49 +18,11 @@ class ElevatorSpeechResumeScreen extends StatelessWidget {
           Column(
             children: [
               SizedBox(height: 30),
-              Row(
-                children: [
-                  SizedBox(
-                    height: 18,
-                    width: screenWidth,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // center title stays centered regardless of right widgets
-                        const Center(
-                          child: Text(
-                            "Your Elevator Speech",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        // right aligned widgets
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Image(
-                                image: AssetImage(
-                                  "assets/icons/elevator_edit_icon.png",
-                                ),
-                                height: 16,
-                                width: 16,
-                              ),
-                              SizedBox(width: 8),
-                              // add more right widgets here
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              TitleWithEditLogo(
+                title: "Elevator Speech Resume",
+                onPress: () {
+                  //* <--- Handle edit action --->
+                },
               ),
               SizedBox(height: 8),
               Padding(
@@ -69,7 +33,39 @@ class ElevatorSpeechResumeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w400),
                 ),
               ),
-              // Add your widgets here
+              SizedBox(height: 20),
+              Center(
+                child: SizedBox(
+                  width: screenWidth - (16 * 2),
+                  height: 105,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      color: Colors.black,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Center(
+                            child: Icon(
+                              Icons.play_circle_fill,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              TitleWithEditLogo(
+                title: "My Resume",
+                onPress: () {
+                  //* <--- Handle edit action --->
+                },
+              ),
+              SizedBox(height: 16),
+              Container(),
             ],
           ),
         ],
