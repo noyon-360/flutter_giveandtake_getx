@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'blog_details.dart';
+
 class BlogScreen extends StatelessWidget {
   const BlogScreen({super.key});
 
@@ -77,76 +79,82 @@ class BlogScreen extends StatelessWidget {
           ),
         ),
       ),
+
+      /// BODY
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           child: Column(
             children: blogPosts.map((post) {
-              return GestureDetector(
-                onTap: () {
-                  // Get.to(() => BlogDetailsScreen(post: post));
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// Blog Image
+                    ClipRRect(
+                      borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(8)),
+                      child: Image.asset(
+                        post['image']!,
+                        height: 223,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      /// Blog Image
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                        child: Image.asset(
-                          post['image']!,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                    ),
 
-                      /// Blog Info
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "${post['date']}      ${post['author']}",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Color(0xFF7C7C7C),
-                                fontWeight: FontWeight.w400,
-                              ),
+                    /// Blog Info
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${post['date']}      ${post['author']}",
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF7C7C7C),
+                              fontWeight: FontWeight.w400,
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              post['title']!,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            post['title']!,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              post['description']!,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Color(0xFF545454),
-                                height: 1.3,
-                              ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            post['description']!,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF545454),
+                              height: 1.3,
                             ),
-                            const SizedBox(height: 6),
-                            const Text(
+                          ),
+                          const SizedBox(height: 6),
+
+                          // Read More Button
+                          InkWell(
+                            onTap: () {
+                              // Get.toNamed('/blog-details', arguments: post);
+                              Get.to(() => BlogDetailsScreen());
+                            },
+                            child: const Text(
                               "Read More →",
                               style: TextStyle(
                                 fontSize: 10,
@@ -154,11 +162,11 @@ class BlogScreen extends StatelessWidget {
                                 color: Color(0xFF2B7FD0),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               );
             }).toList(),
