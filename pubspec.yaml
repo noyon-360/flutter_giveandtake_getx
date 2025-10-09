@@ -50,6 +50,7 @@ dependencies:
   dartz: ^0.10.1
   file_picker: ^10.3.3
   csc_picker_plus: ^0.0.3
+  font_awesome_flutter: ^10.10.0
 
 
 

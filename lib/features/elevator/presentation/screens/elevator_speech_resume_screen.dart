@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:karlfive/features/elevator/presentation/widgets/contact_card.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../widgets/title_with_edit_logo.dart';
 
 class ElevatorSpeechResumeScreen extends StatelessWidget {
@@ -65,7 +67,21 @@ class ElevatorSpeechResumeScreen extends StatelessWidget {
                 },
               ),
               SizedBox(height: 16),
-              Container(),
+
+              ContactCard(),
+
+              SizedBox(height: 24),
+
+              Divider(
+                color: AppColors.textGrey,
+                thickness: 1,
+                indent: 16,
+                endIndent: 16,
+              ),
+
+              SizedBox(height: 16),
+
+              // AboutCard(),
             ],
           ),
         ],
