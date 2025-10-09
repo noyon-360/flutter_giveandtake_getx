@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:karlfive/core/services/get_user_profile_service.dart';
 import '../../../job_listing/presentation/screens/job_listing_screen.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/custom_searchbox.dart';
 import '../widgets/home_main_card.dart';
 import '../widgets/search_filter_iconcard.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final GetUserProfileService _profileService = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user profile when home screen initializes
+    _profileService.getUserProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,14 +59,22 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Hello Mr. Saifullah",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textBlack,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                    // Reactive greeting using profile service
+                    Obx(() {
+                      final user = _profileService.userInfoRx.value;
+                      final displayName = (user != null && user.name.isNotEmpty)
+                          ? user.name
+                          : 'Guest';
+
+                      return Text(
+                        "Hello $displayName",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textBlack,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      );
+                    }),
                     Text(
                       "Find your Dream Job",
                       style: TextStyle(

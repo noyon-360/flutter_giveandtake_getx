@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
+import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
 import 'package:karlfive/features/auth/data/models/login_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
@@ -12,7 +13,6 @@ import 'package:karlfive/features/auth/data/models/reset_password_with_token_req
 import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
 import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
 import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
-import 'package:karlfive/features/auth/presentation/screens/home_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_for_password_reset_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
@@ -22,6 +22,8 @@ import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../Home/presentation/screen/home_screen.dart';
+import '../../../../core/services/get_user_profile_service.dart';
 import 'remember_me_controller.dart';
 
 class AuthController extends BaseController {
@@ -30,7 +32,6 @@ class AuthController extends BaseController {
   bool _isSuccess = false;
 
   AuthController(this._authRepository, this._authStorageService);
-
 
   // Login
   Future<void> login(
@@ -66,13 +67,19 @@ class AuthController extends BaseController {
             refreshToken: success.data.refreshToken,
             userId: success.data.user.id,
           );
+          // Populate the shared GetUserProfileService with the user from login response
+          try {
+            Get.find<GetUserProfileService>().userInfoRx.value = user;
+          } catch (_) {
+            // If service not found, ignore silently (DI should normally register it)
+          }
           if (rememberMeController!.rememberMe.value) {
             final secureStore = SecureStoreServices();
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
           }
           setLoading(false);
-          Get.offAll(() => const HomeScreen());
+          Get.offAll(() => DashboardScreen());
         } else {
           setError("You are not authorized to login as candidate");
           setLoading(false);
@@ -486,12 +493,7 @@ class AuthController extends BaseController {
 
         if (_securityToken != null) {
           //* <--- Navigate to set new password screen with token --->
-          Get.to(
-            () => SetNewPasswordScreen(
-              email: email,
-              otp: '', 
-            ),
-          );
+          Get.to(() => SetNewPasswordScreen(email: email, otp: ''));
         }
       },
     );
