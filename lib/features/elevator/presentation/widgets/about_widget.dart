@@ -32,9 +32,9 @@ class AboutWidget extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            //! <--- Need to add dynamically (API) --->
+            //! <--- Need to change dynamically (API) --->
             "C/C++, .NET C++, Python, Bash, Shell, PERL, Regular expressions, Python, Active-script.",
-            style: TextStyle(color: AppColors.textGrey),
+            style: TextStyle(color: AppColors.textGrey, fontSize: 12),
           ),
         ],
       ),

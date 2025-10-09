@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:karlfive/features/elevator/presentation/widgets/about_widget.dart';
+import 'package:karlfive/features/elevator/presentation/widgets/awards_widget.dart';
 import 'package:karlfive/features/elevator/presentation/widgets/contact_card.dart';
+import 'package:karlfive/features/elevator/presentation/widgets/education_widget.dart';
+import 'package:karlfive/features/elevator/presentation/widgets/experience_widget.dart';
 import 'package:karlfive/features/elevator/presentation/widgets/skill_widget.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -75,33 +78,78 @@ class ElevatorSpeechResumeScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
 
+                  //! <----- CONTACT ----->
                   ContactCard(),
 
                   SizedBox(height: 16),
 
                   Divider(
-                    color: AppColors.textGrey,
-                    thickness: 1,
+                    color: AppColors.textFieldLightGrey,
+                    thickness: 2,
                     indent: 16,
                     endIndent: 16,
                   ),
 
                   SizedBox(height: 16),
 
+                  //! <----- ABOUT ----->
                   AboutWidget(),
 
                   SizedBox(height: 16),
 
                   Divider(
-                    color: AppColors.textGrey,
-                    thickness: 1,
+                    color: AppColors.textFieldLightGrey,
+                    thickness: 2,
                     indent: 16,
                     endIndent: 16,
                   ),
 
                   SizedBox(height: 16),
 
+                  //! <----- SKILLS ----->
                   SkillsWidget(),
+
+                  SizedBox(height: 16),
+
+                  Divider(
+                    color: AppColors.textFieldLightGrey,
+                    thickness: 2,
+                    indent: 16,
+                    endIndent: 16,
+                  ),
+
+                  SizedBox(height: 16),
+
+                  //! <----- EXPERIENCE ----->
+                  ExperienceWidget(),
+
+                  SizedBox(height: 16),
+
+                  Divider(
+                    color: AppColors.textFieldLightGrey,
+                    thickness: 2,
+                    indent: 16,
+                    endIndent: 16,
+                  ),
+
+                  SizedBox(height: 16),
+
+                  //! <----- AWARD ----->
+                  AwardsWidget(),
+
+                  SizedBox(height: 16),
+
+                  Divider(
+                    color: AppColors.textFieldLightGrey,
+                    thickness: 2,
+                    indent: 16,
+                    endIndent: 16,
+                  ),
+
+                  SizedBox(height: 16),
+
+                  //! <----- EDUCATION ----->
+                  EducationWidget(),
                 ],
               ),
             ],
