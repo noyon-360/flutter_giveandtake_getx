@@ -2,9 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
-import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
+
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});

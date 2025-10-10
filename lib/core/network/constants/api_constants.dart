@@ -8,10 +8,6 @@ class ApiConstants {
 
   static const String baseUrl = '$baseDomain/api/v1';
 
-  /// soykot ip
-
-  //static const String soyDomain = 'http://10.10.5.91:5002';
-
   // static const String baseDomain = 'https://api.evpitch.com';
   // static const String baseDomain = 'http://10.10.5.3:5000'; // iftikhar
   // static const String baseUrl = '$baseDomain/api/v1';
