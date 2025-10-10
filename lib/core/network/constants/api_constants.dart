@@ -1,6 +1,11 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'https://api.evpitch.com';
+  // static const String baseDomain = 'https://api.evpitch.com';
+
+  // add by zafor
+  static const String baseDomain = 'http://10.10.5.88:5000';
+  //add by zafor end
+
   static const String baseUrl = '$baseDomain/api/v1';
 
   /// soykot ip
