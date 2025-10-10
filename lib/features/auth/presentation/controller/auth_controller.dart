@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
+import 'package:karlfive/core/services/get_user_profile_service.dart';
 import 'package:karlfive/features/auth/data/models/login_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
@@ -31,6 +32,7 @@ class AuthController extends BaseController {
 
   AuthController(this._authRepository, this._authStorageService);
 
+  final userProfileService = Get.find<GetUserProfileService>();
 
   // Login
   Future<void> login(
@@ -214,7 +216,7 @@ class AuthController extends BaseController {
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
-        // Navigate to security questions for new users
+        //* <--- Navigate to security questions for Sign Up --->
         Get.to(() => SecurityQuestionsScreen(email: email));
       },
     );
@@ -278,75 +280,126 @@ class AuthController extends BaseController {
     );
   }
 
-  void verifyOTPForPasswordReset(String email, String otp) {
-    //* <--- Client-side validation only ---> *//
-    DPrint.log("OTP format validated: $otp");
-    Get.snackbar(
-      'OTP Accepted',
-      'Please enter your new password',
-      backgroundColor: const Color(0xFF10B287),
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
-    //* <--- Navigate to set new password screen with the OTP ---> *//
-    Get.to(() => SetNewPasswordScreen(email: email, otp: otp));
+  /// Verify OTP for password reset flow using /user/verify-reset-otp endpoint
+  Future<void> verifyOTPForPasswordReset(String email, String otp) async {
+    setLoading(true);
+    setError("");
+
+    try {
+      final request = OtpVerificationRequestModel(email: email, otp: otp);
+      final result = await _authRepository.otpVerify(request);
+
+      result.fold(
+        (fail) {
+          setError(fail.message);
+          DPrint.log("Verify-reset OTP failed: ${fail.message}");
+          Get.snackbar(
+            'Invalid OTP',
+            fail.message,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          setLoading(false);
+        },
+        (success) {
+          DPrint.log("Verify-reset OTP success: ${success.message}");
+          setLoading(false);
+          Get.snackbar(
+            'OTP Verified',
+            'Please enter your new password',
+            backgroundColor: const Color(0xFF10B287),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 2),
+          );
+          // Navigate to set new password screen after successful verification
+          Get.to(() => SetNewPasswordScreen(email: email, otp: otp));
+        },
+      );
+    } catch (e, stackTrace) {
+      DPrint.log("verifyOTPForPasswordReset exception: $e");
+      DPrint.log("Stack trace: $stackTrace");
+      setError("An unexpected error occurred");
+      setLoading(false);
+      Get.snackbar(
+        'Error',
+        'Unable to verify OTP. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   Future setNewPass(String email, String otp, String newPassword) async {
     setLoading(true);
     setError("");
 
-    //* <--- Debug logging to see what we're sending --->
-    DPrint.log("=== NEW PASSWORD DEBUG ===");
-    DPrint.log("Email: $email");
-    DPrint.log("OTP: $otp");
-    DPrint.log("New Password: $newPassword");
-    DPrint.log("Password Length: ${newPassword.length}");
+    try {
+      //* <--- Debug logging to see what we're sending --->
+      DPrint.log("=== NEW PASSWORD DEBUG ===");
+      DPrint.log("Email: $email");
+      DPrint.log("OTP: $otp");
+      DPrint.log("New Password: $newPassword");
+      DPrint.log("Password Length: ${newPassword.length}");
 
-    //* <--- For reset password flow, we use the OTP verification endpoint with the new password --->
-    final request = OtpVerificationRequestModel(
-      email: email,
-      otp: otp,
-      newPassword: newPassword,
-    );
+      //* <--- For reset password flow, we use the OTP verification endpoint with the new password --->
+      final request = OtpVerificationRequestModel(
+        email: email,
+        otp: otp,
+        newPassword: newPassword,
+      );
 
-    DPrint.log("Request JSON: ${request.toJson()}");
-    final result = await _authRepository.otpVerify(request);
+      DPrint.log("Request JSON: ${request.toJson()}");
+      final result = await _authRepository.otpVerify(request);
 
-    result.fold(
-      (fail) {
-        setError(fail.message);
-        DPrint.log("New Password set failed result : ${fail.message}");
-        Get.snackbar(
-          'Error',
-          fail.message,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        setLoading(false);
-      },
-      (success) {
-        DPrint.log(
-          "New Password set successfully result : ${success.data.message}",
-        );
-        setLoading(false);
-        // Show success message
-        Get.snackbar(
-          'Success',
-          'Password reset successfully! Please login with your new password.',
-          backgroundColor: const Color(0xFF10B287),
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 3),
-        );
-        // Navigate to login screen after a short delay
-        Future.delayed(const Duration(seconds: 1), () {
-          Get.offAll(() => LoginScreen());
-        });
-      },
-    );
+      result.fold(
+        (fail) {
+          setError(fail.message);
+          DPrint.log("New Password set failed result : ${fail.message}");
+          Get.snackbar(
+            'Error',
+            fail.message,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          setLoading(false);
+        },
+        (success) {
+          DPrint.log(
+            "New Password set successfully result : ${success.data.message}",
+          );
+          setLoading(false);
+          // Show success message
+          Get.snackbar(
+            'Success',
+            'Password reset successfully! Please login with your new password.',
+            backgroundColor: const Color(0xFF10B287),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 3),
+          );
+          // Navigate to login screen after a short delay
+          Future.delayed(const Duration(seconds: 1), () {
+            Get.offAll(() => LoginScreen());
+          });
+        },
+      );
+    } catch (e, stackTrace) {
+      DPrint.log("setNewPass exception: $e");
+      DPrint.log("Stack trace: $stackTrace");
+      setError("An unexpected error occurred");
+      setLoading(false);
+      Get.snackbar(
+        'Error',
+        'Unable to reset password. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   Future refreshToken() async {
@@ -370,7 +423,10 @@ class AuthController extends BaseController {
         await _authStorageService.storeRefreshToken(success.data.refreshToken);
 
         setLoading(false);
-        //  Get.to(() => JoinLeagueScreen(), transition: Transition.rightToLeft); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        Get.to(
+          () => HomeScreen(),
+          transition: Transition.rightToLeft,
+        ); //! <<< If the user is already logged in, go to home screen >>>
         return _isSuccess = true;
       },
     );
@@ -486,12 +542,7 @@ class AuthController extends BaseController {
 
         if (_securityToken != null) {
           //* <--- Navigate to set new password screen with token --->
-          Get.to(
-            () => SetNewPasswordScreen(
-              email: email,
-              otp: '', 
-            ),
-          );
+          Get.to(() => SetNewPasswordScreen(email: email, otp: ''));
         }
       },
     );
@@ -526,11 +577,7 @@ class AuthController extends BaseController {
   Future<void> logout() async {
     await _authStorageService.clearAuthData();
     final secureStore = SecureStoreServices();
-    await secureStore.deleteData(
-      'previewConfirmed',
-    ); // or storeData('previewConfirmed', 'false');
-    // await secureStore.deleteData('email');
-    // await secureStore.deleteData('password');
+    await secureStore.deleteData('previewConfirmed');
 
     setLoading(false);
     setError('');
