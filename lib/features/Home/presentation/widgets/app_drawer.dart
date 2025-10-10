@@ -181,9 +181,17 @@ class ListTileForNav extends StatelessWidget {
             )
           : null,
       leading: liconPath != null
-          ? Image.asset(liconPath!, width: 24, height: 24)
+          ? Image.asset(liconPath!, width: 16, height: 16)
           : null,
-      title: Text(title ?? '', style: TextStyle(color: AppColors.textBlack)),
+      title: Text(
+        title ?? '',
+        style: TextStyle(
+          color: Color(0xff333333),
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -1,
+        ),
+      ),
       onTap: () => onTap(),
     );
   }
