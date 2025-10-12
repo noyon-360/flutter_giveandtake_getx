@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controller/elevator_resume_controller.dart';
 
 class AwardsFormSection extends StatelessWidget {
   final int index;
@@ -58,6 +60,20 @@ class AwardsFormSection extends StatelessWidget {
             border: OutlineInputBorder(),
           ),
         ),
+        if (index > 0) ...[
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () {
+                final controller = Get.find<ElevatorResumeController>();
+                controller.removeAward(index);
+              },
+              icon: const Icon(Icons.delete, color: Colors.red),
+              label: const Text('Remove', style: TextStyle(color: Colors.red)),
+            ),
+          ),
+        ],
       ],
     );
   }

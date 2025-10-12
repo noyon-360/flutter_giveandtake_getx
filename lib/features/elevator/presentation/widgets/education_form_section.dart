@@ -149,18 +149,31 @@ class EducationFormSection extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Obx(() {
+          final isChecked =
+              controller.educationList[index]['presentlyAttendHere'] ?? false;
           return Row(
             children: [
               Checkbox(
-                value: controller.presentlyAttendHere.value,
+                value: isChecked,
                 onChanged: (value) {
-                  controller.presentlyAttendHere.value = value ?? false;
+                  controller.togglePresentlyAttendHere(index);
                 },
               ),
               const Text('I presently attend here'),
             ],
           );
         }),
+        if (index > 0) ...[
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => controller.removeEducation(index),
+              icon: const Icon(Icons.delete, color: Colors.red),
+              label: const Text('Remove', style: TextStyle(color: Colors.red)),
+            ),
+          ),
+        ],
       ],
     );
   }

@@ -293,12 +293,14 @@ class ExperienceFormSection extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Obx(() {
+          final isChecked =
+              controller.experienceList[index]['presentlyWorkHere'] ?? false;
           return Row(
             children: [
               Checkbox(
-                value: controller.presentlyWorkHere.value,
+                value: isChecked,
                 onChanged: (value) {
-                  controller.presentlyWorkHere.value = value ?? false;
+                  controller.togglePresentlyWorkHere(index);
                 },
               ),
               const Text('I presently work here'),
@@ -315,6 +317,17 @@ class ExperienceFormSection extends StatelessWidget {
             border: OutlineInputBorder(),
           ),
         ),
+        if (index > 0) ...[
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => controller.removeExperience(index),
+              icon: const Icon(Icons.delete, color: Colors.red),
+              label: const Text('Remove', style: TextStyle(color: Colors.red)),
+            ),
+          ),
+        ],
       ],
     );
   }

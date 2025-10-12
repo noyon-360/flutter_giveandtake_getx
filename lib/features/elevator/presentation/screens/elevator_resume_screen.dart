@@ -6,6 +6,8 @@ import '../widgets/photo_bio_section.dart';
 import '../widgets/experience_form_section.dart';
 import '../widgets/education_form_section.dart';
 import '../widgets/awards_form_section.dart';
+import '../widgets/skills_section.dart';
+import '../widgets/other_urls_section.dart';
 
 class ElevatorResumeScreen extends StatelessWidget {
   const ElevatorResumeScreen({super.key});
@@ -225,25 +227,14 @@ class ElevatorResumeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Other URL',
-                  hintText: 'Enter Here',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+
+              // Other URLs section - dynamic
+              const OtherUrlsSection(),
+
               const SizedBox(height: 16),
-              TextButton(onPressed: () {}, child: const Text('Add More')),
-              const SizedBox(height: 16),
-              const Text('Skills'),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  const Chip(label: Text('Web Design')),
-                  IconButton(icon: const Icon(Icons.add), onPressed: () {}),
-                ],
-              ),
+
+              // Skills section - dynamic with dialog
+              const SkillsSection(),
               const SizedBox(height: 32),
 
               // Experience section with dynamic add more

@@ -19,18 +19,27 @@ class ElevatorResumeController extends GetxController {
   var selectedGradMonth = Rx<String?>(null);
   var selectedGradYear = Rx<String?>(null);
 
-  // Checkbox states
+  // Checkbox states - now per-item instead of global
   var presentlyWorkHere = false.obs;
-  var presentlyAttendHere = false.obs;
 
   // File paths
   var elevatorVideoPath = Rx<String?>(null);
   var photoPath = Rx<String?>(null);
 
-  // Dynamic lists
-  var experienceList = <Map<String, dynamic>>[{}].obs;
-  var educationList = <Map<String, dynamic>>[{}].obs;
+  // Dynamic lists with individual checkbox states
+  var experienceList = <Map<String, dynamic>>[
+    {'presentlyWorkHere': false},
+  ].obs;
+  var educationList = <Map<String, dynamic>>[
+    {'presentlyAttendHere': false},
+  ].obs;
   var awardsList = <Map<String, dynamic>>[{}].obs;
+
+  // Skills list
+  var skillsList = <String>[].obs;
+
+  // Other URLs list
+  var otherUrlsList = <String>[].obs;
 
   // Dummy data
   final List<String> titles = ['Mr.', 'Mrs.', 'Ms.', 'Dr.'];
@@ -146,15 +155,67 @@ class ElevatorResumeController extends GetxController {
 
   // Add more items
   void addExperience() {
-    experienceList.add({});
+    experienceList.add({'presentlyWorkHere': false});
   }
 
   void addEducation() {
-    educationList.add({});
+    educationList.add({'presentlyAttendHere': false});
   }
 
   void addAward() {
     awardsList.add({});
+  }
+
+  // Remove items
+  void removeExperience(int index) {
+    if (experienceList.length > 1) {
+      experienceList.removeAt(index);
+    }
+  }
+
+  void removeEducation(int index) {
+    if (educationList.length > 1) {
+      educationList.removeAt(index);
+    }
+  }
+
+  void removeAward(int index) {
+    if (awardsList.length > 1) {
+      awardsList.removeAt(index);
+    }
+  }
+
+  // Skills management
+  void addSkill(String skill) {
+    if (skill.trim().isNotEmpty && !skillsList.contains(skill.trim())) {
+      skillsList.add(skill.trim());
+    }
+  }
+
+  void removeSkill(int index) {
+    skillsList.removeAt(index);
+  }
+
+  // Other URLs management
+  void addOtherUrl() {
+    otherUrlsList.add('');
+  }
+
+  void removeOtherUrl(int index) {
+    otherUrlsList.removeAt(index);
+  }
+
+  // Toggle checkbox for specific item
+  void togglePresentlyWorkHere(int index) {
+    experienceList[index]['presentlyWorkHere'] =
+        !(experienceList[index]['presentlyWorkHere'] ?? false);
+    experienceList.refresh();
+  }
+
+  void togglePresentlyAttendHere(int index) {
+    educationList[index]['presentlyAttendHere'] =
+        !(educationList[index]['presentlyAttendHere'] ?? false);
+    educationList.refresh();
   }
 
   // Save method
