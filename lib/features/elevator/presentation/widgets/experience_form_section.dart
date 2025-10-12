@@ -26,10 +26,13 @@ class ExperienceFormSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  labelText: 'Employer*',
-                  border: const OutlineInputBorder(),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Employer*',
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
               ),
             ),

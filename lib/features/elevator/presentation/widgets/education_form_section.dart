@@ -50,11 +50,14 @@ class EducationFormSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  labelText: 'State*',
-                  hintText: 'Write here',
-                  border: const OutlineInputBorder(),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: TextField(
+                  decoration: InputDecoration(
+                    labelText: 'State*',
+                    hintText: 'Write here',
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
               ),
             ),
@@ -67,7 +70,7 @@ class EducationFormSection extends StatelessWidget {
                   Obx(() {
                     return DropdownButtonFormField<String>(
                       isExpanded: true,
-                      value: controller.selectedDegree.value,
+                      initialValue: controller.selectedDegree.value,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
@@ -106,7 +109,7 @@ class EducationFormSection extends StatelessWidget {
               child: Obx(() {
                 return DropdownButtonFormField<String>(
                   isExpanded: true,
-                  value: controller.selectedGradMonth.value,
+                  initialValue: controller.selectedGradMonth.value,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
@@ -128,7 +131,7 @@ class EducationFormSection extends StatelessWidget {
               child: Obx(() {
                 return DropdownButtonFormField<String>(
                   isExpanded: true,
-                  value: controller.selectedGradYear.value,
+                  initialValue: controller.selectedGradYear.value,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),

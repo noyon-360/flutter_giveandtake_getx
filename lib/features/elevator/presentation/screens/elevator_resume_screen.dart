@@ -49,7 +49,7 @@ class ElevatorResumeScreen extends StatelessWidget {
                         Obx(() {
                           return DropdownButtonFormField<String>(
                             isExpanded: true,
-                            value: controller.selectedTitle.value,
+                            initialValue: controller.selectedTitle.value,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                             ),
@@ -73,11 +73,14 @@ class ElevatorResumeScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   const Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: 'First Name*',
-                        hintText: 'Enter Your First Name',
-                        border: OutlineInputBorder(),
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 20.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'First Name*',
+                          hintText: 'Enter Your First Name',
+                          border: OutlineInputBorder(),
+                        ),
                       ),
                     ),
                   ),
@@ -118,7 +121,7 @@ class ElevatorResumeScreen extends StatelessWidget {
                         Obx(() {
                           return DropdownButtonFormField<String>(
                             isExpanded: true,
-                            value: controller.selectedCountry.value,
+                            initialValue: controller.selectedCountry.value,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                             ),
@@ -148,7 +151,7 @@ class ElevatorResumeScreen extends StatelessWidget {
                         Obx(() {
                           return DropdownButtonFormField<String>(
                             isExpanded: true,
-                            value: controller.selectedCity.value,
+                            initialValue: controller.selectedCity.value,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                             ),
