@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import '../controller/elevator_resume_controller.dart';
 
 class PhotoBioSection extends StatelessWidget {
@@ -19,20 +20,34 @@ class PhotoBioSection extends StatelessWidget {
             Obx(() {
               return GestureDetector(
                 onTap: controller.pickPhoto,
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  color: Colors.grey[300],
-                  child: controller.photoPath.value != null
-                      ? Image.file(
-                          File(controller.photoPath.value!),
-                          fit: BoxFit.cover,
-                        )
-                      : Icon(
-                          Icons.add_a_photo,
-                          size: 40,
-                          color: Colors.grey[600],
-                        ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: controller.photoPath.value != null
+                          ? Image.file(
+                              File(controller.photoPath.value!),
+                              fit: BoxFit.cover,
+                            )
+                          : Icon(
+                              Icons.add_a_photo,
+                              size: 40,
+                              color: Colors.grey[600],
+                            ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: const Text(
+                        'Upload Your Photo',
+                        style: TextStyle(fontSize: 10),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }),
@@ -41,7 +56,7 @@ class PhotoBioSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Write Your Bio'),
+                  Text('Write Your Bio',),
                   SizedBox(height: 8),
                   TextField(
                     maxLines: 3,
@@ -56,7 +71,6 @@ class PhotoBioSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        const Text('Upload Your Photo'),
       ],
     );
   }

@@ -103,7 +103,7 @@ class ElevatorResumeScreen extends StatelessWidget {
                     child: TextField(
                       decoration: InputDecoration(
                         labelText: 'Surname*',
-                        hintText: 'Enter Your Surname',
+                        hintText: 'Enter Your Surname',    
                         border: OutlineInputBorder(),
                       ),
                     ),
