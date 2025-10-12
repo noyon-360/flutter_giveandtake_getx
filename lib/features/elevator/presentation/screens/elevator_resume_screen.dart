@@ -17,16 +17,16 @@ class ElevatorResumeScreen extends StatelessWidget {
     final controller = Get.put(ElevatorResumeController());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Elevator Pitch & Resume')),
+      appBar: AppBar(),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Create Your Elevator Pitch & Resume',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
 
