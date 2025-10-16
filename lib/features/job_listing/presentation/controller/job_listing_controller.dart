@@ -1,6 +1,12 @@
 import 'package:get/get.dart';
+import 'package:karlfive/features/job_listing/domain/usecases/get_jobs_usecase.dart';
 
 class JobListingController extends GetxController {
+  final GetJobsUseCase _getJobsUseCase;
+
+  JobListingController({required GetJobsUseCase getJobsUseCase})
+    : _getJobsUseCase = getJobsUseCase;
+
   // Observable variables
   final RxList<Map<String, dynamic>> jobs = <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> filteredJobs =
@@ -9,6 +15,7 @@ class JobListingController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxBool isLoading = true.obs;
   final RxString selectedLocation = 'United States'.obs;
+  final RxString errorMessage = ''.obs;
 
   @override
   void onInit() {
@@ -18,72 +25,30 @@ class JobListingController extends GetxController {
 
   void fetchJobs() async {
     isLoading.value = true;
+    errorMessage.value = '';
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
+    final result = await _getJobsUseCase(limit: 100);
 
-    // Mock job data based on the screenshot
-    final mockJobs = [
-      {
-        'id': '1',
-        'title': 'Human Resources Manager',
-        'company': 'Lancame',
-        'location': 'United States',
-        'duration': 'Full Time',
-        'salary': '\$ 80k-100k/yr',
-        'timePosted': '4 days ago',
-        'type': 'Full Time',
-        'datePosted': DateTime.now().subtract(const Duration(days: 4)),
+    result.fold(
+      (failure) {
+        errorMessage.value = failure.message;
+        isLoading.value = false;
+        Get.snackbar(
+          'Error',
+          errorMessage.value,
+          snackPosition: SnackPosition.BOTTOM,
+        );
       },
-      {
-        'id': '2',
-        'title': 'Human Resources Manager',
-        'company': 'Lancame',
-        'location': 'United States',
-        'duration': 'Full Time',
-        'salary': '\$ 80k-100k/yr',
-        'timePosted': '4 days ago',
-        'type': 'Full Time',
-        'datePosted': DateTime.now().subtract(const Duration(days: 4)),
+      (success) {
+        // Convert JobModel list to Map format for UI compatibility
+        final jobMaps = success.data.jobs
+            .map((job) => job.toDisplayMap())
+            .toList();
+        jobs.assignAll(jobMaps);
+        filteredJobs.assignAll(jobMaps);
+        isLoading.value = false;
       },
-      {
-        'id': '3',
-        'title': 'Human Resources Manager',
-        'company': 'Lancame',
-        'location': 'United States',
-        'duration': 'Full Time',
-        'salary': '\$ 80k-100k/yr',
-        'timePosted': '4 days ago',
-        'type': 'Full Time',
-        'datePosted': DateTime.now().subtract(const Duration(days: 4)),
-      },
-      {
-        'id': '4',
-        'title': 'Software Developer',
-        'company': 'TechCorp',
-        'location': 'United States',
-        'duration': 'Part Time',
-        'salary': '\$ 60k-80k/yr',
-        'timePosted': '2 days ago',
-        'type': 'Part Time',
-        'datePosted': DateTime.now().subtract(const Duration(days: 2)),
-      },
-      {
-        'id': '5',
-        'title': 'Marketing Specialist',
-        'company': 'MarketPro',
-        'location': 'United States',
-        'duration': 'Contract',
-        'salary': '\$ 70k-90k/yr',
-        'timePosted': '1 day ago',
-        'type': 'Contract',
-        'datePosted': DateTime.now().subtract(const Duration(days: 1)),
-      },
-    ];
-
-    jobs.assignAll(mockJobs);
-    filteredJobs.assignAll(mockJobs);
-    isLoading.value = false;
+    );
   }
 
   void toggleFilter(String filter) {
@@ -110,8 +75,13 @@ class JobListingController extends GetxController {
       // Search filter
       if (searchQuery.value.isNotEmpty) {
         final query = searchQuery.value.toLowerCase();
-        if (!job['title'].toLowerCase().contains(query) &&
-            !job['company'].toLowerCase().contains(query)) {
+        final title = (job['title'] ?? '').toString().toLowerCase();
+        final company = (job['company'] ?? '').toString().toLowerCase();
+        final location = (job['location'] ?? '').toString().toLowerCase();
+
+        if (!title.contains(query) &&
+            !company.contains(query) &&
+            !location.contains(query)) {
           return false;
         }
       }

@@ -45,6 +45,11 @@ class ApiConstants {
 
   static PaymentEndpoints get payment => PaymentEndpoints();
   static RecruiterAccountApi get recruiter => RecruiterAccountApi();
+  static JobEndpoints get jobs => JobEndpoints();
+}
+
+class JobEndpoints {
+  String getJobs(int limit) => '${ApiConstants.baseUrl}/jobs?limit=$limit';
 }
 
 class RecruiterAccountApi {

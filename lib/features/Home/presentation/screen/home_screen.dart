@@ -6,7 +6,6 @@ import '../../../job_listing/presentation/screens/job_listing_screen.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/custom_searchbox.dart';
 import '../widgets/home_main_card.dart';
-import '../widgets/search_filter_iconcard.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -89,18 +88,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: SizedBox(
                             height: 48,
-                            child: CustomSearchBox(hintText: "Search your job"),
+                            child: CustomSearchBox(
+                              hintText:
+                                  "Search by job title, keywords, company or country",
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        SearchFilterIconCard(
-                          iconPath: "assets/icons/home_search_location.png",
-                          onTap: () {},
-                        ),
-                        const SizedBox(width: 8),
-                        SearchFilterIconCard(
-                          iconPath: "assets/icons/home_filter_search.png",
-                          onTap: () {},
                         ),
                       ],
                     ),
