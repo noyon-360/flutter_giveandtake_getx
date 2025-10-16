@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/core/services/get_user_profile_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../job_listing/presentation/screens/job_listing_screen.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/custom_searchbox.dart';
@@ -22,6 +23,34 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Fetch user profile when home screen initializes
     _profileService.getUserProfile();
+  }
+
+  // Helper method to launch email
+  Future<void> _launchEmail(String email) async {
+    final Uri emailUri = Uri(scheme: 'mailto', path: email);
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      Get.snackbar(
+        'Error',
+        'Could not open email client',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  // Helper method to launch phone dialer
+  Future<void> _launchPhone(String phoneNumber) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    } else {
+      Get.snackbar(
+        'Error',
+        'Could not open phone dialer',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override
@@ -159,6 +188,156 @@ class _HomeScreenState extends State<HomeScreen> {
                         //TODO: Navigate to get a job screen
                       },
                     ),
+
+                    const SizedBox(height: 24),
+
+                    SizedBox(height: 1, width: double.infinity),
+
+                    // Footer Container
+                    const SizedBox(height: 24),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2B7BC9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Logo and Title
+                          Row(
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 50,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Image.asset(
+                                  'assets/images/app_logo_blue.png',
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'EVP',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
+                                    Text(
+                                      'ELEVATOR\nVIDEO PITCH',
+                                      style: TextStyle(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        height: 1.2,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Tagline
+                          Text(
+                            'Connecting talent with opportunities and businesses\nwith clients all in one pitch!',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Address
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '124 City Road, London EC1V 2NX',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Email (Clickable)
+                          InkWell(
+                            onTap: () => _launchEmail('info@evpitch.com'),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.email,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'info@evpitch.com',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Phone (Clickable)
+                          InkWell(
+                            onTap: () => _launchPhone('+442039542530'),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.phone,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '+44 0203 954 2530',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
