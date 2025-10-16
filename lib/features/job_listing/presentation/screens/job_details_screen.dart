@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 
 class JobDetailsScreen extends StatelessWidget {
@@ -19,10 +19,9 @@ class JobDetailsScreen extends StatelessWidget {
     final String? title =
         raw['title'] as String? ?? jobData['title'] as String?;
     final String? posted = jobData['timePosted'] as String?;
-    final String applicants =
-        raw['applicantsCount']?.toString() ?? 'Over 130 Applicants';
     final String? description = raw['description'] as String?;
     final String? experience = raw['experience'] as String?;
+    final String? employmentType = raw['employement_Type'] as String?;
     final String? positions = raw['vacancy']?.toString();
     final String? compensation =
         (raw['compensation'] as String?) ??
@@ -113,9 +112,24 @@ class JobDetailsScreen extends StatelessWidget {
                 ),
               ],
             ),
-
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.primaryLightBlue),
+                color: AppColors.primaryWhite,
+              ),
+              child: Text(
+                employmentType ?? '',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textBlack,
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
-
             // Buttons
             Row(
               children: [
@@ -171,10 +185,17 @@ class JobDetailsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            Text(
-              // description may contain HTML; for now render raw text
-              description.toString().replaceAll(RegExp(r'<[^>]*>|\n'), '\n'),
-              style: const TextStyle(color: AppColors.textBlack),
+            Html(
+              data: description ?? '',
+              style: {
+                "body": Style(
+                  color: AppColors.textBlack,
+                  fontSize: FontSize(14),
+                  margin: Margins.zero,
+                  padding: HtmlPaddings.zero,
+                ),
+                "p": Style(margin: Margins.only(bottom: 8)),
+              },
             ),
 
             const SizedBox(height: 20),
