@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/job_application_screen.dart';
 
 class JobDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> jobData;
@@ -166,7 +167,10 @@ class JobDetailsScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // Navigate to Job Application screen with the current job data
+                      Get.to(() => JobApplicationScreen(jobData: jobData));
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryBlue,
                       shape: RoundedRectangleBorder(

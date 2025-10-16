@@ -484,7 +484,6 @@ class _JobApplicationScreenState extends State<JobApplicationScreen> {
                     ),
                   const SizedBox(height: 8),
                   Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
                         onPressed: _pickResume,
