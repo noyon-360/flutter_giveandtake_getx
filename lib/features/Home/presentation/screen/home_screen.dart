@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/core/services/get_user_profile_service.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../job_listing/presentation/screens/job_listing_screen.dart';
 import '../widgets/app_drawer.dart';
@@ -27,13 +28,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Helper method to launch email
   Future<void> _launchEmail(String email) async {
-    final Uri emailUri = Uri(scheme: 'mailto', path: email);
-    if (await canLaunchUrl(emailUri)) {
-      await launchUrl(emailUri);
-    } else {
+    // Prefer opening Gmail web compose (works on devices without native mail client)
+    final String encodedTo = Uri.encodeComponent(email);
+    final Uri gmailWeb = Uri.parse(
+      'https://mail.google.com/mail/?view=cm&fs=1&to=$encodedTo',
+    );
+    final Uri mailUri = Uri.parse('mailto:$email');
+
+    try {
+      // 1) Try Gmail web compose in external browser
+      if (await canLaunchUrl(gmailWeb)) {
+        await launchUrl(gmailWeb, mode: LaunchMode.externalApplication);
+        return;
+      }
+
+      // 2) Fallback to native mail client via mailto
+      if (await canLaunchUrl(mailUri)) {
+        await launchUrl(mailUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+
+      // 3) Final fallback: copy email to clipboard and notify user
+      await Clipboard.setData(ClipboardData(text: email));
       Get.snackbar(
-        'Error',
-        'Could not open email client',
+        'Email copied',
+        'Email address copied to clipboard: $email',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      // On any exception, copy to clipboard and notify
+      await Clipboard.setData(ClipboardData(text: email));
+      Get.snackbar(
+        'Email copied',
+        'Email address copied to clipboard: $email',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -41,13 +68,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Helper method to launch phone dialer
   Future<void> _launchPhone(String phoneNumber) async {
-    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-    if (await canLaunchUrl(phoneUri)) {
-      await launchUrl(phoneUri);
-    } else {
+    final Uri phoneUri = Uri.parse('tel:$phoneNumber');
+    try {
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri, mode: LaunchMode.externalApplication);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Could not open phone dialer',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
       Get.snackbar(
         'Error',
-        'Could not open phone dialer',
+        'Could not open phone dialer: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
