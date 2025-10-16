@@ -203,10 +203,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Logo and Title
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
                                 width: 50,
@@ -222,31 +223,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'EVP',
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                        letterSpacing: 2,
-                                      ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'EVP',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: 2,
                                     ),
-                                    Text(
-                                      'ELEVATOR\nVIDEO PITCH',
-                                      style: TextStyle(
-                                        fontSize: 8,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                        height: 1.2,
-                                        letterSpacing: 1.5,
-                                      ),
+                                  ),
+                                  Text(
+                                    'ELEVATOR\nVIDEO PITCH',
+                                    style: TextStyle(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                      height: 1.2,
+                                      letterSpacing: 1.5,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -260,11 +259,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.white,
                               height: 1.4,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 16),
 
                           // Address
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
@@ -273,13 +274,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 size: 16,
                               ),
                               const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  '124 City Road, London EC1V 2NX',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.white,
-                                  ),
+                              Text(
+                                '124 City Road, London EC1V 2NX',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.white,
                                 ),
                               ),
                             ],
@@ -290,6 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           InkWell(
                             onTap: () => _launchEmail('info@evpitch.com'),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.email,
@@ -315,6 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           InkWell(
                             onTap: () => _launchPhone('+442039542530'),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.phone,
