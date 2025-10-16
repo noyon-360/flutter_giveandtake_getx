@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import '../controller/job_listing_controller.dart';
 import '../widgets/job_card.dart';
+import 'job_application_screen.dart';
 
 class JobListingScreen extends StatelessWidget {
   const JobListingScreen({super.key});
@@ -135,7 +136,8 @@ class JobListingScreen extends StatelessWidget {
                     timePosted: job['timePosted'] ?? 'Unknown',
                     logoUrl: job['logoUrl'] as String?,
                     onTap: () => controller.onJobTap(job),
-                    onEasyApply: () => controller.onEasyApply(job),
+                    onEasyApply: () =>
+                        Get.to(() => JobApplicationScreen(jobData: job)),
                   );
                 },
               );
