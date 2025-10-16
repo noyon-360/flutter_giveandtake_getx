@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 
 class JobDetailsScreen extends StatelessWidget {
@@ -17,9 +18,9 @@ class JobDetailsScreen extends StatelessWidget {
         raw['location'] as String? ?? jobData['location'] as String?;
     final String? title =
         raw['title'] as String? ?? jobData['title'] as String?;
+    final String? posted = jobData['timePosted'] as String?;
     final String applicants =
         raw['applicantsCount']?.toString() ?? 'Over 130 Applicants';
-    final String? posted = jobData['timePosted'] as String?;
     final String? description = raw['description'] as String?;
     final String? experience = raw['experience'] as String?;
     final String? positions = raw['vacancy']?.toString();
@@ -50,39 +51,37 @@ class JobDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // company logo and title
             Container(
               width: 48,
               height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.primaryLightBlue,
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
               child: const Icon(Icons.business, color: AppColors.primaryBlue),
             ),
             const SizedBox(width: 12),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title ?? '',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$company',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                    ],
+                Text(
+                  title ?? '',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  " - For ",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  company ?? '',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -90,24 +89,27 @@ class JobDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // meta row
+            // meta row: address and posted time share width, applicants at end
             Row(
               children: [
-                Text(
-                  location ?? '',
-                  style: const TextStyle(color: AppColors.textGrey),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    location ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: AppColors.textGrey),
+                  ),
                 ),
-                // const SizedBox(width: 8),
-                // const Text('•', style: TextStyle(color: AppColors.textGrey)),
-                const SizedBox(width: 11),
-                Text(
-                  posted ?? '',
-                  style: const TextStyle(color: AppColors.textGrey),
-                ),
-                const SizedBox(width: 11),
-                Text(
-                  applicants ?? '',
-                  style: const TextStyle(color: AppColors.textGrey),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    posted ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: AppColors.textGrey),
+                  ),
                 ),
               ],
             ),
@@ -123,11 +125,16 @@ class JobDetailsScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryBlue,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('Easy Apply'),
+                    child: const Text(
+                      'Easy Apply',
+                      style: TextStyle(
+                        color: AppColors.primaryWhite,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -137,13 +144,15 @@ class JobDetailsScreen extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.primaryBlue),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text(
                       'Save',
-                      style: TextStyle(color: AppColors.primaryBlue),
+                      style: TextStyle(
+                        color: AppColors.primaryBlue,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
