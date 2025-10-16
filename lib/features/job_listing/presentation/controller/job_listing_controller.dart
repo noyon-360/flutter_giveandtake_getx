@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:karlfive/features/job_listing/domain/usecases/get_jobs_usecase.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
 
 class JobListingController extends GetxController {
   final GetJobsUseCase _getJobsUseCase;
@@ -41,9 +42,11 @@ class JobListingController extends GetxController {
       },
       (success) {
         // Convert JobModel list to Map format for UI compatibility
-        final jobMaps = success.data.jobs
-            .map((job) => job.toDisplayMap())
-            .toList();
+        final jobMaps = success.data.jobs.map((job) {
+          final map = job.toDisplayMap();
+          map['raw'] = job.toJson();
+          return map;
+        }).toList();
         jobs.assignAll(jobMaps);
         filteredJobs.assignAll(jobMaps);
         isLoading.value = false;
@@ -115,12 +118,8 @@ class JobListingController extends GetxController {
   }
 
   void onJobTap(Map<String, dynamic> job) {
-    // Navigate to job details
-    Get.snackbar(
-      'Job Selected',
-      'Opening ${job['title']} at ${job['company']}',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Navigate to job details screen
+    Get.to(() => JobDetailsScreen(jobData: job));
   }
 
   void onEasyApply(Map<String, dynamic> job) {
