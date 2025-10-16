@@ -165,7 +165,7 @@ class JobDetailsScreen extends StatelessWidget {
               'About The Job',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 15),
             const Text(
               'Job Description',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -184,6 +184,7 @@ class JobDetailsScreen extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.textGrey),
                 color: AppColors.primaryWhite,
                 boxShadow: [
                   BoxShadow(
