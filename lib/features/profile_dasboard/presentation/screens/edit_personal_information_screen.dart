@@ -104,13 +104,9 @@ class _EditProfileState extends State<EditProfile> {
               /// Editable Fields
               _textField(label: "First Name", hint: "Brooklyn"),
               _textField(label: "Last Name", hint: "Simmons"),
-              _textField(
-                  label: "Email Address", hint: "brooklynsimmons@gmail.com"),
-              _textField(label: "Phone", hint: "(58) 474748574"),
+              _textField(label: "Email Address", hint: "brooklynsimmons@gmail.com"),
               _textField(label: "Country", hint: "USA"),
-              _textField(label: "City/State", hint: "Alabama"),
-              _textField(label: "Town", hint: "Berlin"),
-              _textField(label: "Zip/Postal Code (Optional)", hint: "1212"),
+
 
               const SizedBox(height: 30),
 

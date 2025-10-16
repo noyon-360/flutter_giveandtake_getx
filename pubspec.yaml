@@ -40,6 +40,7 @@ dependencies:
   crypto: ^3.0.6
   cached_network_image: ^3.4.1
   flutter_secure_storage: ^9.2.4
+#  http: ^0.13.0
 
   # Network checker
   connectivity_plus: ^6.1.5
@@ -50,6 +51,7 @@ dependencies:
   dartz: ^0.10.1
   file_picker: ^10.3.3
   csc_picker_plus: ^0.0.3
+  http: ^1.5.0
 
 
 
