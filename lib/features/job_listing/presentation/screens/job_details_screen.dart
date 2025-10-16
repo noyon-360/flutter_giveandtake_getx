@@ -3,6 +3,8 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/job_listing/presentation/screens/job_application_screen.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import '../controllers/bookmark_controller.dart';
 
 class JobDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> jobData;
@@ -189,7 +191,14 @@ class JobDetailsScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      final bookmarkCtl = Get.isRegistered<BookmarkController>()
+                          ? Get.find<BookmarkController>()
+                          : Get.put(BookmarkController(), permanent: true);
+                      bookmarkCtl.addJob(jobData);
+                      // Navigate to Bookmark Jobs screen
+                      Get.to(() => BookmarkJobsScreen());
+                    },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.primaryBlue),
                       shape: RoundedRectangleBorder(
