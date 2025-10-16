@@ -1,9 +1,11 @@
 import 'company_model.dart';
+import 'recruiter_model.dart';
 
 class JobModel {
   final String id;
   final String userId;
   final CompanyModel? companyId;
+  final RecruiterModel? recruiterId;
   final String title;
   final String description;
   final String salaryRange;
@@ -34,6 +36,7 @@ class JobModel {
     required this.id,
     required this.userId,
     this.companyId,
+    this.recruiterId,
     required this.title,
     required this.description,
     required this.salaryRange,
@@ -67,6 +70,9 @@ class JobModel {
       userId: json['userId'] ?? '',
       companyId: json['companyId'] != null
           ? CompanyModel.fromJson(json['companyId'] as Map<String, dynamic>)
+          : null,
+      recruiterId: json['recruiterId'] != null
+          ? RecruiterModel.fromJson(json['recruiterId'] as Map<String, dynamic>)
           : null,
       title: json['title'] ?? '',
       description: json['description'] ?? '',
@@ -123,6 +129,7 @@ class JobModel {
       '_id': id,
       'userId': userId,
       'companyId': companyId?.toJson(),
+      'recruiterId': recruiterId?.toJson(),
       'title': title,
       'description': description,
       'salaryRange': salaryRange,
@@ -155,16 +162,26 @@ class JobModel {
 
   // Helper method to convert to map for existing UI
   Map<String, dynamic> toDisplayMap() {
+    // Determine if job is from company or recruiter and get appropriate logo
+    String? logoUrl;
+    if (companyId != null) {
+      logoUrl = companyId!.clogo;
+    } else if (recruiterId != null) {
+      logoUrl = recruiterId!.photo;
+    }
+
     return {
       'id': id,
       'title': title,
-      'company': companyId?.cname ?? 'Unknown Company',
+      'company': companyId?.cname ?? recruiterId?.fullName ?? 'Unknown Company',
       'location': location,
       'duration': employementType.replaceAll('-', ' ').toUpperCase(),
       'salary': salaryRange,
       'timePosted': _calculateTimePosted(),
       'type': employementType,
       'datePosted': publishDate ?? createdAt,
+      'logoUrl': logoUrl,
+      'raw': toJson(),
     };
   }
 

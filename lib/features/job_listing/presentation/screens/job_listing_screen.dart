@@ -133,6 +133,7 @@ class JobListingScreen extends StatelessWidget {
                     duration: job['duration'] ?? 'Unknown Duration',
                     salary: job['salary'] ?? 'Salary not specified',
                     timePosted: job['timePosted'] ?? 'Unknown',
+                    logoUrl: job['logoUrl'] as String?,
                     onTap: () => controller.onJobTap(job),
                     onEasyApply: () => controller.onEasyApply(job),
                   );

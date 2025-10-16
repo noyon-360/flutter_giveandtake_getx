@@ -11,9 +11,26 @@ class JobDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final raw = jobData['raw'] ?? {};
-    final String? company = raw['companyId'] != null
+
+    // Check if job is from company or recruiter
+    final bool isCompanyJob = raw['companyId'] != null;
+    final bool isRecruiterJob = raw['recruiterId'] != null;
+
+    // Get company name or recruiter name
+    final String? company = isCompanyJob
         ? raw['companyId']['cname'] as String?
+        : isRecruiterJob
+        ? '${raw['recruiterId']['firstName'] ?? ''} ${raw['recruiterId']['sureName'] ?? ''}'
+              .trim()
         : jobData['company'] as String?;
+
+    // Get logo URL - clogo for company, photo for recruiter
+    final String? logoUrl = isCompanyJob
+        ? raw['companyId']['clogo'] as String?
+        : isRecruiterJob
+        ? raw['recruiterId']['photo'] as String?
+        : null;
+
     final String? location =
         raw['location'] as String? ?? jobData['location'] as String?;
     final String? title =
@@ -54,7 +71,21 @@ class JobDetailsScreen extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-              child: const Icon(Icons.business, color: AppColors.primaryBlue),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: logoUrl != null && logoUrl.isNotEmpty
+                    ? Image.network(
+                        logoUrl,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (c, e, s) => const Icon(
+                          Icons.business,
+                          color: AppColors.primaryBlue,
+                        ),
+                      )
+                    : const Icon(Icons.business, color: AppColors.primaryBlue),
+              ),
             ),
             const SizedBox(width: 12),
             Row(

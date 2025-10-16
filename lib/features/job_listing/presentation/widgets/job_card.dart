@@ -9,6 +9,7 @@ class JobCard extends StatelessWidget {
   final String duration;
   final String salary;
   final String timePosted;
+  final String? logoUrl;
   final VoidCallback? onTap;
   final VoidCallback? onEasyApply;
 
@@ -20,6 +21,7 @@ class JobCard extends StatelessWidget {
     required this.duration,
     required this.salary,
     required this.timePosted,
+    this.logoUrl,
     this.onTap,
     this.onEasyApply,
   });
@@ -46,7 +48,7 @@ class JobCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Company logo with green chart icon
+            // Company logo with network image or fallback icon
             Container(
               width: 48,
               height: 48,
@@ -54,7 +56,28 @@ class JobCard extends StatelessWidget {
                 color: const Color(0xFF4CAF50).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.show_chart, color: Color(0xFF4CAF50), size: 24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: logoUrl != null && logoUrl!.isNotEmpty
+                    ? Image.network(
+                        logoUrl!,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.show_chart,
+                            color: Color(0xFF4CAF50),
+                            size: 24,
+                          );
+                        },
+                      )
+                    : const Icon(
+                        Icons.show_chart,
+                        color: Color(0xFF4CAF50),
+                        size: 24,
+                      ),
+              ),
             ),
             const SizedBox(width: 12),
 
