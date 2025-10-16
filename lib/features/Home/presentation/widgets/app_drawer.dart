@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
+import 'package:karlfive/features/home_static_screens/presantation/screen/Terms%20&%20Conditions.dart';
+import 'package:karlfive/features/home_static_screens/presantation/screen/aboutus_screen.dart';
+import 'package:karlfive/features/home_static_screens/presantation/screen/blog.dart';
+import 'package:karlfive/features/home_static_screens/presantation/screen/frequently_questions.dart';
+import 'package:karlfive/features/home_static_screens/presantation/screen/privacy_policy.dart';
+import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -35,7 +42,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ListTileForNav(
               title: "Blog",
               onTap: () {
-                // TODO: Navigate to Blog
+                Get.to (()=> BlogScreen());
               },
             ),
 
@@ -61,28 +68,28 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/home.png",
                       title: "About Us",
                       onTap: () {
-                        // TODO: Navigate to About Us
+                       Get.to(()=> AboutUs());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/list.png",
                       title: "Privacy Policy",
                       onTap: () {
-                        // TODO: Navigate to Privacy Policy
+                        Get.to(()=> PrivacyPolicy());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/book-open-01.png",
                       title: "Terms & Conditions",
                       onTap: () {
-                        // TODO: Navigate to Terms & Conditions
+                        Get.to(()=> TermsandConditions());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/Icon (5).png",
                       title: "Frequently Asked Questions",
                       onTap: () {
-                        // TODO: Navigate to FAQ
+                        Get.to(()=> FrequentlyQuestions());
                       },
                     ),
                   ],
@@ -112,7 +119,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/home.png",
                       title: "My Profile",
                       onTap: () {
-                        // TODO: Navigate to Contact Us
+                        Get.to(()=> PersonalInfoScreen());
                       },
                     ),
                     ListTileForNav(
@@ -138,7 +145,7 @@ class _AppDrawerState extends State<AppDrawer> {
               title: "Logout",
               liconPath: "assets/icons/logout_icon_dawer.png",
               onTap: () {
-                // TODO: Handle Logout
+                Get.to(()=> LoginScreen());
               },
             ),
           ],

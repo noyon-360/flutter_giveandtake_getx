@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/home_static_screens/presantation/screen/aboutus_screen.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
+import 'package:karlfive/features/Home/presentation/screen/home_screen.dart';
 import '../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
 import '../../../features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 import '../controllers/bottom_nav_controller.dart';
@@ -15,11 +14,11 @@ class DashboardScreen extends StatelessWidget {
 
   final List<Widget> screens = const [
 
-    Center(child: Text("Home screen")),
-    Center(child: Text("Chat Screen")),
-    Center(child: Text("Notifications")),
-
+    HomeScreen(),
+    Text("Chat Screen"),
+    Text("Notification Screen"),
     ProfileDashboardScreen(),
+
 
 
 
