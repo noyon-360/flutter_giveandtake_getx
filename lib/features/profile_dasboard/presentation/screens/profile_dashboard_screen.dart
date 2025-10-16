@@ -57,26 +57,26 @@ class ProfileDashboardScreen extends StatelessWidget {
                   Get.to(() => const LoginScreen());
                 }),
 
-                _menuTile("assets/icons/personalinfo.png", "About Us", (){
+                _menuTile("assets/images/about.png", "About Us", (){
                   Get.to (() => const AboutUs());
                 }),
-                _menuTile("assets/icons/personalinfo.png", "Privacy Policy", (){
+                _menuTile("assets/images/pricacy.png", "Privacy Policy", (){
                   Get.to (() => const PrivacyPolicy());
                 }),
 
-                _menuTile("assets/icons/personalinfo.png", "Terms & Conditions", (){
+                _menuTile("assets/images/trm.png", "Terms & Conditions", (){
                   Get.to (() => const TermsandConditions());
                 }),
 
-                _menuTile("assets/icons/personalinfo.png", "FrequentlyQuestions", (){
+                _menuTile("assets/images/faq.png", "FrequentlyQuestions", (){
                   Get.to (() => const FrequentlyQuestions());
                 }),
 
-                _menuTile("assets/icons/personalinfo.png", "ContactUsScreen", (){
+                _menuTile("assets/icons/nav_chat.png", "ContactUsScreen", (){
                   Get.to (() =>  ContactUsScreen(member: EditProfileModel()));
                 }),
 
-                _menuTile("assets/icons/personalinfo.png", "Blog", (){
+                _menuTile("assets/icons/profile_contactus.png", "Blog", (){
                   Get.to (() =>  BlogScreen());
                 })
               ],

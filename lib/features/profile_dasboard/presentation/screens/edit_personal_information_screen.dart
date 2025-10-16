@@ -68,7 +68,7 @@ class _EditProfileState extends State<EditProfile> {
                             radius: 12,
                             backgroundColor: Colors.black,
                             child: Image.asset(
-                              "assets/icons/camera.png",
+                              "assets/images/camara.png",
                               width: 13,
                               height: 13,
                               color: Colors.white,
