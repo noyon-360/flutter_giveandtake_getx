@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/edit_personal_information_screen.dart';
 import '../controller/profile_controller.dart';
-import '../widgets/profile_tab_navigator.dart';
 
 class PersonalInfoScreen extends StatelessWidget {
   const PersonalInfoScreen({super.key});
 
+  // Create controller once when the widget instance is constructed.
+  // This avoids calling Get.put inside build repeatedly.
+  static final ProfileController _ctrl = Get.put(ProfileController());
+
   @override
   Widget build(BuildContext context) {
-    final ProfileController ctrl = Get.put(ProfileController());
+    final ProfileController ctrl = _ctrl;
 
     return Scaffold(
       backgroundColor: Colors.white,

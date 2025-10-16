@@ -77,7 +77,7 @@ class AuthEndpoints {
 
 class UserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/user';
-  final String updateProfile = '$_base/update-profile';
+  final String updateProfile = '$_base/update';
   final String getUserProfile = '$_base/profile';
 
   // final String create = '$_base/create';
