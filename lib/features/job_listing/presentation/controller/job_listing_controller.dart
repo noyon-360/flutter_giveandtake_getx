@@ -14,7 +14,7 @@ class JobListingController extends GetxController {
   final RxList<String> selectedFilters = <String>[].obs;
   final RxString searchQuery = ''.obs;
   final RxBool isLoading = true.obs;
-  final RxString selectedLocation = 'United States'.obs;
+  final RxString selectedLocation = 'All Locations'.obs;
   final RxString errorMessage = ''.obs;
 
   @override
@@ -73,22 +73,28 @@ class JobListingController extends GetxController {
   void applyFilters() {
     var filtered = jobs.where((job) {
       // Search filter
-      if (searchQuery.value.isNotEmpty) {
-        final query = searchQuery.value.toLowerCase();
+      final trimmed = searchQuery.value.trim();
+      if (trimmed.isNotEmpty) {
+        final query = trimmed.toLowerCase();
+        // allow multi-keyword search: any token matching any of the fields
+        final tokens = query.split(RegExp(r"\s+"));
+
         final title = (job['title'] ?? '').toString().toLowerCase();
         final company = (job['company'] ?? '').toString().toLowerCase();
         final location = (job['location'] ?? '').toString().toLowerCase();
 
-        if (!title.contains(query) &&
-            !company.contains(query) &&
-            !location.contains(query)) {
-          return false;
-        }
+        final matched = tokens.any(
+          (t) =>
+              title.contains(t) || company.contains(t) || location.contains(t),
+        );
+
+        if (!matched) return false;
       }
 
       // Location filter
       if (selectedLocation.value != 'All Locations' &&
-          job['location'] != selectedLocation.value) {
+          job['location'].toString().toLowerCase() !=
+              selectedLocation.value.toString().toLowerCase()) {
         return false;
       }
 
