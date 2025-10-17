@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:karlfive/features/home_static_screens/data/models/blog_model.dart';
+import 'package:karlfive/features/home_static_screens/presentation/controller/blog_details_controller.dart';
+import 'package:get/get.dart';
 
 class BlogDetailsScreen extends StatelessWidget {
-  const BlogDetailsScreen({super.key});
+  final BlogModel? post;
+  final String? id;
+
+  const BlogDetailsScreen({super.key, this.post, this.id});
 
   @override
   Widget build(BuildContext context) {
+    final BlogDetailsController ctrl = Get.put(BlogDetailsController());
+
+    if (post == null && id != null) {
+      // fetch the blog if id provided and no post model passed
+      ctrl.fetchById(id!);
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -53,105 +66,70 @@ class BlogDetailsScreen extends StatelessWidget {
 
       /// ---------------- Body ----------------
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.asset(
-                  'assets/images/blog.jpg',
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(height: 18),
+        child: Obx(() {
+          // if a post was passed in we show it; otherwise use controller
+          final BlogModel? model = post ?? ctrl.blog.value;
+          if (post == null && ctrl.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              /// Section 1
-              const Text(
-                "Lorem ipsum dolor sit amet.",
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                "Novel research material refers to original, unexplored sources or data sets that offer fresh perspectives on a given topic, pushing the boundaries of existing knowledge and inviting rigorous scholarly inquiry. Unlike repurposed or derivative content, novel research material emerges from innovative methodologies—whether through cutting-edge experiments, newly digitized archives, under-studied communities, or interdisciplinary syntheses—that have not yet been subjected to extensive academic scrutiny. Its value lies not only in presenting previously hidden insights but also in challenging prevailing assumptions.",
-                style: TextStyle(
-                  fontSize: 10,
-                  height: 1.5,
-                  color: Color(0xFF545454),
-                ),
-              ),
-              const SizedBox(height: 14),
+          if (post == null && ctrl.error.value != null) {
+            return Center(child: Text('Error: ${ctrl.error.value}'));
+          }
 
-              /// Section 2
-              const Text(
-                "Lorem ipsum dolor sit amet.",
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                "1. novel research material often catalyzes collaboration across fields? \n2. novel research material often catalyzes collaboration across fields? \n3. novel research material often catalyzes collaboration across fields? \n4. novel research material often catalyzes collaboration across fields?",
-                style: TextStyle(
-                  fontSize: 10,
-                  height: 1.6,
-                  color: Color(0xFF545454),
-                ),
-              ),
-              const SizedBox(height: 14),
+          if (model == null) {
+            return const Center(child: Text('No blog found'));
+          }
 
-              /// Section 3
-              const Text(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                "To instruct aspiring learners in the principles of fiscal legislation, begin by crafting a well-structured syllabus that balances theoretical frameworks with practical illustrations. Rather than merely lecturing, strive for participatory sessions: facilitate roundtable discussions on taxation reforms, assign case analyses of specific regulatory compliance, and assign capstone projects on major monetary statutes. Introduce scholarly articles and judicial opinions as reading materials, then guide students through critical appraisal, highlighting how court precedent shapes tax law, banking ordinances, or consumer protection norms. Tailor exercises to clarify employer-related issues—focusing on the budget cycle, fiscal accountability, and ethics in financial administration.",
-                style: TextStyle(
-                  fontSize: 10,
-                  height: 1.5,
-                  color: Color(0xFF545454),
-                ),
-              ),
-              const SizedBox(height: 14),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (model.image != null && model.image!.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.network(
+                      model.image!,
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                else
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      'assets/images/blog.jpg',
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                const SizedBox(height: 18),
 
-              /// Section 4
-              const Text(
-                "Lorem ipsum dolor sit amet, consectetur.",
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
+                Text(
+                  model.title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                "1. Lorem ipsum dolor sit amet, consectetur.\n2. Lorem ipsum dolor sit amet, consectetur.\n3. Lorem ipsum dolor sit amet, consectetur.\n4. Lorem ipsum dolor sit amet, consectetur.",
-                style: TextStyle(
-                  fontSize: 10,
-                  height: 1.6,
-                  color: Color(0xFF545454),
+                const SizedBox(height: 10),
+                Text(
+                  model.description.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), ''),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    height: 1.6,
+                    color: Color(0xFF545454),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

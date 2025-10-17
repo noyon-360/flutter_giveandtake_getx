@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:karlfive/features/home_static_screens/data/models/blog_model.dart';
+import 'package:karlfive/features/home_static_screens/presentation/controller/blog_controller.dart';
 import 'blog_details.dart';
 
 class BlogScreen extends StatelessWidget {
@@ -8,32 +9,7 @@ class BlogScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final blogPosts = [
-      {
-        'title': 'How to Spot the Right Job for You',
-        'author': 'Alex Robert',
-        'date': 'May 27, 2025',
-        'description':
-        'Don’t just apply — align. Learn how to identify roles that match your career goals and values.',
-        'image': 'assets/images/blog.jpg',
-      },
-      {
-        'title': '5 Tips to Improve Your Elevator Pitch',
-        'author': 'Sarah Lee',
-        'date': 'May 25, 2025',
-        'description':
-        'Crafting an elevator pitch can open new opportunities — here’s how to make yours stand out.',
-        'image': 'assets/images/blog.jpg',
-      },
-      {
-        'title': 'Building a Strong Resume in 2025',
-        'author': 'John Carter',
-        'date': 'May 21, 2025',
-        'description':
-        'Learn the essential strategies for building a resume that catches employers’ attention.',
-        'image': 'assets/images/blog.jpg',
-      },
-    ];
+    final BlogController ctrl = Get.put(BlogController());
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -84,93 +60,120 @@ class BlogScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          child: Column(
-            children: blogPosts.map((post) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
+          child: Obx(() {
+            if (ctrl.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (ctrl.error.value != null) {
+              return Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    /// Blog Image
-                    ClipRRect(
-                      borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(8)),
-                      child: Image.asset(
-                        post['image']!,
-                        height: 223,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-
-                    /// Blog Info
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "${post['date']}      ${post['author']}",
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Color(0xFF7C7C7C),
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            post['title']!,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            post['description']!,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Color(0xFF545454),
-                              height: 1.3,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-
-                          // Read More Button
-                          InkWell(
-                            onTap: () {
-                              // Get.toNamed('/blog-details', arguments: post);
-                              Get.to(() => BlogDetailsScreen());
-                            },
-                            child: const Text(
-                              "Read More →",
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF2B7FD0),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    Text('Error: ${ctrl.error.value}'),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: ctrl.fetchBlogs,
+                      child: const Text('Retry'),
                     ),
                   ],
                 ),
               );
-            }).toList(),
-          ),
+            }
+
+            final List<BlogModel> posts = ctrl.blogs;
+            return Column(
+              children: posts.map((post) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Blog Image
+                      if (post.image != null && post.image!.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(8),
+                          ),
+                          child: Image.network(
+                            post.image!,
+                            height: 223,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              post.createdAt ?? '',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Color(0xFF7C7C7C),
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              post.title,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              // Show a short preview of HTML/description by stripping tags if needed.
+                              post.description.replaceAll(
+                                RegExp(r'<[^>]*>|&[^;]+;'),
+                                '',
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Color(0xFF545454),
+                                height: 1.3,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            InkWell(
+                              onTap: () {
+                                Get.to(() => BlogDetailsScreen(id: post.id));
+                              },
+                              child: const Text(
+                                "Read More →",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF2B7FD0),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            );
+          }),
         ),
       ),
     );
