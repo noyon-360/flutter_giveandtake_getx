@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:karlfive/features/home_static_screens/data/models/blog_model.dart';
-import 'package:karlfive/features/home_static_screens/presentation/controller/blog_details_controller.dart';
 import 'package:get/get.dart';
+
+import '../controller/blog_details_controller.dart';
 
 class BlogDetailsScreen extends StatelessWidget {
   final BlogModel? post;

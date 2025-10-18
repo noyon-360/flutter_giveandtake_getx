@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
-import 'package:karlfive/features/home_static_screens/presantation/screen/Terms%20&%20Conditions.dart';
-import 'package:karlfive/features/home_static_screens/presantation/screen/aboutus_screen.dart';
-import 'package:karlfive/features/home_static_screens/presantation/screen/blog.dart';
-import 'package:karlfive/features/home_static_screens/presantation/screen/frequently_questions.dart';
-import 'package:karlfive/features/home_static_screens/presantation/screen/privacy_policy.dart';
+import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
+import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
+import '../../../home_static_screens/presentation/screen/Terms & Conditions.dart';
+import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
+import '../../../home_static_screens/presentation/screen/blog.dart';
+import '../../../home_static_screens/presentation/screen/frequently_questions.dart';
+import '../../../home_static_screens/presentation/screen/privacy_policy.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -92,6 +94,15 @@ class _AppDrawerState extends State<AppDrawer> {
                         Get.to(()=> FrequentlyQuestions());
                       },
                     ),
+
+                    ListTileForNav(
+                      liconPath: "assets/icons/contactus.png",
+                      title: "Contact Us",
+                      onTap: () {
+                        Get.to(()=> ContactUsScreen(member: EditProfileModel()));
+                      },
+                    ),
+                    
                   ],
                 ),
               ),
@@ -145,7 +156,7 @@ class _AppDrawerState extends State<AppDrawer> {
               title: "Logout",
               liconPath: "assets/icons/logout_icon_dawer.png",
               onTap: () {
-                Get.to(()=> LoginScreen());
+                Get.offAll(()=> LoginScreen());
               },
             ),
           ],

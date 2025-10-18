@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../core/network/api_client.dart';
 import '../../data/models/contactus_model.dart';
 import '../../domain/repo/contact_us_repimpl.dart';
 import '../controller/contact_us_controller.dart';
 
-
-
 class ContactUsScreen extends StatelessWidget {
   final EditProfileModel member;
 
-  final controller = Get.put(ContactUsController(ContactUsRepoImpl(apiClient: ApiClient())));
-
+  final controller = Get.put(
+    ContactUsController(ContactUsRepoImpl(apiClient: ApiClient())),
+  );
 
   ContactUsScreen({super.key, required this.member});
 
@@ -26,6 +24,16 @@ class ContactUsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Prefill fields from passed member when available but only if empty
+    if (firstNameController.text.isEmpty)
+      firstNameController.text = member.firstName;
+    if (lastNameController.text.isEmpty)
+      lastNameController.text = member.lastName;
+    if (addressController.text.isEmpty)
+      addressController.text =
+          member.email; // if address not available, show email
+    if (phoneNumberController.text.isEmpty)
+      phoneNumberController.text = member.phone;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -43,7 +51,12 @@ class ContactUsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 22, left: 24, right: 24, bottom: 24),
+          padding: const EdgeInsets.only(
+            top: 22,
+            left: 24,
+            right: 24,
+            bottom: 24,
+          ),
           child: Column(
             children: [
               // First + Last Name
@@ -205,42 +218,57 @@ class ContactUsScreen extends StatelessWidget {
 
               const SizedBox(height: 43),
 
-              // Error message
-              Obx(() => controller.errorMessage.isNotEmpty
-                  ? Text(
-                controller.errorMessage.value,
-                style: const TextStyle(color: Colors.red),
-              )
-                  : const SizedBox()),
+              // Error / Success message
+              Obx(() {
+                if (controller.errorMessage.isNotEmpty) {
+                  return Text(
+                    controller.errorMessage.value,
+                    style: const TextStyle(color: Colors.red),
+                  );
+                }
+                if (controller.successMessage.isNotEmpty) {
+                  return Text(
+                    controller.successMessage.value,
+                    style: const TextStyle(color: Colors.green),
+                  );
+                }
+                return const SizedBox();
+              }),
 
               const SizedBox(height: 10),
 
               // Submit Button
               Align(
                 alignment: Alignment.center,
-                child: Obx(() => SizedBox(
-                  height: 39,
-                  width: 342,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2B7FD0),
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                child: Obx(
+                  () => SizedBox(
+                    height: 39,
+                    width: 342,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2B7FD0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    onPressed: controller.isLoading.value ? null : _submitForm,
-                    child: controller.isLoading.value
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                      "Send Message",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : _submitForm,
+                      child: controller.isLoading.value
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "Send Message",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                     ),
                   ),
-                ),
                 ),
               ),
               const SizedBox(height: 170),
@@ -273,7 +301,7 @@ class ContactUsScreen extends StatelessWidget {
       address: address,
       phoneNumber: phoneNumber,
       subject: subject,
-      yourCompany: yourCompany,
+      message: yourCompany,
     );
   }
 
@@ -298,13 +326,20 @@ class ContactUsScreen extends StatelessWidget {
         const SizedBox(height: 5),
         TextFormField(
           controller: controller,
-          style: const TextStyle(color: Color(0xFF2A2A2A), fontSize: 12, fontWeight: FontWeight.w400),
+          style: const TextStyle(
+            color: Color(0xFF2A2A2A),
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+          ),
           maxLines: maxLines,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: const TextStyle(color: Color(0xFF787878), fontSize: 10),
             isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
             enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Color(0xFF484848)),
               borderRadius: BorderRadius.circular(6),
