@@ -7,7 +7,7 @@ import '../../data/models/subscription_plan_model.dart';
 
 class PlanPricingController extends BaseController {
   final ApiClient _apiClient = Get.find<ApiClient>();
-  
+
   final RxList<SubscriptionPlan> _allPlans = <SubscriptionPlan>[].obs;
   final RxList<SubscriptionPlan> _filteredPlans = <SubscriptionPlan>[].obs;
   final RxInt _currentPage = 0.obs;
@@ -29,16 +29,18 @@ class PlanPricingController extends BaseController {
 
       // Get user role - multiple attempts for robustness
       String userRole = '';
-      
+
       // Try to get from GetUserProfileService
       try {
         final userProfileService = Get.find<GetUserProfileService>();
         userRole = userProfileService.userInfo?.role ?? '';
         print('🐞 DEBUG: User Role from Service: $userRole');
-        
+
         // If service doesn't have user info, trigger a refresh
         if (userRole.isEmpty) {
-          print('🐞 DEBUG: Service empty, attempting to refresh user profile...');
+          print(
+            '🐞 DEBUG: Service empty, attempting to refresh user profile...',
+          );
           await userProfileService.getUserProfile();
           userRole = userProfileService.userInfo?.role ?? '';
           print('🐞 DEBUG: User Role after refresh: $userRole');
@@ -46,13 +48,13 @@ class PlanPricingController extends BaseController {
       } catch (e) {
         print('🐞 DEBUG: Error accessing GetUserProfileService: $e');
       }
-      
+
       // Fallback: Since your API shows role as 'candidate', use that for now
       if (userRole.isEmpty) {
         print('🐞 DEBUG: Using fallback role: candidate');
         userRole = 'candidate'; // Your API response showed this role
       }
-      
+
       print('🐞 DEBUG: Final User Role: $userRole');
 
       if (userRole.isEmpty) {
