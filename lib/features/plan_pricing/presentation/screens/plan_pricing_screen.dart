@@ -148,6 +148,7 @@ class PlanPricingScreen extends GetView<PlanPricingController> {
                                 price: plan.price,
                                 description: plan.description,
                                 features: plan.features,
+                                valid: plan.valid,
                                 onSubscribe: () {
                                   // Show payment options dialog
                                   showPaymentMethodDialog(

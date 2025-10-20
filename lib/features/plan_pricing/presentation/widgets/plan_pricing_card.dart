@@ -6,6 +6,7 @@ class PlanPricingCard extends StatelessWidget {
   final double price;
   final String description;
   final List<String> features;
+  final String valid;
   final VoidCallback? onSubscribe;
 
   const PlanPricingCard({
@@ -14,6 +15,7 @@ class PlanPricingCard extends StatelessWidget {
     required this.price,
     required this.description,
     required this.features,
+    required this.valid,
     this.onSubscribe,
   });
 
@@ -62,7 +64,7 @@ class PlanPricingCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Per year',
+                  'Per $valid',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white,
