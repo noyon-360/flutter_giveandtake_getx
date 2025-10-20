@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/job_listing/data/models/user_profile_model.dart';
 import 'package:karlfive/features/job_listing/domain/usecases/get_user_profile_usecase.dart';
+import 'package:karlfive/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
 
 class JobApplicationScreen extends StatefulWidget {
   final Map<String, dynamic> jobData;
@@ -125,6 +126,7 @@ class _JobApplicationScreenState extends State<JobApplicationScreen> {
       snackPosition: SnackPosition.BOTTOM,
     );
     debugPrint('Application submitted: $data');
+    Get.to(() => PlanPricingScreen());//TODO: Replace with actual success screen
   }
 
   @override

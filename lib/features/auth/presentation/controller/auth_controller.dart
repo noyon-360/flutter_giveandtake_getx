@@ -66,6 +66,7 @@ class AuthController extends BaseController {
             accessToken: success.data.accessToken,
             refreshToken: success.data.refreshToken,
             userId: success.data.user.id,
+            userRole: user.role,
           );
           // Populate the shared GetUserProfileService with the user from login response
           try {

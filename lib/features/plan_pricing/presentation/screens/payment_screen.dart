@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/user_pricing/presentation/screens/plan_pricing_screen.dart';
+import 'package:karlfive/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
   final String planTitle;
