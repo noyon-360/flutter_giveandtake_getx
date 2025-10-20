@@ -111,36 +111,40 @@ class ChangePasswordScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    controller.validatePasswords();
-                  },
+                child: Obx(() => ElevatedButton(
+                  onPressed: controller.isLoading.value ? null : () { controller.validateAndSubmit(); },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2B7FD0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  child: const Text("Save",
+                  child: controller.isLoading.value
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text("Save",
                     style: TextStyle(
                         color: Color(0xFFF4F4F4),
                         fontWeight: FontWeight.w500,
                         fontSize: 16),
                   ),
-                ),
+                )),
               ),
         
               const SizedBox(height: 20),
         
-              /// Success message
-              Obx(
-                () => controller.isSuccess.value
-                    ? const Text(
-                        "Password Changed Successfully",
-                        style: TextStyle(color: Colors.green, fontSize: 14),
-                      )
-                    : const SizedBox(),
-              ),
+              // Server error or success
+              Obx(() {
+                if (controller.serverError.isNotEmpty) {
+                  return Text(controller.serverError.value, style: const TextStyle(color: Colors.red));
+                }
+                if (controller.isSuccess.value) {
+                  return const Text(
+                    "Password Changed Successfully",
+                    style: TextStyle(color: Colors.green, fontSize: 14),
+                  );
+                }
+                return const SizedBox();
+              }),
             ],
           ),
         ),
@@ -155,7 +159,6 @@ class ChangePasswordScreen extends StatelessWidget {
     required bool hasError,
     String? hint,
     double height = 53,
-    bool isValidationField = false,
   }) {
     final isObscure = true.obs;
 

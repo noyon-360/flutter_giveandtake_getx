@@ -10,11 +10,16 @@ class AppliedJobsRepoImpl implements AppliedJobsRepo {
   AppliedJobsRepoImpl({required ApiClient apiClient}) : _apiClient = apiClient;
 
   @override
-  NetworkResult<AppliedJobsResponseModel> fetchUserApplications({required String userId, int page = 1}) {
-    final endpoint = '${ApiConstants.baseUrl}/applied-jobs/user/$userId?page=$page';
+  NetworkResult<AppliedJobsResponseModel> fetchUserApplications({
+    required String userId,
+    int page = 1,
+  }) {
+    final endpoint =
+        '${ApiConstants.baseUrl}/applied-jobs/user/$userId?page=$page';
     return _apiClient.get<AppliedJobsResponseModel>(
       endpoint,
-      fromJsonT: (json) => AppliedJobsResponseModel.fromJson(json['data'] ?? json),
+      fromJsonT: (json) =>
+          AppliedJobsResponseModel.fromJson(json['data'] ?? json),
     );
   }
 }

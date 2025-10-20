@@ -21,7 +21,9 @@ class ApplicationModel {
     return ApplicationModel(
       id: json['_id'] ?? json['id'] ?? '',
       jobTitle: job != null ? (job['title'] ?? '') : (json['title'] ?? ''),
-      companyName: company != null ? (company['name'] ?? '') : (json['companyName'] ?? ''),
+      companyName: company != null
+          ? (company['name'] ?? '')
+          : (json['companyName'] ?? ''),
       appliedDate: json['appliedAt'] ?? json['appliedDate'] ?? '',
       status: json['status'] ?? '',
       raw: Map<String, dynamic>.from(json),
@@ -84,12 +86,20 @@ class AppliedJobsResponseModel {
 
   factory AppliedJobsResponseModel.fromJson(Map<String, dynamic>? json) {
     if (json == null) return AppliedJobsResponseModel(applications: []);
-    final apps = (json['applications'] as List?)?.map((e) {
-      return ApplicationModel.fromJson(Map<String, dynamic>.from(e as Map));
-    }).toList(growable: false) ?? <ApplicationModel>[];
+    final apps =
+        (json['applications'] as List?)
+            ?.map((e) {
+              return ApplicationModel.fromJson(
+                Map<String, dynamic>.from(e as Map),
+              );
+            })
+            .toList(growable: false) ??
+        <ApplicationModel>[];
 
     final resume = json['createResume'] != null
-        ? CreateResumeModel.fromJson(Map<String, dynamic>.from(json['createResume'] as Map))
+        ? CreateResumeModel.fromJson(
+            Map<String, dynamic>.from(json['createResume'] as Map),
+          )
         : null;
 
     return AppliedJobsResponseModel(applications: apps, createResume: resume);

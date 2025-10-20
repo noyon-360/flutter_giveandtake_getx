@@ -14,15 +14,21 @@ class AppliedJobsController extends GetxController {
   Future<void> fetchUserApplications(String userId, {int page = 1}) async {
     isLoading.value = true;
     error.value = null;
-    final result = await _repo.fetchUserApplications(userId: userId, page: page);
-    result.fold((fail) {
-      error.value = fail.message;
-      isLoading.value = false;
-    }, (success) {
-      final data = success.data;
-      applications.assignAll(data.applications);
-      resume.value = data.createResume;
-      isLoading.value = false;
-    });
+    final result = await _repo.fetchUserApplications(
+      userId: userId,
+      page: page,
+    );
+    result.fold(
+      (fail) {
+        error.value = fail.message;
+        isLoading.value = false;
+      },
+      (success) {
+        final data = success.data;
+        applications.assignAll(data.applications);
+        resume.value = data.createResume;
+        isLoading.value = false;
+      },
+    );
   }
 }
