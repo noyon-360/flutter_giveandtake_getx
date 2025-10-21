@@ -3,12 +3,21 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
+import 'package:karlfive/features/plan_pricing/presentation/screens/paypal_webview_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
   final String planTitle;
   final double amount;
+  final String? orderId;
+  final String? approveUrl;
 
-  const PaymentScreen({super.key, required this.planTitle, this.amount = 0.00});
+  const PaymentScreen({
+    super.key,
+    required this.planTitle,
+    this.amount = 0.00,
+    this.orderId,
+    this.approveUrl,
+  });
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -18,30 +27,30 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool _isProcessing = false;
 
   Future<void> _handlePayment() async {
-    setState(() {
-      _isProcessing = true;
-    });
+    // Navigate to PayPal WebView for payment
+    Get.to(
+      () => PaypalWebViewScreen(
+        planTitle: widget.planTitle,
+        amount: widget.amount,
+        orderId: widget.orderId,
+        onFinish: (transactionId) {
+          // Payment completed successfully
+          Get.snackbar(
+            'Payment Completed',
+            'Payment succeeded for ${widget.planTitle}!\nTransaction ID: $transactionId',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
 
-    // Simulate payment processing
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() {
-      _isProcessing = false;
-    });
-
-    // Show success message
-    Get.snackbar(
-      'Payment Completed',
-      'Payment succeeded for ${widget.planTitle}!',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
+          // Navigate back to plan pricing screen after delay
+          Future.delayed(const Duration(seconds: 2), () {
+            Get.offAll(() => PlanPricingScreen());
+          });
+        },
+      ),
     );
-
-    // Navigate to home after successful payment
-    Future.delayed(const Duration(seconds: 2), () {
-      Get.offAll(() => PlanPricingScreen());
-    });
   }
 
   @override
@@ -88,6 +97,41 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    // Show Order ID if available
+                    if (widget.orderId != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "PayPal Order ID:",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textBlack,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.orderId!,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.blue.shade700,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     Text(
                       "Recurring Payment Terms:",
                       style: TextStyle(

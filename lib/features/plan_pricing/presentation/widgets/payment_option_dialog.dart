@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/common/constants/app_images.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/plan_pricing/presentation/screens/payment_screen.dart';
+import 'package:karlfive/features/plan_pricing/presentation/controllers/paypal_controller.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final String planTitle;
@@ -86,13 +87,46 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
-                onPressed: () {
-                  Get.to(
-                    PaymentScreen(
-                      planTitle: widget.planTitle,
-                      amount: widget.price,
-                    ),
-                  );
+                onPressed: () async {
+                  if (_selectedMethod == 'PayPal') {
+                    // Use PaypalController to create order
+                    final paypalController = Get.find<PaypalController>();
+                    final response = await paypalController.createOrder(
+                      widget.price,
+                    );
+
+                    if (response != null) {
+                      // Close dialog first
+                      if (mounted) Navigator.of(context).pop();
+
+                      // Navigate to PaymentScreen with orderId and approveUrl
+                      Get.to(
+                        () => PaymentScreen(
+                          planTitle: widget.planTitle,
+                          amount: widget.price,
+                          orderId: response.orderId,
+                          approveUrl: response.approveUrl,
+                        ),
+                      );
+                    } else {
+                      // Show error from controller
+                      Get.snackbar(
+                        'Error',
+                        paypalController.errorMessage.value.isEmpty
+                            ? 'Failed to create PayPal order'
+                            : paypalController.errorMessage.value,
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                  } else {
+                    // Fallback to existing PaymentScreen
+                    Get.to(
+                      PaymentScreen(
+                        planTitle: widget.planTitle,
+                        amount: widget.price,
+                      ),
+                    );
+                  }
                 },
                 child: const Text(
                   "Pay Now",

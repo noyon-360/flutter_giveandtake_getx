@@ -25,6 +25,7 @@ void main() async {
   Get.put(BottomNavController());
 
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {

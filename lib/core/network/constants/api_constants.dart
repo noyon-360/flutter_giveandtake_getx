@@ -3,7 +3,8 @@ class ApiConstants {
   // static const String baseDomain = 'https://api.evpitch.com';
 
   // add by zafor
-  static const String baseDomain = 'https://api.evpitch.com';
+  // static const String baseDomain = 'https://api.evpitch.com';
+  static const String baseDomain = 'http://10.10.5.88:5000'; // zafor
   //add by zafor end
 
   static const String baseUrl = '$baseDomain/api/v1';
@@ -44,6 +45,7 @@ class ApiConstants {
   static ContactEndpoints get contact => ContactEndpoints();
 
   static PaymentEndpoints get payment => PaymentEndpoints();
+  static PaypalEndpoints get paypal => PaypalEndpoints();
   static RecruiterAccountApi get recruiter => RecruiterAccountApi();
   static JobEndpoints get jobs => JobEndpoints();
   static SubscriptionEndpoints get subscription => SubscriptionEndpoints();
@@ -123,6 +125,13 @@ class PaymentEndpoints {
   final String createPayment = '$_base/create-payment';
 
   final String confirmPayment = '$_base/confirm-payment';
+}
+
+// PayPal endpoints
+class PaypalEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/payments/paypal';
+
+  final String createOrder = '$_base/create-order';
 }
 
 // Subscription endpoints
