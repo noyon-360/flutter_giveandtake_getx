@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../../../core/network/constants/api_constants.dart';
@@ -15,8 +16,6 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<UserModel> fetchUser() async {
     final uri = Uri.parse('${ApiConstants.baseUrl}/user/single');
-
-    // Retrieve access token from AuthStorageService
     final token = await _authStorageService.getAccessToken();
 
     if (token == null || token.isEmpty) {
@@ -37,32 +36,46 @@ class UserRepositoryImpl implements UserRepository {
       if (data == null) throw Exception('Missing data in response');
       return UserModel.fromJson(data);
     } else {
-      throw Exception(
-        'Failed to fetch user: ${resp.statusCode} — ${resp.body}',
-      );
+      throw Exception('Failed to fetch user: ${resp.statusCode} — ${resp.body}');
     }
   }
 
   @override
-  Future<UserModel> updateUser(Map<String, dynamic> payload) async {
+  Future<UserModel> updateUser(Map<String, dynamic> payload, {File? imageFile}) async {
     final uri = Uri.parse('${ApiConstants.baseUrl}/user/update');
-
     final token = await _authStorageService.getAccessToken();
+
+    print('Sending update request to: $uri');
+    print('Payload: $payload');
+    print('Image file: ${imageFile?.path}');
+    print('Token exists: ${token?.isNotEmpty}');
+
     if (token == null || token.isEmpty) {
       throw Exception('No access token found. Please login again.');
     }
 
-    print('🛰️ PATCH ${uri.toString()}');
-    print('📦 Payload: ${json.encode(payload)}');
+    // Use MultipartRequest for form + image upload
+    final request = http.MultipartRequest('PATCH', uri)
+      ..headers['Authorization'] = 'Bearer $token'
+      ..fields.addAll(payload.map((k, v) => MapEntry(k, v.toString())));
 
-    final resp = await client.patch(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: json.encode(payload),
-    );
+    // Match your backend key name (check Postman: use `profileImage` not `avatar`)
+    if (imageFile != null && await imageFile.exists()) {
+      final fileName = imageFile.path.split('/').last;
+      request.files.add(
+        await http.MultipartFile.fromPath('photo', imageFile.path, filename: fileName),
+
+      );
+      print('Attached file: $fileName');
+    } else {
+      print('No image file selected');
+    }
+
+    final streamedResponse = await request.send();
+    final resp = await http.Response.fromStream(streamedResponse);
+
+    print('Response code: ${resp.statusCode}');
+    print('Response body: ${resp.body}');
 
     if (resp.statusCode == 200) {
       final body = json.decode(resp.body) as Map<String, dynamic>;
@@ -73,5 +86,4 @@ class UserRepositoryImpl implements UserRepository {
       throw Exception('Failed to update user: ${resp.statusCode} — ${resp.body}');
     }
   }
-
 }

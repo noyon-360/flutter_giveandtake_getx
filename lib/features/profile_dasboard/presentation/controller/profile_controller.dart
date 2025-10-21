@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:get/get.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/user_repository_impl.dart';
@@ -36,11 +38,11 @@ class ProfileController extends GetxController {
     }
   }
 
-  Future<void> updateUser(Map<String, dynamic> payload) async {
+  Future<void> updateUser(Map<String, dynamic> payload, {File? imageFile}) async {
     try {
       _isLoading.value = true;
       _error.value = null;
-      final updated = await repository.updateUser(payload);
+      final updated = await repository.updateUser(payload, imageFile: imageFile);
       _user.value = updated;
     } catch (e) {
       _error.value = e.toString();
@@ -48,4 +50,5 @@ class ProfileController extends GetxController {
       _isLoading.value = false;
     }
   }
+
 }

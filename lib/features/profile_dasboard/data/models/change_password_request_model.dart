@@ -1,11 +1,15 @@
 class ChangePasswordRequestModel {
-  final String currentPassword;
+  final String oldPassword;
   final String newPassword;
 
-  ChangePasswordRequestModel({required this.currentPassword, required this.newPassword});
+  ChangePasswordRequestModel({
+    required this.oldPassword,
+    required this.newPassword,
+  });
 
   Map<String, dynamic> toJson() => {
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
-      };
+    'oldPassword': oldPassword,
+    'newPassword': newPassword,
+  };
 }
+

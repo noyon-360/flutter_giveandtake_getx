@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controller/profile_controller.dart';
+import 'package:image_cropper/image_cropper.dart';
+
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -14,7 +16,10 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   File? _image;
   late final ProfileController _ctrl;
+
+  //Text Editing Controllers
   final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _surnameCtrl = TextEditingController();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _phoneCtrl = TextEditingController();
   final TextEditingController _addressCtrl = TextEditingController();
@@ -22,16 +27,24 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void initState() {
     super.initState();
-    // ✅ Initialize controller once
-    // Try to find existing controller; if not found, put a new one.
+
+    // nitialize controller (reuse existing instance)
     _ctrl = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
 
-    // ✅ Pre-fill fields if user data already available
+    // Prefill fields from existing user data
     final user = _ctrl.user;
     if (user != null) {
-      _nameCtrl.text = user.name;
+      //Split full name into first name & surname automatically
+      final nameParts = user.name.trim().split(' ');
+      final lastName = nameParts.isNotEmpty ? nameParts.last : '';
+      final firstName = nameParts.length > 1
+          ? nameParts.sublist(0, nameParts.length - 1).join(' ')
+          : user.name;
+
+      _nameCtrl.text = firstName;
+      _surnameCtrl.text = lastName;
       _emailCtrl.text = user.email;
       _phoneCtrl.text = user.phoneNum ?? '';
       _addressCtrl.text = user.address ?? '';
@@ -40,20 +53,51 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile == null) {
+      print('No image selected');
+      return;
+    }
+
+    // Step 1: Crop the image using the new API (v11+)
+    final CroppedFile? croppedFile = await ImageCropper().cropImage(
+      sourcePath: pickedFile.path,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 90,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Profile Photo',
+          toolbarColor: Colors.black,
+          toolbarWidgetColor: Colors.white,
+          hideBottomControls: true,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(
+          title: 'Crop Profile Photo',
+          aspectRatioLockEnabled: true,
+        ),
+      ],
     );
 
-    if (pickedFile != null) {
+    // 🟩 Step 2: Update _image only if cropping is done
+    if (croppedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _image = File(croppedFile.path);
       });
+      print('Cropped image path: ${croppedFile.path}');
+    } else {
+      print('Cropping canceled');
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     final user = _ctrl.user;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -69,7 +113,7 @@ class _EditProfileState extends State<EditProfile> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
             children: [
-              // Profile Section
+              //Profile Section
               Column(
                 children: [
                   Stack(
@@ -129,8 +173,10 @@ class _EditProfileState extends State<EditProfile> {
               ),
               const SizedBox(height: 60),
 
-              // Editable fields
+              //Editable Fields
               _textField(controller: _nameCtrl, label: "First Name", hint: ""),
+              _textField(controller: _surnameCtrl, label: "Surname", hint: ""),
+              // ✅ New field
               _textField(controller: _phoneCtrl, label: "Phone", hint: ""),
               _textField(
                 controller: _emailCtrl,
@@ -141,7 +187,7 @@ class _EditProfileState extends State<EditProfile> {
 
               const SizedBox(height: 30),
 
-              // Update button
+              //Update Button
               Row(
                 children: [
                   Expanded(
@@ -153,13 +199,21 @@ class _EditProfileState extends State<EditProfile> {
                           onPressed: isLoading
                               ? null
                               : () async {
+                                  // Merge first name + surname before sending
                                   final payload = {
-                                    'name': _nameCtrl.text.trim(),
+                                    'name':
+                                        '${_nameCtrl.text.trim()} ${_surnameCtrl.text.trim()}'
+                                            .trim(),
                                     'email': _emailCtrl.text.trim(),
                                     'phoneNum': _phoneCtrl.text.trim(),
                                     'address': _addressCtrl.text.trim(),
                                   };
-                                  await _ctrl.updateUser(payload);
+
+                                  await _ctrl.updateUser(
+                                    payload,
+                                    imageFile: _image,
+                                  );
+
                                   if (_ctrl.error == null) {
                                     Navigator.of(context).pop();
                                   } else {
@@ -207,12 +261,14 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _surnameCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _addressCtrl.dispose();
     super.dispose();
   }
 
+  //Common TextField Builder
   Widget _textField({
     required TextEditingController controller,
     required String label,

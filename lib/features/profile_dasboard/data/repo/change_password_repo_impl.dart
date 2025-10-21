@@ -7,7 +7,8 @@ import '../../domain/repo/change_password_repo.dart';
 class ChangePasswordRepoImpl implements ChangePasswordRepo {
   final ApiClient _apiClient;
 
-  ChangePasswordRepoImpl({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  ChangePasswordRepoImpl({ApiClient? apiClient})
+    : _apiClient = apiClient ?? ApiClient();
 
   @override
   NetworkResult<void> changePassword(ChangePasswordRequestModel request) {

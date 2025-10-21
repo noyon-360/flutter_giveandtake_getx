@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-
 import '../data/models/change_password_request_model.dart';
 import '../data/repo/change_password_repo_impl.dart';
 
@@ -35,14 +34,24 @@ class ChangePasswordController extends GetxController {
 
     // call API
     isLoading.value = true;
-    final request = ChangePasswordRequestModel(currentPassword: currentPassword.value, newPassword: newPassword.value);
+    final request = ChangePasswordRequestModel(
+      oldPassword: currentPassword.value,
+      newPassword: newPassword.value,
+    );
+
+
+
+
     final result = await _repo.changePassword(request);
-    result.fold((fail) {
-      serverError.value = fail.message;
-      isLoading.value = false;
-    }, (_) {
-      isSuccess.value = true;
-      isLoading.value = false;
-    });
+    result.fold(
+      (fail) {
+        serverError.value = fail.message;
+        isLoading.value = false;
+      },
+      (_) {
+        isSuccess.value = true;
+        isLoading.value = false;
+      },
+    );
   }
 }
