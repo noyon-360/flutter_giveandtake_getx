@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controller/profile_controller.dart';
+import '../../data/models/user_model.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 
@@ -28,27 +29,35 @@ class _EditProfileState extends State<EditProfile> {
   void initState() {
     super.initState();
 
-    // nitialize controller (reuse existing instance)
+    // Initialize controller (reuse existing instance)
     _ctrl = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
 
-    // Prefill fields from existing user data
+    // Initial prefill
+    _prefillFields();
+  }
+
+  void _prefillFields() {
     final user = _ctrl.user;
     if (user != null) {
-      //Split full name into first name & surname automatically
-      final nameParts = user.name.trim().split(' ');
-      final lastName = nameParts.isNotEmpty ? nameParts.last : '';
-      final firstName = nameParts.length > 1
-          ? nameParts.sublist(0, nameParts.length - 1).join(' ')
-          : user.name;
-
-      _nameCtrl.text = firstName;
-      _surnameCtrl.text = lastName;
-      _emailCtrl.text = user.email;
-      _phoneCtrl.text = user.phoneNum ?? '';
-      _addressCtrl.text = user.address ?? '';
+      _updateTextFields(user);
     }
+  }
+
+  void _updateTextFields(UserModel user) {
+    //Split full name into first name & surname automatically
+    final nameParts = user.name.trim().split(' ');
+    final lastName = nameParts.isNotEmpty ? nameParts.last : '';
+    final firstName = nameParts.length > 1
+        ? nameParts.sublist(0, nameParts.length - 1).join(' ')
+        : user.name;
+
+    _nameCtrl.text = firstName;
+    _surnameCtrl.text = lastName;
+    _emailCtrl.text = user.email;
+    _phoneCtrl.text = user.phoneNum ?? '';
+    _addressCtrl.text = user.address ?? '';
   }
 
   Future<void> _pickImage() async {
@@ -81,7 +90,7 @@ class _EditProfileState extends State<EditProfile> {
       ],
     );
 
-    // 🟩 Step 2: Update _image only if cropping is done
+    // Step 2: Update _image only if cropping is done
     if (croppedFile != null) {
       setState(() {
         _image = File(croppedFile.path);
@@ -92,12 +101,8 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-    final user = _ctrl.user;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -113,70 +118,80 @@ class _EditProfileState extends State<EditProfile> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
             children: [
-              //Profile Section
-              Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _image != null
-                            ? FileImage(_image!) as ImageProvider
-                            : (user != null &&
-                                      user.avatarUrl != null &&
-                                      user.avatarUrl!.isNotEmpty
-                                  ? NetworkImage(user.avatarUrl!)
-                                  : const AssetImage(
-                                      "assets/images/profile.jpg",
-                                    )),
-                      ),
-                      Positioned(
-                        bottom: 7.33,
-                        right: 7.33,
-                        child: GestureDetector(
-                          onTap: _pickImage,
-                          child: CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Colors.black,
-                            child: Image.asset(
-                              "assets/images/camara.png",
-                              width: 13,
-                              height: 13,
-                              color: Colors.white,
+              //Profile Section - Now Reactive
+              Obx(() {
+                final user = _ctrl.user;
+                // Update text fields when user data changes reactively
+                if (user != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _updateTextFields(user);
+                  });
+                }
+
+                return Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: _image != null
+                              ? FileImage(_image!) as ImageProvider
+                              : (user != null &&
+                              user.avatarUrl != null &&
+                              user.avatarUrl!.isNotEmpty
+                              ? NetworkImage(user.avatarUrl!)
+                              : const AssetImage(
+                            "assets/images/profile.jpg",
+                          )),
+                        ),
+                        Positioned(
+                          bottom: 7.33,
+                          right: 7.33,
+                          child: GestureDetector(
+                            onTap: _pickImage,
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.black,
+                              child: Image.asset(
+                                "assets/images/camara.png",
+                                width: 13,
+                                height: 13,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      user?.name ?? 'User',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF212121),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    user?.name ?? 'User',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF212121),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    user?.email ?? '',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF595959),
+                    const SizedBox(height: 4),
+                    Text(
+                      user?.email ?? '',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF595959),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
-                ],
-              ),
+                    const SizedBox(height: 24),
+                    const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
+                  ],
+                );
+              }),
               const SizedBox(height: 60),
 
               //Editable Fields
               _textField(controller: _nameCtrl, label: "First Name", hint: ""),
               _textField(controller: _surnameCtrl, label: "Surname", hint: ""),
-              // ✅ New field
+              // New field
               _textField(controller: _phoneCtrl, label: "Phone", hint: ""),
               _textField(
                 controller: _emailCtrl,
@@ -215,6 +230,18 @@ class _EditProfileState extends State<EditProfile> {
                                   );
 
                                   if (_ctrl.error == null) {
+                                    // Clear the selected image after successful update
+                                    setState(() {
+                                      _image = null;
+                                    });
+                                    // Show success message
+                                    Get.snackbar(
+                                      'Success',
+                                      'Profile updated successfully!',
+                                      backgroundColor: const Color(0xFF10B287),
+                                      colorText: Colors.white,
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
                                     Navigator.of(context).pop();
                                   } else {
                                     Get.snackbar('Error', _ctrl.error ?? '');

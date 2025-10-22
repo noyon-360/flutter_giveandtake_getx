@@ -42,6 +42,28 @@ class ProfileController extends GetxController {
     try {
       _isLoading.value = true;
       _error.value = null;
+
+      // Optimistically update UI immediately
+      if (_user.value != null) {
+        final current = _user.value!;
+        _user.value = UserModel(
+          id: current.id,
+          name: payload['name'] ?? current.name,
+          email: payload['email'] ?? current.email,
+          phoneNum: payload['phoneNum'] ?? current.phoneNum,
+          address: payload['address'] ?? current.address,
+          avatarUrl: current.avatarUrl,
+          role: current.role,
+          deactivate: current.deactivate,
+          dateOfdeactivate: current.dateOfdeactivate,
+          refreshToken: current.refreshToken,
+          title: current.title,
+          isValid: current.isValid,
+          payAsYouGo: current.payAsYouGo,
+        );
+      }
+
+      // Then call the API in background
       final updated = await repository.updateUser(payload, imageFile: imageFile);
       _user.value = updated;
     } catch (e) {
@@ -50,5 +72,6 @@ class ProfileController extends GetxController {
       _isLoading.value = false;
     }
   }
+
 
 }
