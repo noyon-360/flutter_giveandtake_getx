@@ -16,19 +16,21 @@ class ApplicationModel {
   });
 
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
-    final job = json['job'] as Map<String, dynamic>?;
-    final company = json['company'] as Map<String, dynamic>?;
+    final job = json['jobId'] as Map<String, dynamic>?;
+    final company = job != null ? job['companyId'] as Map<String, dynamic>? : null;
+
     return ApplicationModel(
-      id: json['_id'] ?? json['id'] ?? '',
-      jobTitle: job != null ? (job['title'] ?? '') : (json['title'] ?? ''),
-      companyName: company != null
-          ? (company['name'] ?? '')
-          : (json['companyName'] ?? ''),
-      appliedDate: json['appliedAt'] ?? json['appliedDate'] ?? '',
+      id: json['_id'] ?? '',
+      jobTitle: job?['title'] ?? '',
+      companyName: company?['cname'] ?? '',
+      appliedDate: json['createdAt']?.toString().split('T').first ?? '',
       status: json['status'] ?? '',
       raw: Map<String, dynamic>.from(json),
     );
   }
+
+
+
 }
 
 class CreateResumeModel {
