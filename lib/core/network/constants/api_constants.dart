@@ -38,6 +38,7 @@ class ApiConstants {
 
   static PaymentEndpoints get payment => PaymentEndpoints();
   static RecruiterAccountApi get recruiter => RecruiterAccountApi();
+  static ContentEndpoints get content => ContentEndpoints();
 }
 
 class RecruiterAccountApi {
@@ -102,6 +103,11 @@ class ContactEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/contact';
   // API endpoint is /contact/contact-us in the backend
   final String createContact = '$_base/contact-us';
+}
+
+class ContentEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/content';
+  final String about = '$_base/about';
 }
 
 // New payment endpoints

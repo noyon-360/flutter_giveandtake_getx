@@ -5,6 +5,7 @@ import 'package:karlfive/core/init/app_initializer.dart';
 import 'package:karlfive/core/theme/app_theme.dart';
 import 'package:karlfive/core/common/constants/stripe_key.dart';
 import 'core/bottomNavbar/controllers/bottom_nav_controller.dart';
+import 'core/network/api_client.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 
  void main() async {
@@ -17,6 +18,9 @@ import 'features/auth/presentation/screens/splash_screen.dart';
   Stripe.publishableKey = StripeKey.publishableKey;
   Stripe.merchantIdentifier = 'merchant.com.yourapp';
   await Stripe.instance.applySettings();
+
+  // Inject ApiClient globally (Fixes double init problem)
+  Get.put(ApiClient(), permanent: true);
  
   // Inject BottomNavController globally
   Get.put(BottomNavController());

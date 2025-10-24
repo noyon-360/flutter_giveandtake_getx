@@ -53,6 +53,7 @@ dependencies:
   csc_picker_plus: ^0.0.3
   http: ^1.5.0
   image_cropper: ^11.0.0
+  flutter_html: ^3.0.0-beta.2
 
 
 
