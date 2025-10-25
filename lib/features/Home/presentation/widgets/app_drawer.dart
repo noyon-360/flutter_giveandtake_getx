@@ -5,7 +5,7 @@ import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
 import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
-import '../../../home_static_screens/presentation/screen/Terms & Conditions.dart';
+import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
 import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
 import '../../../home_static_screens/presentation/screen/blog.dart';
 import '../../../home_static_screens/presentation/screen/frequently_questions.dart';

@@ -108,6 +108,10 @@ class ContactEndpoints {
 class ContentEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/content';
   final String about = '$_base/about';
+  final String privacy = '$_base/privacy';
+  // Terms endpoint - some environments spell it 'trems' accidentally; provide both keys
+  final String terms = '$_base/terms';
+  final String trems = '$_base/trems';
 }
 
 // New payment endpoints

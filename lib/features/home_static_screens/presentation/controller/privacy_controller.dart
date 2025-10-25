@@ -4,31 +4,30 @@ import '../../data/models/about_model.dart';
 import '../../data/repositories/content_repository.dart';
 import '../../data/repositories/content_repository_impl.dart';
 
-class AboutController extends GetxController {
+class PrivacyController extends GetxController {
   final ContentRepository _repo;
 
-  AboutController({ContentRepository? repository})
+  PrivacyController({ContentRepository? repository})
     : _repo = repository ?? ContentRepositoryImpl(client: http.Client());
 
   final RxBool isLoading = false.obs;
   final RxnString error = RxnString();
-  final Rxn<AboutModel> aboutContent = Rxn<AboutModel>();
+  final Rxn<AboutModel> privacyContent = Rxn<AboutModel>();
 
   @override
   void onInit() {
     super.onInit();
-    fetchAboutContent();
+    fetchPrivacyContent();
   }
 
-  Future<void> fetchAboutContent({bool forceRefresh = false}) async {
-    // If already have content and not forceRefresh, do nothing
-    if (!forceRefresh && aboutContent.value != null) return;
+  Future<void> fetchPrivacyContent({bool forceRefresh = false}) async {
+    if (!forceRefresh && privacyContent.value != null) return;
 
     try {
       isLoading.value = true;
       error.value = null;
-      final about = await _repo.fetchAbout();
-      aboutContent.value = about;
+      final content = await _repo.fetchPrivacy();
+      privacyContent.value = content;
     } catch (e) {
       error.value = e.toString();
     } finally {
