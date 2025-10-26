@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/core/services/get_user_profile_service.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:karlfive/core/services/get_user_profile_service.dart';
+import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../job_listing/presentation/screens/job_listing_screen.dart';
+import '../controllers/home_controller.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/custom_searchbox.dart';
 import '../widgets/home_main_card.dart';
@@ -18,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GetUserProfileService _profileService = Get.find();
+  final HomeController _homeController = Get.find();
 
   @override
   void initState() {
@@ -183,46 +186,49 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "1. Record or upload your video elevator pitch (60 seconds free or upgrade!)\n2. Add a link to your video elevator pitch in your CV/resume\n3. Search and apply for jobs on our site",
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: AppColors.textBlack,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-
                     const SizedBox(height: 24),
-                    HomeMainCard(
-                      iconPath: "assets/icons/add-user_home.png",
-                      title: "Create account",
-                      subtitle:
-                          "Build your profile, upload your CV and get\naccess to thousands of jobs",
-                      onTap: () {
-                        //TODO: Navigate to create account screen
-                      },
-                    ),
+                    Obx(() {
+                      final candidate = _homeController.candidateContent.value;
+                      return HomeMainCard(
+                        iconPath: "assets/icons/add-user_home.png",
+                        title: candidate?.title ?? "Candidates",
+                        subtitle: candidate?.description ??
+                            "Build your profile, upload your CV and get\naccess to thousands of jobs",
+                        isHtml: candidate != null,
+                        onTap: () {
+                          //TODO: Navigate to create account screen
+                        },
+                      );
+                    }),
                     const SizedBox(height: 16),
 
-                    HomeMainCard(
-                      iconPath: "assets/icons/home_job_find.png",
-                      title: "Explore our Jobs",
-                      subtitle: "Explore thousands of our job listings.",
-                      onTap: () {
-                        Get.to(() => const JobListingScreen());
-                      },
-                    ),
+                    Obx(() {
+                      final recruiter = _homeController.recruiterContent.value;
+                      return HomeMainCard(
+                        iconPath: "assets/icons/home_job_find.png",
+                        title: recruiter?.title ?? "Recruiters",
+                        subtitle: recruiter?.description ??
+                            "Explore thousands of our job listings.",
+                        isHtml: recruiter != null,
+                        onTap: () {
+                          Get.to(() => const JobListingScreen());
+                        },
+                      );
+                    }),
                     const SizedBox(height: 16),
-                    HomeMainCard(
-                      iconPath: "assets/icons/get_job.png",
-                      title: "Get a Job",
-                      subtitle:
-                          "Apply with ease, follow recruiters, and land your next opportunity.",
-                      onTap: () {
-                        //TODO: Navigate to get a job screen
-                      },
-                    ),
+                    Obx(() {
+                      final company = _homeController.companyContent.value;
+                      return HomeMainCard(
+                        iconPath: "assets/icons/get_job.png",
+                        title: company?.title ?? "Companies",
+                        subtitle: company?.description ??
+                            "Apply with ease, follow recruiters, and land your next opportunity.",
+                        isHtml: company != null,
+                        onTap: () {
+                          //TODO: Navigate to get a job screen
+                        },
+                      );
+                    }),
 
                     const SizedBox(height: 10),
 

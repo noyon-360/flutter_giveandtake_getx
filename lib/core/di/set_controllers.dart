@@ -1,9 +1,10 @@
 import 'package:get/get.dart';
+import 'package:karlfive/features/Home/presentation/controllers/home_controller.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/job_listing/presentation/controller/job_listing_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
-import 'package:karlfive/features/plan_pricing/presentation/controllers/plan_pricing_controller.dart';
 import 'package:karlfive/features/plan_pricing/presentation/controllers/paypal_controller.dart';
+import 'package:karlfive/features/plan_pricing/presentation/controllers/plan_pricing_controller.dart';
+import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 
 void setupController() {
   // Auth Controller
@@ -32,6 +33,12 @@ void setupController() {
   // PayPal Controller
   Get.lazyPut<PaypalController>(
     () => PaypalController(Get.find()),
+    fenix: true,
+  );
+
+  // Home Controller
+  Get.lazyPut<HomeController>(
+    () => HomeController(Get.find()),
     fenix: true,
   );
 }

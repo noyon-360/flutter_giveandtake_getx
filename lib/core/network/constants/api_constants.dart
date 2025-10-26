@@ -49,6 +49,7 @@ class ApiConstants {
   static RecruiterAccountApi get recruiter => RecruiterAccountApi();
   static JobEndpoints get jobs => JobEndpoints();
   static SubscriptionEndpoints get subscription => SubscriptionEndpoints();
+  static ContentEndpoints get content => ContentEndpoints();
 }
 
 class JobEndpoints {
@@ -139,4 +140,11 @@ class SubscriptionEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/subscription';
 
   final String getPlans = '$_base/plans';
+}
+
+// Content endpoints
+class ContentEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/content';
+
+  String getContentByType(String type) => '$_base/$type';
 }
