@@ -14,8 +14,7 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
   NetworkResult<UserProfileModel> getUserProfile() async {
     return await _apiClient.get<UserProfileModel>(
       '${ApiConstants.baseUrl}/user/single',
-      fromJsonT: (json) =>
-          UserProfileModel.fromJson(json['data'] as Map<String, dynamic>),
+      fromJsonT: (json) => UserProfileModel.fromJson(json as Map<String, dynamic>),
     );
   }
 }

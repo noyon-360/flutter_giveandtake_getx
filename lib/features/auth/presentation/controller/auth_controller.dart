@@ -18,12 +18,11 @@ import 'package:karlfive/features/auth/presentation/screens/otp_verification_for
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
 import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
+
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
-
-import '../../../../core/theme/app_colors.dart';
-import '../../../Home/presentation/screen/home_screen.dart';
 import '../../../../core/services/get_user_profile_service.dart';
+import '../../../../core/theme/app_colors.dart';
 import 'remember_me_controller.dart';
 
 class AuthController extends BaseController {

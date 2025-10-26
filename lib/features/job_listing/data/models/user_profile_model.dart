@@ -11,6 +11,12 @@ class UserProfileModel {
   final bool deactivate;
   final DateTime createdAt;
   final DateTime updatedAt;
+  
+  // Social media links
+  final String? linkedinUrl;
+  final String? githubUrl;
+  final String? websiteUrl;
+  final String? instagramUrl;
 
   UserProfileModel({
     required this.id,
@@ -25,6 +31,10 @@ class UserProfileModel {
     required this.deactivate,
     required this.createdAt,
     required this.updatedAt,
+    this.linkedinUrl,
+    this.githubUrl,
+    this.websiteUrl,
+    this.instagramUrl,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +59,10 @@ class UserProfileModel {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
+      linkedinUrl: json['socialLinks']?['linkedin'],
+      githubUrl: json['socialLinks']?['github'],
+      websiteUrl: json['socialLinks']?['website'],
+      instagramUrl: json['socialLinks']?['instagram'],
     );
   }
 
@@ -66,6 +80,12 @@ class UserProfileModel {
       'deactivate': deactivate,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'socialLinks': {
+        'linkedin': linkedinUrl,
+        'github': githubUrl,
+        'website': websiteUrl,
+        'instagram': instagramUrl,
+      },
     };
   }
 }
