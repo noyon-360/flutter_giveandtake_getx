@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 
@@ -33,7 +32,6 @@ class _BookmarkJobsScreenState extends State<BookmarkJobsScreen> {
       position: RelativeRect.fromLTRB(100, 100, 0, 0),
       items: const [
         PopupMenuItem(value: 'view', child: Text('View Details')),
-        PopupMenuItem(value: 'copy', child: Text('Copy link')),
         PopupMenuItem(value: 'unsave', child: Text('Unsave')),
       ],
     );
@@ -42,10 +40,6 @@ class _BookmarkJobsScreenState extends State<BookmarkJobsScreen> {
 
     if (choice == 'view') {
       Get.to(() => JobDetailsScreen(jobData: original));
-    } else if (choice == 'copy') {
-      final link = original['link'] ?? original['applyLink'] ?? '';
-      await Clipboard.setData(ClipboardData(text: link));
-      Get.snackbar('Copied', 'Link copied to clipboard');
     } else if (choice == 'unsave') {
       // Show loading dialog
       Get.dialog(
