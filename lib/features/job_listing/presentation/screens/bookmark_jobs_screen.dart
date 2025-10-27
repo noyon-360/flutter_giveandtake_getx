@@ -80,7 +80,7 @@ class _BookmarkJobsScreenState extends State<BookmarkJobsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bookmark Jobs'),
+        title: const Text('Bookmarked Jobs'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(

@@ -168,7 +168,7 @@ class JobDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'Easy Apply',
+                      'Apply Now',
                       style: TextStyle(
                         color: AppColors.primaryWhite,
                         fontWeight: FontWeight.w700,

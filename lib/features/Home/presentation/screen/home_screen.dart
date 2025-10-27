@@ -178,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "How It Works in three simple steps",
+                        "How It Works",
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.textBlack,
