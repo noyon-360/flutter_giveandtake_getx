@@ -19,21 +19,15 @@ class JobApplicationScreen extends StatelessWidget {
     ));
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: AppColors.textBlack),
         title: const Text(
           'Job Application',
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.textBlack,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
-        ),
-        backgroundColor: AppColors.primaryBlue,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Get.back(),
         ),
       ),
       body: SingleChildScrollView(
@@ -51,7 +45,7 @@ class JobApplicationScreen extends StatelessWidget {
             // Custom Questions
             CustomQuestionField(
               label: 'What is your expected salary?',
-              hintText: 'Enter expected salary',
+              hintText: 'Enter your answer here.',
               controller: controller.pitchController,
             ),
             const SizedBox(height: 16),

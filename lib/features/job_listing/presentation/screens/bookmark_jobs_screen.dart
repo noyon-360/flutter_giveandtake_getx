@@ -2,15 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+
 import '../controllers/bookmark_controller.dart';
 import 'job_details_screen.dart';
 
-class BookmarkJobsScreen extends StatelessWidget {
+class BookmarkJobsScreen extends StatefulWidget {
+  BookmarkJobsScreen({super.key});
+
+  @override
+  State<BookmarkJobsScreen> createState() => _BookmarkJobsScreenState();
+}
+
+class _BookmarkJobsScreenState extends State<BookmarkJobsScreen> {
   final BookmarkController controller = Get.isRegistered<BookmarkController>()
       ? Get.find<BookmarkController>()
       : Get.put(BookmarkController(), permanent: true);
 
-  BookmarkJobsScreen({super.key});
+  @override
+  void initState() {
+    super.initState();
+    // Fetch bookmarks when the screen is shown
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchBookmarks();
+    });
+  }
 
   void _showMenu(BuildContext context, Map<String, dynamic> job) async {
     final choice = await showMenu<String>(
@@ -18,7 +33,6 @@ class BookmarkJobsScreen extends StatelessWidget {
       position: RelativeRect.fromLTRB(100, 100, 0, 0),
       items: const [
         PopupMenuItem(value: 'view', child: Text('View Details')),
-        PopupMenuItem(value: 'copy', child: Text('Copy link')),
         PopupMenuItem(value: 'unsave', child: Text('Unsave')),
       ],
     );
@@ -49,6 +63,10 @@ class BookmarkJobsScreen extends StatelessWidget {
         ),
       ),
       body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         final list = controller.savedJobs;
         if (list.isEmpty) {
           return const Center(child: Text('No saved jobs'));

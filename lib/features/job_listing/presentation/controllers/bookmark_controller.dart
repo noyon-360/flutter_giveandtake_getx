@@ -1,7 +1,14 @@
+import 'package:dio/dio.dart';
+import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
+
+import '../../../../core/network/constants/api_constants.dart';
+import '../../../../core/network/constants/key_constants.dart';
+import '../../../../core/network/services/secure_store_services.dart';
 
 class BookmarkController extends GetxController {
   final RxList<Map<String, dynamic>> savedJobs = <Map<String, dynamic>>[].obs;
+  final RxBool isLoading = false.obs;
 
   String _getId(Map<String, dynamic> job) {
     final raw = job['raw'] ?? {};
@@ -16,9 +23,12 @@ class BookmarkController extends GetxController {
     return savedJobs.any((j) => j['id'] == id);
   }
 
-  void addJob(Map<String, dynamic> job) {
-    if (contains(job)) return;
+  /// Adds a job to local saved list and attempts to persist bookmark on server.
+  /// Returns true when bookmark API call succeeded (or already contained).
+  Future<bool> addJob(Map<String, dynamic> job) async {
+    if (contains(job)) return true;
 
+    // Prepare local snapshot (keeps existing UI behaviour)
     final raw = job['raw'] ?? {};
     final title = raw['title'] ?? job['title'] ?? '';
     final company = raw['companyId'] != null
@@ -42,7 +52,147 @@ class BookmarkController extends GetxController {
       'original': job,
     };
 
-    savedJobs.add(snapshot);
+    // Attempt to call bookmark API
+    try {
+      final secure = SecureStoreServices();
+      final token = await secure.retrieveData(KeyConstants.accessToken);
+      final userId = await secure.retrieveData(KeyConstants.userId);
+
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'User not logged in');
+        return false;
+      }
+
+      final dio = Dio();
+      dio.options.headers.addAll({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      });
+      if (token != null && token.isNotEmpty) {
+        dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+
+      final jobId = job['id']?.toString() ?? (raw['_id']?.toString() ?? raw['id']?.toString());
+      final url = '${ApiConstants.baseUrl}/bookmarks';
+
+      final payload = {
+        'userId': userId,
+        'jobId': jobId,
+      };
+
+      DPrint.log('📤 Bookmark POST -> $url');
+      DPrint.log('Headers: ${dio.options.headers}');
+      DPrint.log('Payload: $payload');
+
+      final response = await dio.post(url, data: payload);
+
+      DPrint.log('👈 Bookmark POST Response (${response.statusCode}): ${response.data}');
+
+      // Consider 200/201 as success. The API may return the created bookmark object directly.
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Add locally only after successful server persist
+        savedJobs.add(snapshot);
+        return true;
+      }
+
+      Get.snackbar('Error', response.data?['message'] ?? 'Failed to bookmark job');
+      return false;
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to bookmark job');
+      return false;
+    }
+  }
+
+  /// Fetch bookmarks for current user from server and populate [savedJobs].
+  Future<void> fetchBookmarks() async {
+    isLoading.value = true;
+    try {
+      final secure = SecureStoreServices();
+      final token = await secure.retrieveData(KeyConstants.accessToken);
+      final userId = await secure.retrieveData(KeyConstants.userId);
+
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'User not logged in');
+        isLoading.value = false;
+        return;
+      }
+
+      final dio = Dio();
+      dio.options.headers.addAll({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      });
+      if (token != null && token.isNotEmpty) {
+        dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+
+      final url = '${ApiConstants.baseUrl}/bookmarks/user/$userId';
+
+      DPrint.log('📤 Bookmark GET -> $url');
+      DPrint.log('Headers: ${dio.options.headers}');
+
+      final response = await dio.get(url);
+
+      DPrint.log('👈 Bookmark GET Response (${response.statusCode}): ${response.data}');
+
+      if (response.statusCode == 200) {
+        dynamic responseData = response.data;
+
+        // Handle envelope formats: {status: 'success', data: {...}} or direct {bookmarks: [...]}
+        List<dynamic> bookmarks = [];
+        try {
+          if (responseData is Map<String, dynamic>) {
+            if (responseData.containsKey('bookmarks')) {
+              bookmarks = responseData['bookmarks'] as List<dynamic>;
+            } else if (responseData.containsKey('data') && responseData['data'] is Map<String, dynamic>) {
+              final inner = responseData['data'] as Map<String, dynamic>;
+              bookmarks = inner['bookmarks'] as List<dynamic>? ?? [];
+            }
+          } else if (responseData is List) {
+            bookmarks = responseData as List<dynamic>;
+          }
+        } catch (e) {
+          DPrint.log('Error parsing bookmarks response: $e');
+        }
+
+        savedJobs.clear();
+
+        for (final b in bookmarks) {
+          // b may be a bookmark object with 'jobId' or may be the job object itself
+          final jobObj = (b is Map && b.containsKey('jobId')) ? b['jobId'] as Map<String, dynamic>? : (b as Map<String, dynamic>?);
+          if (jobObj == null) continue; // skip bookmarks without job
+
+          final raw = jobObj;
+          final title = raw['title'] ?? '';
+          final company = raw['companyId'] != null
+              ? raw['companyId']['cname'] ?? ''
+              : (raw['recruiterId'] != null
+                  ? '${raw['recruiterId']['firstName'] ?? ''} ${raw['recruiterId']['sureName'] ?? ''}'.trim()
+                  : '');
+          final location = raw['location'] ?? '';
+          final logoUrl = raw['companyId'] != null
+              ? raw['companyId']['clogo'] ?? ''
+              : (raw['recruiterId'] != null ? raw['recruiterId']['photo'] ?? '' : '');
+
+          final snapshot = {
+            'id': raw['_id']?.toString() ?? raw['id']?.toString() ?? '',
+            'title': title,
+            'company': company,
+            'location': location,
+            'logoUrl': logoUrl,
+            'original': {'raw': raw, 'id': raw['_id'] ?? raw['id']},
+          };
+
+          savedJobs.add(snapshot);
+        }
+      } else {
+        Get.snackbar('Error', 'Failed to load bookmarks');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load bookmarks');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void removeJob(Map<String, dynamic> job) {

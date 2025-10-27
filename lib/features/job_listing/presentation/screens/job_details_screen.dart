@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/job_application_screen.dart';
 import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/job_application_screen.dart';
+
 import '../controllers/bookmark_controller.dart';
 
 class JobDetailsScreen extends StatelessWidget {
@@ -90,37 +91,24 @@ class JobDetailsScreen extends StatelessWidget {
                     : const Icon(Icons.business, color: AppColors.primaryBlue),
               ),
             ),
-            const SizedBox(width: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title ?? '',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  " - For ",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  company ?? '',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
+            const SizedBox(width: 16),
+            Text(
+              title ?? '',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              company ?? '',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // meta row: address and posted time share width, applicants at end
             Row(
@@ -191,13 +179,23 @@ class JobDetailsScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       final bookmarkCtl = Get.isRegistered<BookmarkController>()
                           ? Get.find<BookmarkController>()
                           : Get.put(BookmarkController(), permanent: true);
-                      bookmarkCtl.addJob(jobData);
-                      // Navigate to Bookmark Jobs screen
-                      Get.to(() => BookmarkJobsScreen());
+
+                      // show simple loading feedback while bookmarking
+                      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+                      final success = await bookmarkCtl.addJob(jobData);
+                      Get.back(); // close loading
+
+                      if (success) {
+                        Get.snackbar('Saved', 'Job bookmarked successfully');
+                        // Navigate to Bookmark Jobs screen
+                        Get.to(() => BookmarkJobsScreen());
+                      } else {
+                        Get.snackbar('Failed', 'Could not save job');
+                      }
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.primaryBlue),

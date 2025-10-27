@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -126,7 +127,9 @@ class _AppDrawerState extends State<AppDrawer> {
                       title: "Bookmark Jobs",
                       liconPath: "assets/icons/book-open-01.png",
                       onTap: () {
-                        // TODO: Navigate to Feedback
+                        // Close the drawer then navigate to Bookmark Jobs screen
+                        Get.back();
+                        Get.to(() => BookmarkJobsScreen());
                       },
                     ),
                   ],
