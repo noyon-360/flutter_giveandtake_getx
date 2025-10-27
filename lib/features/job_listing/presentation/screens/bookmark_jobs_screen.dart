@@ -33,6 +33,7 @@ class _BookmarkJobsScreenState extends State<BookmarkJobsScreen> {
       position: RelativeRect.fromLTRB(100, 100, 0, 0),
       items: const [
         PopupMenuItem(value: 'view', child: Text('View Details')),
+        PopupMenuItem(value: 'copy', child: Text('Copy link')),
         PopupMenuItem(value: 'unsave', child: Text('Unsave')),
       ],
     );
@@ -46,7 +47,38 @@ class _BookmarkJobsScreenState extends State<BookmarkJobsScreen> {
       await Clipboard.setData(ClipboardData(text: link));
       Get.snackbar('Copied', 'Link copied to clipboard');
     } else if (choice == 'unsave') {
-      controller.removeJob(job);
+      // Show loading dialog
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+      
+      // Call the unsaveJob method which hits the API
+      final success = await controller.unsaveJob(job);
+      
+      // Close loading dialog first
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      
+      // Then show success/error snackbar
+      if (success) {
+        Get.snackbar(
+          'Success',
+          'Bookmark removed successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.textGreen,
+          colorText: AppColors.primaryWhite,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to remove bookmark',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.deleteButtonBackground,
+          colorText: AppColors.primaryWhite,
+        );
+      }
     }
   }
 

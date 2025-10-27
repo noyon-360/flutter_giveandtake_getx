@@ -195,6 +195,83 @@ class BookmarkController extends GetxController {
     }
   }
 
+  /// Unsaves/removes a bookmark by calling the update API with bookmarked: false.
+  /// Returns true on success, false on failure. Shows snackbar feedback.
+  Future<bool> unsaveJob(Map<String, dynamic> job) async {
+    try {
+      final secure = SecureStoreServices();
+      final token = await secure.retrieveData(KeyConstants.accessToken);
+      final userId = await secure.retrieveData(KeyConstants.userId);
+
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'User not logged in');
+        return false;
+      }
+
+      final dio = Dio();
+      dio.options.headers.addAll({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      });
+      if (token != null && token.isNotEmpty) {
+        dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+
+      // Extract jobId from the job snapshot or its original data
+      final raw = job['raw'] ?? job['original']?['raw'] ?? {};
+      final jobId = job['id']?.toString() ?? raw['_id']?.toString() ?? raw['id']?.toString();
+
+      DPrint.log('🔍 Job data for unsave:');
+      DPrint.log('  job[id]: ${job['id']}');
+      DPrint.log('  raw[_id]: ${raw['_id']}');
+      DPrint.log('  raw[id]: ${raw['id']}');
+      DPrint.log('  Extracted jobId: $jobId');
+      DPrint.log('  Full job object: $job');
+
+      final url = '${ApiConstants.baseUrl}/bookmarks/update';
+
+      final payload = {
+        'userId': userId,
+        'jobId': jobId,
+        'bookmarked': false,
+      };
+
+      DPrint.log('📤 Bookmark UPDATE (unsave) -> $url');
+      DPrint.log('Headers: ${dio.options.headers}');
+      DPrint.log('Payload: $payload');
+
+      // Try PATCH method instead of POST (more RESTful for updates)
+      final response = await dio.patch(url, data: payload);
+
+      DPrint.log('👈 Bookmark UPDATE Response (${response.statusCode}): ${response.data}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Remove from local list after successful server update
+        final id = job['id'] ?? _getId(job);
+        savedJobs.removeWhere((j) => j['id'] == id);
+        // Don't show snackbar here - let the caller handle UI feedback
+        return true;
+      }
+
+      // Don't show snackbar here - let the caller handle UI feedback
+      return false;
+    } on DioException catch (dioError) {
+      DPrint.log('❌ DioException unsaving job:');
+      DPrint.log('Status Code: ${dioError.response?.statusCode}');
+      DPrint.log('Response Data: ${dioError.response?.data}');
+      DPrint.log('Error Message: ${dioError.message}');
+      DPrint.log('Error Type: ${dioError.type}');
+      
+      // Don't show snackbar here - let the caller handle UI feedback
+      return false;
+    } catch (e, stackTrace) {
+      DPrint.log('❌ Unexpected error unsaving job: $e');
+      DPrint.log('Stack trace: $stackTrace');
+      // Don't show snackbar here - let the caller handle UI feedback
+      return false;
+    }
+  }
+
   void removeJob(Map<String, dynamic> job) {
     final id = job['id'] ?? _getId(job);
     savedJobs.removeWhere((j) => j['id'] == id);
