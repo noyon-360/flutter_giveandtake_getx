@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controller/profile_controller.dart';
 import '../../data/models/user_model.dart';
-import 'package:image_cropper/image_cropper.dart';
+
 
 
 class EditProfile extends StatefulWidget {
@@ -64,42 +64,16 @@ class _EditProfileState extends State<EditProfile> {
     final ImagePicker picker = ImagePicker();
     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile == null) {
-      print('No image selected');
-      return;
-    }
-
-    // Step 1: Crop the image using the new API (v11+)
-    final CroppedFile? croppedFile = await ImageCropper().cropImage(
-      sourcePath: pickedFile.path,
-      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 90,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Crop Profile Photo',
-          toolbarColor: Colors.black,
-          toolbarWidgetColor: Colors.white,
-          hideBottomControls: true,
-          lockAspectRatio: true,
-        ),
-        IOSUiSettings(
-          title: 'Crop Profile Photo',
-          aspectRatioLockEnabled: true,
-        ),
-      ],
-    );
-
-    // Step 2: Update _image only if cropping is done
-    if (croppedFile != null) {
+    if (pickedFile != null) {
       setState(() {
-        _image = File(croppedFile.path);
+        _image = File(pickedFile.path);
       });
-      print('Cropped image path: ${croppedFile.path}');
+      print('Selected image path: ${pickedFile.path}');
     } else {
-      print('Cropping canceled');
+      print('No image selected');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

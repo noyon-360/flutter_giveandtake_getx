@@ -91,15 +91,15 @@ class PrivacyPolicy extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    content.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  // Text(
+                  //   content.title,
+                  //   style: const TextStyle(
+                  //     fontSize: 16,
+                  //     fontWeight: FontWeight.w600,
+                  //     color: Colors.black,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 8),
                   Html(
                     data: content.description,
                     style: {
