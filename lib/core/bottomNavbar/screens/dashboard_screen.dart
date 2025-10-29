@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/features/Home/presentation/screen/home_screen.dart';
 import '../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
-import '../../../features/Home/presentation/screen/home_screen.dart';
 import '../../../features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 import '../controllers/bottom_nav_controller.dart';
 

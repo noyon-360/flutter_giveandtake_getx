@@ -9,9 +9,7 @@ class ApiConstants {
 
   static const String baseUrl = '$baseDomain/api/v1';
 
-  /// soykot ip
 
-  //static const String soyDomain = 'http://10.10.5.91:5002';
 
   // static const String baseDomain = 'https://api.evpitch.com';
   // static const String baseDomain = 'http://10.10.5.3:5000'; // iftikhar
@@ -90,7 +88,7 @@ class AuthEndpoints {
 
 class UserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/user';
-  final String updateProfile = '$_base/update-profile';
+  final String updateProfile = '$_base/update';
   final String getUserProfile = '$_base/profile';
 
   // final String create = '$_base/create';
@@ -116,7 +114,19 @@ class LeagueEndpoints {
 
 class ContactEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/contact';
-  final String createContact = '$_base/create';
+  // API endpoint is /contact/contact-us in the backend
+  final String createContact = '$_base/contact-us';
+}
+
+class ContentEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/content';
+  final String about = '$_base/about';
+  final String privacy = '$_base/privacy';
+  // Terms endpoint - some environments spell it 'trems' accidentally; provide both keys
+  final String terms = '$_base/terms';
+  final String trems = '$_base/trems';
+
+  String getContentByType(String type) => '$_base/$type';
 }
 
 // New payment endpoints
@@ -142,9 +152,3 @@ class SubscriptionEndpoints {
   final String getPlans = '$_base/plans';
 }
 
-// Content endpoints
-class ContentEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/content';
-
-  String getContentByType(String type) => '$_base/$type';
-}

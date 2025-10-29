@@ -113,14 +113,46 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              color: AppColors.homeHeadBackground,
-              height: MediaQuery.of(context).size.height * 0.16,
-              width: double.infinity,
-              child: Padding(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                color: AppColors.homeHeadBackground,
+                height: MediaQuery.of(context).size.height * 0.16,
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Hello Mr. Saifullah",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textBlack,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Text(
+                        "Find your Dream Job",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: AppColors.textBlack,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        height: 48,
+                        child: CustomSearchBox(hintText: "Search your job"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +198,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-            ),
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.all(16),
@@ -180,9 +211,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         "How It Works",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 9,
                           color: AppColors.textBlack,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
@@ -383,8 +414,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
+            )
+            ],
+          ),
         ),
       ),
     );
