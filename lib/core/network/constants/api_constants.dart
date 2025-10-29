@@ -84,6 +84,8 @@ class AuthEndpoints {
       '${ApiConstants.baseUrl}/security-answers/verify';
   final String resetPasswordWithToken =
       '${ApiConstants.baseUrl}/security-answers/reset-password';
+
+  get otpVerifyReset => null;
 }
 
 class UserEndpoints {
