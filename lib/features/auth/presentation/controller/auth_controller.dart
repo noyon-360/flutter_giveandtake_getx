@@ -60,7 +60,7 @@ class AuthController extends BaseController {
       },
       (success) async {
         final user = success.data.user;
-        if (user.role == 'candidate') {
+        if (user.role == 'candidate' || user.role == 'recruiter' || user.role == 'company') {
           await _authStorageService.storeAuthData(
             accessToken: success.data.accessToken,
             refreshToken: success.data.refreshToken,
