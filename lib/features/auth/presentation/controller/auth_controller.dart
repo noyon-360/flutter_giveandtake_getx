@@ -24,6 +24,7 @@ import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 import '../../../../core/services/get_user_profile_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../Home/presentation/screen/home_screen.dart';
 import 'remember_me_controller.dart';
 
 class AuthController extends BaseController {
