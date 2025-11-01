@@ -5,6 +5,7 @@ import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/company_image_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/image_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/video_upload_screen.dart';
+
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../controller/country_city_controller.dart';
 import '../controller/description_controller.dart';
@@ -476,11 +477,11 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      //_submit();
-                      if(recruiterController.successVideoUploaded.value){
-                        _submit();
+                      _submit();
+                      // if(recruiterController.successVideoUploaded.value){
+                      //   _submit();
 
-                      }
+                      // }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
