@@ -1,0 +1,89 @@
+import 'package:flutter/material.dart';
+import 'package:flutx_core/core/validation/validators.dart';
+import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+
+class Name extends StatelessWidget {
+  const Name({
+    super.key,
+    required TextEditingController firstNameTEController,
+    required FocusNode firstNameFocusNode,
+    required TextEditingController surNameTEController,
+    required FocusNode surNameFocusNode,
+  }) : _firstNameTEController = firstNameTEController, _firstNameFocusNode = firstNameFocusNode, _surNameTEController = surNameTEController, _surNameFocusNode = surNameFocusNode;
+
+  final TextEditingController _firstNameTEController;
+  final FocusNode _firstNameFocusNode;
+  final TextEditingController _surNameTEController;
+  final FocusNode _surNameFocusNode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'First Name*',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 6),
+              TextFormField(
+                controller: _firstNameTEController,
+                focusNode: _firstNameFocusNode,
+                keyboardType: TextInputType.name,
+                textInputAction: TextInputAction.next,
+                decoration: context.primaryInputDecoration.copyWith(
+                  hintText: "Enter Your First Name",
+                  hintStyle: TextStyle(
+                    color: Color(0xFF787878),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                validator: Validators.name,
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(width: 19),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Surname (Optional)',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 6),
+              TextFormField(
+                controller: _surNameTEController,
+                keyboardType: TextInputType.name,
+                focusNode: _surNameFocusNode,
+                textInputAction: TextInputAction.next,
+                decoration: context.primaryInputDecoration.copyWith(
+                  hintText: "Enter Your Surname",
+                  hintStyle: TextStyle(
+                    color: Color(0xFF787878),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                validator: Validators.name,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
