@@ -31,21 +31,22 @@ class PlanPricingCard extends StatelessWidget {
           colors: [Color(0xff3B9EFF), Color(0xff2B7FD9)],
         ),
       ),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Plan title (dynamic)
           Text(
             title.toUpperCase(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: Colors.white,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Price (dynamic)
           Row(
@@ -54,19 +55,19 @@ class PlanPricingCard extends StatelessWidget {
               Text(
                 '\$${price.toStringAsFixed(2)}',
                 style: TextStyle(
-                  fontSize: 40,
+                  fontSize: 36,
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
                   height: 1,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   'Per $valid',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.white,
                     fontWeight: FontWeight.w400,
                   ),
@@ -75,7 +76,7 @@ class PlanPricingCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
 
           // "What the user will get" text
           Align(
@@ -83,28 +84,28 @@ class PlanPricingCard extends StatelessWidget {
             child: Text(
               'What the user will get',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 10,
                 color: Colors.white,
                 fontWeight: FontWeight.w400,
               ),
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Description (dynamic)
           Text(
             description,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: Colors.white,
               fontWeight: FontWeight.w400,
-              height: 1.5,
+              height: 1.4,
             ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
           Divider(color: Colors.white.withOpacity(0.5), thickness: 1),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
 
           // Features list (dynamic - renders based on array length)
           ...features.asMap().entries.map((entry) {
@@ -127,25 +128,26 @@ class PlanPricingCard extends StatelessWidget {
                         size: 14,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         entry.value,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 11,
                           color: Colors.white,
                           fontWeight: FontWeight.w400,
+                          height: 1.3,
                         ),
                       ),
                     ),
                   ],
                 ),
-                if (!isLast) const SizedBox(height: 16),
+                if (!isLast) const SizedBox(height: 12),
               ],
             );
           }).toList(),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
 
           // Subscribe button
           SizedBox(
@@ -155,7 +157,7 @@ class PlanPricingCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Color(0xff3B9EFF),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),
@@ -163,7 +165,7 @@ class PlanPricingCard extends StatelessWidget {
               ),
               child: Text(
                 'Get the premium',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
             ),
           ),

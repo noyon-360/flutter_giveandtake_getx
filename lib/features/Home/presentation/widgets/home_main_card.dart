@@ -53,7 +53,7 @@ class HomeMainCard extends StatelessWidget {
                   fontWeight: FontWeight.w400,
                   margin: Margins.zero,
                   padding: HtmlPaddings.zero,
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.start,
                 ),
                 "li": Style(
                   fontSize: FontSize(14),
@@ -74,7 +74,7 @@ class HomeMainCard extends StatelessWidget {
             Text(
               subtitle ??
                   "Build your profile, upload your CV and get\naccess to thousands of jobs",
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.start,
               style: TextStyle(
                 fontSize: 15,
                 color: Color(0xff707070),

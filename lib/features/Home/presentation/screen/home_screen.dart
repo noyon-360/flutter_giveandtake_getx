@@ -98,6 +98,11 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xffF5F6FF),
         iconTheme: IconThemeData(color: AppColors.textBlack),
+        centerTitle: true,
+        title: Image.asset(
+          "assets/images/logo_transparent.png",
+          height: 40,
+        ),
         actions: [
           Container(
             margin: EdgeInsets.only(right: 16),
@@ -117,41 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                color: AppColors.homeHeadBackground,
-                height: MediaQuery.of(context).size.height * 0.16,
-                width: double.infinity,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Hello Mr. Saifullah",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textBlack,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      Text(
-                        "Find your Dream Job",
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: AppColors.textBlack,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        height: 48,
-                        child: CustomSearchBox(hintText: "Search your job"),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -211,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         "How It Works",
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: 18,
                           color: AppColors.textBlack,
                           fontWeight: FontWeight.w400,
                         ),
@@ -223,8 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return HomeMainCard(
                         iconPath: "assets/icons/add-user_home.png",
                         title: candidate?.title ?? "Candidates",
-                        subtitle: candidate?.description ??
-                            "Build your profile, upload your CV and get\naccess to thousands of jobs",
+                        subtitle: candidate?.description,
                         isHtml: candidate != null,
                         onTap: () {
                           //TODO: Navigate to create account screen
@@ -238,8 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return HomeMainCard(
                         iconPath: "assets/icons/home_job_find.png",
                         title: recruiter?.title ?? "Recruiters",
-                        subtitle: recruiter?.description ??
-                            "Explore thousands of our job listings.",
+                        subtitle: recruiter?.description,
                         isHtml: recruiter != null,
                         onTap: () {
                           Get.to(() => const JobListingScreen());
@@ -252,8 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return HomeMainCard(
                         iconPath: "assets/icons/get_job.png",
                         title: company?.title ?? "Companies",
-                        subtitle: company?.description ??
-                            "Apply with ease, follow recruiters, and land your next opportunity.",
+                        subtitle: company?.description ,
                         isHtml: company != null,
                         onTap: () {
                           //TODO: Navigate to get a job screen
