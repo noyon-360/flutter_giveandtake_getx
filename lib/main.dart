@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/init/app_initializer.dart';
 import 'package:karlfive/core/theme/app_theme.dart';
@@ -14,12 +13,7 @@ void main() async {
 
   // App initialize
   await AppInitializer.initializeApp();
-
-  // Stripe setup
-  Stripe.publishableKey = StripeKey.publishableKey;
-  Stripe.merchantIdentifier = 'merchant.com.yourapp';
-  await Stripe.instance.applySettings();
-
+  
   // Inject BottomNavController globally
   Get.put(BottomNavController());
 

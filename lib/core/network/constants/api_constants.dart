@@ -48,14 +48,28 @@ class ApiConstants {
   static JobEndpoints get jobs => JobEndpoints();
   static SubscriptionEndpoints get subscription => SubscriptionEndpoints();
   static ContentEndpoints get content => ContentEndpoints();
+  static ElevatorPitchVideo get elevatorPitchVideo => ElevatorPitchVideo();
 }
 
 class JobEndpoints {
   String getJobs(int limit) => '${ApiConstants.baseUrl}/jobs?limit=$limit';
+
 }
 
 class RecruiterAccountApi {
   final String getCompany = '${ApiConstants.baseUrl}/all/companies';
+  final String uploadVideo = '${ApiConstants.baseUrl}/all/companies';
+
+  static const String _base = '${ApiConstants.baseUrl}/recruiter';
+  String createRecruiterAccount = '$_base/recruiter-account';
+  String fetchRecruiterInfo(String userId) => '$_base/recruiter-account/$userId';
+  String updateRecruiter(String userId) => '$_base/recruiter-account/$userId';
+}
+
+class ElevatorPitchVideo {
+  static const String _base = '${ApiConstants.baseUrl}/elevator-pitch';
+
+  String uploadVideo(String userId) => '$_base/video?userId=$userId';
 }
 
 /// [Authentication Endpoints]

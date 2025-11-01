@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/core/services/get_user_profile_service.dart';
 import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
+import 'package:karlfive/core/services/get_user_profile_service.dart';
 import 'package:karlfive/features/auth/data/models/login_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model.dart';
 import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
@@ -19,10 +19,10 @@ import 'package:karlfive/features/auth/presentation/screens/otp_verification_for
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
 import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
-import '../../../../core/services/get_user_profile_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../Home/presentation/screen/home_screen.dart';
 import 'remember_me_controller.dart';
@@ -62,7 +62,7 @@ class AuthController extends BaseController {
       },
       (success) async {
         final user = success.data.user;
-        if (user.role == 'candidate' || user.role == 'recruiter' || user.role == 'company') {
+        if (user.role == 'candidate' || user.role == 'company') {
           await _authStorageService.storeAuthData(
             accessToken: success.data.accessToken,
             refreshToken: success.data.refreshToken,
@@ -82,7 +82,28 @@ class AuthController extends BaseController {
           }
           setLoading(false);
           Get.offAll(() => DashboardScreen());
-        } else {
+        } else if (user.role == 'recruiter' ) {
+          await _authStorageService.storeAuthData(
+            accessToken: success.data.accessToken,
+            refreshToken: success.data.refreshToken,
+            userId: success.data.user.id,
+            userRole: user.role,
+          );
+          // Populate the shared GetUserProfileService with the user from login response
+          try {
+            Get.find<GetUserProfileService>().userInfoRx.value = user;
+          } catch (_) {
+            // If service not found, ignore silently (DI should normally register it)
+          }
+          if (rememberMeController!.rememberMe.value) {
+            final secureStore = SecureStoreServices();
+            secureStore.storeData('email', email);
+            secureStore.storeData('password', password);
+          }
+          setLoading(false);
+          Get.offAll(() => CreateRecruiterAccount());
+        }
+        else {
           setError("You are not authorized to login as candidate");
           setLoading(false);
         }

@@ -1,8 +1,13 @@
 import 'package:get/get.dart';
+import 'package:karlfive/core/network/services/auth_storage_service.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/auth/presentation/screens/account_preview_screen.dart';
+import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/onboarding_screen.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
 import '../../../../core/network/services/secure_store_services.dart';
+import '../screens/home_screen.dart';
 
 class SplashController extends GetxController {
   final _authController = Get.find<AuthController>();
@@ -16,30 +21,42 @@ class SplashController extends GetxController {
   Future<void> _checkStartupFlow() async {
     await Future.delayed(const Duration(seconds: 2));
 
-    final secureStore = SecureStoreServices();
-    final savedEmail = await secureStore.retrieveData("email");
-    final savedPassword = await secureStore.retrieveData("password");
-    final previewConfirmed = await secureStore.retrieveData(
-      "previewConfirmed",
-    ); // 'true' or null
+    final  AuthStorageService _authStorageService = AuthStorageService();
 
-    final success = await _authController.refreshToken();
+    final accessToken = await _authStorageService.getAccessToken();
 
-    if (savedEmail != null && savedPassword != null) {
-      // if they previously confirmed preview, go straight to Home
-      if (previewConfirmed == 'true') {
-        // Get.offAll(() => HomeScreen());
-      } else {
-        // show preview until they confirm
-        Get.offAll(() => const AccountPreviewScreen());
-      }
+    if(accessToken != null) {
+      Get.to( () => RecruiterPageScreen());
     } else {
-      // no saved credentials — try token refresh flow
-      if (success) {
-        // Get.offAll(() => HomeScreen());
-      } else {
-        Get.offAll(() => OnboardingScreen(), transition: Transition.fadeIn);
-      }
+      Get.to( () => LoginScreen());
     }
+
+
+
+    // final secureStore = SecureStoreServices();
+    // final savedEmail = await secureStore.retrieveData("email");
+    // final savedPassword = await secureStore.retrieveData("password");
+    // final previewConfirmed = await secureStore.retrieveData(
+    //   "previewConfirmed",
+    // ); // 'true' or null
+    //
+    // final success = await _authController.refreshToken();
+    //
+    // if (savedEmail != null && savedPassword != null) {
+    //   // if they previously confirmed preview, go straight to Home
+    //   if (previewConfirmed == 'true') {
+    //     Get.offAll(() => HomeScreen());
+    //   } else {
+    //     // show preview until they confirm
+    //     Get.offAll(() => const AccountPreviewScreen());
+    //   }
+    // } else {
+    //   // no saved credentials — try token refresh flow
+    //   if (success) {
+    //     // Get.offAll(() => HomeScreen());
+    //   } else {
+    //     Get.offAll(() => OnboardingScreen(), transition: Transition.fadeIn);
+    //   }
+    // }
   }
 }
