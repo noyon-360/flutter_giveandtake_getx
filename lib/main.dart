@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
 import 'package:karlfive/core/init/app_initializer.dart';
 import 'package:karlfive/core/theme/app_theme.dart';
 import 'package:karlfive/core/common/constants/stripe_key.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'core/bottomNavbar/controllers/bottom_nav_controller.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 
@@ -13,12 +13,7 @@ import 'features/auth/presentation/screens/splash_screen.dart';
 
   // App initialize
   await AppInitializer.initializeApp();
-
-  // Stripe setup
-  Stripe.publishableKey = StripeKey.publishableKey;
-  Stripe.merchantIdentifier = 'merchant.com.yourapp';
-  await Stripe.instance.applySettings();
- 
+  
   // Inject BottomNavController globally
   Get.put(BottomNavController());
 

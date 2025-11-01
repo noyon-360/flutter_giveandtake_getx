@@ -10,7 +10,7 @@ void setupController() {
   );
 
   Get.lazyPut<RecruiterController>(
-    () => RecruiterController(Get.find()),
+    () => RecruiterController(Get.find(), Get.find()),
     fenix: true,
   );
 }

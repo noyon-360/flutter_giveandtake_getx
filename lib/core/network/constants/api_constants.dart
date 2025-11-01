@@ -1,6 +1,7 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'https://api.evpitch.com';
+  // static const String baseDomain = 'https://api.evpitch.com';
+  static const String baseDomain = 'http://10.10.5.33:5001';
   static const String baseUrl = '$baseDomain/api/v1';
 
   /// soykot ip
@@ -40,10 +41,24 @@ class ApiConstants {
 
   static PaymentEndpoints get payment => PaymentEndpoints();
   static RecruiterAccountApi get recruiter => RecruiterAccountApi();
+  static ElevatorPitchVideo get elevatorPitchVideo => ElevatorPitchVideo();
+
 }
 
 class RecruiterAccountApi {
   final String getCompany = '${ApiConstants.baseUrl}/all/companies';
+  final String uploadVideo = '${ApiConstants.baseUrl}/all/companies';
+
+  static const String _base = '${ApiConstants.baseUrl}/recruiter';
+  String createRecruiterAccount = '$_base/recruiter-account';
+  String fetchRecruiterInfo(String userId) => '$_base/recruiter-account/$userId';
+  String updateRecruiter(String userId) => '$_base/recruiter-account/$userId';
+}
+
+class ElevatorPitchVideo {
+  static const String _base = '${ApiConstants.baseUrl}/elevator-pitch';
+
+  String uploadVideo(String userId) => '$_base/video?userId=$userId';
 }
 
 /// [Authentication Endpoints]

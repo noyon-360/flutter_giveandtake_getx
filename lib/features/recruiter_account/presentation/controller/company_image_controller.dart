@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
-class ImageController extends GetxController {
+class CompanyImageController extends GetxController {
   Rx<File?> selectedImage = Rx<File?>(null);
   RxString existingImageUrl = ''.obs;
 

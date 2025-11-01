@@ -1,19 +1,32 @@
-import 'package:get/get.dart';
+import 'dart:io';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 
-class ElevatorPitchController extends GetxController {
+class ElevatorPitchController extends GetxController{
+
+// final Repo recruiterRepo;
+// final AuthStorageService authStorageService;
+//
+// ElevatorPitchController(this.authStorageService, this.recruiterRepo);
+
   final picker = ImagePicker();
 
   var isUploading = false.obs;
+  var selectedVideoPath = ''.obs;
+  var isVideoInitialized = false.obs;
+  var isPlaying = false.obs;
+  var currentPosition = Duration.zero.obs;
+  var totalDuration = Duration.zero.obs;
 
-  /// Pick from gallery or record a new video
+  VideoPlayerController? videoPlayerController;
+
   Future<void> pickAndUploadVideo() async {
     try {
-      // Ask user: Pick existing or Record new
       final source = await Get.bottomSheet<ImageSource>(
         Container(
-          color: Colors.white,
+          color: const Color(0xFFFFFFFF),
           child: Wrap(
             children: [
               ListTile(
@@ -31,51 +44,76 @@ class ElevatorPitchController extends GetxController {
         ),
       );
 
-      if (source == null) return; // User canceled
+      if (source == null) return;
 
       final XFile? video = await picker.pickVideo(
         source: source,
         maxDuration: const Duration(seconds: 60),
       );
 
-      if (video == null) {
-        //Get.snackbar('Cancelled', 'No video selected');
-        return;
-      }
+      if (video == null) return;
 
-      //await uploadVideo(File(video.path));
+      selectedVideoPath.value = video.path;
+      isVideoInitialized.value = false;
+
+      videoPlayerController?.dispose();
+
+      videoPlayerController = VideoPlayerController.file(File(video.path))
+        ..initialize().then((_) {
+          isVideoInitialized.value = true;
+          totalDuration.value = videoPlayerController!.value.duration;
+
+          videoPlayerController!.setLooping(false);
+          videoPlayerController!.play();
+          isPlaying.value = true;
+
+          //  Listen for position and video end
+          videoPlayerController!.addListener(() {
+            final position = videoPlayerController!.value.position;
+            currentPosition.value = position;
+
+            // Check if video finished
+            if (position >= videoPlayerController!.value.duration &&
+                !videoPlayerController!.value.isPlaying) {
+              isPlaying.value = false;
+            }
+          });
+        });
     } catch (e) {
       Get.snackbar('Error', 'Something went wrong: $e');
     }
   }
 
-  // /// Upload video
-  // Future<void> uploadVideo(File file) async {
-  //   try {
-  //     isUploading.value = true;
-  //     Get.snackbar('Uploading', 'Your elevator pitch is being uploaded...');
-  //
-  //     // Example upload with Dio
-  //     final dio = Dio();
-  //     final formData = FormData.fromMap({
-  //       'file': await MultipartFile.fromFile(file.path, filename: 'pitch.mp4'),
-  //     });
-  //
-  //     final response = await dio.post(
-  //       'https://your-api.com/upload', // <-- replace with your API endpoint
-  //       data: formData,
-  //     );
-  //
-  //     isUploading.value = false;
-  //
-  //     if (response.statusCode == 200) {
-  //       Get.snackbar('Success', 'Video uploaded successfully!');
-  //     } else {
-  //       Get.snackbar('Upload Failed', 'Server error: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     isUploading.value = false;
-  //     Get.snackbar('Upload Error', e.toString());
-  //   }
-  // }
+  void togglePlayPause() {
+    if (videoPlayerController == null) return;
+
+    if (videoPlayerController!.value.isPlaying) {
+      videoPlayerController!.pause();
+      isPlaying.value = false;
+    } else {
+      // If the video is finished, replay from start
+      if (currentPosition.value >=
+          videoPlayerController!.value.duration) {
+        videoPlayerController!.seekTo(Duration.zero);
+      }
+      videoPlayerController!.play();
+      isPlaying.value = true;
+    }
+  }
+
+  void seekTo(Duration position) {
+    videoPlayerController?.seekTo(position);
+  }
+
+  String formatDuration(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  @override
+  void onClose() {
+    videoPlayerController?.dispose();
+    super.onClose();
+  }
 }
