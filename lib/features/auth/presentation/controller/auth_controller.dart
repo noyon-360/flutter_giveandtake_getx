@@ -19,6 +19,7 @@ import 'package:karlfive/features/auth/presentation/screens/otp_verification_for
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
 import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
+import 'package:karlfive/features/create_job/presentation/screen/create_job_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
@@ -62,7 +63,7 @@ class AuthController extends BaseController {
       },
       (success) async {
         final user = success.data.user;
-        if (user.role == 'candidate' || user.role == 'company') {
+        if (user.role == 'candidate') {
           await _authStorageService.storeAuthData(
             accessToken: success.data.accessToken,
             refreshToken: success.data.refreshToken,
@@ -102,8 +103,27 @@ class AuthController extends BaseController {
           }
           setLoading(false);
           Get.offAll(() => CreateRecruiterAccount());
-        }
-        else {
+        } else if (user.role == 'company') {
+          await _authStorageService.storeAuthData(
+            accessToken: success.data.accessToken,
+            refreshToken: success.data.refreshToken,
+            userId: success.data.user.id,
+            userRole: user.role,
+          );
+          // Populate the shared GetUserProfileService with the user from login response
+          try {
+            Get.find<GetUserProfileService>().userInfoRx.value = user;
+          } catch (_) {
+            // If service not found, ignore silently (DI should normally register it)
+          }
+          if (rememberMeController!.rememberMe.value) {
+            final secureStore = SecureStoreServices();
+            secureStore.storeData('email', email);
+            secureStore.storeData('password', password);
+          }
+          setLoading(false);
+          Get.offAll(() => CreateJobPostingScreen());
+        }else {
           setError("You are not authorized to login as candidate");
           setLoading(false);
         }
