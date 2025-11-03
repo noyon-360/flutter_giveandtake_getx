@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
-import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/change_pass_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/payment_history.dart';
