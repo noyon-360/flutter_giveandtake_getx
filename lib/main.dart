@@ -3,11 +3,12 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/init/app_initializer.dart';
 import 'package:karlfive/core/theme/app_theme.dart';
 import 'package:karlfive/core/common/constants/stripe_key.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:karlfive/features/auth/presentation/screens/splash_screen.dart';
 import 'core/bottomNavbar/controllers/bottom_nav_controller.dart';
-import 'features/auth/presentation/screens/splash_screen.dart';
+import 'features/Home/presentation/screen/home_screen.dart';
+import 'features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
 
- void main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // App initialize
@@ -17,6 +18,7 @@ import 'features/auth/presentation/screens/splash_screen.dart';
   Get.put(BottomNavController());
 
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {

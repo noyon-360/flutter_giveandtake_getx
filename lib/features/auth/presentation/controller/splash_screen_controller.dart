@@ -1,13 +1,10 @@
 import 'package:get/get.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/auth/presentation/screens/account_preview_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/onboarding_screen.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
-import '../../../../core/network/services/secure_store_services.dart';
-import '../screens/home_screen.dart';
+
+import '../../../recruiter_account/presentation/screens/create_recruiter_account.dart';
+import '../screens/login_screen.dart';
+
 
 class SplashController extends GetxController {
   final _authController = Get.find<AuthController>();

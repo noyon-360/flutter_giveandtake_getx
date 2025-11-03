@@ -11,12 +11,12 @@ void setupServiceLocator() {
   // Repositories
   setupRepository();
 
+  // Services (must be before controllers since controllers depend on services)
+  setupServices();
+
   // Use Cases
   setupUsecases();
 
   // Controllers
   setupController();
-
-  // Services
-  setupServices();
 }

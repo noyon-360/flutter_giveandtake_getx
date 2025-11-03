@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+
 class JobCard extends StatelessWidget {
   final String title;
   final String company;
@@ -7,6 +9,7 @@ class JobCard extends StatelessWidget {
   final String duration;
   final String salary;
   final String timePosted;
+  final String? logoUrl;
   final VoidCallback? onTap;
   final VoidCallback? onEasyApply;
 
@@ -18,6 +21,7 @@ class JobCard extends StatelessWidget {
     required this.duration,
     required this.salary,
     required this.timePosted,
+    this.logoUrl,
     this.onTap,
     this.onEasyApply,
   });
@@ -44,7 +48,7 @@ class JobCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Company logo with green chart icon
+            // Company logo with network image or fallback icon
             Container(
               width: 48,
               height: 48,
@@ -52,10 +56,27 @@ class JobCard extends StatelessWidget {
                 color: const Color(0xFF4CAF50).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.show_chart,
-                color: Color(0xFF4CAF50),
-                size: 24,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: logoUrl != null && logoUrl!.isNotEmpty
+                    ? Image.network(
+                        logoUrl!,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.show_chart,
+                            color: Color(0xFF4CAF50),
+                            size: 24,
+                          );
+                        },
+                      )
+                    : const Icon(
+                        Icons.show_chart,
+                        color: Color(0xFF4CAF50),
+                        size: 24,
+                      ),
               ),
             ),
             const SizedBox(width: 12),
@@ -104,19 +125,17 @@ class JobCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-
+                  Text(
+                    salary,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   // Salary and time posted row
                   Row(
                     children: [
-                      Text(
-                        salary,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const Spacer(),
                       Text(
                         timePosted,
                         style: const TextStyle(
@@ -125,7 +144,7 @@ class JobCard extends StatelessWidget {
                           fontWeight: FontWeight.w400,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      Spacer(),
                       // Easy Apply button
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -133,7 +152,7 @@ class JobCard extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: Color(0xffF5F6FF),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: GestureDetector(
@@ -143,7 +162,7 @@ class JobCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: Colors.white,
+                              color: AppColors.textBlack,
                             ),
                           ),
                         ),

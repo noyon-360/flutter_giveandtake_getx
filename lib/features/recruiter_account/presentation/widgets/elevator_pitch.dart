@@ -1,6 +1,6 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:video_player/video_player.dart';
-import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 
 class ElevatorPitchSection extends StatefulWidget {

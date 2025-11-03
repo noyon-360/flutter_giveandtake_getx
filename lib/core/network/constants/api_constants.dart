@@ -1,9 +1,16 @@
 class  ApiConstants {
   /// [Base Configuration]
   // static const String baseDomain = 'https://api.evpitch.com';
-  static const String baseDomain = 'http://10.10.5.33:5001';
-  static const String baseUrl = '$baseDomain/api/v1';
 
+  // add by zafor
+  // static const String baseDomain = 'https://api.evpitch.com';
+  //static const String baseDomain = 'http://10.10.5.88:5000'; // zafor
+  //add by zafor end
+
+  // static const String baseDomain = 'https://api.evpitch.com';
+  static const String baseDomain = 'http://10.10.5.33:5001';//eshita
+
+  static const String baseUrl = '$baseDomain/api/v1';
 
 
   // static const String baseDomain = 'https://api.evpitch.com';
@@ -38,8 +45,17 @@ class  ApiConstants {
   static ContactEndpoints get contact => ContactEndpoints();
 
   static PaymentEndpoints get payment => PaymentEndpoints();
+  static PaypalEndpoints get paypal => PaypalEndpoints();
   static RecruiterAccountApi get recruiter => RecruiterAccountApi();
+  static JobEndpoints get jobs => JobEndpoints();
+  static SubscriptionEndpoints get subscription => SubscriptionEndpoints();
+  static ContentEndpoints get content => ContentEndpoints();
   static ElevatorPitchVideo get elevatorPitchVideo => ElevatorPitchVideo();
+  static CategoryEndpoints get category => CategoryEndpoints();
+}
+
+class JobEndpoints {
+  String getJobs(int limit) => '${ApiConstants.baseUrl}/jobs?limit=$limit';
 
 }
 
@@ -85,11 +101,13 @@ class AuthEndpoints {
       '${ApiConstants.baseUrl}/security-answers/verify';
   final String resetPasswordWithToken =
       '${ApiConstants.baseUrl}/security-answers/reset-password';
+
+  get otpVerifyReset => null;
 }
 
 class UserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/user';
-  final String updateProfile = '$_base/update-profile';
+  final String updateProfile = '$_base/update';
   final String getUserProfile = '$_base/profile';
 
   // final String create = '$_base/create';
@@ -115,7 +133,19 @@ class LeagueEndpoints {
 
 class ContactEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/contact';
-  final String createContact = '$_base/create';
+  // API endpoint is /contact/contact-us in the backend
+  final String createContact = '$_base/contact-us';
+}
+
+class ContentEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/content';
+  final String about = '$_base/about';
+  final String privacy = '$_base/privacy';
+  // Terms endpoint - some environments spell it 'trems' accidentally; provide both keys
+  final String terms = '$_base/terms';
+  final String trems = '$_base/trems';
+
+  String getContentByType(String type) => '$_base/$type';
 }
 
 // New payment endpoints
@@ -126,3 +156,23 @@ class PaymentEndpoints {
 
   final String confirmPayment = '$_base/confirm-payment';
 }
+
+// PayPal endpoints
+class PaypalEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/payments/paypal';
+
+  final String createOrder = '$_base/create-order';
+}
+
+// Subscription endpoints
+class SubscriptionEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/subscription';
+
+  final String getPlans = '$_base/plans';
+}
+
+class CategoryEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/category';
+  final String jobCategory = '$_base/job-category';
+}
+

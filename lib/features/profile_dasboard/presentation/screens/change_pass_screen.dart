@@ -30,31 +30,42 @@ class ChangePasswordScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              /// Profile Avatar
-              const CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage("assets/images/profile.jpg"),
+              // /// Profile Avatar
+              // const CircleAvatar(
+              //   radius: 50,
+              //   backgroundImage: AssetImage("assets/images/profile.jpg"),
+              // ),
+              //
+              // const SizedBox(height: 12),
+              // const Text(
+              //   "Brooklyn Simmons",
+              //   style: TextStyle(
+              //     fontSize: 16,
+              //     fontWeight: FontWeight.w600,
+              //     color: Color(0xFF212121),
+              //   ),
+              // ),
+              // const SizedBox(height: 4),
+              // const Text(
+              //   "brooklynsimmons@gmail.com",
+              //   style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
+              // ),
+              // const SizedBox(height: 24),
+              // const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
+              //
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Change Password",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.start,
+                  ),
+                ],
               ),
-        
-              const SizedBox(height: 12),
-              const Text(
-                "Brooklyn Simmons",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF212121),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "brooklynsimmons@gmail.com",
-                style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
-              ),
-              const SizedBox(height: 24),
-              const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
-        
-              const SizedBox(height: 64,),
-        
+
+              const SizedBox(height: 20),
+
               /// Fields
               Obx(
                 () => _passwordField(
@@ -65,7 +76,7 @@ class ChangePasswordScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-        
+
               Obx(
                 () => _passwordField(
                   hint: "New Password",
@@ -75,7 +86,7 @@ class ChangePasswordScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-        
+
               Obx(
                 () => _passwordField(
                   hint: "Confirm Password",
@@ -85,67 +96,90 @@ class ChangePasswordScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-        
+
               /// Error message
               /// Error message
               Obx(
-                    () => controller.hasError.value
+                () => controller.hasError.value
                     ? const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 0),
-                    child: Text(
-                      "Passphrase must be at least 12 characters and \n include one uppercase, one lowercase, one number, \n and one special character.",
-                      style: TextStyle(color: Color(0xFFB90000), fontSize: 10),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                )
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 0),
+                          child: Text(
+                            "Passphrase must be at least 12 characters and \n include one uppercase, one lowercase, one number, \n and one special character.",
+                            style: TextStyle(
+                              color: Color(0xFFB90000),
+                              fontSize: 10,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      )
                     : SizedBox.shrink(),
               ),
 
-
               const SizedBox(height: 16),
-        
+
               /// Save Button
               SizedBox(
                 width: double.infinity,
                 height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    controller.validatePasswords();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B7FD0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                child: Obx(
+                  () => ElevatedButton(
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () {
+                            controller.validateAndSubmit();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2B7FD0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
-                  ),
-                  child: const Text("Save",
-                    style: TextStyle(
-                        color: Color(0xFFF4F4F4),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16),
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            "Save",
+                            style: TextStyle(
+                              color: Color(0xFFF4F4F4),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                 ),
               ),
-        
+
               const SizedBox(height: 20),
-        
-              /// Success message
-              Obx(
-                () => controller.isSuccess.value
-                    ? const Text(
-                        "Password Changed Successfully",
-                        style: TextStyle(color: Colors.green, fontSize: 14),
-                      )
-                    : const SizedBox(),
-              ),
+
+              // Server error or success
+              Obx(() {
+                if (controller.serverError.isNotEmpty) {
+                  return Text(
+                    controller.serverError.value,
+                    style: const TextStyle(color: Colors.red),
+                  );
+                }
+                if (controller.isSuccess.value) {
+                  return const Text(
+                    "Password Changed Successfully",
+                    style: TextStyle(color: Colors.green, fontSize: 14),
+                  );
+                }
+                return const SizedBox();
+              }),
             ],
           ),
         ),
       ),
-
     );
   }
 
@@ -155,14 +189,13 @@ class ChangePasswordScreen extends StatelessWidget {
     required bool hasError,
     String? hint,
     double height = 53,
-    bool isValidationField = false,
   }) {
     final isObscure = true.obs;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Obx(
-            () => SizedBox(
+        () => SizedBox(
           height: height,
           child: TextFormField(
             controller: controller,
@@ -231,5 +264,4 @@ class ChangePasswordScreen extends StatelessWidget {
       ),
     );
   }
-
 }

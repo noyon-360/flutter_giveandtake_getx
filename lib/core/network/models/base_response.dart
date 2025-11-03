@@ -47,8 +47,24 @@ class BaseResponse<T> {
       }
     }
 
+    // Handle success field - can be boolean or string
+    bool successValue = false;
+    if (json['success'] != null) {
+      if (json['success'] is bool) {
+        successValue = json['success'];
+      } else if (json['success'] is String) {
+        successValue = json['success'].toString().toLowerCase() == 'true';
+      }
+    } else if (json['status'] != null) {
+      if (json['status'] is bool) {
+        successValue = json['status'];
+      } else if (json['status'] is String) {
+        successValue = json['status'].toString().toLowerCase() == 'success';
+      }
+    }
+
     return BaseResponse<T>(
-      success: json['success'] ?? json['status'] ?? false,
+      success: successValue,
       message: json['message'] ?? '',
       data: parsedData,
       errorSources: json['errorSources'] != null

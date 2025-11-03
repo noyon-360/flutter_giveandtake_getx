@@ -4,7 +4,7 @@ class ContactUsRequestModel {
   final String address;
   final String phoneNumber;
   final String subject;
-  final String yourCompony;
+  final String message;
 
   ContactUsRequestModel({
     required this.firstName,
@@ -12,7 +12,7 @@ class ContactUsRequestModel {
     required this.address,
     required this.phoneNumber,
     required this.subject,
-    required this.yourCompony,
+    required this.message,
   });
 
   // Convert Dart object → JSON
@@ -23,7 +23,7 @@ class ContactUsRequestModel {
       'address': address,
       'phoneNumber': phoneNumber,
       'subject': subject,
-      'yourCompony': yourCompony,
+      'message': message,
     };
   }
 }

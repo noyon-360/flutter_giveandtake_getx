@@ -1,6 +1,13 @@
 import 'package:get/get.dart';
+import 'package:karlfive/features/job_listing/domain/usecases/get_jobs_usecase.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
 
 class JobListingController extends GetxController {
+  final GetJobsUseCase _getJobsUseCase;
+
+  JobListingController({required GetJobsUseCase getJobsUseCase})
+    : _getJobsUseCase = getJobsUseCase;
+
   // Observable variables
   final RxList<Map<String, dynamic>> jobs = <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> filteredJobs =
@@ -8,7 +15,8 @@ class JobListingController extends GetxController {
   final RxList<String> selectedFilters = <String>[].obs;
   final RxString searchQuery = ''.obs;
   final RxBool isLoading = true.obs;
-  final RxString selectedLocation = 'United States'.obs;
+  final RxString selectedLocation = 'All Locations'.obs;
+  final RxString errorMessage = ''.obs;
 
   @override
   void onInit() {
@@ -18,72 +26,32 @@ class JobListingController extends GetxController {
 
   void fetchJobs() async {
     isLoading.value = true;
+    errorMessage.value = '';
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
+    final result = await _getJobsUseCase(limit: 100);
 
-    // Mock job data based on the screenshot
-    final mockJobs = [
-      {
-        'id': '1',
-        'title': 'Human Resources Manager',
-        'company': 'Lancame',
-        'location': 'United States',
-        'duration': 'Full Time',
-        'salary': '\$ 80k-100k/yr',
-        'timePosted': '4 days ago',
-        'type': 'Full Time',
-        'datePosted': DateTime.now().subtract(const Duration(days: 4)),
+    result.fold(
+      (failure) {
+        errorMessage.value = failure.message;
+        isLoading.value = false;
+        Get.snackbar(
+          'Error',
+          errorMessage.value,
+          snackPosition: SnackPosition.BOTTOM,
+        );
       },
-      {
-        'id': '2',
-        'title': 'Human Resources Manager',
-        'company': 'Lancame',
-        'location': 'United States',
-        'duration': 'Full Time',
-        'salary': '\$ 80k-100k/yr',
-        'timePosted': '4 days ago',
-        'type': 'Full Time',
-        'datePosted': DateTime.now().subtract(const Duration(days: 4)),
+      (success) {
+        // Convert JobModel list to Map format for UI compatibility
+        final jobMaps = success.data.jobs.map((job) {
+          final map = job.toDisplayMap();
+          map['raw'] = job.toJson();
+          return map;
+        }).toList();
+        jobs.assignAll(jobMaps);
+        filteredJobs.assignAll(jobMaps);
+        isLoading.value = false;
       },
-      {
-        'id': '3',
-        'title': 'Human Resources Manager',
-        'company': 'Lancame',
-        'location': 'United States',
-        'duration': 'Full Time',
-        'salary': '\$ 80k-100k/yr',
-        'timePosted': '4 days ago',
-        'type': 'Full Time',
-        'datePosted': DateTime.now().subtract(const Duration(days: 4)),
-      },
-      {
-        'id': '4',
-        'title': 'Software Developer',
-        'company': 'TechCorp',
-        'location': 'United States',
-        'duration': 'Part Time',
-        'salary': '\$ 60k-80k/yr',
-        'timePosted': '2 days ago',
-        'type': 'Part Time',
-        'datePosted': DateTime.now().subtract(const Duration(days: 2)),
-      },
-      {
-        'id': '5',
-        'title': 'Marketing Specialist',
-        'company': 'MarketPro',
-        'location': 'United States',
-        'duration': 'Contract',
-        'salary': '\$ 70k-90k/yr',
-        'timePosted': '1 day ago',
-        'type': 'Contract',
-        'datePosted': DateTime.now().subtract(const Duration(days: 1)),
-      },
-    ];
-
-    jobs.assignAll(mockJobs);
-    filteredJobs.assignAll(mockJobs);
-    isLoading.value = false;
+    );
   }
 
   void toggleFilter(String filter) {
@@ -108,17 +76,28 @@ class JobListingController extends GetxController {
   void applyFilters() {
     var filtered = jobs.where((job) {
       // Search filter
-      if (searchQuery.value.isNotEmpty) {
-        final query = searchQuery.value.toLowerCase();
-        if (!job['title'].toLowerCase().contains(query) &&
-            !job['company'].toLowerCase().contains(query)) {
-          return false;
-        }
+      final trimmed = searchQuery.value.trim();
+      if (trimmed.isNotEmpty) {
+        final query = trimmed.toLowerCase();
+        // allow multi-keyword search: any token matching any of the fields
+        final tokens = query.split(RegExp(r"\s+"));
+
+        final title = (job['title'] ?? '').toString().toLowerCase();
+        final company = (job['company'] ?? '').toString().toLowerCase();
+        final location = (job['location'] ?? '').toString().toLowerCase();
+
+        final matched = tokens.any(
+          (t) =>
+              title.contains(t) || company.contains(t) || location.contains(t),
+        );
+
+        if (!matched) return false;
       }
 
       // Location filter
       if (selectedLocation.value != 'All Locations' &&
-          job['location'] != selectedLocation.value) {
+          job['location'].toString().toLowerCase() !=
+              selectedLocation.value.toString().toLowerCase()) {
         return false;
       }
 
@@ -139,12 +118,8 @@ class JobListingController extends GetxController {
   }
 
   void onJobTap(Map<String, dynamic> job) {
-    // Navigate to job details
-    Get.snackbar(
-      'Job Selected',
-      'Opening ${job['title']} at ${job['company']}',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Navigate to job details screen
+    Get.to(() => JobDetailsScreen(jobData: job));
   }
 
   void onEasyApply(Map<String, dynamic> job) {
