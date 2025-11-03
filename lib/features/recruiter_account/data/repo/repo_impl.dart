@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:karlfive/core/network/network_result.dart';
@@ -8,6 +10,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../domain/repo/repo.dart';
 import '../models/create_recruiter_response_model.dart';
+import '../models/get_category_response_model.dart';
 import '../models/get_recruiter_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
 
@@ -23,6 +26,15 @@ class RepoImplementation extends Repo {
       fromJsonT: (json) => companyListFromJson(json as List<dynamic>),
     );
   }
+
+  @override
+  NetworkResult<GetCategoryResponseModel> fetchCategory() {
+    return _apiClient.get(
+      ApiConstants.recruiter.getCategory,
+      fromJsonT: (json) => GetCategoryResponseModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
 
   @override
   NetworkResult<void> uploadVideo(String userId, FormData formData) {
@@ -75,5 +87,5 @@ class RepoImplementation extends Repo {
     );
   }
 
-
+  
 }
