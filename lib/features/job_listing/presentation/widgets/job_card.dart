@@ -158,7 +158,7 @@ class JobCard extends StatelessWidget {
                         child: GestureDetector(
                           onTap: onEasyApply,
                           child: const Text(
-                            'Easy Apply',
+                            'Apply Now',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
