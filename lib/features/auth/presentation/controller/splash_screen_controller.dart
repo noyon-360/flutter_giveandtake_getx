@@ -26,7 +26,7 @@ class SplashController extends GetxController {
     final accessToken = await _authStorageService.getAccessToken();
 
     if(accessToken != null) {
-      Get.to( () => RecruiterPageScreen());
+      Get.to( () => CreateRecruiterAccount());
     } else {
       Get.to( () => LoginScreen());
     }
