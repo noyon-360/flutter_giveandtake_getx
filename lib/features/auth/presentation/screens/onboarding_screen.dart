@@ -48,16 +48,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 // Hero widget wraps the logo for smooth transition
-                Center(
-                  child: Hero(
-                    tag: 'app_logo_transition',
-                    child: AppLogo(
-                      images: AppImages.appLogoWhite,
-                      height: 250,
-                      width: 250,
-                    ),
-                  ),
-                ),
+                // Center(
+                //   child: Hero(
+                //     tag: 'app_logo_transition',
+                //     child: AppLogo(
+                //       images: AppImages.appLogoWhite,
+                //       height: 250,
+                //       width: 250,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
 
