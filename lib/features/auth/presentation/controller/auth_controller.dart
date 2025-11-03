@@ -631,20 +631,32 @@ class AuthController extends BaseController {
   }
 
   Future<void> logout() async {
-    await _authStorageService.clearAuthData();
-    
-    // Clear user data from GetUserProfileService
     try {
-      Get.find<GetUserProfileService>().clearUserData();
-    } catch (_) {
-      // If service not found, ignore silently
+      setLoading(true);
+      
+      // Clear all auth storage data (tokens, user ID, role, user profile)
+      await _authStorageService.clearAuthData();
+      
+      // Clear user data from GetUserProfileService
+      try {
+        Get.find<GetUserProfileService>().clearUserData();
+      } catch (_) {
+        // If service not found, ignore silently
+      }
+      
+      // Clear all secure storage data (includes remember me credentials and other cached data)
+      final secureStore = SecureStoreServices();
+      await secureStore.deleteAllData();
+      
+      setLoading(false);
+      setError('');
+      
+      // Navigate to login screen
+      Get.offAll(() => LoginScreen());
+    } catch (e) {
+      DPrint.log("Logout error: $e");
+      setLoading(false);
+      setError("Failed to logout");
     }
-    
-    final secureStore = SecureStoreServices();
-    await secureStore.deleteData('previewConfirmed');
-
-    setLoading(false);
-    setError('');
-    Get.offAll(() => LoginScreen());
   }
 }

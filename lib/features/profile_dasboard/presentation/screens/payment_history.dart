@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../../core/bottomNavbar/screens/dashboard_screen.dart';
 import '../../../plan_pricing/presentation/controllers/plan_pricing_controller.dart';
 import '../../../plan_pricing/presentation/widgets/payment_option_dialog.dart';
@@ -42,28 +43,6 @@ class PaymentHistoryScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              /// Profile Info
-              const CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage("assets/images/profile.jpg"),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "Brooklyn Simmons",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF212121),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "brooklynsimmons@gmail.com",
-                style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
-              ),
-              const SizedBox(height: 10),
-              const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
-        
               /// Current Plan Title
               const Text(
                 "Current Plan",
