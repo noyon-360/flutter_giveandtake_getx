@@ -1,4 +1,4 @@
-class ApiConstants {
+class  ApiConstants {
   /// [Base Configuration]
   // static const String baseDomain = 'https://api.evpitch.com';
 
@@ -7,8 +7,10 @@ class ApiConstants {
   static const String baseDomain = 'http://10.10.5.88:5001'; // zafor
   //add by zafor end
 
-  static const String baseUrl = '$baseDomain/api/v1';
+  // static const String baseDomain = 'https://api.evpitch.com';
+  // static const String baseDomain = 'http://10.10.5.33:5001';//eshita
 
+  static const String baseUrl = '$baseDomain/api/v1';
 
 
   // static const String baseDomain = 'https://api.evpitch.com';
@@ -59,6 +61,7 @@ class JobEndpoints {
 
 class RecruiterAccountApi {
   final String getCompany = '${ApiConstants.baseUrl}/all/companies';
+  final String getCategory = '${ApiConstants.baseUrl}/category/job-category';
   final String uploadVideo = '${ApiConstants.baseUrl}/all/companies';
 
   static const String _base = '${ApiConstants.baseUrl}/recruiter';

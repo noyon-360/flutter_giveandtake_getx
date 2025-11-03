@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:karlfive/core/init/stripe_initializer.dart';
 
 import '../di/service_locator.dart';
 import 'hive_intialization.dart';

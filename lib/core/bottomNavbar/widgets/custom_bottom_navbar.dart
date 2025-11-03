@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../features/company_pricing/presentation/screens/plan_pricing_screen.dart';
-import '../../../features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 import '../controllers/bottom_nav_controller.dart';
 
 class CustomBottomNavBar extends StatelessWidget {

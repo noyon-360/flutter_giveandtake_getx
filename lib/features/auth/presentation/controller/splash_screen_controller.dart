@@ -2,6 +2,11 @@ import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
+import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+
+import '../../../recruiter_account/presentation/screens/create_recruiter_account.dart';
+import '../screens/login_screen.dart';
+
 import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
 import 'package:karlfive/features/create_job/presentation/screen/create_job_screen.dart' as cjs;
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../create_job/presentation/controller/create_job_controller.dart';
 import '../../../create_job/presentation/widgets/searchable_widgets.dart';
 import '../controller/company_account_controller.dart';
-import '../widget/add_list_widget.dart';
 import '../widget/custom_text_field.dart';
 import '../widget/upload_card_widget.dart';
 import '../widget/upload_video_widget.dart';
