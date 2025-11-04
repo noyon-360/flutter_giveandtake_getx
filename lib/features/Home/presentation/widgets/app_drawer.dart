@@ -45,7 +45,7 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             ListTileForNav(
-              title: "Blog",
+              title: "Blogs",
               onTap: () {
                 Get.to (()=> BlogScreen());
               },
@@ -145,7 +145,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       },
                     ),
                     ListTileForNav(
-                      title: "Bookmark Jobs",
+                      title: "Bookmarked Jobs",
                       liconPath: "assets/icons/book-open-01.png",
                       onTap: () {
                         // Close the drawer then navigate to Bookmark Jobs screen
