@@ -62,6 +62,7 @@ class JobEndpoints {
 class RecruiterAccountApi {
   final String getCompany = '${ApiConstants.baseUrl}/all/companies';
   final String getCategory = '${ApiConstants.baseUrl}/category/job-category';
+  final String getCurrency = '${ApiConstants.baseUrl}/courency';
   final String uploadVideo = '${ApiConstants.baseUrl}/all/companies';
 
   static const String _base = '${ApiConstants.baseUrl}/recruiter';

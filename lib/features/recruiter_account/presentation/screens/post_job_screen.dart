@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controller/job_posing _controller.dart';
+import '../../../../core/common/widgets/app_scaffold.dart';
+import '../controller/job_posting _controller.dart';
 import '../widgets/job_description_step.dart';
 import '../widgets/job_details_step.dart';
 import '../widgets/job_stepper.dart';
 
-class CreateJobPostingScreen extends StatelessWidget {
-  const CreateJobPostingScreen({super.key});
+class CreateJobScreen extends StatelessWidget {
+  const CreateJobScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,32 +15,48 @@ class CreateJobPostingScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Job Posting'),
+        title: const Text(
+          'Create Job Posting',
+          style: TextStyle(color: Colors.black),
+        ),
         centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
       body: Column(
         children: [
-          const SizedBox(height: 16),
           const JobStepper(),
-          const Divider(height: 32, thickness: 1),
+          const Divider(thickness: 1, color: Colors.grey),
 
-          // Dynamic step content
+          // ✅ Expanded makes scrollable content fill the remaining space
           Expanded(
             child: Obx(() {
+              Widget stepWidget;
               switch (controller.currentStep.value) {
                 case 1:
-                  return const JobDetailsStep();
+                  stepWidget =  JobDetailsStep();
+                  break;
                 case 2:
-                  return const JobDescriptionStep();
-                // case 3:
-                //   return const ApplicationRequirementsStep();
-                // case 4:
-                //   return const CustomQuestionsStep();
-                // case 5:
-                //   return const FinishStep();
+                  stepWidget = const JobDescriptionStep();
+                  break;
+              // case 3:
+              //   stepWidget = const ApplicationRequirementsStep();
+              //   break;
+              // case 4:
+              //   stepWidget = const CustomQuestionsStep();
+              //   break;
+              // case 5:
+              //   stepWidget = const FinishStep();
+              //   break;
                 default:
-                  return const SizedBox.shrink();
+                  stepWidget = const SizedBox.shrink();
               }
+
+              // ✅ Wrap the step widget in a scroll view
+              return SingleChildScrollView(
+                ///padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: stepWidget,
+              );
             }),
           ),
         ],

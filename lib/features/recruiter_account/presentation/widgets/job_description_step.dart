@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controller/job_posing _controller.dart';
+import '../controller/job_posting _controller.dart';
 
 class JobDescriptionStep extends StatelessWidget {
   const JobDescriptionStep({super.key});
@@ -18,7 +18,7 @@ class JobDescriptionStep extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           TextField(
-            controller: controller.jobDescriptionController,
+            //controller: controller.jobDescriptionController,
             maxLines: 5,
             decoration: const InputDecoration(
               labelText: 'Describe the job role...',

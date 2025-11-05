@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_company_response_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
 import 'package:karlfive/features/recruiter_account/domain/repo/repo.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/upload_elevator_pitch.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
@@ -25,6 +26,7 @@ class RecruiterController extends BaseController {
 
   final companies = <GetCompanyResponseModel>[].obs;
   final category = <Category>[].obs;
+  final currency = <GetCurrencyResponseModel>[].obs;
 
   // final selectedCompany = Rxn<GetCompanyResponseModel>();
   final selectedCompany = RxnString();
@@ -48,6 +50,8 @@ class RecruiterController extends BaseController {
     super.onInit();
     fetchCompany(); //Fetch when controller is created
     fetchProfile();
+    fetchCategory();
+    fetchCurrency();
   }
 
 
@@ -80,6 +84,29 @@ class RecruiterController extends BaseController {
       setLoading(false);
     });
   }
+
+
+
+  Future<void> fetchCurrency() async {
+    setLoading(true);
+    setError('');
+
+    final result = await _recruiterRepo.fetchCurrency();
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+          (success) {
+        // success.data is already a List<GetCurrencyResponseModel>
+        currency.value = success.data;
+
+        setLoading(false);
+      },
+    );
+  }
+
 
 
   Future<void> uploadVideo(ElevatorPitchController elevatorPitchController) async {

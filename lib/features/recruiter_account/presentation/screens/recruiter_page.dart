@@ -4,8 +4,10 @@ import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/archive_job.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/edit_profile_page.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/post_job_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../create_job/presentation/screen/create_job_screen.dart';
 import '../widgets/social_media.dart';
 
 class RecruiterPageScreen extends StatefulWidget {
@@ -199,7 +201,7 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                       Row(
                         children: [
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {Get.to(() => CreateJobScreen());},
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2B7FD0),
                             ),
@@ -209,16 +211,16 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                             ),
                           ),
                           const SizedBox(width: 20),
-                          ElevatedButton(
-                            onPressed: () => Get.to(() => const ArchiveJobsPage()),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2B7FD0),
-                            ),
-                            child: const Text(
-                              'All Archive Job',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                            ),
-                          ),
+                          // ElevatedButton(
+                          //   onPressed: () => Get.to(() => const ArchiveJobsPage()),
+                          //   style: ElevatedButton.styleFrom(
+                          //     backgroundColor: const Color(0xFF2B7FD0),
+                          //   ),
+                          //   child: const Text(
+                          //     'All Archive Job',
+                          //     style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ],

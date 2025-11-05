@@ -70,11 +70,6 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
     ElevatorPitchController(),
   );
 
-
-
-  // This will hold the current country code for city picker
-  String? selectedCountryCode;
-
   _submit() {
     recruiterController.createRecruiterScreen(
         bannerPickerController.selectedImage.value!,

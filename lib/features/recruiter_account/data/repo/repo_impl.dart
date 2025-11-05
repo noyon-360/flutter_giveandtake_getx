@@ -11,6 +11,7 @@ import '../../../../core/network/constants/api_constants.dart';
 import '../../domain/repo/repo.dart';
 import '../models/create_recruiter_response_model.dart';
 import '../models/get_category_response_model.dart';
+import '../models/get_currency_response_model.dart';
 import '../models/get_recruiter_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
 
@@ -18,6 +19,8 @@ class RepoImplementation extends Repo {
   final ApiClient _apiClient;
 
   RepoImplementation({required ApiClient apiClient}) : _apiClient = apiClient;
+
+
 
   @override
   NetworkResult<List<GetCompanyResponseModel>> fetchCompany() {
@@ -31,9 +34,24 @@ class RepoImplementation extends Repo {
   NetworkResult<GetCategoryResponseModel> fetchCategory() {
     return _apiClient.get(
       ApiConstants.recruiter.getCategory,
-      fromJsonT: (json) => GetCategoryResponseModel.fromJson(json as Map<String, dynamic>),
+      fromJsonT: (json) => GetCategoryResponseModel.fromJson(json),
     );
   }
+
+  @override
+  NetworkResult<List<GetCurrencyResponseModel>> fetchCurrency() {
+    return _apiClient.get(
+      ApiConstants.recruiter.getCurrency,
+      fromJsonT: (json) {
+        // Ensure json is a List
+        final List<dynamic> jsonList = json as List<dynamic>;
+        return jsonList
+            .map((item) => GetCurrencyResponseModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+      },
+    );
+  }
+
 
 
   @override
