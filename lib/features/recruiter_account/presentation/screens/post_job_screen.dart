@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/common/widgets/app_scaffold.dart';
-import '../controller/job_posting _controller.dart';
+import '../controller/job_posting_controller.dart';
+import '../widgets/application_requirement_step.dart';
 import '../widgets/job_description_step.dart';
 import '../widgets/job_details_step.dart';
 import '../widgets/job_stepper.dart';
@@ -14,6 +14,7 @@ class CreateJobScreen extends StatelessWidget {
     final controller = Get.put(JobPostingController());
 
     return Scaffold(
+      backgroundColor: Colors.white,  //sets white background for Scaffold
       appBar: AppBar(
         title: const Text(
           'Create Job Posting',
@@ -28,7 +29,6 @@ class CreateJobScreen extends StatelessWidget {
           const JobStepper(),
           const Divider(thickness: 1, color: Colors.grey),
 
-          // ✅ Expanded makes scrollable content fill the remaining space
           Expanded(
             child: Obx(() {
               Widget stepWidget;
@@ -39,9 +39,9 @@ class CreateJobScreen extends StatelessWidget {
                 case 2:
                   stepWidget = const JobDescriptionStep();
                   break;
-              // case 3:
-              //   stepWidget = const ApplicationRequirementsStep();
-              //   break;
+              case 3:
+                 stepWidget = const ApplicationRequirementStep();
+                 break;
               // case 4:
               //   stepWidget = const CustomQuestionsStep();
               //   break;
@@ -52,10 +52,13 @@ class CreateJobScreen extends StatelessWidget {
                   stepWidget = const SizedBox.shrink();
               }
 
-              // ✅ Wrap the step widget in a scroll view
-              return SingleChildScrollView(
-                ///padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: stepWidget,
+              return Container(
+                color: Color(0xFFE6E6FA).withOpacity(.3),
+                width: double.infinity,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: stepWidget,
+                ),
               );
             }),
           ),

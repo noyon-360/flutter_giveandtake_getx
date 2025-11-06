@@ -13,6 +13,8 @@ import 'package:karlfive/features/recruiter_account/presentation/screens/create_
 import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
 import '../../../../core/base/base_controller.dart';
 import '../../../../core/network/services/multiple_form_data_manager.dart';
+import '../../../../core/network/services/secure_store_services.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 import '../../data/models/get_recruiter_response_model.dart';
 import '../models/job_model.dart';
 import 'package:http_parser/http_parser.dart';
@@ -515,5 +517,14 @@ class RecruiterController extends BaseController {
     // call API to remove from archive, then refresh
     //await _recruiterRepo.unarchiveJob(id);
     fetchArchiveJobs();
+  }
+
+  Future<void> logout() async {
+    await _authStorageService.clearAuthData();
+    final secureStore = SecureStoreServices();
+    await secureStore.deleteData('email');
+    await secureStore.deleteData('password');
+
+    Get.offAll(() => LoginScreen());
   }
 }

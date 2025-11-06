@@ -36,6 +36,7 @@ dependencies:
     table_calendar: ^3.0.9
     html_editor_enhanced: ^2.7.1
 
+
     # Api and cache
     dio: ^5.9.0
     hive_flutter: ^1.1.0

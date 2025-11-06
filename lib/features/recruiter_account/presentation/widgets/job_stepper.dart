@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controller/job_posting _controller.dart';
+import '../controller/job_posting_controller.dart';
 
 
 class JobStepper extends StatelessWidget {

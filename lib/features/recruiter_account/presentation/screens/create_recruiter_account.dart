@@ -111,6 +111,7 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                ElevatedButton(onPressed: (){Get.find<RecruiterController>().logout();} , child: Text('Logout')),
                 const Text(
                   'Upload Your Elevator Speech (Optional)',
                   style: TextStyle(
