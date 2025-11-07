@@ -13,6 +13,8 @@ import '../models/create_recruiter_response_model.dart';
 import '../models/get_category_response_model.dart';
 import '../models/get_currency_response_model.dart';
 import '../models/get_recruiter_response_model.dart';
+import '../models/job_create_request_model.dart';
+import '../models/job_create_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
 
 class RepoImplementation extends Repo {
@@ -48,6 +50,28 @@ class RepoImplementation extends Repo {
         return jsonList
             .map((item) => GetCurrencyResponseModel.fromJson(item as Map<String, dynamic>))
             .toList();
+      },
+    );
+  }
+
+  @override
+  NetworkResult<List<JobPostResponseModel>> createNewJobPost(
+      JobPostRequestModel request) {
+    return _apiClient.post(
+      ApiConstants.recruiter.createJob,
+      data: request.toJson(),
+      fromJsonT: (json) {
+        // Check if API returns a list or single object
+        if (json is List) {
+          return json
+              .map((e) => JobPostResponseModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+        } else if (json is Map<String, dynamic>) {
+          // Sometimes API returns a single object
+          return [JobPostResponseModel.fromJson(json)];
+        } else {
+          return <JobPostResponseModel>[];
+        }
       },
     );
   }

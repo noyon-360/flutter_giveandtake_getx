@@ -24,30 +24,46 @@ class JobDetailsStep extends StatelessWidget {
       controller.loadCurrenciesIfEmpty();
     }
 
-    TextEditingController _jobTitleTEController = TextEditingController();
+    TextEditingController _jobTitleTEController = TextEditingController(
+      text: controller.selectedRole.value,
+    );
     final FocusNode _jobTitleFocusNode = FocusNode();
 
-    TextEditingController _departmentTEController = TextEditingController();
+    TextEditingController _departmentTEController = TextEditingController(
+      text: controller.department.value,
+    );
     final FocusNode _departmentFocusNode = FocusNode();
 
     TextEditingController _vacanciesTEController = TextEditingController(
-      text: '1',
+      text: controller.vacancies.value.isNotEmpty
+          ? controller.vacancies.value
+          : '1', // default
     );
+
     final FocusNode _vacanciesFocusNode = FocusNode();
 
     TextEditingController _compensationTEController = TextEditingController();
     final FocusNode _compensationFocusNode = FocusNode();
 
+    TextEditingController _companyWebTEController = TextEditingController();
+    final FocusNode _companyWebFocusNode = FocusNode();
+
     final LocationController countryCityController = Get.put(
       LocationController(),
     );
 
-    // Listen to selectedRole changes and update Job Title if empty
+    // Listen to selectedRole changes and auto-fill + update controller.jobTitle
     ever(controller.selectedRole, (String role) {
-      if (_jobTitleTEController.text.isEmpty && role.isNotEmpty) {
+      if (role.isNotEmpty) {
         _jobTitleTEController.text = role;
+        controller.jobTitle.value = role; //save it to controller
       }
     });
+
+    // Also set controller.vacancies.value if empty
+    if (controller.vacancies.value.isEmpty) {
+      controller.vacancies.value = '1';
+    }
 
     final EmploymentTypeController employeeController = Get.put(
       EmploymentTypeController(),
@@ -188,6 +204,7 @@ class JobDetailsStep extends StatelessWidget {
             TextFormField(
               controller: _jobTitleTEController,
               focusNode: _jobTitleFocusNode,
+              onChanged: (value) => controller.jobTitle.value = value,
               textInputAction: TextInputAction.next,
               decoration: context.primaryInputDecoration.copyWith(
                 hintText: "Enter job title",
@@ -208,6 +225,7 @@ class JobDetailsStep extends StatelessWidget {
             TextFormField(
               controller: _departmentTEController,
               focusNode: _departmentFocusNode,
+              onChanged: (value) => controller.department.value = value,
               textInputAction: TextInputAction.next,
               decoration: context.primaryInputDecoration.copyWith(
                 hintText: "Enter department",
@@ -236,6 +254,7 @@ class JobDetailsStep extends StatelessWidget {
               child: TextFormField(
                 controller: _vacanciesTEController,
                 focusNode: _vacanciesFocusNode,
+                onChanged: (value) => controller.vacancies.value = value,
                 keyboardType: TextInputType.number,
                 decoration: context.primaryInputDecoration.copyWith(
                   hintText: _vacanciesTEController.text,
@@ -249,7 +268,10 @@ class JobDetailsStep extends StatelessWidget {
                           int value =
                               int.tryParse(_vacanciesTEController.text) ?? 0;
                           if (value < 50) {
-                            _vacanciesTEController.text = "${value + 1}";
+                            value++;
+                            _vacanciesTEController.text = value.toString();
+                            controller.vacancies.value = value
+                                .toString(); // update the observable
                           }
                         },
                         child: Container(
@@ -280,10 +302,11 @@ class JobDetailsStep extends StatelessWidget {
                       //Removed SizedBox, now only 1-pixel border gap
                       GestureDetector(
                         onTap: () {
-                          int value =
-                              int.tryParse(_vacanciesTEController.text) ?? 0;
+                          int value = int.tryParse(_vacanciesTEController.text) ?? 0;
                           if (value > 1) {
-                            _vacanciesTEController.text = "${value - 1}";
+                            value--;
+                            _vacanciesTEController.text = value.toString();
+                            controller.vacancies.value = value.toString(); // update the observable
                           }
                         },
                         child: Container(
@@ -634,6 +657,7 @@ class JobDetailsStep extends StatelessWidget {
               return TextFormField(
                 controller: _compensationTEController,
                 focusNode: _compensationFocusNode,
+                onChanged: (value) => controller.compensation.value = value,
                 keyboardType: TextInputType.number,
                 decoration: context.primaryInputDecoration.copyWith(
                   prefixText: selectedCurrency?.symbol != null
@@ -714,8 +738,8 @@ class JobDetailsStep extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             TextFormField(
-              controller: _departmentTEController,
-              focusNode: _departmentFocusNode,
+              controller: _companyWebTEController,
+              focusNode: _companyWebFocusNode,
               textInputAction: TextInputAction.next,
               decoration: context.primaryInputDecoration.copyWith(
                 hintText: "https://example.com",
@@ -765,9 +789,14 @@ class JobDetailsStep extends StatelessWidget {
                 Container(
                   height: 50,
                   width: 120,
-                  decoration: BoxDecoration(color: Color(0xFF2B7FD0), borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF2B7FD0),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: ElevatedButton(
-                    onPressed: () {controller.nextStep();},
+                    onPressed: () {
+                      controller.nextStep();
+                    },
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -777,10 +806,14 @@ class JobDetailsStep extends StatelessWidget {
                       shadowColor: Colors.transparent,
                       disabledBackgroundColor: Colors.transparent,
                     ),
-                    child: Text('Next', style: TextStyle(
-                      color: Colors.white,fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),),
+                    child: Text(
+                      'Next',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
               ],

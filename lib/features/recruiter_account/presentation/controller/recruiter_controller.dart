@@ -16,6 +16,7 @@ import '../../../../core/network/services/multiple_form_data_manager.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../data/models/get_recruiter_response_model.dart';
+import '../../data/models/job_create_request_model.dart';
 import '../models/job_model.dart';
 import 'package:http_parser/http_parser.dart';
 
@@ -109,6 +110,84 @@ class RecruiterController extends BaseController {
     );
   }
 
+  Future createJobPost(
+      final String title,
+      final String description,
+      final String salaryRange,
+      final String location,
+      final String shift,
+      final List<String> responsibilities,
+      final List<String> educationExperience,
+      final List<String> benefits,
+      final int vacancy,
+      final String experience,
+      final String deadline,
+      final String status,
+      final String jobCategoryId,
+      final String name,
+      final String role,
+      final String compensation,
+      final bool archivedJob,
+      final List<ApplicationRequirement> applicationRequirement,
+      final List<CustomQuestion> customQuestion,
+      final String employementType,
+      final String websiteUrl,
+      final String publishDate,
+      final String careerStage,
+      final String locationType) async {
+    setLoading(true);
+    setError("");
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User ID not found. Please log in again.');
+      Get.snackbar('Error', 'User ID not found. Please log in again.');
+      setLoading(false);
+      return;
+    }
+    final request = JobPostRequestModel(userId: userId,
+        title: title,
+        description: description,
+        salaryRange: salaryRange,
+        location: location,
+        shift: shift,
+        responsibilities: [],
+        educationExperience: [],
+        benefits: [],
+        vacancy: vacancy,
+        experience: experience,
+        deadline: deadline,
+        status: status,
+        jobCategoryId: jobCategoryId,
+        name: name,
+        role: role,
+        compensation: compensation,
+        archivedJob: archivedJob,
+        applicationRequirement: applicationRequirement,
+        customQuestion: customQuestion,
+        employementType: employementType,
+        websiteUrl: websiteUrl,
+        publishDate: publishDate,
+        careerStage: careerStage,
+        locationType: locationType);
+
+    final result = await _recruiterRepo.createNewJobPost(request);
+
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("verify otp success result : ${fail.message}");
+        setLoading(false);
+      },
+          (success) {
+        DPrint.log("verify otp success result : ${success.message}");
+        Get.to(() => RecruiterPageScreen());
+        setLoading(false);
+      },
+    );
+  }
+
 
 
   Future<void> uploadVideo(ElevatorPitchController elevatorPitchController) async {
@@ -187,95 +266,6 @@ class RecruiterController extends BaseController {
     }
   }
 
-
-
-  // Future<void> createRecruiterScreen(
-  //     File banner,
-  //     File recruiterLogo,
-  //     String description,
-  //     String firstName,
-  //     String surname,
-  //     String emailAddress,
-  //     String phoneNumber,
-  //     String title,
-  //     String country,
-  //     String city,
-  //     int zipCode,
-  //     String linkedIn,
-  //     String twitter,
-  //     String upwork,
-  //     String facebook,
-  //     String tiktok,
-  //     String instagram,
-  //     ) async {
-  //   setLoading(true);
-  //   setError('');
-  //
-  //   final userId = await _authStorageService.getUserId(); // get logged-in userId
-  //   if (userId == null || userId.isEmpty) {
-  //     setError('User ID not found. Please log in again.');
-  //     Get.snackbar('Error', 'User ID not found. Please log in again.');
-  //     setLoading(false);
-  //     return;
-  //   }
-  //
-  //   // Build social links list
-  //   List<Map<String, String>> sLinks = [];
-  //   if (linkedIn.isNotEmpty) sLinks.add({"label": "LinkedIn", "url": linkedIn});
-  //   if (twitter.isNotEmpty) sLinks.add({"label": "Twitter", "url": twitter});
-  //   if (upwork.isNotEmpty) sLinks.add({"label": "Upwork", "url": upwork});
-  //   if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
-  //   if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
-  //   if (instagram.isNotEmpty) sLinks.add({"label": "Instagram", "url": instagram});
-  //
-  //   // Add all text + file fields
-  //   _multiFormDataManager.addImageFile(key: "banner", banner);
-  //   _multiFormDataManager.addImageFile(key: "photo", recruiterLogo);
-  //   _multiFormDataManager.addTextData("firstName", firstName);
-  //   _multiFormDataManager.addTextData("sureName", surname);
-  //   _multiFormDataManager.addTextData("emailAddress", emailAddress);
-  //   _multiFormDataManager.addTextData("phoneNumber", phoneNumber);
-  //   _multiFormDataManager.addTextData("title", title);
-  //   _multiFormDataManager.addTextData("bio", description);
-  //   _multiFormDataManager.addTextData("country", country);
-  //   _multiFormDataManager.addTextData("city", city);
-  //   _multiFormDataManager.addTextData("zipCode", zipCode.toString());
-  //
-  //   //Add userId here
-  //   _multiFormDataManager.addTextData("userId", userId);
-  //
-  //   // Optionally include companyId if your backend expects it
-  //   if (selectedCompany.value != null) {
-  //     _multiFormDataManager.addTextData("companyId", selectedCompany.value!.id);
-  //   }
-  //
-  //   // Add social links
-  //   for (int i = 0; i < sLinks.length; i++) {
-  //     _multiFormDataManager.addTextData("sLink[$i][label]", sLinks[i]["label"]!);
-  //     _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
-  //   }
-  //
-  //   final formRequest = await _multiFormDataManager.toFormDataAsync();
-  //
-  //   print(' Fields: ${formRequest.fields}');
-  //   print(' Files: ${formRequest.files}');
-  //
-  //   final result = await _recruiterRepo.createRecruiter(formRequest);
-  //
-  //   result.fold(
-  //         (fail) {
-  //       setError(fail.message);
-  //       DPrint.log('Create Recruiter: ${fail.message}');
-  //       isLoading(false);
-  //     },
-  //         (success) {
-  //       DPrint.log('Create Recruiter: ${success.message}');
-  //       Get.to(() => RecruiterPageScreen());
-  //       isLoading(false);
-  //       setError(success.message);
-  //     },
-  //   );
-  // }
 
 
   Future<void> createRecruiterScreen(File banner,

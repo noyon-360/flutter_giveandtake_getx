@@ -64,6 +64,7 @@ class RecruiterAccountApi {
   final String getCategory = '${ApiConstants.baseUrl}/category/job-category';
   final String getCurrency = '${ApiConstants.baseUrl}/courency';
   final String uploadVideo = '${ApiConstants.baseUrl}/all/companies';
+  final String createJob = '${ApiConstants.baseUrl}/jobs';
 
   static const String _base = '${ApiConstants.baseUrl}/recruiter';
   String createRecruiterAccount = '$_base/recruiter-account';

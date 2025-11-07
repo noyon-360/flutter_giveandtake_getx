@@ -14,12 +14,26 @@ class JobPostingController extends GetxController {
   RxString selectedCategory = ''.obs;
   RxString selectedRole = ''.obs;
 
+
+  RxString jobTitle = ''.obs;
+  RxString department = ''.obs;
+
+  RxString vacancies = ''.obs;
+
+  // Add these setter methods for cleaner updates (optional)
+  void setJobTitle(String value) => jobTitle.value = value;
+  void setDepartment(String value) => department.value = value;
+
+
+
   // Data sources
   List<Category> get categories => recruiterController.category;
 
   // Currency management
   var currencies = <GetCurrencyResponseModel>[].obs;
   var selectedCurrency = Rxn<GetCurrencyResponseModel>();
+  RxString compensation = ''.obs;
+
 
   // add these near the other application requirements state variables
   RxBool resumeRequired = true.obs;

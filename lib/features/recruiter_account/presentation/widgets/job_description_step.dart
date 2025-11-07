@@ -234,7 +234,7 @@ class JobDescriptionStep extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {controller.previousStep();},
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -243,7 +243,7 @@ class JobDescriptionStep extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(),
                         child: Text(
-                          'Cancle',
+                          'Back',
                           style: TextStyle(
                             color: Color(0xFF2B7FD0),
                             fontWeight: FontWeight.bold,
