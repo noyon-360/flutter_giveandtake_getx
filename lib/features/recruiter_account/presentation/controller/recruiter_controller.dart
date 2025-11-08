@@ -20,7 +20,6 @@ import '../../data/models/job_create_request_model.dart';
 import '../models/job_model.dart';
 import 'package:http_parser/http_parser.dart';
 
-
 class RecruiterController extends BaseController {
   final AuthStorageService _authStorageService;
   final Repo _recruiterRepo;
@@ -38,15 +37,13 @@ class RecruiterController extends BaseController {
 
   final MultiFormDataManager _multiFormDataManager = MultiFormDataManager();
 
-
   RecruiterController(this._recruiterRepo, this._authStorageService);
 
-  final Rxn<FetchRecruiterResponseModel> userInfo = Rxn<
-      FetchRecruiterResponseModel>();
+  final Rxn<FetchRecruiterResponseModel> userInfo =
+  Rxn<FetchRecruiterResponseModel>();
 
   final RxString uploadedVideoPath = ''.obs;
   final RxBool successVideoUploaded = false.obs;
-
 
   @override
   void onInit() {
@@ -57,20 +54,22 @@ class RecruiterController extends BaseController {
     fetchCurrency();
   }
 
-
   Future<void> fetchCompany() async {
     setLoading(true);
     setError('');
 
     final result = await _recruiterRepo.fetchCompany();
 
-    result.fold((fail) {
-      setError(fail.message);
-      setLoading(false);
-    }, (success) {
-      companies.value = success.data;
-      setLoading(false);
-    });
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+          (success) {
+        companies.value = success.data;
+        setLoading(false);
+      },
+    );
   }
 
   Future<void> fetchCategory() async {
@@ -79,16 +78,17 @@ class RecruiterController extends BaseController {
 
     final result = await _recruiterRepo.fetchCategory();
 
-    result.fold((fail) {
-      setError(fail.message);
-      setLoading(false);
-    }, (success) {
-      category.value = success.data.category;
-      setLoading(false);
-    });
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+          (success) {
+        category.value = success.data.category;
+        setLoading(false);
+      },
+    );
   }
-
-
 
   Future<void> fetchCurrency() async {
     setLoading(true);
@@ -110,31 +110,23 @@ class RecruiterController extends BaseController {
     );
   }
 
-  Future createJobPost(
-      final String title,
+  Future createJobPost(final String title,
       final String description,
-      final String salaryRange,
       final String location,
-      final String shift,
-      final List<String> responsibilities,
-      final List<String> educationExperience,
-      final List<String> benefits,
       final int vacancy,
       final String experience,
       final String deadline,
-      final String status,
       final String jobCategoryId,
       final String name,
       final String role,
       final String compensation,
-      final bool archivedJob,
       final List<ApplicationRequirement> applicationRequirement,
       final List<CustomQuestion> customQuestion,
       final String employementType,
       final String websiteUrl,
       final String publishDate,
       final String careerStage,
-      final String locationType) async {
+      final String locationType,) async {
     setLoading(true);
     setError("");
 
@@ -148,21 +140,14 @@ class RecruiterController extends BaseController {
     final request = JobPostRequestModel(userId: userId,
         title: title,
         description: description,
-        salaryRange: salaryRange,
         location: location,
-        shift: shift,
-        responsibilities: [],
-        educationExperience: [],
-        benefits: [],
         vacancy: vacancy,
         experience: experience,
         deadline: deadline,
-        status: status,
         jobCategoryId: jobCategoryId,
         name: name,
         role: role,
         compensation: compensation,
-        archivedJob: archivedJob,
         applicationRequirement: applicationRequirement,
         customQuestion: customQuestion,
         employementType: employementType,
@@ -171,8 +156,35 @@ class RecruiterController extends BaseController {
         careerStage: careerStage,
         locationType: locationType);
 
-    final result = await _recruiterRepo.createNewJobPost(request);
+    // JobPostRequestModel(
+    //   userId: userId,
+    //   title: title,
+    //   description: description,
+    //   salaryRange: salaryRange,
+    //   location: location,
+    //   shift: shift,
+    //   responsibilities: [],
+    //   educationExperience: [],
+    //   benefits: [],
+    //   vacancy: vacancy,
+    //   experience: experience,
+    //   deadline: deadline,
+    //   status: status,
+    //   jobCategoryId: jobCategoryId,
+    //   name: name,
+    //   role: role,
+    //   compensation: compensation,
+    //   archivedJob: archivedJob,
+    //   applicationRequirement: applicationRequirement,
+    //   customQuestion: customQuestion,
+    //   employementType: employementType,
+    //   websiteUrl: websiteUrl,
+    //   publishDate: publishDate,
+    //   careerStage: careerStage,
+    //   locationType: locationType,
+    // );
 
+    final result = await _recruiterRepo.createNewJobPost(request);
 
     result.fold(
           (fail) {
@@ -188,9 +200,8 @@ class RecruiterController extends BaseController {
     );
   }
 
-
-
-  Future<void> uploadVideo(ElevatorPitchController elevatorPitchController) async {
+  Future<void> uploadVideo(
+      ElevatorPitchController elevatorPitchController,) async {
     final videoPath = elevatorPitchController.selectedVideoPath.value;
 
     //Check if video is selected
@@ -222,7 +233,10 @@ class RecruiterController extends BaseController {
       deleteResult.fold(
             (fail) {
           //DPrint.log('Failed to delete existing video: ${fail.message}');
-          Get.snackbar('Error', 'Could not delete previous video: ${fail.message}');
+          Get.snackbar(
+            'Error',
+            'Could not delete previous video: ${fail.message}',
+          );
           setLoading(false);
           return;
         },
@@ -237,7 +251,9 @@ class RecruiterController extends BaseController {
       final formData = FormData.fromMap({
         "videoFile": await MultipartFile.fromFile(
           file.path,
-          filename: file.path.split('/').last,
+          filename: file.path
+              .split('/')
+              .last,
           contentType: MediaType('video', 'mp4'),
         ),
       });
@@ -265,8 +281,6 @@ class RecruiterController extends BaseController {
       setLoading(false);
     }
   }
-
-
 
   Future<void> createRecruiterScreen(File banner,
       File recruiterLogo,
@@ -306,8 +320,7 @@ class RecruiterController extends BaseController {
     if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
     if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
     if (instagram.isNotEmpty) {
-      sLinks.add(
-        {"label": "Instagram", "url": instagram});
+      sLinks.add({"label": "Instagram", "url": instagram});
     }
 
     // Add all text + file fields
@@ -329,13 +342,18 @@ class RecruiterController extends BaseController {
     // Optionally include companyId if your backend expects it
     if (selectedCompany.value != null) {
       DPrint.log("Recruiter controller -> ${selectedCompany.value}");
-      _multiFormDataManager.addTextData("companyId", selectedCompany.value.toString());
+      _multiFormDataManager.addTextData(
+        "companyId",
+        selectedCompany.value.toString(),
+      );
     }
 
     // Add social links
     for (int i = 0; i < sLinks.length; i++) {
       _multiFormDataManager.addTextData(
-          "sLink[$i][label]", sLinks[i]["label"]!);
+        "sLink[$i][label]",
+        sLinks[i]["label"]!,
+      );
       _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
     }
 
@@ -363,7 +381,6 @@ class RecruiterController extends BaseController {
     );
   }
 
-
   Future<void> fetchProfile() async {
     setLoading(true);
     setError("");
@@ -379,18 +396,20 @@ class RecruiterController extends BaseController {
 
     final result = await _recruiterRepo.fetchRecruiterInfo(userId);
 
-    result.fold((fail) {
-      setError(fail.message);
-      DPrint.log('data fetch failed: ${fail.message}');
-      setLoading(false);
-    }, (success) {
-      userInfo.value = success.data;
-      setLoading(false);
-    });
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+          (success) {
+        userInfo.value = success.data;
+        setLoading(false);
+      },
+    );
   }
 
-  Future<void> updateRecruiter(
-      File? banner,
+  Future<void> updateRecruiter(File? banner,
       File? recruiterLogo,
       String description,
       String firstName,
@@ -403,7 +422,7 @@ class RecruiterController extends BaseController {
       String upwork,
       String facebook,
       String tiktok,
-      String instagram) async {
+      String instagram,) async {
     setLoading(true);
     setError("");
 
@@ -429,7 +448,6 @@ class RecruiterController extends BaseController {
       sLinks.add({"label": "Instagram", "url": instagram});
     }
 
-
     // Add images only if selected
     if (banner != null) {
       _multiFormDataManager.addImageFile(key: "banner", banner);
@@ -451,12 +469,18 @@ class RecruiterController extends BaseController {
     // Add company ID (dropdown)
     if (selectedCompany.value != null) {
       DPrint.log("Recruiter controller -> ${selectedCompany.value}");
-      _multiFormDataManager.addTextData("companyId", selectedCompany.value.toString());
+      _multiFormDataManager.addTextData(
+        "companyId",
+        selectedCompany.value.toString(),
+      );
     }
 
     // Add social links as array
     for (int i = 0; i < sLinks.length; i++) {
-      _multiFormDataManager.addTextData("sLink[$i][label]", sLinks[i]["label"]!);
+      _multiFormDataManager.addTextData(
+        "sLink[$i][label]",
+        sLinks[i]["label"]!,
+      );
       _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
     }
 
@@ -482,8 +506,6 @@ class RecruiterController extends BaseController {
       },
     );
   }
-
-
 
   Future<void> fetchArchiveJobs() async {
     try {

@@ -10,125 +10,125 @@ class ApplicationRequirementStep extends StatelessWidget {
     final controller = Get.find<JobPostingController>();
     print('Current step: ${controller.currentStep.value}');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Application Requirements",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Application Requirements",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          "What personal info would you like to gather about each applicant?",
-          style: TextStyle(fontSize: 16, color: Colors.black87),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 8),
+          const Text(
+            "What personal info would you like to gather about each applicant?",
+            style: TextStyle(fontSize: 16, color: Colors.black87),
+          ),
+          const SizedBox(height: 24),
 
-        // Resume option (show only if visible)
-        Obx(() {
-          if (!controller.resumeVisible.value) return const SizedBox.shrink();
-          return _RequirementItem(
-            label: "Resume",
-            value: controller.resumeRequired,
-            onChanged: (value) => controller.resumeRequired.value = value,
-            selectedStatus: controller.resumeStatus,
-            onDelete: () => controller.removeRequirement('resume'),
-          );
-        }),
+          // Resume option (show only if visible)
+          Obx(() {
+            if (!controller.resumeVisible.value) return const SizedBox.shrink();
+            return _RequirementItem(
+              label: "Resume",
+              //onChanged: (value) => controller.resumeRequired.value = value,
+              selectedStatus: controller.resumeStatus,
+              onDelete: () => controller.removeRequirement('resume'),
+            );
+          }),
 
-        SizedBox(height: 25,),
+          SizedBox(height: 25,),
 
-        // Valid visa option
-        Obx(() {
-          if (!controller.visaVisible.value) return const SizedBox.shrink();
-          return _RequirementItem(
-            label: "Valid visa for this job location?",
-            value: controller.validVisaRequired,
-            onChanged: (value) => controller.validVisaRequired.value = value,
-            selectedStatus: controller.visaStatus,
-            onDelete: () => controller.removeRequirement('visa'),
-          );
-        }),
+          // Valid visa option
+          Obx(() {
+            if (!controller.visaVisible.value) return const SizedBox.shrink();
+            return _RequirementItem(
+              label: "Valid visa for this job location?",
 
-        const SizedBox(height: 40),
+              //onChanged: (value) => controller.validVisaRequired.value = value,
+              selectedStatus: controller.visaStatus,
+              onDelete: () => controller.removeRequirement('visa'),
+            );
+          }),
 
-        // Buttons
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              height: 50,
-              width: 120,
-              decoration: BoxDecoration(
-                border: Border.all(color: Color(0xFF2B7FD0)),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+          const SizedBox(height: 40),
+
+          // Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                height: 50,
+                width: 120,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Color(0xFF2B7FD0)),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Container(
-                  decoration: BoxDecoration(),
-                  child: Text(
-                    'Cancle',
-                    style: TextStyle(
-                      color: Color(0xFF2B7FD0),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                child: ElevatedButton(
+                  onPressed: () {controller.previousStep();},
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(),
+                    child: Text(
+                      'Back',
+                      style: TextStyle(
+                        color: Color(0xFF2B7FD0),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
 
-            SizedBox(width: 20),
+              SizedBox(width: 20),
 
-            Container(
-              height: 50,
-              width: 120,
-              decoration: BoxDecoration(color: Color(0xFF2B7FD0), borderRadius: BorderRadius.circular(8)),
-              child: ElevatedButton(
-                onPressed: () {controller.nextStep();},
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              Container(
+                height: 50,
+                width: 120,
+                decoration: BoxDecoration(color: Color(0xFF2B7FD0), borderRadius: BorderRadius.circular(8)),
+                child: ElevatedButton(
+                  onPressed: () {controller.nextStep();},
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: EdgeInsets.zero,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    disabledBackgroundColor: Colors.transparent,
                   ),
-                  padding: EdgeInsets.zero,
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  disabledBackgroundColor: Colors.transparent,
+                  child: Text('Next', style: TextStyle(
+                    color: Colors.white,fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),),
                 ),
-                child: Text('Next', style: TextStyle(
-                  color: Colors.white,fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),),
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: 50),
-      ],
+            ],
+          ),
+          SizedBox(height: 50),
+        ],
+      ),
     );
   }
 }
 
 class _RequirementItem extends StatelessWidget {
   final String label;
-  final RxBool value;
-  final void Function(bool) onChanged;
+  //final void Function(bool) onChanged;
   final RxString selectedStatus;
   final VoidCallback onDelete;
 
   const _RequirementItem({
     required this.label,
-    required this.value,
-    required this.onChanged,
+    //required this.onChanged,
     required this.selectedStatus,
     required this.onDelete,
   });
@@ -143,21 +143,19 @@ class _RequirementItem extends StatelessWidget {
             children: [
               // Rounded box instead of Checkbox
               GestureDetector(
-                onTap: () => onChanged(!value.value),
+                onTap: () => (){},
                 child: Container(
                   width: 22,
                   height: 22,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: value.value ? Color(0xFF2B7FD0) : Colors.grey,
+                      color: Color(0xFF2B7FD0),
                       width: 2,
                     ),
-                    color: value.value ? Color(0xFF2B7FD0) : Colors.transparent,
+                    color: Color(0xFF2B7FD0),
                   ),
-                  child: value.value
-                      ? const Icon(Icons.check, size: 14, color: Colors.white)
-                      : null,
+                  child: const Icon(Icons.check, size: 14, color: Colors.white),
                 ),
               ),
               const SizedBox(width: 10),

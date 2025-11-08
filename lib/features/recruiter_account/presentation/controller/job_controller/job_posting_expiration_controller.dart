@@ -1,13 +1,27 @@
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:get/get.dart';
 
 class JobPostingExpirationController extends GetxController {
   final RxString selectedJobPostingExpiration = ''.obs;
-  final List<String> jobPostingExpiration = [
-    '7 days',
-    '14 days',
-    '30 days',
-    '60 days',
-    '90 days'
-  ];
+
+  // Display value → Duration mapping
+  final Map<String, int> jobPostingExpirationMap = {
+    '7 days': 7,
+    '14 days': 14,
+    '30 days': 30,
+    '60 days': 60,
+    '90 days': 90,
+  };
+
+  List<String> get jobPostingExpiration => jobPostingExpirationMap.keys.toList();
+
+  /// Get actual deadline date based on selected value
+  DateTime getDeadlineDate() {
+    final days = jobPostingExpirationMap[selectedJobPostingExpiration.value] ?? 0;
+    return DateTime.now().add(Duration(days: days));
+  }
+
+  /// Get ISO string to send to backend
+  String getDeadlineIso() {
+    return getDeadlineDate().toIso8601String();
+  }
 }

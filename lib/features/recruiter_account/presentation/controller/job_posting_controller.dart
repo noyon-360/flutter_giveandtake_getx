@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:karlfive/features/recruiter_account/data/models/job_create_request_model.dart';
+
 
 class JobPostingController extends GetxController {
   final recruiterController = Get.find<RecruiterController>();
@@ -19,6 +21,8 @@ class JobPostingController extends GetxController {
   RxString department = ''.obs;
 
   RxString vacancies = ''.obs;
+  late int vacanciesInt = int.tryParse(vacancies.value) ?? 0;
+
 
   // Add these setter methods for cleaner updates (optional)
   void setJobTitle(String value) => jobTitle.value = value;
@@ -36,12 +40,12 @@ class JobPostingController extends GetxController {
 
 
   // add these near the other application requirements state variables
-  RxBool resumeRequired = true.obs;
   RxString resumeStatus = ''.obs;
+  String resume = 'Resume';
   RxBool resumeVisible = true.obs; // <-- controls whether the row is shown
 
-  RxBool validVisaRequired = true.obs;
   RxString visaStatus = ''.obs;
+  String visa = 'Visa';
   RxBool visaVisible = true.obs; // <-- controls whether the row is shown
 
 
@@ -60,6 +64,11 @@ class JobPostingController extends GetxController {
   // Publish settings
   RxBool publishNow = true.obs;
   Rx<DateTime> selectedDate = DateTime.now().obs;
+
+  RxString companyWebsite= ''.obs;
+
+  RxList<String> customQuestion= <String>[].obs;
+
 
   // -----------------------------
   // Lifecycle
@@ -88,18 +97,23 @@ class JobPostingController extends GetxController {
     switch (key) {
       case 'resume':
         resumeVisible.value = false;
-        resumeRequired.value = false;
         resumeStatus.value = '';
         break;
       case 'visa':
         visaVisible.value = false;
-        validVisaRequired.value = false;
         visaStatus.value = '';
-        break;
-      default:
         break;
     }
   }
+
+  List<ApplicationRequirement> get applicationRequirement => [
+    ApplicationRequirement(requirement: resume, status: resumeStatus.value),
+    ApplicationRequirement(requirement: visa, status: visaStatus.value),
+  ];
+
+  List<CustomQuestion> get customQuestions =>
+      customQuestion.map((q) => CustomQuestion(question: q)).toList();
+
 
 
   // -----------------------------
@@ -150,7 +164,7 @@ class JobPostingController extends GetxController {
   // -----------------------------
   /// Call this when the HTML content changes.
   void updateJobDescriptionHtml(String html) {
-    jobDescriptionHtml.value = html ?? '';
+    jobDescriptionHtml.value = html;
     final plain = _stripHtmlTags(jobDescriptionHtml.value).trim();
     jobDescriptionPlain.value = plain;
     characterCount.value = plain.length;
@@ -178,3 +192,4 @@ class JobPostingController extends GetxController {
     super.onClose();
   }
 }
+

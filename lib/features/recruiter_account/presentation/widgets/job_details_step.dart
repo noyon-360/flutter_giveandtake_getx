@@ -42,10 +42,16 @@ class JobDetailsStep extends StatelessWidget {
 
     final FocusNode _vacanciesFocusNode = FocusNode();
 
-    TextEditingController _compensationTEController = TextEditingController();
+    TextEditingController _compensationTEController = TextEditingController(
+      text: controller.compensation.value.isNotEmpty
+          ? controller.compensation.value
+          : '',
+    );
     final FocusNode _compensationFocusNode = FocusNode();
 
-    TextEditingController _companyWebTEController = TextEditingController();
+    TextEditingController _companyWebTEController = TextEditingController(text: controller.companyWebsite.value.isNotEmpty
+        ? controller.companyWebsite.value
+        : '',);
     final FocusNode _companyWebFocusNode = FocusNode();
 
     final LocationController countryCityController = Get.put(
@@ -302,11 +308,13 @@ class JobDetailsStep extends StatelessWidget {
                       //Removed SizedBox, now only 1-pixel border gap
                       GestureDetector(
                         onTap: () {
-                          int value = int.tryParse(_vacanciesTEController.text) ?? 0;
+                          int value =
+                              int.tryParse(_vacanciesTEController.text) ?? 0;
                           if (value > 1) {
                             value--;
                             _vacanciesTEController.text = value.toString();
-                            controller.vacancies.value = value.toString(); // update the observable
+                            controller.vacancies.value = value
+                                .toString(); // update the observable
                           }
                         },
                         child: Container(
@@ -466,7 +474,7 @@ class JobDetailsStep extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                items: locationTypeController.locationType
+                items: locationTypeController.locationTypes
                     .map(
                       (type) => DropdownMenuItem<String>(
                         value: type,
@@ -512,7 +520,7 @@ class JobDetailsStep extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                items: careerStageController.careerStage
+                items: careerStageController.careerStages
                     .map(
                       (type) => DropdownMenuItem<String>(
                         value: type,
@@ -686,20 +694,13 @@ class JobDetailsStep extends StatelessWidget {
             SizedBox(height: 6),
 
             Obx(
-              () => DropdownButtonFormField<String>(
+                  () => DropdownButtonFormField<String>(
                 isExpanded: true,
-                value:
-                    jobPostingExpirationController
-                        .selectedJobPostingExpiration
-                        .value
-                        .isEmpty
+                value: jobPostingExpirationController.selectedJobPostingExpiration.value.isEmpty
                     ? null
-                    : jobPostingExpirationController
-                          .selectedJobPostingExpiration
-                          .value,
+                    : jobPostingExpirationController.selectedJobPostingExpiration.value,
                 decoration: context.primaryInputDecoration.copyWith(
-                  hintText:
-                      jobPostingExpirationController.jobPostingExpiration[2],
+                  hintText: jobPostingExpirationController.jobPostingExpiration[2],
                   hintStyle: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -710,23 +711,20 @@ class JobDetailsStep extends StatelessWidget {
                 items: jobPostingExpirationController.jobPostingExpiration
                     .map(
                       (type) => DropdownMenuItem<String>(
-                        value: type,
-                        child: Text(
-                          type,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black,
-                          ),
-                        ),
+                    value: type,
+                    child: Text(
+                      type,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
                       ),
-                    )
+                    ),
+                  ),
+                )
                     .toList(),
                 onChanged: (value) {
-                  jobPostingExpirationController
-                          .selectedJobPostingExpiration
-                          .value =
-                      value ?? '';
+                  jobPostingExpirationController.selectedJobPostingExpiration.value = value ?? '';
                 },
               ),
             ),
@@ -740,6 +738,7 @@ class JobDetailsStep extends StatelessWidget {
             TextFormField(
               controller: _companyWebTEController,
               focusNode: _companyWebFocusNode,
+              onChanged: (value) => controller.companyWebsite.value = value,
               textInputAction: TextInputAction.next,
               decoration: context.primaryInputDecoration.copyWith(
                 hintText: "https://example.com",
@@ -764,7 +763,7 @@ class JobDetailsStep extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {Get.back();},
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),

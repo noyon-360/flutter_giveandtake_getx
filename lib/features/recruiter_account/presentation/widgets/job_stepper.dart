@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/job_posting_controller.dart';
 
-
 class JobStepper extends StatelessWidget {
   const JobStepper({super.key});
 
@@ -29,25 +28,38 @@ class JobStepper extends StatelessWidget {
             child: Row(
               children: List.generate(steps.length, (index) {
                 final stepNumber = index + 1;
+                final isCompleted = controller.currentStep.value > stepNumber;
                 final isActive = controller.currentStep.value == stepNumber;
 
+                Color circleColor;
+                Color textColor;
+                FontWeight fontWeight;
+
+                if (isActive || isCompleted) {
+                  circleColor = Color(0xFF2B7FD0);
+                  textColor = Color(0xFF2B7FD0);
+                  fontWeight = FontWeight.w600;
+                } else {
+                  circleColor = Colors.grey.shade300;
+                  textColor = Colors.grey.shade600;
+                  fontWeight = FontWeight.normal;
+                }
+
                 return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    // Step Column (circle + text)
-                    Row(
+                    Column(
                       children: [
                         GestureDetector(
                           onTap: () =>
                           controller.currentStep.value = stepNumber,
                           child: CircleAvatar(
                             radius: 25,
-                            backgroundColor: isActive
-                                ? Color(0xFF2B7FD0)
-                                : Colors.grey.shade300,
+                            backgroundColor: circleColor,
                             child: Text(
                               '$stepNumber',
                               style: TextStyle(
-                                color: isActive
+                                color: isActive || isCompleted
                                     ? Colors.white
                                     : Colors.black,
                                 fontWeight: FontWeight.bold,
@@ -63,12 +75,8 @@ class JobStepper extends StatelessWidget {
                             steps[index],
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: isActive
-                                  ? Color(0xFF2B7FD0)
-                                  : Colors.grey.shade600,
-                              fontWeight: isActive
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
+                              color: textColor,
+                              fontWeight: fontWeight,
                               fontSize: 12,
                             ),
                           ),
@@ -81,13 +89,12 @@ class JobStepper extends StatelessWidget {
                         child: Container(
                           width: 40,
                           height: 2,
-                          color: isActive
+                          color: isCompleted || isActive
                               ? Color(0xFF2B7FD0)
                               : Colors.grey.shade600,
                         ),
                       ),
-
-                    SizedBox(width: 18,)
+                    const SizedBox(width: 18),
                   ],
                 );
               }),

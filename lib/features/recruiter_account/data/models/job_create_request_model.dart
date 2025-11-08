@@ -2,21 +2,21 @@ class JobPostRequestModel {
   final String userId;
   final String title;
   final String description;
-  final String salaryRange;
+   String? salaryRange;
   final String location;
-  final String shift;
-  final List<String> responsibilities;
-  final List<String> educationExperience;
-  final List<String> benefits;
+  String? shift;
+  final List<String>? responsibilities;
+  final List<String>? educationExperience;
+  final List<String>? benefits;
   final int vacancy;
   final String experience;
   final String deadline;
-  final String status;
+  final String? status;
   final String jobCategoryId;
   final String name;
   final String role;
   final String compensation;
-  final bool archivedJob;
+  final bool? archivedJob;
   final List<ApplicationRequirement> applicationRequirement;
   final List<CustomQuestion> customQuestion;
   final String employementType;
@@ -29,21 +29,21 @@ class JobPostRequestModel {
     required this.userId,
     required this.title,
     required this.description,
-    required this.salaryRange,
+    this.salaryRange,
     required this.location,
-    required this.shift,
-    required this.responsibilities,
-    required this.educationExperience,
-    required this.benefits,
+    this.shift,
+    this.responsibilities,
+    this.educationExperience,
+    this.benefits,
     required this.vacancy,
     required this.experience,
     required this.deadline,
-    required this.status,
+     this.status,
     required this.jobCategoryId,
     required this.name,
     required this.role,
     required this.compensation,
-    required this.archivedJob,
+     this.archivedJob,
     required this.applicationRequirement,
     required this.customQuestion,
     required this.employementType,

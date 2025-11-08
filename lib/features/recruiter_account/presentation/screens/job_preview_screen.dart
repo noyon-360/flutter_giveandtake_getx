@@ -1,85 +1,155 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/country_city_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/career_stage_controller.dart';
-
 import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/employment_type_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/experience_level_controller.dart';
+import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/job_posting_expiration_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/location_type_controller.dart';
 import '../controller/job_posting_controller.dart';
 
 class JobPreviewScreen extends StatelessWidget {
   final controller = Get.find<JobPostingController>();
   final LocationController locationController = Get.find<LocationController>();
-  final EmploymentTypeController employmentTypeController = Get.find<EmploymentTypeController>();
-  final ExperienceLevelController experienceController = Get.find<ExperienceLevelController>();
-  final LocationTypeController locationTypeController = Get.find<LocationTypeController>();
-  final CareerStageController careerStageController = Get.find<CareerStageController>();
+  final EmploymentTypeController employmentTypeController =
+      Get.find<EmploymentTypeController>();
+  final ExperienceLevelController experienceController =
+      Get.find<ExperienceLevelController>();
+  final LocationTypeController locationTypeController =
+      Get.find<LocationTypeController>();
+  final CareerStageController careerStageController =
+      Get.find<CareerStageController>();
+  final JobPostingExpirationController jobPostingExpirationController =
+      Get.find<JobPostingExpirationController>();
 
   JobPreviewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text(
-          'Job Preview',
+          'Preview Job Posting',
           style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: Colors.white,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
+        actions: [
+          IconButton(
+            onPressed: () => Get.back(),
+            icon: const Icon(Icons.close_rounded, color: Colors.black),
+          ),
+        ],
       ),
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Obx(() {
-          return Column(
+      body: Obx(() {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _previewRow("Category", controller.selectedCategory.value),
-              _previewRow("Role", controller.selectedRole.value),
-              //access it from job details step screen
-              _previewRow("Job Title", controller.jobTitle.value),
-              //access it from job details step screen
-              _previewRow("Department", controller.department.value),
+              // ---------- JOB DETAILS ----------
+              const Text(
+                "Job Details",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
 
-              _previewRow("Country", locationController.selectedCountry.toString()),
-              _previewRow("City", locationController.selectedCity.toString()),
+              _previewBox("Job Category", controller.selectedCategory.value),
+              _previewBox("Role", controller.selectedRole.value),
+              _previewBox("Job Title", controller.jobTitle.value),
+              _previewBox("Department", controller.department.value),
+              _previewBox(
+                "Country",
+                locationController.selectedCountry.toString(),
+              ),
+              _previewBox("City", locationController.selectedCity.toString()),
+              _previewBox('Number of Vacancies', controller.vacancies.value),
+              _previewBox(
+                "Employment Type",
+                employmentTypeController.selectedEmploymentType.value,
+              ),
+              _previewBox(
+                "Experience Level",
+                experienceController.selectedExperienceLevel.value,
+              ),
+              _previewBox(
+                "Location Type",
+                locationTypeController.selectedLocationType.value,
+              ),
+              _previewBox(
+                "Career Stage",
+                careerStageController.selectedCareerStage.value,
+              ),
+              _previewBox(
+                'Currency',
+                "${controller.selectedCurrency.value?.currencyName ?? '—'} "
+                    "(${controller.selectedCurrency.value?.symbol ?? ''})",
+              ),
 
-              _previewRow("Number of Vacancies", controller.vacancies.value),
-              _previewRow("Employment Type", employmentTypeController.selectedEmploymentType.value),
-              _previewRow("Experience Level", experienceController.selectedExperienceLevel.value),
-              _previewRow("Location Type", locationTypeController.selectedLocationType.value),
-              _previewRow("Career Stage", careerStageController.selectedCareerStage.value),
-              //_previewRow("Currency", controller.selectedCurrency.value!.currencyName.toString()),
-              _previewRow(
+              _previewBox(
+                "Compensation",
+                "${controller.selectedCurrency.value?.symbol ?? ''} ${controller.compensation.value}",
+              ),
+              _previewBox(
+                "Job Posting Expiration Date",
+                jobPostingExpirationController
+                    .selectedJobPostingExpiration
+                    .value,
+              ),
+              _previewBox("Company Website", controller.companyWebsite.value),
+
+
+              const SizedBox(height: 20),
+
+              // ---------- JOB DESCRIPTION ----------
+              const Text(
                 "Job Description",
-                controller.jobDescriptionPlain.value,
-                maxLines: 5,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const Divider(),
-              _previewRow(
-                "Resume Required",
-                controller.resumeRequired.value ? "Yes" : "No",
-              ),
-              _previewRow(
-                "Valid Visa Required",
-                controller.validVisaRequired.value ? "Yes" : "No",
-              ),
-              const Divider(),
-              _previewRow(
-                "Publish Type",
-                controller.publishNow.value ? "Publish Now" : "Schedule",
-              ),
-              if (!controller.publishNow.value)
-                _previewRow(
-                  "Scheduled Date",
-                  controller.selectedDate.value.toString(),
-                ),
+              const SizedBox(height: 10),
+              _descriptionBox(controller.jobDescriptionPlain.value),
+
+              const SizedBox(height: 20),
+
+              // ---------- PUBLISH SETTINGS ----------
+              const SizedBox(height: 10),
+              _publishSwitch(controller.publishNow.value),
+
+              const SizedBox(height: 16),
+              !controller.publishNow.value
+                  ? _calendarSection(controller.selectedDate.value.toString())
+                  : const SizedBox.shrink(),
+
               const SizedBox(height: 30),
 
-              // Publish Button
+              // ---------- CUSTOM QUESTIONS ----------
+              const Text(
+                "Application Requirements",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              _previewBox('Resume', controller.resumeStatus.value),
+              _previewBox(
+                'Valid visa for this job location?',
+                controller.visaStatus.value,
+              ),
+
+              const SizedBox(height: 20),
+
+              // ---------- CUSTOM QUESTIONS ----------
+              const Text(
+                "Custom Questions",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              _questionList(controller.customQuestion),
+
+              const SizedBox(height: 40),
+
+              // ---------- PUBLISH BUTTON ----------
               Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -92,7 +162,7 @@ class JobPreviewScreen extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2B7FD0),
-                    minimumSize: const Size(180, 50),
+                    minimumSize: const Size(200, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -105,39 +175,213 @@ class JobPreviewScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-              )
+              ),
+              const SizedBox(height: 60),
             ],
-          );
-        }),
-      ),
+          ),
+        );
+      }),
     );
   }
 
-  Widget _previewRow(String label, String value, {int maxLines = 2}) {
+  // ---------- Widget Builders ----------
+
+  Widget _previewBox(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value.isEmpty ? '—' : value,
-            maxLines: maxLines,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+              fontWeight: FontWeight.w600,
               fontSize: 15,
               color: Colors.black87,
             ),
           ),
+          const SizedBox(height: 6),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
+              color: Colors.white,
+            ),
+            child: Text(
+              value.isEmpty ? '—' : value,
+              style: const TextStyle(fontSize: 15, color: Colors.black87),
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _descriptionBox(String value) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Text(
+        value.isNotEmpty ? value : "No job description added.",
+        style: const TextStyle(
+          fontSize: 15,
+          color: Colors.black87,
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _publishSwitch(bool publishNow) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            "Publish Now",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          Switch(
+            value: publishNow,
+            onChanged: (_) {},
+            activeColor: const Color(0xFF2B7FD0),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _calendarSection(String dateStr) {
+    DateTime? selected;
+    try {
+      selected = DateTime.tryParse(dateStr);
+    } catch (_) {}
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+        color: Colors.white,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 20, color: Colors.black54),
+              const SizedBox(width: 8),
+              Text(
+                selected != null
+                    ? "Selected Date: ${selected.day}/${selected.month}/${selected.year}"
+                    : "No date selected",
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // ✅ Read-only calendar view
+          AbsorbPointer(
+            // disables all touch interactions
+            child: TableCalendar(
+              focusedDay: selected ?? DateTime.now(),
+              firstDay: DateTime(2000),
+              lastDay: DateTime(2100),
+              selectedDayPredicate: (day) =>
+                  selected != null && isSameDay(day, selected),
+              availableGestures: AvailableGestures.none,
+              // disable swipe
+              headerStyle: const HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+                leftChevronVisible: false,
+                // disable navigation arrows
+                rightChevronVisible: false,
+                titleTextStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              calendarStyle: CalendarStyle(
+                selectedDecoration: const BoxDecoration(
+                  color: Color(0xFF2B7FD0),
+                  shape: BoxShape.circle,
+                ),
+                todayDecoration: BoxDecoration(
+                  color: Color(0xFF2B7FD0).withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+                weekendTextStyle: const TextStyle(color: Colors.redAccent),
+                defaultTextStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _questionList(List<String> questions) {
+    if (questions.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade300),
+          color: Colors.white,
+        ),
+        child: const Text(
+          "No custom questions added.",
+          style: TextStyle(fontSize: 15, color: Colors.black54),
+        ),
+      );
+    }
+
+    return Column(
+      children: questions
+          .map(
+            (q) => Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+                color: Colors.white,
+              ),
+              child: Text(
+                q,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Colors.black87,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import '../controller/job_posting_controller.dart';
 import '../widgets/application_requirement_step.dart';
 import '../widgets/custom_questions_step.dart';
@@ -54,15 +55,20 @@ class CreateJobScreen extends StatelessWidget {
                   stepWidget = const SizedBox.shrink();
               }
 
-              return Container(
-                color: Color(0xFFE6E6FA).withOpacity(.3),
-                width: double.infinity,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: stepWidget,
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10,bottom: 20,left: 16, right: 16),
+                      child: Container(
+                        color: Color(0xFFE6E6FA).withOpacity(.3),
+                        width: double.infinity,
+                        child: stepWidget,
+                      ),
+                    ),
+                
+                    SizedBox()
+                  ],
                 ),
               );
             }),
