@@ -31,102 +31,110 @@ class FinishStep extends StatelessWidget {
     final JobPostingExpirationController jobPostingExpirationController =
     Get.find<JobPostingExpirationController>();
 
+    // Find category by name
+    final selectedCategoryModel = recruiterController.category.firstWhereOrNull(
+          (c) => c.name == controller.selectedCategory.value,
+    );
+
+    // Extract category ID (or empty if null)
+    final categoryId = selectedCategoryModel?.id ?? '';
+
     _submit() {
       recruiterController.createJobPost(
           controller.jobTitle.value,
           controller.jobDescriptionPlain.value,
-          locationController.selectedCountry.toString(),
+          '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
           controller.vacanciesInt,
           experienceController.selectedExperienceLevel.value,
-          //here i have to send two thing that is job publish date and the job expiration date
-          jobPostingExpirationController.selectedJobPostingExpiration.value,
-          //here have to pass country and city together
-          '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
+          '${jobPostingExpirationController.finalDeadlineDate.value}',
+          //here i have to add category id how to do it
+          categoryId,
           controller.selectedCategory.value,
           controller.selectedRole.value,
           controller.compensation.value,
-          //here add this two field
           controller.applicationRequirement,
           controller.customQuestions,
           employmentTypeController.getBackendValue(
             employmentTypeController.selectedEmploymentType.value,
           ),
           controller.companyWebsite.value,
+          //here i have to pass two date together
           controller.selectedDate.value.toString(),
           careerStageController.selectedCareerStage.value,
-          locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value),
-          );}
-
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Your job posting is ready!",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Buttons Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Preview Button
-                OutlinedButton(
-                  onPressed: () {
-                    Get.to(() => JobPreviewScreen());
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                        color: Color(0xFF2B7FD0), width: 1.5),
-                    minimumSize: const Size(160, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "Preview Your Post",
-                    style: TextStyle(
-                      color: Color(0xFF2B7FD0),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-
-                // Publish Button
-                ElevatedButton(
-                  onPressed: () {
-                    _submit();
-                    Get.snackbar(
-                      "Success",
-                      "Job post published successfully!",
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B7FD0),
-                    minimumSize: const Size(160, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "Publish Your Post",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30,)
-          ],
-        ),
-      );
+          locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value));
     }
+
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            "Your job posting is ready!",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Buttons Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Preview Button
+              OutlinedButton(
+                onPressed: () {
+                  Get.to(() => JobPreviewScreen());
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(
+                      color: Color(0xFF2B7FD0), width: 1.5),
+                  minimumSize: const Size(160, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  "Preview Your Post",
+                  style: TextStyle(
+                    color: Color(0xFF2B7FD0),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Publish Button
+              ElevatedButton(
+                onPressed: () {
+                  _submit();
+                  Get.snackbar(
+                    "Success",
+                    "Job post published successfully!",
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2B7FD0),
+                  minimumSize: const Size(160, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  "Publish Your Post",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 30,)
+        ],
+      ),
+    );
   }
+}

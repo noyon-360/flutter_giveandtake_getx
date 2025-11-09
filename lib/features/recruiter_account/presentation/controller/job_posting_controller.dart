@@ -45,7 +45,7 @@ class JobPostingController extends GetxController {
   RxBool resumeVisible = true.obs; // <-- controls whether the row is shown
 
   RxString visaStatus = ''.obs;
-  String visa = 'Visa';
+  String visa = 'Valid visa for this job location?';
   RxBool visaVisible = true.obs; // <-- controls whether the row is shown
 
 

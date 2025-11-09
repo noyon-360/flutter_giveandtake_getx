@@ -3,7 +3,17 @@ import 'package:get/get.dart';
 class JobPostingExpirationController extends GetxController {
   final RxString selectedJobPostingExpiration = ''.obs;
 
-  // Display value → Duration mapping
+  // Reactive variable for final calculated deadline date
+  final Rx<DateTime?> finalDeadlineDate = Rx<DateTime?>(null);
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Initialize with today's date if not set yet
+    calculateDeadline(DateTime.now());
+  }
+
+  // List of available expiration options with their durations
   final Map<String, int> jobPostingExpirationMap = {
     '7 days': 7,
     '14 days': 14,
@@ -14,14 +24,20 @@ class JobPostingExpirationController extends GetxController {
 
   List<String> get jobPostingExpiration => jobPostingExpirationMap.keys.toList();
 
-  /// Get actual deadline date based on selected value
-  DateTime getDeadlineDate() {
+  /// Calculates and updates the final deadline date
+  void calculateDeadline(DateTime selectedPublishDate) {
     final days = jobPostingExpirationMap[selectedJobPostingExpiration.value] ?? 0;
-    return DateTime.now().add(Duration(days: days));
+    if (days > 0) {
+      final calculatedDate = selectedPublishDate.add(Duration(days: days));
+      finalDeadlineDate.value = calculatedDate;
+    } else {
+      finalDeadlineDate.value = null;
+    }
   }
 
-  /// Get ISO string to send to backend
+  /// Converts the deadline to ISO string for backend
   String getDeadlineIso() {
-    return getDeadlineDate().toIso8601String();
+    if (finalDeadlineDate.value == null) return '';
+    return finalDeadlineDate.value!.toIso8601String();
   }
 }

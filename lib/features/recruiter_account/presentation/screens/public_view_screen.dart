@@ -12,14 +12,14 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../create_job/presentation/screen/create_job_screen.dart';
 import '../widgets/social_media.dart';
 
-class RecruiterPageScreen extends StatefulWidget {
-  const RecruiterPageScreen({super.key});
+class PublicViewScreen extends StatefulWidget {
+  const PublicViewScreen({super.key});
 
   @override
-  State<RecruiterPageScreen> createState() => _RecruiterPageScreenState();
+  State<PublicViewScreen> createState() => _PublicViewScreenState();
 }
 
-class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
+class _PublicViewScreenState extends State<PublicViewScreen> {
   final RecruiterController recruiterController = Get.find<RecruiterController>();
 
   @override
@@ -96,29 +96,6 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                           ),
                         ),
                       ),
-
-                      // Edit Button
-                      Positioned(
-                        right: 10,
-                        bottom: 30,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2B7FD0),
-                          ),
-                          onPressed: () {
-                            Get.to(() => EditProfilePage(recruiterResponseModel: user,));
-                          },
-                          icon: const Icon(Icons.edit, size: 15, color: Colors.white),
-                          label: const Text(
-                            'Edit Profile',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -184,121 +161,17 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                       .toList(),
                 ),
 
-                const SizedBox(height: 20),
-
-                // ----- Buttons -----
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Try It Free — Post Your First Job at No Cost!',
-                      style: TextStyle(fontSize: 17),
-                    ),
-                    const SizedBox(height: 20),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Get.dialog(ConnectCompanyDialog());
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2B7FD0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text(
-                              'Connect with a Company',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 20),
-
-                          ElevatedButton(
-                            onPressed: () {
-                              Get.to(PublicViewScreen());
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2B7FD0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text(
-                              'Public View',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              Get.to(() => CreateJobScreen());
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2B7FD0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text(
-                              'Post A Job',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                Divider(color: Color(0xFF999999),),
-
                 SizedBox(height: 20,),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFF999999),
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
+                
+                ElevatedButton(onPressed: (){}, style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2B7FD0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                ), child: Text('Follow', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)),
 
-                  //fetch elevated pitch e
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: const Color(0xFF191919),
-                    ),
-                    height: 160,
-                    width: double.infinity,
-                    child: ElevatorPitchSection(
-                      videoUrl: user.elevatorPitch?.video.hlsUrl,
-                      httpHeaders: {
-                        'Accept': '*/*',
-                        'Accept-Encoding': 'identity',
-
-                        "Authorization": "Bearer ${user.elevatorPitch?.video.encryptionKeyUrl}",
-                        "Custom-Header": "value",
-                      },
-                    ),
-                  ),
-                )
+                const SizedBox(height: 20),
+                
               ],
             ),
           );

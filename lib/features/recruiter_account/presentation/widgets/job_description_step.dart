@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:intl/intl.dart';
 import '../controller/job_posting_controller.dart';
+import '../controller/job_controller/job_posting_expiration_controller.dart';
 
 class JobDescriptionStep extends StatelessWidget {
   const JobDescriptionStep({super.key});
@@ -11,6 +12,8 @@ class JobDescriptionStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<JobPostingController>();
     final htmlController = HtmlEditorController();
+    final jobPostingExpirationController = Get.put(JobPostingExpirationController());
+    jobPostingExpirationController.calculateDeadline(controller.selectedDate.value);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -41,37 +44,30 @@ class JobDescriptionStep extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(8),
-                child: Column(
-                  children: [
-                    HtmlEditor(
-                      controller: htmlController,
-                      htmlEditorOptions: HtmlEditorOptions(
-                        hint: "Describe the job role...",
-                        initialText: controller.jobDescriptionHtml.value,
-                        autoAdjustHeight: false, adjustHeightForKeyboard: false
-                      ),
-                      htmlToolbarOptions: const HtmlToolbarOptions(
-
-                        defaultToolbarButtons: [
-                          StyleButtons(), // Added this line — includes "Normal Text" option
-                          FontButtons(),
-                          ListButtons(),
-                          ParagraphButtons(),
-                          InsertButtons(),
-                          OtherButtons(),
-                        ],
-                      ),
-                      otherOptions: const OtherOptions(
-                        height: 250,
-                        //This hides the "Done" button in the editor view
-                      ),
-                      callbacks: Callbacks(
-                        onChangeContent: (String? changed) {
-                          controller.updateJobDescriptionHtml(changed ?? '');
-                        },
-                      ),
-                    ),
-                  ],
+                child: HtmlEditor(
+                  controller: htmlController,
+                  htmlEditorOptions: HtmlEditorOptions(
+                    hint: "Describe the job role...",
+                    initialText: controller.jobDescriptionHtml.value,
+                    autoAdjustHeight: false,
+                    adjustHeightForKeyboard: false,
+                  ),
+                  htmlToolbarOptions: const HtmlToolbarOptions(
+                    defaultToolbarButtons: [
+                      StyleButtons(),
+                      FontButtons(),
+                      ListButtons(),
+                      ParagraphButtons(),
+                      InsertButtons(),
+                      OtherButtons(),
+                    ],
+                  ),
+                  otherOptions: const OtherOptions(height: 250),
+                  callbacks: Callbacks(
+                    onChangeContent: (String? changed) {
+                      controller.updateJobDescriptionHtml(changed ?? '');
+                    },
+                  ),
                 ),
               ),
 
@@ -106,13 +102,13 @@ class JobDescriptionStep extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8)),
                 elevation: 0,
                 color: Colors.grey.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
+                child: const Padding(
+                  padding: EdgeInsets.all(12),
                   child: SizedBox(
-                    width: isWide ? 300 : double.infinity,
+                    width: 300,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'TIP',
                           style: TextStyle(
@@ -175,16 +171,38 @@ class JobDescriptionStep extends StatelessWidget {
                           CalendarDatePicker(
                             initialDate: controller.selectedDate.value,
                             firstDate: DateTime.now(),
-                            lastDate:
-                            DateTime.now().add(const Duration(days: 365)),
-                            onDateChanged: (date) =>
-                                controller.updateSelectedDate(date),
+                            lastDate: DateTime.now()
+                                .add(const Duration(days: 365)),
+                            onDateChanged: (date) {
+                              controller.updateSelectedDate(date);
+
+                              //Update expiration date too
+                              jobPostingExpirationController
+                                  .calculateDeadline(date);
+                            },
                           ),
                           const SizedBox(height: 8),
+
+                          //Show Publish and Expire Date
                           Obx(() {
-                            final dateStr = DateFormat('dd/MM/yyyy')
-                                .format(controller.selectedDate.value);
-                            return Text('Selected date: $dateStr');
+                            final publishDate = controller.selectedDate.value;
+                            final expireDate = jobPostingExpirationController
+                                .finalDeadlineDate.value;
+
+                            final publishStr =
+                            DateFormat('dd/MM/yyyy').format(publishDate);
+
+                            final expireStr = expireDate != null
+                                ? DateFormat('dd/MM/yyyy').format(expireDate)
+                                : "Not set";
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Publish Date: $publishStr'),
+                                Text('Expire Date: $expireStr'),
+                              ],
+                            );
                           }),
                         ],
                       ),
@@ -196,28 +214,25 @@ class JobDescriptionStep extends StatelessWidget {
           );
 
           /// LAYOUT
-          Widget mainContent;
-          if (isWide) {
-            mainContent = Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: left),
-                const SizedBox(width: 24),
-                SizedBox(width: 320, child: right),
-              ],
-            );
-          } else {
-            mainContent = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                left,
-                const SizedBox(height: 16),
-                right,
-              ],
-            );
-          }
+          Widget mainContent = isWide
+              ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: left),
+              const SizedBox(width: 24),
+              SizedBox(width: 320, child: right),
+            ],
+          )
+              : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              left,
+              const SizedBox(height: 16),
+              right,
+            ],
+          );
 
-          /// FINAL LAYOUT — main content + buttons at bottom
+          /// FINAL LAYOUT
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -234,52 +249,52 @@ class JobDescriptionStep extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: ElevatedButton(
-                      onPressed: () {controller.previousStep();},
+                      onPressed: () => controller.previousStep(),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Container(
-                        decoration: BoxDecoration(),
-                        child: Text(
-                          'Back',
-                          style: TextStyle(
-                            color: Color(0xFF2B7FD0),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                      child: const Text(
+                        'Back',
+                        style: TextStyle(
+                          color: Color(0xFF2B7FD0),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
                     ),
                   ),
-
-                  SizedBox(width: 20),
-
+                  const SizedBox(width: 20),
                   Container(
                     height: 50,
                     width: 120,
-                    decoration: BoxDecoration(color: Color(0xFF2B7FD0), borderRadius: BorderRadius.circular(8)),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF2B7FD0),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: ElevatedButton(
-                      onPressed: () {controller.nextStep();},
+                      onPressed: () => controller.nextStep(),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: EdgeInsets.zero,
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                        disabledBackgroundColor: Colors.transparent,
                       ),
-                      child: Text('Next', style: TextStyle(
-                        color: Colors.white,fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),),
+                      child: const Text(
+                        'Next',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
             ],
           );
         },

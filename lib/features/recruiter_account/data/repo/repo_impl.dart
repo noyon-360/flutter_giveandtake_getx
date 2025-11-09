@@ -9,20 +9,23 @@ import 'package:karlfive/features/recruiter_account/data/models/get_company_resp
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../domain/repo/repo.dart';
+import '../models/connect_company_request_model.dart';
+import '../models/connect_company_response_model.dart';
 import '../models/create_recruiter_response_model.dart';
+import '../models/follow_request_model.dart';
+import '../models/follow_response_model.dart';
 import '../models/get_category_response_model.dart';
 import '../models/get_currency_response_model.dart';
 import '../models/get_recruiter_response_model.dart';
 import '../models/job_create_request_model.dart';
 import '../models/job_create_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
+import '../models/your_job_response_model.dart';
 
 class RepoImplementation extends Repo {
   final ApiClient _apiClient;
 
   RepoImplementation({required ApiClient apiClient}) : _apiClient = apiClient;
-
-
 
   @override
   NetworkResult<List<GetCompanyResponseModel>> fetchCompany() {
@@ -48,7 +51,11 @@ class RepoImplementation extends Repo {
         // Ensure json is a List
         final List<dynamic> jsonList = json as List<dynamic>;
         return jsonList
-            .map((item) => GetCurrencyResponseModel.fromJson(item as Map<String, dynamic>))
+            .map(
+              (item) => GetCurrencyResponseModel.fromJson(
+                item as Map<String, dynamic>,
+              ),
+            )
             .toList();
       },
     );
@@ -56,7 +63,8 @@ class RepoImplementation extends Repo {
 
   @override
   NetworkResult<List<JobPostResponseModel>> createNewJobPost(
-      JobPostRequestModel request) {
+    JobPostRequestModel request,
+  ) {
     return _apiClient.post(
       ApiConstants.recruiter.createJob,
       data: request.toJson(),
@@ -64,7 +72,9 @@ class RepoImplementation extends Repo {
         // Check if API returns a list or single object
         if (json is List) {
           return json
-              .map((e) => JobPostResponseModel.fromJson(e as Map<String, dynamic>))
+              .map(
+                (e) => JobPostResponseModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList();
         } else if (json is Map<String, dynamic>) {
           // Sometimes API returns a single object
@@ -75,8 +85,6 @@ class RepoImplementation extends Repo {
       },
     );
   }
-
-
 
   @override
   NetworkResult<void> uploadVideo(String userId, FormData formData) {
@@ -95,7 +103,31 @@ class RepoImplementation extends Repo {
     );
   }
 
+  @override
+  NetworkResult<ConnectCompanyResponse> connectCompany(
+    ConnectCompanyRequest request,
+  ) {
+    return _apiClient.post(
+      ApiConstants.recruiter.connectCompany,
+      data: request.toJson(),
+      fromJsonT: (json) => ConnectCompanyResponse.fromJson(json),
+    );
+  }
 
+  @override
+  NetworkResult<YourJobResponse> yourJob() {
+    return _apiClient.get(ApiConstants.recruiter.yourJob,
+        fromJsonT: (json) => YourJobResponse.fromJson(json));
+  }
+
+  @override
+  NetworkResult<FollowResponseModel> follow(FollowRequestModel request) {
+    return _apiClient.post(
+      ApiConstants.recruiter.follow,
+      data: request.toJson(),
+      fromJsonT: (json) => FollowResponseModel.fromJson(json),
+    );
+  }
 
   @override
   NetworkResult<CreateRecruiterResponseModel> createRecruiter(
@@ -119,15 +151,16 @@ class RepoImplementation extends Repo {
   }
 
   @override
-  NetworkResult<UpdateRecruiterResponseModel> updateRecruiter(String userId, FormData formData){
+  NetworkResult<UpdateRecruiterResponseModel> updateRecruiter(
+    String userId,
+    FormData formData,
+  ) {
     DPrint.log("Repo Impl : ${formData.toString()}");
     return _apiClient.patch(
       ApiConstants.recruiter.updateRecruiter(userId),
       formData: formData,
       fromJsonT: (json) => UpdateRecruiterResponseModel.fromJson(json),
-      isFormData: true
+      isFormData: true,
     );
   }
-
-  
 }

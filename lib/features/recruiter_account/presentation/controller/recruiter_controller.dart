@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
+import 'package:karlfive/features/recruiter_account/data/models/connect_company_request_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/follow_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_company_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
@@ -17,6 +19,7 @@ import '../../../../core/network/services/secure_store_services.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../data/models/get_recruiter_response_model.dart';
 import '../../data/models/job_create_request_model.dart';
+import '../../data/models/your_job_response_model.dart' hide ApplicationRequirement, CustomQuestion;
 import '../models/job_model.dart';
 import 'package:http_parser/http_parser.dart';
 
@@ -27,11 +30,16 @@ class RecruiterController extends BaseController {
   var isContinueLoading = false.obs;
 
   final companies = <GetCompanyResponseModel>[].obs;
+  RxString? companySearchQuery;
+
   final category = <Category>[].obs;
   final currency = <GetCurrencyResponseModel>[].obs;
 
   // final selectedCompany = Rxn<GetCompanyResponseModel>();
   final selectedCompany = RxnString();
+
+  final yourJobList = <YourJobResponse>[].obs;
+
 
   var archiveJobs = <JobModel>[].obs;
 
@@ -40,7 +48,7 @@ class RecruiterController extends BaseController {
   RecruiterController(this._recruiterRepo, this._authStorageService);
 
   final Rxn<FetchRecruiterResponseModel> userInfo =
-  Rxn<FetchRecruiterResponseModel>();
+      Rxn<FetchRecruiterResponseModel>();
 
   final RxString uploadedVideoPath = ''.obs;
   final RxBool successVideoUploaded = false.obs;
@@ -61,11 +69,11 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.fetchCompany();
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         setLoading(false);
       },
-          (success) {
+      (success) {
         companies.value = success.data;
         setLoading(false);
       },
@@ -79,11 +87,11 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.fetchCategory();
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         setLoading(false);
       },
-          (success) {
+      (success) {
         category.value = success.data.category;
         setLoading(false);
       },
@@ -97,11 +105,11 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.fetchCurrency();
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         setLoading(false);
       },
-          (success) {
+      (success) {
         // success.data is already a List<GetCurrencyResponseModel>
         currency.value = success.data;
 
@@ -110,23 +118,25 @@ class RecruiterController extends BaseController {
     );
   }
 
-  Future createJobPost(final String title,
-      final String description,
-      final String location,
-      final int vacancy,
-      final String experience,
-      final String deadline,
-      final String jobCategoryId,
-      final String name,
-      final String role,
-      final String compensation,
-      final List<ApplicationRequirement> applicationRequirement,
-      final List<CustomQuestion> customQuestion,
-      final String employementType,
-      final String websiteUrl,
-      final String publishDate,
-      final String careerStage,
-      final String locationType,) async {
+  Future createJobPost(
+    final String title,
+    final String description,
+    final String location,
+    final int vacancy,
+    final String experience,
+    final String deadline,
+    final String jobCategoryId,
+    final String name,
+    final String role,
+    final String compensation,
+    final List<ApplicationRequirement> applicationRequirement,
+    final List<CustomQuestion> customQuestion,
+    final String employementType,
+    final String websiteUrl,
+    final String publishDate,
+    final String careerStage,
+    final String locationType,
+  ) async {
     setLoading(true);
     setError("");
 
@@ -137,71 +147,123 @@ class RecruiterController extends BaseController {
       setLoading(false);
       return;
     }
-    final request = JobPostRequestModel(userId: userId,
-        title: title,
-        description: description,
-        location: location,
-        vacancy: vacancy,
-        experience: experience,
-        deadline: deadline,
-        jobCategoryId: jobCategoryId,
-        name: name,
-        role: role,
-        compensation: compensation,
-        applicationRequirement: applicationRequirement,
-        customQuestion: customQuestion,
-        employementType: employementType,
-        websiteUrl: websiteUrl,
-        publishDate: publishDate,
-        careerStage: careerStage,
-        locationType: locationType);
-
-    // JobPostRequestModel(
-    //   userId: userId,
-    //   title: title,
-    //   description: description,
-    //   salaryRange: salaryRange,
-    //   location: location,
-    //   shift: shift,
-    //   responsibilities: [],
-    //   educationExperience: [],
-    //   benefits: [],
-    //   vacancy: vacancy,
-    //   experience: experience,
-    //   deadline: deadline,
-    //   status: status,
-    //   jobCategoryId: jobCategoryId,
-    //   name: name,
-    //   role: role,
-    //   compensation: compensation,
-    //   archivedJob: archivedJob,
-    //   applicationRequirement: applicationRequirement,
-    //   customQuestion: customQuestion,
-    //   employementType: employementType,
-    //   websiteUrl: websiteUrl,
-    //   publishDate: publishDate,
-    //   careerStage: careerStage,
-    //   locationType: locationType,
-    // );
+    final request = JobPostRequestModel(
+      userId: userId,
+      title: title,
+      description: description,
+      location: location,
+      vacancy: vacancy,
+      experience: experience,
+      deadline: deadline,
+      jobCategoryId: jobCategoryId,
+      name: name,
+      role: role,
+      compensation: compensation,
+      applicationRequirement: applicationRequirement,
+      customQuestion: customQuestion,
+      employementType: employementType,
+      websiteUrl: websiteUrl,
+      publishDate: publishDate,
+      careerStage: careerStage,
+      locationType: locationType,
+    );
 
     final result = await _recruiterRepo.createNewJobPost(request);
 
     result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("create job success result : ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("create job success result : ${success.message}");
+        Get.offAll(() => RecruiterPageScreen());
+        setLoading(false);
+      },
+    );
+  }
+
+  Future connectCompany(final String companyId) async {
+    setLoading(true);
+    setError("");
+
+    final request = ConnectCompanyRequest(companyId: companyId);
+    final result = await _recruiterRepo.connectCompany(request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("connect company success result : ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("connect company success result : ${success.message}");
+        Get.back();
+        setLoading(false);
+      },
+    );
+  }
+
+  Future yourJob() async {
+    setLoading(true);
+    setError("");
+
+    final result = await _recruiterRepo.yourJob();
+
+    result.fold(
           (fail) {
         setError(fail.message);
-        DPrint.log("verify otp success result : ${fail.message}");
+        DPrint.log("your job failed result : ${fail.message}");
         setLoading(false);
       },
           (success) {
-        DPrint.log("verify otp success result : ${success.message}");
-        Get.to(() => RecruiterPageScreen());
+        DPrint.log("your job success result : ${success.message}");
+
+        // success.data should be a List<YourJobResponse>
+        final List<YourJobResponse> jobList = (success.data as List)
+            .map((e) => YourJobResponse.fromJson(e))
+            .toList();
+
+        // Store jobs in a reactive variable if needed
+        yourJobList.value = jobList;
+        // (Declare: final yourJobList = <YourJobResponse>[].obs;)
+
+        DPrint.log("Fetched ${jobList.length} jobs successfully.");
+
+        setLoading(false);
+      },
+    );
+  }
+
+
+
+
+  Future follow(final String recruiterId,
+  final String userId) async {
+    setLoading(true);
+    setError("");
+
+    final request = FollowRequestModel(recruiterId: recruiterId, userId: userId);
+    final result = await _recruiterRepo.follow(request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("Follow success result : ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("Follow success result : ${success.message}");
+        Get.back();
         setLoading(false);
       },
     );
   }
 
   Future<void> uploadVideo(
-      ElevatorPitchController elevatorPitchController,) async {
+    ElevatorPitchController elevatorPitchController,
+  ) async {
     final videoPath = elevatorPitchController.selectedVideoPath.value;
 
     //Check if video is selected
@@ -231,7 +293,7 @@ class RecruiterController extends BaseController {
       //Delete any existing video unconditionally
       final deleteResult = await _recruiterRepo.deleteVideo(userId);
       deleteResult.fold(
-            (fail) {
+        (fail) {
           //DPrint.log('Failed to delete existing video: ${fail.message}');
           Get.snackbar(
             'Error',
@@ -240,7 +302,7 @@ class RecruiterController extends BaseController {
           setLoading(false);
           return;
         },
-            (_) {
+        (_) {
           DPrint.log('Existing video deleted successfully');
           uploadedVideoPath.value = '';
           successVideoUploaded.value = false;
@@ -251,9 +313,7 @@ class RecruiterController extends BaseController {
       final formData = FormData.fromMap({
         "videoFile": await MultipartFile.fromFile(
           file.path,
-          filename: file.path
-              .split('/')
-              .last,
+          filename: file.path.split('/').last,
           contentType: MediaType('video', 'mp4'),
         ),
       });
@@ -261,12 +321,12 @@ class RecruiterController extends BaseController {
       final uploadResult = await _recruiterRepo.uploadVideo(userId, formData);
 
       uploadResult.fold(
-            (fail) {
+        (fail) {
           setError(fail.message);
           DPrint.log('Upload video failed: ${fail.message}');
           Get.snackbar('Error', fail.message);
         },
-            (success) {
+        (success) {
           uploadedVideoPath.value = videoPath;
           successVideoUploaded.value = true;
           DPrint.log('Upload video success: ${success.message}');
@@ -282,23 +342,25 @@ class RecruiterController extends BaseController {
     }
   }
 
-  Future<void> createRecruiterScreen(File banner,
-      File recruiterLogo,
-      String description,
-      String firstName,
-      String surname,
-      String emailAddress,
-      String phoneNumber,
-      String title,
-      String country,
-      String city,
-      int zipCode,
-      String linkedIn,
-      String twitter,
-      String upwork,
-      String facebook,
-      String tiktok,
-      String instagram,) async {
+  Future<void> createRecruiterScreen(
+    File banner,
+    File recruiterLogo,
+    String description,
+    String firstName,
+    String surname,
+    String emailAddress,
+    String phoneNumber,
+    String title,
+    String country,
+    String city,
+    int zipCode,
+    String linkedIn,
+    String twitter,
+    String upwork,
+    String facebook,
+    String tiktok,
+    String instagram,
+  ) async {
     setLoading(true);
     setError('');
 
@@ -365,12 +427,12 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.createRecruiter(formRequest);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log('Create Recruiter: ${fail.message}');
         setLoading(false); // Fix: Use setLoading instead of isLoading
       },
-          (success) async {
+      (success) async {
         DPrint.log('Create Recruiter: ${success.message}');
         // Fetch the updated profile data before navigating
         await fetchProfile(); // Add this line to refresh userInfo
@@ -397,32 +459,34 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.fetchRecruiterInfo(userId);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log('data fetch failed: ${fail.message}');
         setLoading(false);
       },
-          (success) {
+      (success) {
         userInfo.value = success.data;
         setLoading(false);
       },
     );
   }
 
-  Future<void> updateRecruiter(File? banner,
-      File? recruiterLogo,
-      String description,
-      String firstName,
-      String surname,
-      String title,
-      String country,
-      String city,
-      String linkedIn,
-      String twitter,
-      String upwork,
-      String facebook,
-      String tiktok,
-      String instagram,) async {
+  Future<void> updateRecruiter(
+    File? banner,
+    File? recruiterLogo,
+    String description,
+    String firstName,
+    String surname,
+    String title,
+    String country,
+    String city,
+    String linkedIn,
+    String twitter,
+    String upwork,
+    String facebook,
+    String tiktok,
+    String instagram,
+  ) async {
     setLoading(true);
     setError("");
 
@@ -486,18 +550,16 @@ class RecruiterController extends BaseController {
 
     final formRequest = await _multiFormDataManager.toFormDataAsync();
 
-    DPrint.log("📌 Fields: ${formRequest.fields}");
-    DPrint.log("📌 Files: ${formRequest.files}");
 
     final result = await _recruiterRepo.updateRecruiter(userId, formRequest);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log('Update Recruiter: ${fail.message}');
         setLoading(false);
       },
-          (success) async {
+      (success) async {
         DPrint.log('Update Recruiter: ${success.message}');
         await fetchProfile(); // refresh profile
         Get.to(() => RecruiterPageScreen());

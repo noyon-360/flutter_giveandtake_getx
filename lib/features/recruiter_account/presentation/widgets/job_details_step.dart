@@ -559,8 +559,7 @@ class JobDetailsStep extends StatelessWidget {
                     return;
                   }
 
-                  final selected =
-                      await showModalBottomSheet<GetCurrencyResponseModel>(
+                  final selected = await showModalBottomSheet<GetCurrencyResponseModel>(
                         context: context,
                         isScrollControlled: true,
                         builder: (ctx) {
