@@ -12,6 +12,7 @@ class UserModel {
   final String? title;
   final bool? isValid;
   final bool? payAsYouGo;
+  final List<Map<String, dynamic>>? securityQuestions;
 
   UserModel({
     required this.id,
@@ -27,10 +28,12 @@ class UserModel {
     this.title,
     this.isValid,
     this.payAsYouGo,
+    this.securityQuestions,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final avatar = json['avatar'];
+    final secQs = json['securityQuestions'] as List?;
     return UserModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
@@ -45,6 +48,9 @@ class UserModel {
       title: json['title'] as String?,
       isValid: json['isValid'] as bool?,
       payAsYouGo: json['payAsYouGo'] as bool?,
+      securityQuestions: secQs != null
+          ? List<Map<String, dynamic>>.from(secQs)
+          : null,
     );
   }
 
@@ -62,5 +68,6 @@ class UserModel {
     'title': title,
     'isValid': isValid,
     'payAsYouGo': payAsYouGo,
+    'securityQuestions': securityQuestions,
   };
 }

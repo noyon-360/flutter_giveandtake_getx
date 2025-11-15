@@ -100,7 +100,8 @@ class AuthEndpoints {
       '${ApiConstants.baseUrl}/default-security-questions';
   final String securityAnswers = '${ApiConstants.baseUrl}/security-answers';
   final String verifySecurityAnswers =
-      '${ApiConstants.baseUrl}/security-answers/verify';
+      '${ApiConstants.baseUrl}/verify-security-answers';
+  final String changeEmail = '${ApiConstants.baseUrl}/change-email';
   final String resetPasswordWithToken =
       '${ApiConstants.baseUrl}/security-answers/reset-password';
 
