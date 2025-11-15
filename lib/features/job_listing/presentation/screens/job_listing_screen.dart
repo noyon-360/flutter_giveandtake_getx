@@ -3,19 +3,22 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import '../controller/job_listing_controller.dart';
 import '../widgets/job_card.dart';
-import '../widgets/job_filter_chip.dart';
+import 'job_application_screen.dart';
 
 class JobListingScreen extends StatelessWidget {
   const JobListingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final JobListingController controller = Get.put(JobListingController());
+    final JobListingController controller =
+        Get.isRegistered<JobListingController>()
+        ? Get.find<JobListingController>()
+        : Get.put(JobListingController(getJobsUseCase: Get.find()));
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xffF5F6FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textBlack),
@@ -33,17 +36,21 @@ class JobListingScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Search bar
+          // Search bar (single field)
           Container(
-            color: Colors.white,
             padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Color(0xffF5F6FF),
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Column(
               children: [
                 // Search TextField
                 TextField(
                   onChanged: controller.updateSearchQuery,
                   decoration: InputDecoration(
-                    hintText: 'Job Title, Keywords, or Company',
+                    hintText:
+                        'Search by job title, keywords, company or country',
                     hintStyle: const TextStyle(
                       fontSize: 14,
                       color: AppColors.textGrey,
@@ -53,10 +60,15 @@ class JobListingScreen extends StatelessWidget {
                       color: AppColors.textGrey,
                     ),
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    fillColor: AppColors.primaryWhite,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(
+                        color: AppColors.primaryLightBlue.withValues(
+                          alpha: 0.3,
+                        ),
+                        width: 0.5,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -64,81 +76,7 @@ class JobListingScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 12),
-
-                // Location dropdown
-                Obx(
-                  () => Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on,
-                          color: AppColors.textGrey,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: controller.selectedLocation.value,
-                              isExpanded: true,
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: AppColors.textGrey,
-                              ),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textBlack,
-                              ),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 'United States',
-                                  child: Text('United States'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'Canada',
-                                  child: Text('Canada'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'United Kingdom',
-                                  child: Text('United Kingdom'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'All Locations',
-                                  child: Text('All Locations'),
-                                ),
-                              ],
-                              onChanged: (value) {
-                                if (value != null) {
-                                  controller.updateLocation(value);
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ],
-            ),
-          ),
-
-          // Filter chips
-          Obx(
-            () => JobFiltersRow(
-              selectedFilters: controller.selectedFilters.toList(),
-              onFilterToggle: controller.toggleFilter,
             ),
           ),
 
@@ -196,8 +134,10 @@ class JobListingScreen extends StatelessWidget {
                     duration: job['duration'] ?? 'Unknown Duration',
                     salary: job['salary'] ?? 'Salary not specified',
                     timePosted: job['timePosted'] ?? 'Unknown',
+                    logoUrl: job['logoUrl'] as String?,
                     onTap: () => controller.onJobTap(job),
-                    onEasyApply: () => controller.onEasyApply(job),
+                    onEasyApply: () =>
+                        Get.to(() => JobApplicationScreen(jobData: job)),
                   );
                 },
               );

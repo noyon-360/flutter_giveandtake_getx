@@ -14,17 +14,19 @@ class AuthStorageService {
   bool _isAuthenticated = false;
   bool get isAuthenticated => _isAuthenticated;
 
-  // Store all auth data (tokens + user ID)
+  // Store all auth data (tokens + user ID + role)
   Future<void> storeAuthData({
     required String accessToken,
     required String refreshToken,
-    required String userId, // Added required userId parameter
+    required String userId,
+    required String userRole, // Added user role parameter
   }) async {
-    // Store tokens and user ID in parallel for better performance
+    // Store tokens, user ID, and role in parallel for better performance
     await Future.wait([
       _secureStorage.write(key: KeyConstants.accessToken, value: accessToken),
       _secureStorage.write(key: KeyConstants.refreshToken, value: refreshToken),
       _secureStorage.write(key: KeyConstants.userId, value: userId),
+      _secureStorage.write(key: KeyConstants.role, value: userRole),
     ]);
   }
 
@@ -41,6 +43,11 @@ class AuthStorageService {
   // Store just user ID
   Future<void> storeUserId(String userId) async {
     await _secureStorage.write(key: KeyConstants.userId, value: userId);
+  }
+
+  // Store just user role
+  Future<void> storeUserRole(String userRole) async {
+    await _secureStorage.write(key: KeyConstants.role, value: userRole);
   }
 
   // Get access token
@@ -68,6 +75,11 @@ class AuthStorageService {
     return await _secureStorage.read(key: KeyConstants.userId);
   }
 
+  // Get user role
+  Future<String?> getUserRole() async {
+    return await _secureStorage.read(key: KeyConstants.role);
+  }
+
   // Get all auth data at once
   Future<Map<String, String?>> getAllAuthData() async {
     return {
@@ -77,12 +89,24 @@ class AuthStorageService {
     };
   }
 
+  // Store user data as JSON string
+  Future<void> storeUserData(String userDataJson) async {
+    await _secureStorage.write(key: KeyConstants.userData, value: userDataJson);
+  }
+
+  // Get user data JSON string
+  Future<String?> getUserData() async {
+    return await _secureStorage.read(key: KeyConstants.userData);
+  }
+
   // Clear all auth data (logout)
   Future<void> clearAuthData() async {
     await Future.wait([
       _secureStorage.delete(key: KeyConstants.accessToken),
       _secureStorage.delete(key: KeyConstants.refreshToken),
       _secureStorage.delete(key: KeyConstants.userId),
+      _secureStorage.delete(key: KeyConstants.role),
+      _secureStorage.delete(key: KeyConstants.userData),
     ]);
     _isAuthenticated = false;
   }

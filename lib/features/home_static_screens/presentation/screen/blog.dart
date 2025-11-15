@@ -23,7 +23,7 @@ class BlogScreen extends StatelessWidget {
         title: const Padding(
           padding: EdgeInsets.only(left: 4),
           child: Text(
-            "Blog",
+            "Blogs",
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
