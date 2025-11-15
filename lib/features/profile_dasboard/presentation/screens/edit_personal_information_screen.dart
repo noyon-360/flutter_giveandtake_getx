@@ -788,6 +788,7 @@ class _EditProfileState extends State<EditProfile> {
   Future<void> _showOtpVerifyDialog(String newEmail) async {
     _otpCtrl.text = '';
     bool isVerifying = false;
+    bool isResending = false;
 
     await showDialog<void>(
       context: context,
@@ -797,34 +798,116 @@ class _EditProfileState extends State<EditProfile> {
           builder: (context, setStateDialog) {
             return AlertDialog(
               title: Center(child: const Text('Verify Email')),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Enter the OTP sent to your new email to verify and complete the change.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: Color(0xFF666666)),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _otpCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'Enter OTP',
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Enter the OTP sent to your new email to verify and complete the change.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Color(0xFF666666)),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _otpCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Enter OTP',
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: (isVerifying || isResending)
+                            ? null
+                            : () async {
+                                setStateDialog(() {
+                                  isResending = true;
+                                });
+                                try {
+                                  final api = ApiClient();
+                                  // Log the resend attempt
+                                  print(
+                                    '[DEBUG] Resending OTP to $newEmail using endpoint: ${ApiConstants.auth.changeEmail}',
+                                  );
+                                  final res = await api.post<Map<String, dynamic>>(
+                                    ApiConstants.auth.changeEmail,
+                                    data: {'email': newEmail},
+                                    fromJsonT: (json) => json == null
+                                        ? {}
+                                        : json as Map<String, dynamic>,
+                                  );
+                                  res.fold(
+                                    (fail) {
+                                      print('[DEBUG] Resend failed: ${fail.message}');
+                                      setStateDialog(() {
+                                        isResending = false;
+                                      });
+                                      Get.snackbar(
+                                        'Error',
+                                        'Failed to resend OTP: ${fail.message}',
+                                        backgroundColor: Colors.red,
+                                        colorText: Colors.white,
+                                      );
+                                    },
+                                    (success) {
+                                      print('[DEBUG] Resend successful');
+                                      setStateDialog(() {
+                                        isResending = false;
+                                      });
+                                      Get.snackbar(
+                                        'OTP Resent',
+                                        'A new OTP was sent to $newEmail',
+                                        backgroundColor: const Color(0xFF2B7FD0),
+                                        colorText: Colors.white,
+                                      );
+                                    },
+                                  );
+                                } catch (e) {
+                                  print('[DEBUG] Resend exception: $e');
+                                  setStateDialog(() {
+                                    isResending = false;
+                                  });
+                                  Get.snackbar(
+                                    'Error',
+                                    'Resend failed: ${e.toString()}',
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                  );
+                                }
+                              },
+                        child: isResending
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF2B7FD0),
+                                ),
+                              )
+                            : const Text(
+                                'Resend OTP',
+                                style: TextStyle(
+                                  color: Color(0xFF2B7FD0),
+                                  fontSize: 12,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
-                  onPressed: isVerifying
+                  onPressed: (isVerifying || isResending)
                       ? null
                       : () {
                           Navigator.of(context).pop();
@@ -835,7 +918,7 @@ class _EditProfileState extends State<EditProfile> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: isVerifying
+                  onPressed: (isVerifying || isResending)
                       ? null
                       : () async {
                           final otp = _otpCtrl.text.trim();
@@ -849,6 +932,7 @@ class _EditProfileState extends State<EditProfile> {
 
                           try {
                             final api = ApiClient();
+                            print('[DEBUG] Verifying OTP: $newEmail using endpoint: ${ApiConstants.auth.verify}');
                             final res = await api.post<Map<String, dynamic>>(
                               ApiConstants.auth.verify,
                               data: {'email': newEmail, 'otp': otp},
@@ -859,16 +943,18 @@ class _EditProfileState extends State<EditProfile> {
 
                             res.fold(
                               (fail) {
+                                print('[DEBUG] Verify failed: ${fail.message}');
                                 setStateDialog(() {
                                   isVerifying = false;
                                 });
                                 Get.snackbar('Error', fail.message);
                               },
                               (success) {
+                                print('[DEBUG] Verify successful, updating email to: $newEmail');
                                 setStateDialog(() {
                                   isVerifying = false;
                                 });
-                                // Update UI with new email
+                                // Update UI with new email instantly and persist
                                 setState(() {
                                   _emailCtrl.text = newEmail;
                                   _isEmailEditable = false;
@@ -883,6 +969,7 @@ class _EditProfileState extends State<EditProfile> {
                               },
                             );
                           } catch (e) {
+                            print('[DEBUG] Verify exception: $e');
                             setStateDialog(() {
                               isVerifying = false;
                             });
