@@ -5,6 +5,7 @@ import 'package:karlfive/features/recruiter_account/data/models/create_recruiter
 import 'package:karlfive/features/recruiter_account/data/models/follow_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/follow_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/get_job_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/job_create_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/job_create_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/your_job_response_model.dart';
@@ -19,7 +20,7 @@ abstract class Repo{
   NetworkResult<GetCategoryResponseModel> fetchCategory();
   NetworkResult<ConnectCompanyResponse> connectCompany(ConnectCompanyRequest request);
   NetworkResult<FollowResponseModel> follow(FollowRequestModel request);
-  NetworkResult<YourJobResponse> yourJob();
+  NetworkResult<List<YourJobResponseModel>> yourJob();
   NetworkResult<List<GetCurrencyResponseModel>> fetchCurrency();
   NetworkResult<List<JobPostResponseModel>> createNewJobPost(JobPostRequestModel request);
   NetworkResult<void> uploadVideo(String userId, FormData formData);

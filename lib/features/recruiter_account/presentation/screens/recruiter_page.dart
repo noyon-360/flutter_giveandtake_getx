@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/applicants_list_screen.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/archieve_job_view.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/archive_job.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/edit_profile_page.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/post_job_screen.dart';
@@ -25,8 +27,9 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      recruiterController.fetchProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await recruiterController.fetchProfile();
+      await recruiterController.getJob();   // <-- ADD THIS LINE
     });
   }
 
@@ -298,7 +301,138 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                       },
                     ),
                   ),
-                )
+                ),
+
+                // here make me your job list that fetched from backend and will show like listview
+                // Inside your Column in RecruiterPageScreen, after ElevatorPitchSection
+                const SizedBox(height: 20),
+
+                Obx(() {
+                  if (recruiterController.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final jobs = recruiterController.yourJobList;
+
+                  if (jobs.isEmpty) {
+                    return const Center(child: Text("No jobs posted yet."));
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFF999999), width: 1),
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      children: [
+                        // Header Row
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(12),
+                            ),
+                          ),
+                          child: Row(
+                            children: const [
+                              Expanded(flex: 2, child: Text("Job Title", style: TextStyle(fontWeight: FontWeight.bold))),
+                              Expanded(flex: 1, child: Text("Status", style: TextStyle(fontWeight: FontWeight.bold))),
+                              Expanded(flex: 1, child: Text("Ordered", style: TextStyle(fontWeight: FontWeight.bold))),
+                              Expanded(flex: 1, child: Text("Published", style: TextStyle(fontWeight: FontWeight.bold))),
+                              Expanded(flex: 1, child: Text("Expiry", style: TextStyle(fontWeight: FontWeight.bold))),
+                              Expanded(flex: 1, child: Text("Applicants", style: TextStyle(fontWeight: FontWeight.bold))),
+                              Expanded(flex: 1, child: Text("Actions", style: TextStyle(fontWeight: FontWeight.bold))),
+                            ],
+                          ),
+                        ),
+                        const Divider(height: 1, color: Colors.grey),
+
+                        // Job Rows
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: jobs.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1, color: Colors.grey),
+                            itemBuilder: (context, index) {
+                              final job = jobs[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                child: SingleChildScrollView(   // <-- Make row scrollable
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 150,  // optional fixed width for Job Title
+                                        child: Text(job.title.toString()),
+                                      ),
+                                      SizedBox(
+                                        width: 80,
+                                        child: Text(job.status ?? ""),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Text(job.createdAt.toString()),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Text(job.publishDate.toString()),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Text(job.deadline.toString()),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Get.to(() => ApplicantsListScreen(jobId: job.id));
+                                          },
+                                          child: Text(
+                                            "View (${job.applicantCount})",
+                                            style: const TextStyle(color: Colors.blue),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 140,
+                                        child: Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.remove_red_eye, color: Colors.black),
+                                              onPressed: () {
+                                                Get.to(() => ArchieveJobView(jobId: job.id));
+                                              },
+                                            ),
+                                            const SizedBox(width: 8),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                job.arcrivedJob; // Implement archive logic
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.green.shade100,
+                                                foregroundColor: Colors.green.shade800,
+                                                minimumSize: const Size(60, 30),
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                              ),
+                                              child: const Text("Archive", style: TextStyle(fontSize: 12)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               ],
             ),
           );

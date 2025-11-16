@@ -1,6 +1,5 @@
 import 'dart:developer' as DPrint;
 import 'dart:io';
-
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
@@ -17,14 +16,15 @@ import '../../../../core/base/base_controller.dart';
 import '../../../../core/network/services/multiple_form_data_manager.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../data/models/get_job_response_model.dart' hide ApplicationRequirement, CustomQuestion;
 import '../../data/models/get_recruiter_response_model.dart';
 import '../../data/models/job_create_request_model.dart';
-import '../../data/models/your_job_response_model.dart' hide ApplicationRequirement, CustomQuestion;
 import '../models/job_model.dart';
 import 'package:http_parser/http_parser.dart';
 
 class RecruiterController extends BaseController {
   final AuthStorageService _authStorageService;
+
   final Repo _recruiterRepo;
   var isSkipLoading = false.obs;
   var isContinueLoading = false.obs;
@@ -38,7 +38,7 @@ class RecruiterController extends BaseController {
   // final selectedCompany = Rxn<GetCompanyResponseModel>();
   final selectedCompany = RxnString();
 
-  final yourJobList = <YourJobResponse>[].obs;
+  final yourJobList = <YourJobResponseModel>[].obs;
 
 
   var archiveJobs = <JobModel>[].obs;
@@ -60,6 +60,7 @@ class RecruiterController extends BaseController {
     fetchProfile();
     fetchCategory();
     fetchCurrency();
+    getJob();
   }
 
   Future<void> fetchCompany() async {
@@ -205,7 +206,7 @@ class RecruiterController extends BaseController {
     );
   }
 
-  Future yourJob() async {
+  Future getJob() async {
     setLoading(true);
     setError("");
 
@@ -214,23 +215,12 @@ class RecruiterController extends BaseController {
     result.fold(
           (fail) {
         setError(fail.message);
-        DPrint.log("your job failed result : ${fail.message}");
+        DPrint.log("your job fetch failed result : ${fail.message}");
         setLoading(false);
       },
           (success) {
-        DPrint.log("your job success result : ${success.message}");
-
-        // success.data should be a List<YourJobResponse>
-        final List<YourJobResponse> jobList = (success.data as List)
-            .map((e) => YourJobResponse.fromJson(e))
-            .toList();
-
-        // Store jobs in a reactive variable if needed
-        yourJobList.value = jobList;
-        // (Declare: final yourJobList = <YourJobResponse>[].obs;)
-
-        DPrint.log("Fetched ${jobList.length} jobs successfully.");
-
+        DPrint.log("your job fetch success result : ${success.message}");
+        yourJobList.value = success.data;
         setLoading(false);
       },
     );

@@ -5,6 +5,7 @@ import 'package:flutx_core/core/debug_print.dart';
 import 'package:karlfive/core/network/network_result.dart';
 
 import 'package:karlfive/features/recruiter_account/data/models/get_company_response_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/get_job_response_model.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
@@ -115,9 +116,9 @@ class RepoImplementation extends Repo {
   }
 
   @override
-  NetworkResult<YourJobResponse> yourJob() {
-    return _apiClient.get(ApiConstants.recruiter.yourJob,
-        fromJsonT: (json) => YourJobResponse.fromJson(json));
+  NetworkResult<List<YourJobResponseModel>> yourJob() {
+    return _apiClient.get(ApiConstants.recruiter.getJob,
+        fromJsonT: (json) => (json as List).map((item) => YourJobResponseModel.fromJson(item)).toList());
   }
 
   @override
