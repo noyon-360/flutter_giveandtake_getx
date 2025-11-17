@@ -838,16 +838,19 @@ class _EditProfileState extends State<EditProfile> {
                                   print(
                                     '[DEBUG] Resending OTP to $newEmail using endpoint: ${ApiConstants.auth.changeEmail}',
                                   );
-                                  final res = await api.post<Map<String, dynamic>>(
-                                    ApiConstants.auth.changeEmail,
-                                    data: {'email': newEmail},
-                                    fromJsonT: (json) => json == null
-                                        ? {}
-                                        : json as Map<String, dynamic>,
-                                  );
+                                  final res = await api
+                                      .post<Map<String, dynamic>>(
+                                        ApiConstants.auth.changeEmail,
+                                        data: {'email': newEmail},
+                                        fromJsonT: (json) => json == null
+                                            ? {}
+                                            : json as Map<String, dynamic>,
+                                      );
                                   res.fold(
                                     (fail) {
-                                      print('[DEBUG] Resend failed: ${fail.message}');
+                                      print(
+                                        '[DEBUG] Resend failed: ${fail.message}',
+                                      );
                                       setStateDialog(() {
                                         isResending = false;
                                       });
@@ -866,7 +869,9 @@ class _EditProfileState extends State<EditProfile> {
                                       Get.snackbar(
                                         'OTP Resent',
                                         'A new OTP was sent to $newEmail',
-                                        backgroundColor: const Color(0xFF2B7FD0),
+                                        backgroundColor: const Color(
+                                          0xFF2B7FD0,
+                                        ),
                                         colorText: Colors.white,
                                       );
                                     },
@@ -932,7 +937,9 @@ class _EditProfileState extends State<EditProfile> {
 
                           try {
                             final api = ApiClient();
-                            print('[DEBUG] Verifying OTP: $newEmail using endpoint: ${ApiConstants.auth.verify}');
+                            print(
+                              '[DEBUG] Verifying OTP: $newEmail using endpoint: ${ApiConstants.auth.verify}',
+                            );
                             final res = await api.post<Map<String, dynamic>>(
                               ApiConstants.auth.verify,
                               data: {'email': newEmail, 'otp': otp},
@@ -950,7 +957,9 @@ class _EditProfileState extends State<EditProfile> {
                                 Get.snackbar('Error', fail.message);
                               },
                               (success) {
-                                print('[DEBUG] Verify successful, updating email to: $newEmail');
+                                print(
+                                  '[DEBUG] Verify successful, updating email to: $newEmail',
+                                );
                                 setStateDialog(() {
                                   isVerifying = false;
                                 });
