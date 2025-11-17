@@ -113,6 +113,10 @@ class UserEndpoints {
   final String updateProfile = '$_base/update';
   final String getUserProfile = '$_base/profile';
 
+  // Account actions
+  final String deactivate = '$_base/deactivate';
+  final String disable = '$_base/disable';
+
   // final String create = '$_base/create';
 }
 

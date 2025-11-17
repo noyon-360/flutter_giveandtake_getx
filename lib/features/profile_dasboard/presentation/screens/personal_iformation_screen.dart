@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/edit_personal_information_screen.dart';
 import '../controller/profile_controller.dart';
+import 'package:karlfive/core/network/api_client.dart';
+import 'package:karlfive/core/network/constants/api_constants.dart';
+import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 
 class PersonalInfoScreen extends StatelessWidget {
   const PersonalInfoScreen({super.key});
@@ -130,7 +133,9 @@ class PersonalInfoScreen extends StatelessWidget {
                       child: SizedBox(
                         height: 32,
                         child: OutlinedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _showDeactivateDialog(context, ctrl);
+                          },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFFD00003),
                             side: const BorderSide(
@@ -158,7 +163,9 @@ class PersonalInfoScreen extends StatelessWidget {
                       child: SizedBox(
                         height: 32,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _showDeleteDialog(context, ctrl);
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFD00003),
                             shape: RoundedRectangleBorder(
@@ -209,6 +216,336 @@ class PersonalInfoScreen extends StatelessWidget {
           );
         }),
       ),
+    );
+  }
+
+  Future<void> _showDeleteDialog(
+    BuildContext context,
+    ProfileController ctrl,
+  ) async {
+    final email = ctrl.user?.email ?? '';
+    final TextEditingController passwordCtrl = TextEditingController();
+    bool isProcessing = false;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Center(child: const Text('Confirm Account Deletion')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Please confirm your identity to permanently delete your account. You can still log back in within 30 days to restore it.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Color(0xFF666666)),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        'Email',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      initialValue: email,
+                      enabled: false,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color(0xFFF6F7F8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        'Password',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: passwordCtrl,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isProcessing
+                      ? null
+                      : () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isProcessing
+                      ? null
+                      : () async {
+                          final pwd = passwordCtrl.text.trim();
+                          if (pwd.isEmpty) {
+                            Get.snackbar('Error', 'Please enter your password');
+                            return;
+                          }
+                          setStateDialog(() => isProcessing = true);
+                          try {
+                            final api = ApiClient();
+                            final res = await api.patch<Map<String, dynamic>>(
+                              ApiConstants.user.deactivate,
+                              data: {'email': email, 'password': pwd},
+                              fromJsonT: (json) => json == null
+                                  ? {}
+                                  : json as Map<String, dynamic>,
+                            );
+                            res.fold(
+                              (fail) {
+                                setStateDialog(() => isProcessing = false);
+                                Get.snackbar(
+                                  'Error',
+                                  fail.message,
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                );
+                              },
+                              (success) {
+                                setStateDialog(() => isProcessing = false);
+                                Navigator.of(context).pop();
+                                Get.snackbar(
+                                  'Success',
+                                  success.message,
+                                  backgroundColor: const Color(0xFF10B287),
+                                  colorText: Colors.white,
+                                );
+                                // Sign out the user after account deletion
+                                Future.delayed(
+                                  const Duration(milliseconds: 600),
+                                  () {
+                                    try {
+                                      Get.find<AuthController>().logout();
+                                    } catch (_) {}
+                                  },
+                                );
+                              },
+                            );
+                          } catch (e) {
+                            setStateDialog(() => isProcessing = false);
+                            Get.snackbar(
+                              'Error',
+                              'Request failed: ${e.toString()}',
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD00003),
+                  ),
+                  child: isProcessing
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Delete Account',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showDeactivateDialog(
+    BuildContext context,
+    ProfileController ctrl,
+  ) async {
+    final email = ctrl.user?.email ?? '';
+    final TextEditingController passwordCtrl = TextEditingController();
+    bool isProcessing = false;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Center(child: const Text('Confirm Deactivation')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Please confirm your identity to deactivate your account. You can reactivate anytime.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Color(0xFF666666)),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        'Email',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      initialValue: email,
+                      enabled: false,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color(0xFFF6F7F8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        'Password',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: passwordCtrl,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isProcessing
+                      ? null
+                      : () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isProcessing
+                      ? null
+                      : () async {
+                          final pwd = passwordCtrl.text.trim();
+                          if (pwd.isEmpty) {
+                            Get.snackbar('Error', 'Please enter your password');
+                            return;
+                          }
+                          setStateDialog(() => isProcessing = true);
+                          try {
+                            final api = ApiClient();
+                            final res = await api.patch<Map<String, dynamic>>(
+                              ApiConstants.user.disable,
+                              data: {'email': email, 'password': pwd},
+                              fromJsonT: (json) => json == null
+                                  ? {}
+                                  : json as Map<String, dynamic>,
+                            );
+                            res.fold(
+                              (fail) {
+                                setStateDialog(() => isProcessing = false);
+                                Get.snackbar(
+                                  'Error',
+                                  fail.message,
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                );
+                              },
+                              (success) {
+                                setStateDialog(() => isProcessing = false);
+                                Navigator.of(context).pop();
+                                Get.snackbar(
+                                  'Success',
+                                  success.message,
+                                  backgroundColor: const Color(0xFF10B287),
+                                  colorText: Colors.white,
+                                );
+                                // Sign out the user after account deactivation
+                                Future.delayed(
+                                  const Duration(milliseconds: 600),
+                                  () {
+                                    try {
+                                      Get.find<AuthController>().logout();
+                                    } catch (_) {}
+                                  },
+                                );
+                              },
+                            );
+                          } catch (e) {
+                            setStateDialog(() => isProcessing = false);
+                            Get.snackbar(
+                              'Error',
+                              'Request failed: ${e.toString()}',
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2B7FD0),
+                  ),
+                  child: isProcessing
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Deactivate Account',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
