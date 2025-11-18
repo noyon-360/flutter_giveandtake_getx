@@ -332,23 +332,28 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Job List', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),),
+                          Text('Job List', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),),
+                          SizedBox(height: 20,),
+                          Divider(color: Colors.black,thickness: 2,),
+                          SizedBox(height: 20,),
                           // HEADER ROW
-                          Row(
-                            children: const [
-                              SizedBox(width: 200, child: Text("Job Title", style: TextStyle(fontWeight: FontWeight.bold))),
-                              SizedBox(width: 100, child: Text("Status", style: TextStyle(fontWeight: FontWeight.bold))),
-                              SizedBox(width: 120, child: Text("Ordered", style: TextStyle(fontWeight: FontWeight.bold))),
-                              SizedBox(width: 120, child: Text("Published", style: TextStyle(fontWeight: FontWeight.bold))),
-                              SizedBox(width: 120, child: Text("Expiry", style: TextStyle(fontWeight: FontWeight.bold))),
-                              SizedBox(width: 120, child: Text("Applicants", style: TextStyle(fontWeight: FontWeight.bold))),
-                              SizedBox(width: 140, child: Text("Actions", style: TextStyle(fontWeight: FontWeight.bold))),
-                            ],
-                          ),
+                        Row(
+                          children: const [
+                            SizedBox(width: 200, child: Text("Job Title", style: TextStyle(fontWeight: FontWeight.bold))),
+                            SizedBox(width: 100, child: Text("Status", style: TextStyle(fontWeight: FontWeight.bold))),
+                            SizedBox(width: 140, child: Text("Ordered", style: TextStyle(fontWeight: FontWeight.bold))),
+                            SizedBox(width: 140, child: Text("Published", style: TextStyle(fontWeight: FontWeight.bold))),
+                            SizedBox(width: 140, child: Text("Expiry", style: TextStyle(fontWeight: FontWeight.bold))),
+                            SizedBox(width: 120, child: Text("Applicants", style: TextStyle(fontWeight: FontWeight.bold))),
+                            SizedBox(width: 140, child: Text("Actions", style: TextStyle(fontWeight: FontWeight.bold))),
+                          ],
+                        ),
 
-                          const SizedBox(height: 10),
+
+                        const SizedBox(height: 10),
                           const Divider(color: Colors.grey),
 
                           const SizedBox(height: 10),
@@ -377,53 +382,45 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
 
                                 child: Row(
                                   children: [
-                                    SizedBox(width: 200, child: Text(job.title, style: const TextStyle(fontWeight: FontWeight.w600))),
-
+                                    SizedBox(width: 200, child: Text(job.title, style: TextStyle(fontWeight: FontWeight.w600))),
                                     SizedBox(width: 100, child: Text(job.status ?? "")),
 
-                                    SizedBox(width: 120, child: Text(formatDate(job.createdAt))),
-                                    SizedBox(width: 120, child: Text(formatDate(job.publishDate))),
-                                    SizedBox(width: 120, child: Text(formatDate(job.deadline))),
+                                    SizedBox(width: 140, child: Text(formatDate(job.createdAt))),
+                                    SizedBox(width: 140, child: Text(formatDate(job.publishDate))),
+                                    SizedBox(width: 140, child: Text(formatDate(job.deadline))),
 
-                                    // Applicants
                                     SizedBox(
                                       width: 120,
                                       child: GestureDetector(
                                         onTap: () => Get.to(() => ApplicantsListScreen(jobId: job.id)),
-                                        child: Text(
-                                          "View (${job.applicantCount})",
-                                          style: const TextStyle(color: Colors.blue),
-                                        ),
+                                        child: Text("View (${job.applicantCount})", style: TextStyle(color: Colors.blue)),
                                       ),
                                     ),
 
-                                    // ACTIONS
                                     SizedBox(
                                       width: 140,
                                       child: Row(
                                         children: [
                                           IconButton(
-                                            icon: const Icon(Icons.remove_red_eye),
+                                            icon: Icon(Icons.remove_red_eye),
                                             onPressed: () => Get.to(() => ArchieveJobView(jobId: job.id)),
                                           ),
-
                                           ElevatedButton(
-                                            onPressed: () {
-                                              DPrint();
-                                            },
+                                            onPressed: () { DPrint(); },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors.green.shade100,
                                               foregroundColor: Colors.green.shade800,
-                                              minimumSize: const Size(60, 32),
-                                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                                              minimumSize: Size(60, 32),
+                                              padding: EdgeInsets.symmetric(horizontal: 8),
                                             ),
-                                            child: const Text("Archive", style: TextStyle(fontSize: 12)),
+                                            child: Text("Archive", style: TextStyle(fontSize: 12)),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ],
                                 ),
+
                               );
                             }),
                           ),
