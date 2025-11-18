@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/applicants_list_screen.dart';
@@ -23,6 +25,8 @@ class RecruiterPageScreen extends StatefulWidget {
 
 class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
   final RecruiterController recruiterController = Get.find<RecruiterController>();
+  final ScrollController horizontalScrollController = ScrollController();
+
 
   @override
   void initState() {
@@ -319,120 +323,119 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                   }
 
                   return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xFF999999), width: 1),
-                      borderRadius: BorderRadius.circular(12),
                       color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Column(
-                      children: [
-                        // Header Row
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              topRight: Radius.circular(12),
-                            ),
-                          ),
-                          child: Row(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Job List', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),),
+                          // HEADER ROW
+                          Row(
                             children: const [
-                              Expanded(flex: 2, child: Text("Job Title", style: TextStyle(fontWeight: FontWeight.bold))),
-                              Expanded(flex: 1, child: Text("Status", style: TextStyle(fontWeight: FontWeight.bold))),
-                              Expanded(flex: 1, child: Text("Ordered", style: TextStyle(fontWeight: FontWeight.bold))),
-                              Expanded(flex: 1, child: Text("Published", style: TextStyle(fontWeight: FontWeight.bold))),
-                              Expanded(flex: 1, child: Text("Expiry", style: TextStyle(fontWeight: FontWeight.bold))),
-                              Expanded(flex: 1, child: Text("Applicants", style: TextStyle(fontWeight: FontWeight.bold))),
-                              Expanded(flex: 1, child: Text("Actions", style: TextStyle(fontWeight: FontWeight.bold))),
+                              SizedBox(width: 200, child: Text("Job Title", style: TextStyle(fontWeight: FontWeight.bold))),
+                              SizedBox(width: 100, child: Text("Status", style: TextStyle(fontWeight: FontWeight.bold))),
+                              SizedBox(width: 120, child: Text("Ordered", style: TextStyle(fontWeight: FontWeight.bold))),
+                              SizedBox(width: 120, child: Text("Published", style: TextStyle(fontWeight: FontWeight.bold))),
+                              SizedBox(width: 120, child: Text("Expiry", style: TextStyle(fontWeight: FontWeight.bold))),
+                              SizedBox(width: 120, child: Text("Applicants", style: TextStyle(fontWeight: FontWeight.bold))),
+                              SizedBox(width: 140, child: Text("Actions", style: TextStyle(fontWeight: FontWeight.bold))),
                             ],
                           ),
-                        ),
-                        const Divider(height: 1, color: Colors.grey),
 
-                        // Job Rows
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: jobs.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1, color: Colors.grey),
-                            itemBuilder: (context, index) {
+                          const SizedBox(height: 10),
+                          const Divider(color: Colors.grey),
+
+                          const SizedBox(height: 10),
+
+                          // ----- JOB ROWS -----
+                          // ----- JOB ROWS AS CARDS -----
+                          Column(
+                            children: List.generate(jobs.length, (index) {
                               final job = jobs[index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                child: SingleChildScrollView(   // <-- Make row scrollable
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 150,  // optional fixed width for Job Title
-                                        child: Text(job.title.toString()),
+
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.grey.shade300),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.shade200,
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 200, child: Text(job.title, style: const TextStyle(fontWeight: FontWeight.w600))),
+
+                                    SizedBox(width: 100, child: Text(job.status ?? "")),
+
+                                    SizedBox(width: 120, child: Text(formatDate(job.createdAt))),
+                                    SizedBox(width: 120, child: Text(formatDate(job.publishDate))),
+                                    SizedBox(width: 120, child: Text(formatDate(job.deadline))),
+
+                                    // Applicants
+                                    SizedBox(
+                                      width: 120,
+                                      child: GestureDetector(
+                                        onTap: () => Get.to(() => ApplicantsListScreen(jobId: job.id)),
+                                        child: Text(
+                                          "View (${job.applicantCount})",
+                                          style: const TextStyle(color: Colors.blue),
+                                        ),
                                       ),
-                                      SizedBox(
-                                        width: 80,
-                                        child: Text(job.status ?? ""),
-                                      ),
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(job.createdAt.toString()),
-                                      ),
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(job.publishDate.toString()),
-                                      ),
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(job.deadline.toString()),
-                                      ),
-                                      SizedBox(
-                                        width: 100,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Get.to(() => ApplicantsListScreen(jobId: job.id));
-                                          },
-                                          child: Text(
-                                            "View (${job.applicantCount})",
-                                            style: const TextStyle(color: Colors.blue),
+                                    ),
+
+                                    // ACTIONS
+                                    SizedBox(
+                                      width: 140,
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.remove_red_eye),
+                                            onPressed: () => Get.to(() => ArchieveJobView(jobId: job.id)),
                                           ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 140,
-                                        child: Row(
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.remove_red_eye, color: Colors.black),
-                                              onPressed: () {
-                                                Get.to(() => ArchieveJobView(jobId: job.id));
-                                              },
+
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              DPrint();
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green.shade100,
+                                              foregroundColor: Colors.green.shade800,
+                                              minimumSize: const Size(60, 32),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8),
                                             ),
-                                            const SizedBox(width: 8),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                job.arcrivedJob; // Implement archive logic
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.green.shade100,
-                                                foregroundColor: Colors.green.shade800,
-                                                minimumSize: const Size(60, 30),
-                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                                              ),
-                                              child: const Text("Archive", style: TextStyle(fontSize: 12)),
-                                            ),
-                                          ],
-                                        ),
+                                            child: const Text("Archive", style: TextStyle(fontSize: 12)),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               );
-                            },
-                        ),
-                      ],
+                            }),
+                          ),
+
+                        ],
+                      ),
                     ),
                   );
+
+
                 }),
+
               ],
             ),
           );
@@ -459,4 +462,25 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
         return 'assets/icons/link.png';
     }
   }
+
+
+  /// Safe date formatter — accepts String or DateTime (or null)
+  String formatDate(dynamic date) {
+    if (date == null) return '';
+    try {
+      DateTime dt;
+      if (date is DateTime) {
+        dt = date;
+      } else {
+        // try parse string (handles ISO strings from backend)
+        dt = DateTime.parse(date.toString());
+      }
+      // Example output: 12 Nov, 2025
+      return DateFormat('dd MMM, yyyy').format(dt);
+    } catch (e) {
+      // fallback: just return the original value as string
+      return date.toString();
+    }
+  }
+
 }
