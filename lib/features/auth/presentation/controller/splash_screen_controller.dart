@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
 
 import '../../../recruiter_account/presentation/screens/create_recruiter_account.dart';
 import '../screens/login_screen.dart';
@@ -33,7 +34,7 @@ class SplashController extends GetxController {
       if (userRole == 'candidate') {
         Get.offAll(() => DashboardScreen());
       } else if (userRole == 'recruiter') {
-        Get.offAll(() => CreateRecruiterAccount());
+        Get.offAll(() => RecruiterPageScreen());
       } else if (userRole == 'company') {
         Get.offAll(() => cjs.CreateJobPostingScreen());
       } else {

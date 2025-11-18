@@ -70,11 +70,6 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
     ElevatorPitchController(),
   );
 
-
-
-  // This will hold the current country code for city picker
-  String? selectedCountryCode;
-
   _submit() {
     recruiterController.createRecruiterScreen(
         bannerPickerController.selectedImage.value!,
@@ -116,6 +111,7 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                ElevatedButton(onPressed: (){Get.find<RecruiterController>().logout();} , child: Text('Logout')),
                 const Text(
                   'Upload Your Elevator Speech (Optional)',
                   style: TextStyle(

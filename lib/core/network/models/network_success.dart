@@ -1,4 +1,3 @@
-// lib/core/network/models/network_success.dart
 import 'package:equatable/equatable.dart';
 
 class NetworkSuccess<T> extends Equatable {
