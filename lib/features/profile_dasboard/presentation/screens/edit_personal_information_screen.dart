@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
 import '../controller/profile_controller.dart';
 import '../../data/models/user_model.dart';
 import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
@@ -73,43 +72,10 @@ class _EditProfileState extends State<EditProfile> {
     );
 
     if (pickedFile != null) {
-      try {
-        // Open crop / resize UI so user can adjust the selected image
-        final CroppedFile? croppedFile = await ImageCropper().cropImage(
-          sourcePath: pickedFile.path,
-          uiSettings: [
-            AndroidUiSettings(
-              toolbarTitle: 'Resize / Crop',
-              toolbarColor: Colors.black,
-              toolbarWidgetColor: Colors.white,
-              initAspectRatio: CropAspectRatioPreset.original,
-              lockAspectRatio: false,
-            ),
-            IOSUiSettings(
-              title: 'Resize / Crop',
-            ),
-          ],
-        );
-
-        if (croppedFile != null) {
-          setState(() {
-            _image = File(croppedFile.path);
-          });
-          print('Cropped image path: ${croppedFile.path}');
-        } else {
-          // If user cancelled cropping, still use the originally selected image
-          setState(() {
-            _image = File(pickedFile.path);
-          });
-          print('No crop applied, using original image: ${pickedFile.path}');
-        }
-      } catch (e) {
-        // Fallback to original image on any error and surface debug info
-        setState(() {
-          _image = File(pickedFile.path);
-        });
-        print('[ERROR] Image crop failed: $e');
-      }
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+      print('Selected image path: ${pickedFile.path}');
     } else {
       print('No image selected');
     }
