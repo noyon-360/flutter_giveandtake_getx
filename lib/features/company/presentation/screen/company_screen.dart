@@ -4,6 +4,14 @@ import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../create_job/presentation/controller/create_job_controller.dart';
 import '../../../create_job/presentation/widgets/searchable_widgets.dart';
+import '../../../recruiter_account/data/models/get_category_response_model.dart';
+import '../../../recruiter_account/presentation/controller/company_image_controller.dart';
+import '../../../recruiter_account/presentation/controller/description_controller.dart';
+import '../../../recruiter_account/presentation/controller/image_controller.dart';
+import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
+import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
+import '../../../recruiter_account/presentation/widgets/bio.dart';
+import '../../../recruiter_account/presentation/widgets/video_player_widget.dart';
 import '../controller/company_account_controller.dart';
 import '../widget/custom_text_field.dart';
 import '../widget/upload_card_widget.dart';
@@ -14,9 +22,19 @@ class CreateCompanyAccountPage extends StatelessWidget {
   final CompanyAccountController controller = Get.put(
     CompanyAccountController(),
   );
+  final recruiterController = Get.find<RecruiterController>();
 
   final CreateJobPostingController jobController = Get.put(
     CreateJobPostingController(Get.find()),
+  );
+  final CompanyImageController bannerPickerController = Get.put(
+    CompanyImageController(),
+  );
+
+  final ImageController imagePickerController = Get.put(ImageController());
+  final TextEditingController _descriptionTController = TextEditingController();
+  final DescriptionController descriptionController = Get.put(
+    DescriptionController(),
   );
 
   CreateCompanyAccountPage({super.key});
@@ -73,65 +91,250 @@ class CreateCompanyAccountPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Upload Elevator Pitch
-              VideoUploadCardWidget(
-                title: "Upload your elevator pitch",
-                subtitle:
-                    "Share a video introduction to make your resume stand out",
-                buttonText: "Upload Elevator Pitch",
-                fileType:
-                    "Drop your file here \n Maximum size 24mb and 30 seconds or 60 seconds long (if upgraded) \n Choose File",
-                // isChecked: true,
-                // onChanged: (value) {},
+              GestureDetector(
+                onTap: () {
+                  Get.to(VideoUploadScreen());
+                },
+                child: Obx(() {
+                  if (recruiterController.successVideoUploaded.value &&
+                      recruiterController.uploadedVideoPath.value.isNotEmpty) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xFF191919),
+                      ),
+                      height: 200,
+                      width: double.infinity,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: VideoPlayerWidget(
+                          videoPath:
+                              recruiterController.uploadedVideoPath.value,
+                        ),
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xFF191919),
+                      ),
+                      height: 150,
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: Image(
+                              image: AssetImage('assets/icons/gallery.png'),
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          const Text(
+                            'Drop your files here',
+                            style: TextStyle(fontSize: 12, color: Colors.white),
+                          ),
+                          const SizedBox(height: 9.5),
+                          const Text(
+                            'Choose file',
+                            style: TextStyle(fontSize: 12, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                }),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 16),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Company Banner",
-                  style: TextStyle(
-                    color: AppColors.textBlack,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+              Text(
+                'Company Banner',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(width: 1, color: Color(0xFF999999)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: GestureDetector(
+                    onTap: bannerPickerController.showPickerOptions,
+                    child: Obx(() {
+                      return Container(
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Color(0xFFD9D9D9),
+                        ),
+                        child: Center(
+                          child:
+                              bannerPickerController.selectedImage.value != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  // same as container
+                                  child: Image.file(
+                                    bannerPickerController.selectedImage.value!,
+                                    width: double.infinity,
+                                    height: 150,
+                                    fit: BoxFit
+                                        .cover, // makes image fill the container
+                                  ),
+                                )
+                              : const Text(
+                                  'company banner',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                        ),
+                      );
+                    }),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
 
-              // Company Banner
-              UploadCardWidget(
-                title: "Upload banner",
-                subtitle:
-                    "Upload and crop a banner image to enhance your resume profile.",
-                buttonText: "Upload Banner",
-                fileType:
-                    "Drop your file here \n Supports JPG, PNG • Max 10MB • Will be cropped to 300px height \n Choose File",
-              ),
-
-              const SizedBox(height: 24),
+              SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Company Logo",
                   style: TextStyle(
-                    color: AppColors.textBlack,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
+                    color: Color(0xFF000000),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
 
-              // Company Logo
-              UploadCardWidget(
-                title: "",
-                subtitle: "",
-                buttonText: "Upload Logo",
-                fileType: "Drop your file here\nChoose Logo",
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    children: [
+                      SizedBox(height: 10),
+                      GestureDetector(
+                        onTap: imagePickerController.showPickerOptions,
+                        child: Obx(() {
+                          return Container(
+                            height: 130,
+                            width: 130,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Color(0xFFD9D9D9),
+                            ),
+                            child: Center(
+                              child:
+                                  imagePickerController.selectedImage.value !=
+                                      null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      // same as container
+                                      child: Image.file(
+                                        imagePickerController
+                                            .selectedImage
+                                            .value!,
+                                        height: 130,
+                                        width: 130,
+                                        fit: BoxFit
+                                            .cover, // makes image fill the container
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Company logo',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                            ),
+                          );
+                        }),
+                      ),
+
+                      SizedBox(height: 10),
+                    ],
+                  ),
+
+                  SizedBox(width: 15),
+
+                  Bio(
+                    descriptionTController: _descriptionTController,
+                    descriptionController: descriptionController,
+                  ),
+                ],
               ),
 
-              const SizedBox(height: 24),
+              // Upload Elevator Pitch
+              // VideoUploadCardWidget(
+              //   title: "Upload your Video pitch",
+              //   subtitle: "Drop your video here or click to browswer",
+              //   buttonText: "Upload Elevator Pitch",
+              //   fileType:
+              //       "Upload your Video pitch \n Drop your video here or click to browswer \n Choose File",
+              //   // isChecked: true,
+              //   // onChanged: (value) {},
+              //   onTap: () {
+              //     Get.to(() => VideoUploadScreen());
+              //   },
+              // ),
+
+              // const SizedBox(height: 24),
+
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: Text(
+              //     "Company Banner",
+              //     style: TextStyle(
+              //       color: AppColors.textBlack,
+              //       fontSize: 18,
+              //       fontWeight: FontWeight.w500,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 8),
+
+              // // Company Banner
+              // UploadCardWidget(
+              //   title: "Upload banner",
+              //   subtitle:
+              //       "Upload and crop a banner image to enhance your resume profile.",
+              //   buttonText: "Upload Banner",
+              //   fileType:
+              //       "Drop your file here \n Supports JPG, PNG • Max 10MB • Will be cropped to 300px height \n Choose File",
+              // ),
+              // const SizedBox(height: 24),
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: Text(
+              //     "Company Logo",
+              //     style: TextStyle(
+              //       color: AppColors.textBlack,
+              //       fontSize: 18,
+              //       fontWeight: FontWeight.w500,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 8),
+
+              // // Company Logo
+              // UploadCardWidget(
+              //   title: "",
+              //   subtitle: "",
+              //   buttonText: "Upload Logo",
+              //   fileType: "Drop your file here\nChoose Logo",
+              // ),
+
+              // const SizedBox(height: 24),
 
               // Align(
               //   alignment: Alignment.centerLeft,
@@ -306,25 +509,122 @@ class CreateCompanyAccountPage extends StatelessWidget {
                 hintText: "Enter Here",
               ),
               const SizedBox(height: 8),
-              CustomTextField(
-                label: 'Other Business Website',
 
-                isRequired: true,
-                hintText: "Enter Here",
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                label: 'Country',
+              // CustomTextField(
+              //   label: 'Other Business Website',
 
-                isRequired: true,
-                hintText: "Industry",
-              ),
-
-              // const SizedBox(height: 8),
-              // const Text(
-              //   "Services",
-              //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              //   isRequired: true,
+              //   hintText: "Enter Here",
               // ),
+              // const SizedBox(height: 8),
+              // CustomTextField(
+              //   label: 'Industry',
+
+              //   isRequired: true,
+              //   hintText: "Select Industry",
+              // ),
+              CustomTextField(
+                label: 'Industry',
+                hintText: "Select Industry",
+                isRequired: true,
+                readOnly: true,
+                controller:
+                    controller.industryController, // create this controller
+                onTap: () async {
+                  await recruiterController.fetchCategory();
+                  recruiterController.searchText.value = "";
+
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true, // needed to react to keyboard
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
+                    ),
+                    builder: (context) {
+                      final bottomPadding = MediaQuery.of(
+                        context,
+                      ).viewInsets.bottom;
+
+                      return Padding(
+                        // 🟦 pushes bottom sheet above keyboard
+                        padding: EdgeInsets.only(bottom: bottomPadding),
+
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Container(
+                            constraints: const BoxConstraints(
+                              maxHeight: 350, // dropdown height
+                            ),
+                            child: Column(
+                              children: [
+                                // 🔎 SEARCH FIELD
+                                TextField(
+                                  decoration: InputDecoration(
+                                    hintText: "Search Industry",
+                                    prefixIcon: Icon(Icons.search),
+                                    filled: true,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  onChanged: (value) {
+                                    recruiterController.searchText.value =
+                                        value;
+                                  },
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                // 📋 FILTERED LIST
+                                Expanded(
+                                  child: Obx(() {
+                                    final filtered = recruiterController
+                                        .category
+                                        .where(
+                                          (item) =>
+                                              item.name.toLowerCase().contains(
+                                                recruiterController
+                                                    .searchText
+                                                    .value
+                                                    .toLowerCase(),
+                                              ),
+                                        )
+                                        .toList();
+
+                                    if (filtered.isEmpty) {
+                                      return const Center(
+                                        child: Text("No results found"),
+                                      );
+                                    }
+
+                                    return ListView.builder(
+                                      itemCount: filtered.length,
+                                      itemBuilder: (_, index) {
+                                        final item = filtered[index];
+                                        return ListTile(
+                                          title: Text(item.name),
+                                          onTap: () {
+                                            controller.industryController.text =
+                                                item.name;
+                                            Navigator.pop(context);
+                                          },
+                                        );
+                                      },
+                                    );
+                                  }),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+
               const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,7 +633,7 @@ class CreateCompanyAccountPage extends StatelessWidget {
                   Expanded(
                     child: CustomTextField(
                       label: "Service",
-                      hintText: "Enter service",
+                      hintText: "Add Service",
                       controller: controller.serviceControllers[0],
                       isRequired: true,
                     ),
@@ -391,11 +691,11 @@ class CreateCompanyAccountPage extends StatelessWidget {
                           children: [
                             Expanded(
                               child: CustomTextField(
-                                label: "Service ${index + 0}",
+                                label: "",
                                 hintText: "Enter service",
                                 controller:
                                     controller.serviceControllers[index],
-                                isRequired: true,
+                                // isRequired: true,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -416,7 +716,7 @@ class CreateCompanyAccountPage extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "View your Company Employees",
+                  "View your Company recruiters",
                   style: TextStyle(
                     color: AppColors.textBlack,
                     fontSize: 16,
@@ -430,7 +730,7 @@ class CreateCompanyAccountPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: CustomTextField(
-                      label: "Add Profiles of Employees",
+                      label: "Add Profiles of Recruiters",
                       hintText: "Add Here",
                       controller: controller.employeeControllers[0],
                       isRequired: true,
@@ -487,8 +787,8 @@ class CreateCompanyAccountPage extends StatelessWidget {
                           children: [
                             Expanded(
                               child: CustomTextField(
-                                label: "Employee ${index + 1}",
-                                hintText: "Enter employee profile",
+                                label: "Recruiter ${index + 1}",
+                                hintText: "Enter recruiter profile",
                                 controller:
                                     controller.employeeControllers[index],
                                 isRequired: true,

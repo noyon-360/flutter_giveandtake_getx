@@ -26,6 +26,8 @@ class CompanyAccountController extends GetxController {
   final awardDescriptionController = TextEditingController();
   final addMoreLinksController = TextEditingController();
   final otherWebsiteController2 = TextEditingController();
+  final TextEditingController industryController = TextEditingController();
+
 
   // Observables
   var elevatorVideoPath = RxnString();

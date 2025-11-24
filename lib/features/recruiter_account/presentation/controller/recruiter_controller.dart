@@ -28,6 +28,9 @@ class RecruiterController extends BaseController {
   final Repo _recruiterRepo;
   var isSkipLoading = false.obs;
   var isContinueLoading = false.obs;
+  // inside RecruiterController class
+final RxString searchText = ''.obs;
+
 
   final companies = <GetCompanyResponseModel>[].obs;
   RxString? companySearchQuery;
