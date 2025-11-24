@@ -53,6 +53,8 @@ class ApiConstants {
   static ContentEndpoints get content => ContentEndpoints();
   static ElevatorPitchVideo get elevatorPitchVideo => ElevatorPitchVideo();
   static CategoryEndpoints get category => CategoryEndpoints();
+  static  AlluserEndpoints get allusers => AlluserEndpoints();
+  
 }
 
 class JobEndpoints {
@@ -187,4 +189,9 @@ class SubscriptionEndpoints {
 class CategoryEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/category';
   final String jobCategory = '$_base/job-category';
+}
+
+class AlluserEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/all';
+  final String alluser = '$_base/user';
 }
