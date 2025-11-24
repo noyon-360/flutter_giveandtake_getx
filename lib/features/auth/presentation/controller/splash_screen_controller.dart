@@ -1,12 +1,18 @@
+import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
+import 'package:karlfive/core/network/services/auth_storage_service.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/auth/presentation/screens/account_preview_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/onboarding_screen.dart';
-import '../../../../core/network/services/secure_store_services.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
+
+import '../../../recruiter_account/presentation/screens/create_recruiter_account.dart';
+import '../screens/login_screen.dart';
+
+import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
+import 'package:karlfive/features/create_job/presentation/screen/create_job_screen.dart' as cjs;
+import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 
 class SplashController extends GetxController {
-  final _authController = Get.find<AuthController>();
-
   @override
   void onInit() {
     super.onInit();
@@ -16,30 +22,28 @@ class SplashController extends GetxController {
   Future<void> _checkStartupFlow() async {
     await Future.delayed(const Duration(seconds: 2));
 
-    final secureStore = SecureStoreServices();
-    final savedEmail = await secureStore.retrieveData("email");
-    final savedPassword = await secureStore.retrieveData("password");
-    final previewConfirmed = await secureStore.retrieveData(
-      "previewConfirmed",
-    ); // 'true' or null
+    final AuthStorageService _authStorageService = AuthStorageService();
 
-    final success = await _authController.refreshToken();
+    final accessToken = await _authStorageService.getAccessToken();
 
-    if (savedEmail != null && savedPassword != null) {
-      // if they previously confirmed preview, go straight to Home
-      if (previewConfirmed == 'true') {
-        // Get.offAll(() => HomeScreen());
+    if (accessToken != null) {
+      // User is logged in, check their role and navigate accordingly
+      final userRole = await _authStorageService.getUserRole();
+      DPrint.log("User Role: $userRole");
+
+      if (userRole == 'candidate') {
+        Get.offAll(() => DashboardScreen());
+      } else if (userRole == 'recruiter') {
+        Get.offAll(() => RecruiterPageScreen());
+      } else if (userRole == 'company') {
+        Get.offAll(() => cjs.CreateJobPostingScreen());
       } else {
-        // show preview until they confirm
-        Get.offAll(() => const AccountPreviewScreen());
+        // Unknown role, go to login
+        Get.offAll(() => LoginScreen());
       }
     } else {
-      // no saved credentials — try token refresh flow
-      if (success) {
-        // Get.offAll(() => HomeScreen());
-      } else {
-        Get.offAll(() => OnboardingScreen(), transition: Transition.fadeIn);
-      }
+      // No access token, go to login
+      Get.offAll(() => LoginScreen());
     }
   }
 }

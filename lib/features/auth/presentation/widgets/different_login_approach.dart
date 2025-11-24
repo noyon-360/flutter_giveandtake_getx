@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
 
 class DifferentLoginApproach extends StatelessWidget {
   const DifferentLoginApproach({

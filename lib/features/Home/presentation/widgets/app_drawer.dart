@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
+import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
+
+import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
+import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
+import '../../../home_static_screens/presentation/screen/blog.dart';
+import '../../../home_static_screens/presentation/screen/frequently_questions.dart';
+import '../../../home_static_screens/presentation/screen/privacy_policy.dart';
+import '../screens/my_plan_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -33,9 +45,9 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             ListTileForNav(
-              title: "Blog",
+              title: "Blogs",
               onTap: () {
-                // TODO: Navigate to Blog
+                Get.to (()=> BlogScreen());
               },
             ),
 
@@ -61,30 +73,39 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/home.png",
                       title: "About Us",
                       onTap: () {
-                        // TODO: Navigate to About Us
+                       Get.to(()=> AboutUs());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/list.png",
                       title: "Privacy Policy",
                       onTap: () {
-                        // TODO: Navigate to Privacy Policy
+                        Get.to(()=> PrivacyPolicy());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/book-open-01.png",
                       title: "Terms & Conditions",
                       onTap: () {
-                        // TODO: Navigate to Terms & Conditions
+                        Get.to(()=> TermsandConditions());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/Icon (5).png",
                       title: "Frequently Asked Questions",
                       onTap: () {
-                        // TODO: Navigate to FAQ
+                        Get.to(()=> FrequentlyQuestions());
                       },
                     ),
+
+                    ListTileForNav(
+                      liconPath: "assets/icons/contactus.png",
+                      title: "Contact Us",
+                      onTap: () {
+                        Get.to(()=> ContactUsScreen(member: EditProfileModel()));
+                      },
+                    ),
+                    
                   ],
                 ),
               ),
@@ -112,21 +133,24 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/home.png",
                       title: "My Profile",
                       onTap: () {
-                        // TODO: Navigate to Contact Us
+                        Get.to(()=> PersonalInfoScreen());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/list.png",
                       title: "My Plan",
                       onTap: () {
-                        // TODO: Navigate to Contact Us
+                        Get.back();
+                        Get.to(() => const MyPlanScreen());
                       },
                     ),
                     ListTileForNav(
-                      title: "Bookmark Jobs",
+                      title: "Bookmarked Jobs",
                       liconPath: "assets/icons/book-open-01.png",
                       onTap: () {
-                        // TODO: Navigate to Feedback
+                        // Close the drawer then navigate to Bookmark Jobs screen
+                        Get.back();
+                        Get.to(() => BookmarkJobsScreen());
                       },
                     ),
                   ],
@@ -138,7 +162,7 @@ class _AppDrawerState extends State<AppDrawer> {
               title: "Logout",
               liconPath: "assets/icons/logout_icon_dawer.png",
               onTap: () {
-                // TODO: Handle Logout
+                Get.find<AuthController>().logout();
               },
             ),
           ],
@@ -181,9 +205,17 @@ class ListTileForNav extends StatelessWidget {
             )
           : null,
       leading: liconPath != null
-          ? Image.asset(liconPath!, width: 24, height: 24)
+          ? Image.asset(liconPath!, width: 16, height: 16)
           : null,
-      title: Text(title ?? '', style: TextStyle(color: AppColors.textBlack)),
+      title: Text(
+        title ?? '',
+        style: TextStyle(
+          color: Color(0xff333333),
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -1,
+        ),
+      ),
       onTap: () => onTap(),
     );
   }

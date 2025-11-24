@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 class ImageController extends GetxController {
   Rx<File?> selectedImage = Rx<File?>(null);
+  RxString existingImageUrl = ''.obs;
 
   final ImagePicker _picker = ImagePicker();
 

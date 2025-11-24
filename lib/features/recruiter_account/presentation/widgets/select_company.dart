@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import '../../data/models/get_company_response_model.dart';
@@ -29,9 +30,12 @@ class CompanyDropdown extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),),
-        value: controller.selectedCompany.value,
+        value: controller.companies.firstWhereOrNull(
+              (company) => company.id == controller.selectedCompany.value,
+        ),
         onChanged: (value) {
-          controller.selectedCompany.value = value;
+          DPrint.log("Select Company Drop -> ${value!.id}");
+          controller.selectedCompany.value = value.id;
         },
         items: controller.companies.map((company) {
           return DropdownMenuItem(

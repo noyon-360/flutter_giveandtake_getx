@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
+
 import '../../../../core/bottomNavbar/screens/dashboard_screen.dart';
-import '../../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
+import '../../../plan_pricing/presentation/controllers/plan_pricing_controller.dart';
+import '../../../plan_pricing/presentation/widgets/payment_option_dialog.dart';
+import '../../../plan_pricing/presentation/widgets/plan_pricing_card.dart';
+
 
 class PaymentHistoryScreen extends StatelessWidget {
   const PaymentHistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Initialize the PlanPricingController
+    final PlanPricingController controller = Get.put(PlanPricingController());
+    final PageController pageController = PageController();
+
+    // Add listener to page controller for reactive page updates
+    pageController.addListener(() {
+      if (pageController.hasClients && pageController.page != null) {
+        int next = pageController.page!.round();
+        if (controller.currentPage != next) {
+          controller.updateCurrentPage(next);
+        }
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -26,30 +43,6 @@ class PaymentHistoryScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              /// Profile Info
-              const CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage("assets/images/profile.jpg"),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "Brooklyn Simmons",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF212121),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "brooklynsimmons@gmail.com",
-                style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
-              ),
-              const SizedBox(height: 24),
-              const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
-        
-              const SizedBox(height: 22),
-        
               /// Current Plan Title
               const Text(
                 "Current Plan",
@@ -62,121 +55,132 @@ class PaymentHistoryScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
         
-              /// Current Plan Card
-              SizedBox(
-                height: 349.94,
-                width: 250.63,
-                child: Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2B7FD0),
-                    borderRadius: BorderRadius.circular(11.08),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "PREMIUM PLAN",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-        
-                      /// Price Row
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: const [
+              /// Plan Pricing Cards with PageView
+              Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(40.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
                           Text(
-                            "\$49.99",
-                            style: TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                            'Error: ${controller.errorMessage.value}',
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
                           ),
-                          SizedBox(width: 6),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 45),
-                            child: Text(
-                              "Per year",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => controller.refreshPlans(),
+                            child: const Text('Retry'),
                           ),
                         ],
                       ),
-        
-                      // const SizedBox(height: 0),
-                      const Align(
-                        alignment: Alignment.centerRight,
-                        child: const Text(
-                          "What the user will get",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.5,
+                    ),
+                  );
+                }
+
+                if (!controller.hasPlans) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
+                          const Text('No plans available for your role.'),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => controller.refreshPlans(),
+                            child: const Text('Refresh'),
                           ),
-                        ),
+                        ],
                       ),
-        
-                      const SizedBox(height: 13),
-        
-                      const Text(
-                        "Plan description: Lorem ipsum is a dummy or placeholder text commonly used in graphic design, publishing, and web development.",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          height: 1.8,
-                        ),
+                    ),
+                  );
+                }
+
+                final plans = controller.filteredPlans;
+
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 450,
+                      child: PageView.builder(
+                        controller: pageController,
+                        itemCount: plans.length,
+                        itemBuilder: (context, index) {
+                          final plan = plans[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: PlanPricingCard(
+                              title: plan.title,
+                              price: plan.price,
+                              description: plan.description,
+                              features: plan.features,
+                              valid: plan.valid,
+                              onSubscribe: () {
+                                showPaymentMethodDialog(
+                                  context,
+                                  planTitle: plan.title,
+                                  price: plan.price,
+                                  onPayNow: () {
+                                    print('Processing payment for: ${plan.title}');
+                                  },
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
-        
-                      const SizedBox(height: 16),
-                      Divider(color: Colors.white.withOpacity(0.4)),
-        
-                      const SizedBox(height: 12),
-        
-                      /// Features list
-                      _buildFeature("A 60-sec elevator pitch"),
-                      const SizedBox(height: 11),
-                      _buildFeature("A free CV review and alteration online"),
-                    ],
+                    ),
+                  ],
+                );
+              }),
+              
+              // Page indicator dots - at the bottom of the page
+              Obx(() {
+                if (controller.isLoading.value || !controller.hasPlans) {
+                  return const SizedBox.shrink();
+                }
+                
+                final plans = controller.filteredPlans;
+                
+                if (plans.length <= 1) {
+                  return const SizedBox.shrink();
+                }
+                
+                return Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(plans.length, (index) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: controller.currentPage == index ? 8 : 6,
+                        height: controller.currentPage == index ? 8 : 6,
+                        decoration: BoxDecoration(
+                          color: controller.currentPage == index
+                              ? const Color(0xff3B9EFF)
+                              : const Color(0xffD9D9D9),
+                          shape: BoxShape.circle,
+                        ),
+                      );
+                    }),
                   ),
-                ),
-              ),
+                );
+              }),
             ],
           ),
         ),
       ),
 
-    );
-  }
-
-  /// Helper function to build a feature row
-  Widget _buildFeature(String text) {
-    return Row(
-      children: [
-        const Icon(Icons.check_circle, color: Colors.white, size: 16),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              height: 1,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

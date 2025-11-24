@@ -5,9 +5,7 @@ import 'package:dio/dio.dart';
 
 class MultiFormDataManager {
   final Map<String, String> textData = {};
-  final List<File> imageFiles = [];
-  final List<File> documentFiles = [];
-  final List<File> otherFiles = [];
+  final Map<String, List<File>> fileData = {}; // Store files with custom keys
 
   // Add text data
   void addTextData(String key, String value) {
@@ -19,62 +17,58 @@ class MultiFormDataManager {
     textData.addAll(data);
   }
 
-  // Add image files from XFile
-  Future<void> addImages(List<XFile> images) async {
+  // Add image files from XFile with a custom key
+  Future<void> addImages(List<XFile> images, {required String key}) async {
+    fileData.putIfAbsent(key, () => []);
     for (var image in images) {
-      imageFiles.add(File(image.path));
+      fileData[key]!.add(File(image.path));
     }
   }
 
-  // Add image files from File
-  void addImageFiles(List<File> files) {
-    imageFiles.addAll(files);
+  // Add image files from File with a custom key
+  void addImageFiles(List<File> files, {required String key}) {
+    fileData.putIfAbsent(key, () => []);
+    fileData[key]!.addAll(files);
   }
 
-  // Add single image file
-  void addImageFile(File file) {
-    imageFiles.add(file);
+  // Add single image file with a custom key
+  void addImageFile(File file, {required String key}) {
+    fileData.putIfAbsent(key, () => []);
+    fileData[key]!.add(file);
   }
 
-  // Add documents from PlatformFile
-  Future<void> addDocuments(List<PlatformFile> files) async {
+  // Add documents from PlatformFile with a custom key
+  Future<void> addDocuments(List<PlatformFile> files, {required String key}) async {
+    fileData.putIfAbsent(key, () => []);
     for (var file in files) {
       if (file.path != null) {
-        documentFiles.add(File(file.path!));
+        fileData[key]!.add(File(file.path!));
       }
     }
   }
 
-  // Add document files from File
-  void addDocumentFiles(List<File> files) {
-    documentFiles.addAll(files);
+  // Add document files from File with a custom key
+  void addDocumentFiles(List<File> files, {required String key}) {
+    fileData.putIfAbsent(key, () => []);
+    fileData[key]!.addAll(files);
   }
 
-  // Add single document file
-  void addDocumentFile(File file) {
-    documentFiles.add(file);
+  // Add single document file with a custom key
+  void addDocumentFile(File file, {required String key}) {
+    fileData.putIfAbsent(key, () => []);
+    fileData[key]!.add(file);
   }
 
-  // Add any type of file
-  void addFiles(List<File> files, {String type = 'other'}) {
-    if (type == 'image') {
-      imageFiles.addAll(files);
-    } else if (type == 'document') {
-      documentFiles.addAll(files);
-    } else {
-      otherFiles.addAll(files);
-    }
+  // Add any type of file with a custom key
+  void addFiles(List<File> files, {required String key}) {
+    fileData.putIfAbsent(key, () => []);
+    fileData[key]!.addAll(files);
   }
 
-  // Add single file with type
-  void addFile(File file, {String type = 'other'}) {
-    if (type == 'image') {
-      imageFiles.add(file);
-    } else if (type == 'document') {
-      documentFiles.add(file);
-    } else {
-      otherFiles.add(file);
-    }
+  // Add single file with a custom key
+  void addFile(File file, {required String key}) {
+    fileData.putIfAbsent(key, () => []);
+    fileData[key]!.add(file);
   }
 
   // Remove text data by key
@@ -82,33 +76,20 @@ class MultiFormDataManager {
     textData.remove(key);
   }
 
-  // Remove image file by index
-  void removeImageAt(int index) {
-    if (index >= 0 && index < imageFiles.length) {
-      imageFiles.removeAt(index);
-    }
-  }
-
-  // Remove document file by index
-  void removeDocumentAt(int index) {
-    if (index >= 0 && index < documentFiles.length) {
-      documentFiles.removeAt(index);
-    }
-  }
-
-  // Remove other file by index
-  void removeOtherFileAt(int index) {
-    if (index >= 0 && index < otherFiles.length) {
-      otherFiles.removeAt(index);
+  // Remove file by index for a specific key
+  void removeFileAt(String key, int index) {
+    if (fileData.containsKey(key) && index >= 0 && index < fileData[key]!.length) {
+      fileData[key]!.removeAt(index);
+      if (fileData[key]!.isEmpty) {
+        fileData.remove(key); // Clean up empty key
+      }
     }
   }
 
   // Clear all data
   void clear() {
     textData.clear();
-    imageFiles.clear();
-    documentFiles.clear();
-    otherFiles.clear();
+    fileData.clear();
   }
 
   // Clear only text data
@@ -116,50 +97,34 @@ class MultiFormDataManager {
     textData.clear();
   }
 
-  // Clear only image files
-  void clearImages() {
-    imageFiles.clear();
+  // Clear files for a specific key
+  void clearFiles(String key) {
+    fileData.remove(key);
   }
 
-  // Clear only document files
-  void clearDocuments() {
-    documentFiles.clear();
-  }
-
-  // Clear only other files
-  void clearOtherFiles() {
-    otherFiles.clear();
+  // Clear all files
+  void clearAllFiles() {
+    fileData.clear();
   }
 
   // Check if form data is empty
   bool isEmpty() {
-    return textData.isEmpty &&
-        imageFiles.isEmpty &&
-        documentFiles.isEmpty &&
-        otherFiles.isEmpty;
+    return textData.isEmpty && fileData.isEmpty;
   }
 
   // Get total file count
   int get totalFileCount {
-    return imageFiles.length + documentFiles.length + otherFiles.length;
+    return fileData.values.fold(0, (sum, files) => sum + files.length);
   }
 
   // Get total size of all files in bytes
   Future<int> getTotalSize() async {
     int totalSize = 0;
-    
-    for (var file in imageFiles) {
-      totalSize += await file.length();
+    for (var files in fileData.values) {
+      for (var file in files) {
+        totalSize += await file.length();
+      }
     }
-    
-    for (var file in documentFiles) {
-      totalSize += await file.length();
-    }
-    
-    for (var file in otherFiles) {
-      totalSize += await file.length();
-    }
-    
     return totalSize;
   }
 
@@ -172,43 +137,23 @@ class MultiFormDataManager {
       formData.fields.add(MapEntry(key, value));
     });
 
-    // Add image files
-    for (var i = 0; i < imageFiles.length; i++) {
-      formData.files.add(MapEntry(
-        'images', // Use same field name for multiple files
-        MultipartFile.fromFileSync(
-          imageFiles[i].path,
-          filename: _getFileName(imageFiles[i], 'image_$i'),
-        ),
-      ));
-    }
-
-    // Add document files
-    for (var i = 0; i < documentFiles.length; i++) {
-      formData.files.add(MapEntry(
-        'documents',
-        MultipartFile.fromFileSync(
-          documentFiles[i].path,
-          filename: _getFileName(documentFiles[i], 'document_$i'),
-        ),
-      ));
-    }
-
-    // Add other files
-    for (var i = 0; i < otherFiles.length; i++) {
-      formData.files.add(MapEntry(
-        'files',
-        MultipartFile.fromFileSync(
-          otherFiles[i].path,
-          filename: _getFileName(otherFiles[i], 'file_$i'),
-        ),
-      ));
-    }
+    // Add files with their respective keys
+    fileData.forEach((key, files) {
+      for (var i = 0; i < files.length; i++) {
+        formData.files.add(MapEntry(
+          key,
+          MultipartFile.fromFileSync(
+            files[i].path,
+            filename: _getFileName(files[i], '${key}_$i'),
+          ),
+        ));
+      }
+    });
 
     return formData;
   }
 
-  // Alternative: Async version for large files
+  // Async version for large files
   Future<FormData> toFormDataAsync() async {
     final formData = FormData();
 
@@ -217,37 +162,19 @@ class MultiFormDataManager {
       formData.fields.add(MapEntry(key, value));
     });
 
-    // Add image files asynchronously
-    for (var i = 0; i < imageFiles.length; i++) {
-      formData.files.add(MapEntry(
-        'images',
-        await MultipartFile.fromFile(
-          imageFiles[i].path,
-          filename: _getFileName(imageFiles[i], 'image_$i'),
-        ),
-      ));
-    }
-
-    // Add document files asynchronously
-    for (var i = 0; i < documentFiles.length; i++) {
-      formData.files.add(MapEntry(
-        'documents',
-        await MultipartFile.fromFile(
-          documentFiles[i].path,
-          filename: _getFileName(documentFiles[i], 'document_$i'),
-        ),
-      ));
-    }
-
-    // Add other files asynchronously
-    for (var i = 0; i < otherFiles.length; i++) {
-      formData.files.add(MapEntry(
-        'files',
-        await MultipartFile.fromFile(
-          otherFiles[i].path,
-          filename: _getFileName(otherFiles[i], 'file_$i'),
-        ),
-      ));
+    // Add files with their respective keys
+    for (var entry in fileData.entries) {
+      final key = entry.key;
+      final files = entry.value;
+      for (var i = 0; i < files.length; i++) {
+        formData.files.add(MapEntry(
+          key,
+          await MultipartFile.fromFile(
+            files[i].path,
+            filename: _getFileName(files[i], '${key}_$i'),
+          ),
+        ));
+      }
     }
 
     return formData;
@@ -256,8 +183,7 @@ class MultiFormDataManager {
   // Enhanced method with validation
   Future<FormData> toFormDataWithValidation({
     int maxFileSize = 10 * 1024 * 1024, // 10MB default
-    List<String> allowedImageTypes = const ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    List<String> allowedDocumentTypes = const ['pdf', 'doc', 'docx', 'txt', 'rtf'],
+    Map<String, List<String>> allowedFileTypes = const {}, // Map of key to allowed extensions
   }) async {
     final formData = FormData();
     final errors = <String>[];
@@ -270,66 +196,35 @@ class MultiFormDataManager {
       formData.fields.add(MapEntry(key, value));
     });
 
-    // Validate and add image files
-    for (var i = 0; i < imageFiles.length; i++) {
-      final file = imageFiles[i];
-      final extension = _getFileExtension(file.path);
-      
-      if (!allowedImageTypes.contains(extension.toLowerCase())) {
-        errors.add('Image ${file.path} has invalid type: $extension');
-        continue;
-      }
-      
-      final length = await file.length();
-      if (length > maxFileSize) {
-        errors.add('Image ${file.path} exceeds maximum size (${maxFileSize ~/ (1024 * 1024)}MB)');
-        continue;
-      }
+    // Validate and add files
+    for (var entry in fileData.entries) {
+      final key = entry.key;
+      final files = entry.value;
+      final allowedTypes = allowedFileTypes[key] ?? ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'txt', 'rtf'];
 
-      formData.files.add(MapEntry(
-        'images',
-        await MultipartFile.fromFile(
-          file.path, 
-          filename: _getFileName(file, 'image_$i'),
-        ),
-      ));
-    }
+      for (var i = 0; i < files.length; i++) {
+        final file = files[i];
+        final extension = _getFileExtension(file.path);
 
-    // Validate and add document files
-    for (var i = 0; i < documentFiles.length; i++) {
-      final file = documentFiles[i];
-      final extension = _getFileExtension(file.path);
-      
-      if (!allowedDocumentTypes.contains(extension.toLowerCase())) {
-        errors.add('Document ${file.path} has invalid type: $extension');
-        continue;
+        if (!allowedTypes.contains(extension.toLowerCase())) {
+          errors.add('File ${file.path} for key "$key" has invalid type: $extension');
+          continue;
+        }
+
+        final length = await file.length();
+        if (length > maxFileSize) {
+          errors.add('File ${file.path} for key "$key" exceeds maximum size (${maxFileSize ~/ (1024 * 1024)}MB)');
+          continue;
+        }
+
+        formData.files.add(MapEntry(
+          key,
+          await MultipartFile.fromFile(
+            file.path,
+            filename: _getFileName(file, '${key}_$i'),
+          ),
+        ));
       }
-      
-      final length = await file.length();
-      if (length > maxFileSize) {
-        errors.add('Document ${file.path} exceeds maximum size (${maxFileSize ~/ (1024 * 1024)}MB)');
-        continue;
-      }
-
-      formData.files.add(MapEntry(
-        'documents',
-        await MultipartFile.fromFile(
-          file.path,
-          filename: _getFileName(file, 'document_$i'),
-        ),
-      ));
-    }
-
-    // Add other files (no validation)
-    for (var i = 0; i < otherFiles.length; i++) {
-      final file = otherFiles[i];
-      formData.files.add(MapEntry(
-        'files',
-        await MultipartFile.fromFile(
-          file.path,
-          filename: _getFileName(file, 'file_$i'),
-        ),
-      ));
     }
 
     if (errors.isNotEmpty) {
@@ -354,17 +249,17 @@ class MultiFormDataManager {
 
   // Get summary of form data (useful for debugging)
   Future<Map<String, dynamic>> getSummary() async {
+    final fileSummary = <String, List<String>>{};
+    fileData.forEach((key, files) {
+      fileSummary[key] = files.map((f) => f.path).toList();
+    });
+
     return {
       'textFields': textData.length,
-      'imageFiles': imageFiles.length,
-      'documentFiles': documentFiles.length,
-      'otherFiles': otherFiles.length,
       'totalFiles': totalFileCount,
       'totalSize': await getTotalSize(),
       'textData': textData,
-      'imagePaths': imageFiles.map((f) => f.path).toList(),
-      'documentPaths': documentFiles.map((f) => f.path).toList(),
-      'otherFilePaths': otherFiles.map((f) => f.path).toList(),
+      'fileData': fileSummary,
     };
   }
 
@@ -372,9 +267,9 @@ class MultiFormDataManager {
   MultiFormDataManager copy() {
     final copy = MultiFormDataManager();
     copy.textData.addAll(textData);
-    copy.imageFiles.addAll(imageFiles);
-    copy.documentFiles.addAll(documentFiles);
-    copy.otherFiles.addAll(otherFiles);
+    fileData.forEach((key, files) {
+      copy.fileData[key] = List.from(files);
+    });
     return copy;
   }
 }
