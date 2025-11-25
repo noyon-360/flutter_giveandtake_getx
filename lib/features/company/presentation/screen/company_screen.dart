@@ -369,15 +369,15 @@ class CreateCompanyAccountPage extends StatelessWidget {
               //     ),
               //   ),
               // ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                maxLines: 5,
-                controller: controller.aboutUsController, // ✅ bind
-                label: 'About Us',
+              // const SizedBox(height: 8),
+              // CustomTextField(
+              //   maxLines: 5,
+              //   controller: controller.aboutUsController, // ✅ bind
+              //   label: 'About Us',
 
-                isRequired: false,
-                hintText: "Write here",
-              ),
+              //   isRequired: false,
+              //   hintText: "Write here",
+              // ),
               const SizedBox(height: 8),
               CustomTextField(
                 label: 'Company Name',
