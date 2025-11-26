@@ -208,6 +208,7 @@ class ElevatorResumeScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
+
               // ===================== PERSONAL INFO =====================
 
               Text(
@@ -217,97 +218,76 @@ class ElevatorResumeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              _SectionCard(
-                child: Column(
+
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // First & Surname (top of the section)
-                    Row(
-                      children: const [
-                        Expanded(
-                          child: _LabeledTextField(
-                            label: 'First Name*',
-                            hint: 'Enter your first name',
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: _LabeledTextField(
-                            label: 'Surname*',
-                            hint: 'Enter your surname',
-                          ),
-                        ),
-                      ],
+                    _LabeledTextField(
+                      label: 'First Name*',
+                      hint: 'Enter your first name',
+                    ),
+                    SizedBox(height: 12),
+                    _LabeledTextField(
+                      label: 'Surname*',
+                      hint: 'Enter your surname',
                     ),
                     const SizedBox(height: 16),
 
-                    // Country & City
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Country*'),
-                              const SizedBox(height: 6),
-                              Obx(
-                                    () => DropdownButtonFormField<String>(
-                                  isExpanded: true,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  value: controller.selectedCountry.value,
-                                  hint: const Text('Select Country'),
-                                  items: controller.countries
-                                      .map(
-                                        (country) => DropdownMenuItem(
-                                      value: country,
-                                      child: Text(country),
-                                    ),
-                                  )
-                                      .toList(),
-                                  onChanged: (value) {
-                                    controller.selectedCountry.value = value;
-                                    controller.onCountryChanged(value);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
+
+                    // Country
+                    const Text('Country*'),
+                    const SizedBox(height: 6),
+                    Obx(
+                          () => DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('City*'),
-                              const SizedBox(height: 6),
-                              Obx(
-                                    () => DropdownButtonFormField<String>(
-                                  isExpanded: true,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  value: controller.selectedCity.value,
-                                  hint: const Text('Select City'),
-                                  items: controller.cities
-                                      .map(
-                                        (city) => DropdownMenuItem(
-                                      value: city,
-                                      child: Text(city),
-                                    ),
-                                  )
-                                      .toList(),
-                                  onChanged: (value) {
-                                    controller.selectedCity.value = value;
-                                  },
-                                ),
-                              ),
-                            ],
+                        value: controller.selectedCountry.value,
+                        hint: const Text('Select Country'),
+                        items: controller.countries
+                            .map(
+                              (country) => DropdownMenuItem(
+                            value: country,
+                            child: Text(country),
                           ),
-                        ),
-                      ],
+                        )
+                            .toList(),
+                        onChanged: (value) {
+                          controller.selectedCountry.value = value;
+                          controller.onCountryChanged(value);
+                        },
+                      ),
                     ),
+
+                    const SizedBox(height: 12),
+
+                    // City
+                    const Text('City*'),
+                    const SizedBox(height: 6),
+                    Obx(
+                          () => DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        value: controller.selectedCity.value,
+                        hint: const Text('Select City'),
+                        items: controller.cities
+                            .map(
+                              (city) => DropdownMenuItem(
+                            value: city,
+                            child: Text(city),
+                          ),
+                        )
+                            .toList(),
+                        onChanged: (value) {
+                          controller.selectedCity.value = value;
+                        },
+                      ),
+                    ),
+
                     const SizedBox(height: 16),
 
                     const _LabeledTextField(
@@ -349,7 +329,8 @@ class ElevatorResumeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
+
+
 
               const SizedBox(height: 20),
 
@@ -406,6 +387,11 @@ class ElevatorResumeScreen extends StatelessWidget {
 
               // ===================== SKILLS =====================
 
+              _SectionCard(child:
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+              const SizedBox(height: 12),
               Text(
                 'Skills',
                 style: theme.textTheme.titleMedium
@@ -418,13 +404,15 @@ class ElevatorResumeScreen extends StatelessWidget {
                     ?.copyWith(color: Colors.grey[700]),
               ),
               const SizedBox(height: 12),
-              _SectionCard(
-                child: Column(
+
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     SkillsSection(),
                   ],
                 ),
+                ]
+              )
               ),
 
               const SizedBox(height: 24),
@@ -705,26 +693,35 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-/// Simple labeled TextField, used everywhere to keep UI consistent
+/// Simple labeled TextField
 class _LabeledTextField extends StatelessWidget {
   final String label;
   final String? hint;
   final TextInputType? keyboardType;
+  final bool enabled;
+  final String? initialValue;
 
   const _LabeledTextField({
     required this.label,
     this.hint,
     this.keyboardType,
+    this.enabled = true,
+    this.initialValue,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      initialValue: initialValue,
+      enabled: enabled,
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         border: const OutlineInputBorder(),
+
+        filled: !enabled,
+        fillColor: !enabled ? Colors.grey.shade100 : null,
       ),
     );
   }
