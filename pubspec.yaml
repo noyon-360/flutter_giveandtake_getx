@@ -32,9 +32,10 @@ dependencies:
     country_picker: ^2.0.27
     dropdown_search: ^6.0.2
     flutter_html: ^3.0.0-beta.2
-    flutter_quill: ^11.4.2
+    flutter_quill: ^11.5.0
     table_calendar: ^3.0.9
     html_editor_enhanced: ^2.7.1
+    dotted_border: ^2.0.0
 
 
     # Api and cache

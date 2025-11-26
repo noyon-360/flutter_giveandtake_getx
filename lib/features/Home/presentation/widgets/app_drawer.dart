@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:karlfive/features/elevator/presentation/screens/applied_jobs_screen.dart';
+import 'package:karlfive/features/elevator/presentation/screens/elevator_resume_screen.dart';
+import 'package:karlfive/features/elevator/presentation/screens/elevator_speech_resume_screen.dart';
 import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
@@ -41,7 +44,8 @@ class _AppDrawerState extends State<AppDrawer> {
             ListTileForNav(
               title: "Elevator Pitch & Resume",
               onTap: () {
-                // TODO: Navigate to Elevator Pitch & Resume
+                Get.to (()=> ElevatorResumeScreen(
+                ));
               },
             ),
             ListTileForNav(
