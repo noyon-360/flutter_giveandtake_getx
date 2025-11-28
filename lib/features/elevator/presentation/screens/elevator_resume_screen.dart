@@ -302,6 +302,7 @@ class ElevatorResumeScreen extends StatelessWidget {
                       children: [
                         Obx(
                               () => Checkbox(
+
                             value: controller.immediatelyAvailable.value,
                             onChanged: (value) {
                               controller.immediatelyAvailable.value =
@@ -395,7 +396,7 @@ class ElevatorResumeScreen extends StatelessWidget {
               Text(
                 'Skills',
                 style: theme.textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
+                    ?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 4),
               Text(
@@ -719,7 +720,6 @@ class _LabeledTextField extends StatelessWidget {
         labelText: label,
         hintText: hint,
         border: const OutlineInputBorder(),
-
         filled: !enabled,
         fillColor: !enabled ? Colors.grey.shade100 : null,
       ),
