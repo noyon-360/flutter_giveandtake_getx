@@ -33,6 +33,9 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      appBar: AppBar(
+        title: Text('Public view'),
+      ),
       body: SafeArea(
         child: Obx(() {
           if (recruiterController.isLoading.value) {

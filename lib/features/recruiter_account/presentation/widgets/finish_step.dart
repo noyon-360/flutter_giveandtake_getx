@@ -47,7 +47,6 @@ class FinishStep extends StatelessWidget {
           controller.vacanciesInt,
           experienceController.selectedExperienceLevel.value,
           '${jobPostingExpirationController.finalDeadlineDate.value}',
-          //here i have to add category id how to do it
           categoryId,
           controller.selectedCategory.value,
           controller.selectedRole.value,
@@ -58,7 +57,6 @@ class FinishStep extends StatelessWidget {
             employmentTypeController.selectedEmploymentType.value,
           ),
           controller.companyWebsite.value,
-          //here i have to pass two date together
           controller.selectedDate.value.toString(),
           careerStageController.selectedCareerStage.value,
           locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value));

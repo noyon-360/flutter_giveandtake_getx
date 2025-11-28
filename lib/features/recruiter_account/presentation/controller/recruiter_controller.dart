@@ -16,6 +16,7 @@ import '../../../../core/base/base_controller.dart';
 import '../../../../core/network/services/multiple_form_data_manager.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../data/models/current_password_update_request_model.dart';
 import '../../data/models/get_job_response_model.dart' hide ApplicationRequirement, CustomQuestion;
 import '../../data/models/get_recruiter_response_model.dart';
 import '../../data/models/job_create_request_model.dart';
@@ -182,7 +183,7 @@ final RxString searchText = ''.obs;
       },
       (success) {
         DPrint.log("create job success result : ${success.message}");
-        Get.offAll(() => RecruiterPageScreen());
+        Get.to(() => RecruiterPageScreen());
         setLoading(false);
       },
     );
@@ -571,6 +572,25 @@ final RxString searchText = ''.obs;
       isLoading.value = false;
     }
   }
+
+  Future<void> changePassword(String oldPassword, String newPassword) async{
+    final request = UpdatePasswordRequestModel(newPassword: newPassword, currentPassword: oldPassword);
+    final result = await _recruiterRepo.changePass(request);
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("change pass success result : ${fail.message}");
+        setLoading(false);
+      },
+          (success) {
+        DPrint.log("change pass success result : ${success.message}");
+        Get.to(() => RecruiterPageScreen());
+        setLoading(false);
+      },
+    );
+  }
+
 
   void viewJobDetails(String id) {
     // navigate to details page

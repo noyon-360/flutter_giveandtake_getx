@@ -13,6 +13,7 @@ import '../../domain/repo/repo.dart';
 import '../models/connect_company_request_model.dart';
 import '../models/connect_company_response_model.dart';
 import '../models/create_recruiter_response_model.dart';
+import '../models/current_password_update_request_model.dart';
 import '../models/follow_request_model.dart';
 import '../models/follow_response_model.dart';
 import '../models/get_category_response_model.dart';
@@ -162,6 +163,15 @@ class RepoImplementation extends Repo {
       formData: formData,
       fromJsonT: (json) => UpdateRecruiterResponseModel.fromJson(json),
       isFormData: true,
+    );
+  }
+
+  @override
+  NetworkResult<void> changePass(UpdatePasswordRequestModel request){
+    return _apiClient.post(
+      ApiConstants.recruiter.changePass,
+      data: request.toJson(),
+      fromJsonT: (json) => [],
     );
   }
 }
