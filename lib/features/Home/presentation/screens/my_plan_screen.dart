@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../core/bottomNavbar/screens/dashboard_screen.dart';
 import '../../../plan_pricing/presentation/controllers/plan_pricing_controller.dart';
 import '../../../plan_pricing/presentation/widgets/payment_option_dialog.dart';
 import '../../../plan_pricing/presentation/widgets/plan_pricing_card.dart';
 
-
-class PaymentHistoryScreen extends StatelessWidget {
-  const PaymentHistoryScreen({super.key});
+class MyPlanScreen extends StatelessWidget {
+  const MyPlanScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +30,16 @@ class PaymentHistoryScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          onPressed: () {
-            Get.to(() => DashboardScreen());
-          },
+          onPressed: () => Get.back(),
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
+        title: const Text(
+          'My Plan',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
         ),
       ),
       body: SafeArea(
@@ -43,9 +47,11 @@ class PaymentHistoryScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
+              const SizedBox(height: 20),
+
               /// Current Plan Title
               const Text(
-                "Current Plan",
+                "Your Subscription Plan",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -53,8 +59,18 @@ class PaymentHistoryScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-        
+              const SizedBox(height: 8),
+              const Text(
+                "View and manage your subscription",
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF8593A3),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+
               /// Plan Pricing Cards with PageView
               Obx(() {
                 if (controller.isLoading.value) {
@@ -111,7 +127,7 @@ class PaymentHistoryScreen extends StatelessWidget {
                 return Column(
                   children: [
                     SizedBox(
-                      height: 450,
+                      height: 480,
                       child: PageView.builder(
                         controller: pageController,
                         itemCount: plans.length,
@@ -143,21 +159,21 @@ class PaymentHistoryScreen extends StatelessWidget {
                   ],
                 );
               }),
-              
+
               // Page indicator dots - at the bottom of the page
               Obx(() {
                 if (controller.isLoading.value || !controller.hasPlans) {
                   return const SizedBox.shrink();
                 }
-                
+
                 final plans = controller.filteredPlans;
-                
+
                 if (plans.length <= 1) {
                   return const SizedBox.shrink();
                 }
-                
+
                 return Padding(
-                  padding: const EdgeInsets.only(top: 20, bottom: 20),
+                  padding: const EdgeInsets.only(top: 30, bottom: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(plans.length, (index) {
@@ -176,11 +192,13 @@ class PaymentHistoryScreen extends StatelessWidget {
                   ),
                 );
               }),
+
+              const SizedBox(height: 30),
+
             ],
           ),
         ),
       ),
-
     );
   }
 }

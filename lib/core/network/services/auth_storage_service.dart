@@ -89,6 +89,16 @@ class AuthStorageService {
     };
   }
 
+  // Store user data as JSON string
+  Future<void> storeUserData(String userDataJson) async {
+    await _secureStorage.write(key: KeyConstants.userData, value: userDataJson);
+  }
+
+  // Get user data JSON string
+  Future<String?> getUserData() async {
+    return await _secureStorage.read(key: KeyConstants.userData);
+  }
+
   // Clear all auth data (logout)
   Future<void> clearAuthData() async {
     await Future.wait([
@@ -96,6 +106,7 @@ class AuthStorageService {
       _secureStorage.delete(key: KeyConstants.refreshToken),
       _secureStorage.delete(key: KeyConstants.userId),
       _secureStorage.delete(key: KeyConstants.role),
+      _secureStorage.delete(key: KeyConstants.userData),
     ]);
     _isAuthenticated = false;
   }

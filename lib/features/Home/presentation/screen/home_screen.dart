@@ -25,8 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch user profile when home screen initializes
-    _profileService.getUserProfile();
+    // User profile is already fetched during login and stored in GetUserProfileService
+    // No need to call API again here
   }
 
   // Helper method to launch email
@@ -103,20 +103,6 @@ class _HomeScreenState extends State<HomeScreen> {
           "assets/images/logo_transparent.png",
           height: 40,
         ),
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: 16),
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primaryBlue,
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: Icon(
-              Icons.notifications_active_outlined,
-              color: AppColors.primaryWhite,
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

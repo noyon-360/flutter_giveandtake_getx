@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
+import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
+
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
 import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
 import '../../../home_static_screens/presentation/screen/blog.dart';
 import '../../../home_static_screens/presentation/screen/frequently_questions.dart';
 import '../../../home_static_screens/presentation/screen/privacy_policy.dart';
+import '../screens/my_plan_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -43,7 +45,7 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             ListTileForNav(
-              title: "Blog",
+              title: "Blogs",
               onTap: () {
                 Get.to (()=> BlogScreen());
               },
@@ -138,11 +140,12 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/list.png",
                       title: "My Plan",
                       onTap: () {
-                        // TODO: Navigate to Contact Us
+                        Get.back();
+                        Get.to(() => const MyPlanScreen());
                       },
                     ),
                     ListTileForNav(
-                      title: "Bookmark Jobs",
+                      title: "Bookmarked Jobs",
                       liconPath: "assets/icons/book-open-01.png",
                       onTap: () {
                         // Close the drawer then navigate to Bookmark Jobs screen
@@ -159,7 +162,7 @@ class _AppDrawerState extends State<AppDrawer> {
               title: "Logout",
               liconPath: "assets/icons/logout_icon_dawer.png",
               onTap: () {
-                Get.offAll(()=> LoginScreen());
+                Get.find<AuthController>().logout();
               },
             ),
           ],

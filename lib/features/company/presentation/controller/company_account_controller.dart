@@ -1,9 +1,16 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/core/base/base_controller.dart';
+import 'package:karlfive/features/company/domain/repo/company_repo.dart';
 
-class CompanyAccountController extends GetxController {
+import '../../data/model/all_user_response_model.dart';
+
+class CompanyAccountController extends BaseController {
+  final CompanyRepository _companyRepo;
+
+  CompanyAccountController(this._companyRepo);
+  var recruiters = <AllUserResponseModel>[].obs;
+
   // Form Key
   final formKey = GlobalKey<FormState>();
 
@@ -26,6 +33,7 @@ class CompanyAccountController extends GetxController {
   final awardDescriptionController = TextEditingController();
   final addMoreLinksController = TextEditingController();
   final otherWebsiteController2 = TextEditingController();
+  final TextEditingController industryController = TextEditingController();
 
   // Observables
   var elevatorVideoPath = RxnString();
@@ -87,14 +95,13 @@ class CompanyAccountController extends GetxController {
   // }
 
   void addAwardField() {
-  awardFields.add({
-    'title': TextEditingController(),
-    'issuer': TextEditingController(),
-    'date': TextEditingController(),
-    'description': TextEditingController(),
-  });
-}
-
+    awardFields.add({
+      'title': TextEditingController(),
+      'issuer': TextEditingController(),
+      'date': TextEditingController(),
+      'description': TextEditingController(),
+    });
+  }
 
   // Remove award fields
   void removeAwardField(int index) {
@@ -207,8 +214,184 @@ class CompanyAccountController extends GetxController {
     for (var c in employeeControllers) {
       c.dispose();
     }
-    
 
     super.onClose();
+  }
+
+  Future<void> fetchUsers() async {
+    setLoading(true);
+    setError('');
+
+    final result = await _companyRepo.fetchAllUsers();
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+      (success) {
+        setLoading(false);
+
+        if (success.data == null || success.data.isEmpty) {
+          setError("No users found");
+          recruiters.clear();
+          return;
+        }
+
+        // Just store all users
+        recruiters.clear();
+        recruiters.addAll(success.data);
+
+        // Show in BottomSheet
+        _showUserBottomSheet();
+      },
+    );
+  }
+
+  // BottomSheet to select any user
+  void _showUserBottomSheet() {
+    final searchController = TextEditingController();
+
+    Get.bottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      Container(
+        height: Get.height * 0.8, // 80% of screen
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Select Recruiter",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Get.back(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Search Bar
+            TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: "Search by name or email...",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              onChanged: (_) => recruiters.refresh(),
+            ),
+            const SizedBox(height: 16),
+
+            // User List - This takes remaining space
+            Expanded(
+              child: Obx(() {
+                final query = searchController.text.toLowerCase();
+
+                // FILTER: Only recruiters + search match
+                final filtered = recruiters.where((user) {
+                  final name = (user.name ?? "").toLowerCase();
+                  final email = (user.email ?? "").toLowerCase();
+                  final role = (user.role ?? "").toLowerCase();
+
+                  return role == "recruiter" &&
+                      (name.contains(query) || email.contains(query));
+                }).toList();
+
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.person_off,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          query.isEmpty
+                              ? "No recruiters found"
+                              : "No recruiter matches '$query'",
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final user = filtered[index];
+                    final displayText = "${user.name} (${user.email})";
+
+                    final isAlreadyAdded = employeeControllers.any(
+                      (c) => c.text.contains(user.email),
+                    );
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        enabled: !isAlreadyAdded,
+                        leading: CircleAvatar(
+                          backgroundImage: user.avatarUrl.isNotEmpty
+                              ? NetworkImage(user.avatarUrl)
+                              : null,
+                          child: user.avatarUrl.isEmpty
+                              ? Text(
+                                  user.name.isNotEmpty
+                                      ? user.name[0].toUpperCase()
+                                      : "R",
+                                )
+                              : null,
+                        ),
+                        title: Text(user.name),
+                        subtitle: Text(user.email),
+                        trailing: isAlreadyAdded
+                            ? const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              )
+                            : const Icon(Icons.add_circle_outline),
+                        onTap: isAlreadyAdded
+                            ? null
+                            : () {
+                                final emptyCtrl = employeeControllers
+                                    .firstWhere(
+                                      (c) => c.text.isEmpty,
+                                      orElse: () => employeeControllers.last,
+                                    );
+                                emptyCtrl.text = displayText;
+                                Get.back();
+                                Get.snackbar(
+                                  "Added",
+                                  "$displayText added as recruiter",
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                );
+                              },
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

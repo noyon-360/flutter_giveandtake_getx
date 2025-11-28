@@ -152,17 +152,17 @@ class JobCard extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Color(0xffF5F6FF),
+                          color: AppColors.primaryBlue,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: GestureDetector(
                           onTap: onEasyApply,
                           child: const Text(
-                            'Easy Apply',
+                            'Apply Now',
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textBlack,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryWhite,
                             ),
                           ),
                         ),

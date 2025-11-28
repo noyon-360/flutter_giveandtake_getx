@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
+import 'package:karlfive/core/bottomNavbar/controllers/bottom_nav_controller.dart';
 import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
 import 'package:karlfive/core/services/get_user_profile_service.dart';
 import 'package:karlfive/features/auth/data/models/login_request_model.dart';
@@ -72,7 +73,7 @@ class AuthController extends BaseController {
           );
           // Populate the shared GetUserProfileService with the user from login response
           try {
-            Get.find<GetUserProfileService>().userInfoRx.value = user;
+            Get.find<GetUserProfileService>().setUserInfo(user);
           } catch (_) {
             // If service not found, ignore silently (DI should normally register it)
           }
@@ -82,6 +83,13 @@ class AuthController extends BaseController {
             secureStore.storeData('password', password);
           }
           setLoading(false);
+          
+          // Reset nav controller to show home screen
+          if (Get.isRegistered<BottomNavController>()) {
+            Get.find<BottomNavController>().resetToHome();
+            print('✅ BottomNavController reset to Home');
+          }
+          
           Get.offAll(() => DashboardScreen());
         } else if (user.role == 'recruiter' ) {
           await _authStorageService.storeAuthData(
@@ -92,7 +100,7 @@ class AuthController extends BaseController {
           );
           // Populate the shared GetUserProfileService with the user from login response
           try {
-            Get.find<GetUserProfileService>().userInfoRx.value = user;
+            Get.find<GetUserProfileService>().setUserInfo(user);
           } catch (_) {
             // If service not found, ignore silently (DI should normally register it)
           }
@@ -112,7 +120,7 @@ class AuthController extends BaseController {
           );
           // Populate the shared GetUserProfileService with the user from login response
           try {
-            Get.find<GetUserProfileService>().userInfoRx.value = user;
+            Get.find<GetUserProfileService>().setUserInfo(user);
           } catch (_) {
             // If service not found, ignore silently (DI should normally register it)
           }
@@ -623,12 +631,32 @@ class AuthController extends BaseController {
   }
 
   Future<void> logout() async {
-    await _authStorageService.clearAuthData();
-    final secureStore = SecureStoreServices();
-    await secureStore.deleteData('previewConfirmed');
-
-    setLoading(false);
-    setError('');
-    Get.offAll(() => LoginScreen());
+    try {
+      setLoading(true);
+      
+      // Clear all auth storage data (tokens, user ID, role, user profile)
+      await _authStorageService.clearAuthData();
+      
+      // Clear user data from GetUserProfileService
+      try {
+        Get.find<GetUserProfileService>().clearUserData();
+      } catch (_) {
+        // If service not found, ignore silently
+      }
+      
+      // Clear all secure storage data (includes remember me credentials and other cached data)
+      final secureStore = SecureStoreServices();
+      await secureStore.deleteAllData();
+      
+      setLoading(false);
+      setError('');
+      
+      // Navigate to login screen
+      Get.offAll(() => LoginScreen());
+    } catch (e) {
+      DPrint.log("Logout error: $e");
+      setLoading(false);
+      setError("Failed to logout");
+    }
   }
 }

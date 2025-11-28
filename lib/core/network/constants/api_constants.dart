@@ -1,17 +1,18 @@
-class  ApiConstants {
+class ApiConstants {
   /// [Base Configuration]
+     static const String baseDomain = 'http://10.10.5.53:5001';  /// soykot ip
   // static const String baseDomain = 'https://api.evpitch.com';
+  static const String baseUrl = '$baseDomain/api/v1';
 
   // add by zafor
   // static const String baseDomain = 'https://api.evpitch.com';
-  //static const String baseDomain = 'http://10.10.5.88:5000'; // zafor
+  // static const String baseDomain = 'http://10.10.5.88:5001'; // zafor
   //add by zafor end
 
   // static const String baseDomain = 'https://api.evpitch.com';
-  static const String baseDomain = 'http://10.10.5.33:5001';//eshita
+  // static const String baseDomain = 'http://10.10.5.33:5001';//eshita
 
-  static const String baseUrl = '$baseDomain/api/v1';
-
+  // static const String baseUrl = '$baseDomain/api/v1';
 
   // static const String baseDomain = 'https://api.evpitch.com';
   // static const String baseDomain = 'http://10.10.5.3:5000'; // iftikhar
@@ -52,11 +53,12 @@ class  ApiConstants {
   static ContentEndpoints get content => ContentEndpoints();
   static ElevatorPitchVideo get elevatorPitchVideo => ElevatorPitchVideo();
   static CategoryEndpoints get category => CategoryEndpoints();
+  static  AlluserEndpoints get allusers => AlluserEndpoints();
+  
 }
 
 class JobEndpoints {
   String getJobs(int limit) => '${ApiConstants.baseUrl}/jobs?limit=$limit';
-
 }
 
 class RecruiterAccountApi {
@@ -72,7 +74,8 @@ class RecruiterAccountApi {
 
   static const String _base = '${ApiConstants.baseUrl}/recruiter';
   String createRecruiterAccount = '$_base/recruiter-account';
-  String fetchRecruiterInfo(String userId) => '$_base/recruiter-account/$userId';
+  String fetchRecruiterInfo(String userId) =>
+      '$_base/recruiter-account/$userId';
   String updateRecruiter(String userId) => '$_base/recruiter-account/$userId';
 }
 
@@ -105,7 +108,8 @@ class AuthEndpoints {
       '${ApiConstants.baseUrl}/default-security-questions';
   final String securityAnswers = '${ApiConstants.baseUrl}/security-answers';
   final String verifySecurityAnswers =
-      '${ApiConstants.baseUrl}/security-answers/verify';
+      '${ApiConstants.baseUrl}/verify-security-answers';
+  final String changeEmail = '${ApiConstants.baseUrl}/change-email';
   final String resetPasswordWithToken =
       '${ApiConstants.baseUrl}/security-answers/reset-password';
 
@@ -116,6 +120,10 @@ class UserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/user';
   final String updateProfile = '$_base/update';
   final String getUserProfile = '$_base/profile';
+
+  // Account actions
+  final String deactivate = '$_base/deactivate';
+  final String disable = '$_base/disable';
 
   // final String create = '$_base/create';
 }
@@ -183,3 +191,7 @@ class CategoryEndpoints {
   final String jobCategory = '$_base/job-category';
 }
 
+class AlluserEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/all';
+  final String alluser = '$_base/user';
+}
