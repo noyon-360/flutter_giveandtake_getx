@@ -53,8 +53,8 @@ class ApiConstants {
   static ContentEndpoints get content => ContentEndpoints();
   static ElevatorPitchVideo get elevatorPitchVideo => ElevatorPitchVideo();
   static CategoryEndpoints get category => CategoryEndpoints();
-  static  AlluserEndpoints get allusers => AlluserEndpoints();
-  
+  static AlluserEndpoints get allusers => AlluserEndpoints();
+  static CompanyAccountApi get company => CompanyAccountApi();
 }
 
 class JobEndpoints {
@@ -69,7 +69,8 @@ class RecruiterAccountApi {
   final String uploadVideo = '${ApiConstants.baseUrl}/all/companies';
   final String createJob = '${ApiConstants.baseUrl}/jobs';
   final String getJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
-  final String connectCompany = '${ApiConstants.baseUrl}/company/apply-for-company-employee';
+  final String connectCompany =
+      '${ApiConstants.baseUrl}/company/apply-for-company-employee';
   final String follow = '${ApiConstants.baseUrl}/following/follow';
   //final String yourJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
 
@@ -197,4 +198,14 @@ class CategoryEndpoints {
 class AlluserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/all';
   final String alluser = '$_base/user';
+}
+class CompanyAccountApi {
+  static const String _base = '${ApiConstants.baseUrl}/company';
+  final String createcompany = '$_base';
+    String fetchCompanyInfo(String userId) =>
+      '$_base/user/$userId';
+
+      String fetchUpdateInfo(String userId) =>
+      '$_base/$userId';
+
 }
