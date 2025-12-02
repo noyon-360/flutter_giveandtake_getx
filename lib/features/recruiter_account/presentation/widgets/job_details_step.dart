@@ -428,7 +428,7 @@ class JobDetailsStep extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                items: experienceLevelController.experienceLevel
+                items: experienceLevelController.experienceLevels
                     .map(
                       (type) => DropdownMenuItem<String>(
                         value: type,

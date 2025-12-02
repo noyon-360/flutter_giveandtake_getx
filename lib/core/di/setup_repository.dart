@@ -54,5 +54,4 @@ void setupRepository() {
   
   Get.lazyPut<JobApplicationRepository>(() => JobApplicationRepositoryImpl(), fenix: true);
   Get.lazyPut<CompanyRepository>(() => CompanyRepoImplementation( apiClient: Get.find()), fenix: true);
- 
 }

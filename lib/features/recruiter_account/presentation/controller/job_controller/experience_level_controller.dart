@@ -1,12 +1,25 @@
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:get/get.dart';
 
 class ExperienceLevelController extends GetxController {
   final RxString selectedExperienceLevel = ''.obs;
-  final List<String> experienceLevel = [
-    'Entry Level',
-    'Mid Level',
-    'Senior Level',
-    'Executive',
-  ];
+
+  final Map<String, String> experienceLevelMap = {
+    'Entry Level': 'entry_level',
+    'Mid Level': 'mid_level',
+    'Senior Level': 'senior_level',
+    'Executive': 'executive',
+  };
+
+  List<String> get experienceLevels => experienceLevelMap.keys.toList();
+
+  String getBackendValue(String displayName) {
+    return experienceLevelMap[displayName] ?? '';
+  }
+
+  String getDisplayName(String backendValue) {
+    return experienceLevelMap.entries
+        .firstWhere((e) => e.value == backendValue, orElse: () => const MapEntry('', ''))
+        .key;
+  }
+
 }

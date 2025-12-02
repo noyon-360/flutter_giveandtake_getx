@@ -1,29 +1,13 @@
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/material.dart';
 
 class ElevatorResumeController extends GetxController {
   final ImagePicker _picker = ImagePicker();
-  // Rich text controller for About Me
-  late final quill.QuillController aboutMeQuillController;
 
-
-  /// ================== ABOUT ME EDITOR ==================
-  final aboutMeController = TextEditingController();
-
-  var aboutMeHeading = 'Normal'.obs;                // Normal / Heading 1 / 2 / 3
-  var aboutMeIsBold = false.obs;
-  var aboutMeIsItalic = false.obs;
-  var aboutMeIsUnderline = false.obs;
-  var aboutMeTextAlign = TextAlign.left.obs;        // left / center / right
-  var aboutMeWordCount = 0.obs;
-
-  /// ================== SELECTED VALUES ==================
+  // Selected values
   var selectedTitle = 'Mr.'.obs;
   var selectedCountry = Rx<String?>(null);
   var selectedCity = Rx<String?>(null);
-
   var selectedJobTitle = Rx<String?>(null);
   var selectedStartMonth = Rx<String?>(null);
   var selectedStartYear = Rx<String?>(null);
@@ -35,39 +19,29 @@ class ElevatorResumeController extends GetxController {
   var selectedGradMonth = Rx<String?>(null);
   var selectedGradYear = Rx<String?>(null);
 
-  /// Immediately Available checkbox
-  var immediatelyAvailable = false.obs;
+  // Checkbox states - now per-item instead of global
+  var presentlyWorkHere = false.obs;
 
-  /// ================== FILE PATHS ==================
+  // File paths
   var elevatorVideoPath = Rx<String?>(null);
   var photoPath = Rx<String?>(null);
-  var bannerImagePath = Rx<String?>(null);
 
-  /// ================== DYNAMIC LISTS ==================
-  // each experience map can hold more fields later (company, role, etc.)
+  // Dynamic lists with individual checkbox states
   var experienceList = <Map<String, dynamic>>[
     {'presentlyWorkHere': false},
   ].obs;
-
   var educationList = <Map<String, dynamic>>[
     {'presentlyAttendHere': false},
   ].obs;
-
   var awardsList = <Map<String, dynamic>>[{}].obs;
 
-  /// Skills chips
+  // Skills list
   var skillsList = <String>[].obs;
 
-  /// Other custom URLs
+  // Other URLs list
   var otherUrlsList = <String>[].obs;
 
-  /// Certifications list (shown under Certifications section)
-  var certifications = <String>[].obs;
-
-  /// Languages list (chips under Languages)
-  var languages = <String>[].obs;
-
-  /// ================== DUMMY DATA ==================
+  // Dummy data
   final List<String> titles = ['Mr.', 'Mrs.', 'Ms.', 'Dr.'];
 
   final List<String> countries = [
@@ -82,7 +56,6 @@ class ElevatorResumeController extends GetxController {
     'Japan',
   ];
 
-  /// For simplicity, ekta static list use korchi. Ichcha korle per-country map banate paro.
   final List<String> cities = [
     'New York',
     'London',
@@ -123,7 +96,7 @@ class ElevatorResumeController extends GetxController {
 
   final List<String> years = List.generate(
     50,
-        (index) => (DateTime.now().year - index).toString(),
+    (index) => (DateTime.now().year - index).toString(),
   );
 
   final List<String> availabilities = [
@@ -155,56 +128,7 @@ class ElevatorResumeController extends GetxController {
     'Professional Certificate',
   ];
 
-  /// ================== LIFECYCLE ==================
-  @override
-  void onInit() {
-    super.onInit();
-
-    aboutMeQuillController = quill.QuillController.basic();
-
-    // word count update
-    aboutMeQuillController.addListener(_updateWordCountFromQuill);
-  }
-
-  void _updateWordCountFromQuill() {
-    final plain = aboutMeQuillController.document.toPlainText().trim();
-    if (plain.isEmpty) {
-      aboutMeWordCount.value = 0;
-    } else {
-      aboutMeWordCount.value =
-          plain.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-    }
-  }
-
-  @override
-  void onClose() {
-    aboutMeQuillController.dispose();
-    super.onClose();
-  }
-
-
-  /// ================== ABOUT ME ACTIONS ==================
-  void setAboutMeHeading(String heading) {
-    aboutMeHeading.value = heading;
-  }
-
-  void toggleAboutMeBold() {
-    aboutMeIsBold.value = !aboutMeIsBold.value;
-  }
-
-  void toggleAboutMeItalic() {
-    aboutMeIsItalic.value = !aboutMeIsItalic.value;
-  }
-
-  void toggleAboutMeUnderline() {
-    aboutMeIsUnderline.value = !aboutMeIsUnderline.value;
-  }
-
-  void setAboutMeAlign(TextAlign align) {
-    aboutMeTextAlign.value = align;
-  }
-
-  /// ================== PICKERS ==================
+  // Image/Video picker methods
   Future<void> pickElevatorVideo() async {
     try {
       final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
@@ -229,26 +153,7 @@ class ElevatorResumeController extends GetxController {
     }
   }
 
-  /// Banner image (for “Drop your banner image here”)
-  Future<void> pickBannerImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        bannerImagePath.value = image.path;
-        Get.snackbar('Success', 'Banner image selected successfully');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to pick banner image: $e');
-    }
-  }
-
-  /// ================== DROPDOWN HELPERS ==================
-  void onCountryChanged(String? value) {
-    selectedCountry.value = value;
-    // jodi per-country city list korte chao, ekhane handle korbe
-  }
-
-  /// ================== EXPERIENCE / EDUCATION / AWARDS ==================
+  // Add more items
   void addExperience() {
     experienceList.add({'presentlyWorkHere': false});
   }
@@ -261,6 +166,7 @@ class ElevatorResumeController extends GetxController {
     awardsList.add({});
   }
 
+  // Remove items
   void removeExperience(int index) {
     if (experienceList.length > 1) {
       experienceList.removeAt(index);
@@ -279,23 +185,10 @@ class ElevatorResumeController extends GetxController {
     }
   }
 
-  void togglePresentlyWorkHere(int index) {
-    experienceList[index]['presentlyWorkHere'] =
-    !(experienceList[index]['presentlyWorkHere'] ?? false);
-    experienceList.refresh();
-  }
-
-  void togglePresentlyAttendHere(int index) {
-    educationList[index]['presentlyAttendHere'] =
-    !(educationList[index]['presentlyAttendHere'] ?? false);
-    educationList.refresh();
-  }
-
-  /// ================== SKILLS ==================
+  // Skills management
   void addSkill(String skill) {
-    final s = skill.trim();
-    if (s.isNotEmpty && !skillsList.contains(s)) {
-      skillsList.add(s);
+    if (skill.trim().isNotEmpty && !skillsList.contains(skill.trim())) {
+      skillsList.add(skill.trim());
     }
   }
 
@@ -303,71 +196,31 @@ class ElevatorResumeController extends GetxController {
     skillsList.removeAt(index);
   }
 
-  /// ================== OTHER URLS ==================
+  // Other URLs management
   void addOtherUrl() {
     otherUrlsList.add('');
   }
 
   void removeOtherUrl(int index) {
-    if (otherUrlsList.isNotEmpty) {
-      otherUrlsList.removeAt(index);
-    }
+    otherUrlsList.removeAt(index);
   }
 
-  /// ================== CERTIFICATIONS ==================
-  void addCertification() {
-    final textController = TextEditingController();
-
-    Get.defaultDialog(
-      title: 'Add Certification',
-      content: TextField(
-        controller: textController,
-        decoration: const InputDecoration(
-          hintText: 'e.g. AWS Certified Solutions Architect',
-        ),
-      ),
-      textConfirm: 'Add',
-      textCancel: 'Cancel',
-      onConfirm: () {
-        final text = textController.text.trim();
-        if (text.isNotEmpty) {
-          certifications.add(text);
-        }
-        Get.back();
-      },
-      onCancel: () {},
-    );
+  // Toggle checkbox for specific item
+  void togglePresentlyWorkHere(int index) {
+    experienceList[index]['presentlyWorkHere'] =
+        !(experienceList[index]['presentlyWorkHere'] ?? false);
+    experienceList.refresh();
   }
 
-  /// ================== LANGUAGES ==================
-  void addLanguage(String lang) {
-    final l = lang.trim();
-    if (l.isNotEmpty && !languages.contains(l)) {
-      languages.add(l);
-    }
+  void togglePresentlyAttendHere(int index) {
+    educationList[index]['presentlyAttendHere'] =
+        !(educationList[index]['presentlyAttendHere'] ?? false);
+    educationList.refresh();
   }
 
-  void removeLanguage(String lang) {
-    languages.remove(lang);
-  }
-
-  /// ================== SUBMIT / SAVE ==================
+  // Save method
   void saveResume() {
-    // TODO: Backend call / form validation
     Get.snackbar('Success', 'Resume saved successfully!');
-  }
-
-  /// Used by the big bottom button: "Upload Elevator Pitch First"
-  void onUploadElevatorPitchFirst() {
-    if (elevatorVideoPath.value == null) {
-      Get.snackbar(
-        'Upload required',
-        'Please upload your Elevator Video Pitch before submitting the form.',
-      );
-      return;
-    }
-
-    // jodi video thake, tahole actual save
-    saveResume();
+    // TODO: Implement actual save logic
   }
 }

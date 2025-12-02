@@ -10,7 +10,7 @@ class AppTheme {
     colorScheme: ColorScheme.light(primary: AppColors.primaryBlue),
     textTheme: GoogleFonts.interTextTheme(),
     appBarTheme: AppBarTheme(
-      iconTheme: IconThemeData(color: Color(0xFF1A3E74)),
+      iconTheme: IconThemeData(color: Colors.black),
       backgroundColor: Colors.white,
       titleTextStyle: TextStyle(
         fontSize: 24,

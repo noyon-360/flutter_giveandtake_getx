@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
@@ -18,7 +16,6 @@ import '../../../recruiter_account/presentation/widgets/bio.dart';
 import '../../../recruiter_account/presentation/widgets/video_player_widget.dart';
 import '../controller/company_account_controller.dart';
 import '../widget/custom_text_field.dart';
-import '../widget/month_added_widget.dart';
 import '../widget/upload_card_widget.dart';
 import '../widget/upload_video_widget.dart';
 import 'company_details_screen.dart';
@@ -49,12 +46,6 @@ class CreateCompanyAccountPage extends StatelessWidget {
   final TextEditingController _fiverrTEController = TextEditingController();
   final TextEditingController _comapanyTEController = TextEditingController();
 
-  final companyNameController = TextEditingController();
-  final countryController = TextEditingController();
-  final cityController = TextEditingController();
-  final postalCodeController = TextEditingController();
-  final emailController = TextEditingController();
-
   final FocusNode _linkedINFocusNode = FocusNode();
   final FocusNode _twitterFocusNode = FocusNode();
   final FocusNode _upworkFocusNode = FocusNode();
@@ -63,7 +54,6 @@ class CreateCompanyAccountPage extends StatelessWidget {
   final FocusNode _tiktokFocusNode = FocusNode();
   final FocusNode _fiverrFocusNode = FocusNode();
   final FocusNode _companyFocusNode = FocusNode();
-  late int zipCode = int.tryParse(postalCodeController.text) ?? 0;
 
   final DescriptionController descriptionController = Get.put(
     DescriptionController(),
@@ -306,10 +296,91 @@ class CreateCompanyAccountPage extends StatelessWidget {
                 ],
               ),
 
+              // Upload Elevator Pitch
+              // VideoUploadCardWidget(
+              //   title: "Upload your Video pitch",
+              //   subtitle: "Drop your video here or click to browswer",
+              //   buttonText: "Upload Elevator Pitch",
+              //   fileType:
+              //       "Upload your Video pitch \n Drop your video here or click to browswer \n Choose File",
+              //   // isChecked: true,
+              //   // onChanged: (value) {},
+              //   onTap: () {
+              //     Get.to(() => VideoUploadScreen());
+              //   },
+              // ),
+
+              // const SizedBox(height: 24),
+
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: Text(
+              //     "Company Banner",
+              //     style: TextStyle(
+              //       color: AppColors.textBlack,
+              //       fontSize: 18,
+              //       fontWeight: FontWeight.w500,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 8),
+
+              // // Company Banner
+              // UploadCardWidget(
+              //   title: "Upload banner",
+              //   subtitle:
+              //       "Upload and crop a banner image to enhance your resume profile.",
+              //   buttonText: "Upload Banner",
+              //   fileType:
+              //       "Drop your file here \n Supports JPG, PNG • Max 10MB • Will be cropped to 300px height \n Choose File",
+              // ),
+              // const SizedBox(height: 24),
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: Text(
+              //     "Company Logo",
+              //     style: TextStyle(
+              //       color: AppColors.textBlack,
+              //       fontSize: 18,
+              //       fontWeight: FontWeight.w500,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 8),
+
+              // // Company Logo
+              // UploadCardWidget(
+              //   title: "",
+              //   subtitle: "",
+              //   buttonText: "Upload Logo",
+              //   fileType: "Drop your file here\nChoose Logo",
+              // ),
+
+              // const SizedBox(height: 24),
+
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: Text(
+              //     "About Us",
+              //     style: TextStyle(
+              //       color: AppColors.buttonText,
+              //       fontSize: 18,
+              //       fontWeight: FontWeight.w500,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 8),
+              // CustomTextField(
+              //   maxLines: 5,
+              //   controller: controller.aboutUsController, // ✅ bind
+              //   label: 'About Us',
+
+              //   isRequired: false,
+              //   hintText: "Write here",
+              // ),
               const SizedBox(height: 8),
               CustomTextField(
                 label: 'Company Name',
-                controller: controller.companyNameController,
 
                 isRequired: true,
                 hintText: "Enter Your Country Name",
@@ -370,6 +441,23 @@ class CreateCompanyAccountPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
+                    // child: CustomTextField(
+                    //   label: 'Email',
+                    //   controller: controller.emailController,
+                    //   isRequired: true,
+                    //   keyboardType: TextInputType.emailAddress,
+                    //   hintText: "Enter your email",
+                    //   validator: (value) {
+                    //     if (value == null || value.isEmpty) {
+                    //       return "Email is required";
+                    //     }
+                    //     final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    //     if (!regex.hasMatch(value)) {
+                    //       return "Enter a valid email address";
+                    //     }
+                    //     return null;
+                    //   },
+                    // ),
                     child: CustomTextField(
                       label: "Email",
                       controller: controller.emailController, // ✅ bind
@@ -705,257 +793,178 @@ class CreateCompanyAccountPage extends StatelessWidget {
                 ),
               ),
 
-            const SizedBox(height: 25),
-              const Text("Award Description*", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 12),
-
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Award & Honors", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-                    const Text("Highlight your achievements and recognitions.", style: TextStyle(fontSize: 12, color: AppColors.textGrey)),
-
-                    const SizedBox(height: 20),
-
-                    // Dynamic Award Cards
-                    Obx(() => Column(
-                      children: List.generate(controller.awardFields.length, (index) {
-                        final fields = controller.awardFields[index];
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                            boxShadow: [
-                              BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 3)),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Header: Award Title + Remove Button
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Award ${index + 1}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                                  IconButton(
-                                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                                    onPressed: () => controller.removeAwardField(index),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                  ),
-                                ],
-                              ),
-                              const Divider(),
-
-                              CustomTextField(label: "Award Title", hintText: "e.g. Employee of the Year", controller: fields['title'], isRequired: true),
-                              const SizedBox(height: 12),
-
-                              CustomTextField(label: "Program Name", hintText: "e.g. Company Recognition Program", controller: fields['issuer'], isRequired: true),
-                              const SizedBox(height: 12),
-
-                              // Program Date - Month/Year Picker
-                              const Text("Program Date", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () async {
-                                  int? initMonth, initYear;
-                                  final text = fields['date']!.text;
-                                  if (text.length == 6) {
-                                    initMonth = int.tryParse(text.substring(0, 2));
-                                    initYear = int.tryParse(text.substring(2));
-                                  }
-
-                                  final result = await showDialog<Map<String, int>>(
-                                    context: context,
-                                    builder: (_) => MonthYearPickerDialog(initialMonth: initMonth, initialYear: initYear),
-                                  );
-
-                                  if (result != null) {
-                                    final month = result['month']!.toString().padLeft(2, '0');
-                                    final year = result['year'].toString();
-                                    fields['date']?.text = month + year; // e.g. 122025
-                                  }
-                                },
-                                child: AbsorbPointer(
-                                  child: TextFormField(
-                                    controller: fields['date'],
-                                    decoration: InputDecoration(
-                                      hintText: "MMYYYY",
-                                      suffixIcon: const Icon(Icons.calendar_today_outlined, size: 20),
-                                      filled: true,
-                                      fillColor: Colors.grey[50],
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
-                                    ),
-                                    validator: (val) {
-                                      if (val == null || val.isEmpty) return "Required";
-                                      if (!RegExp(r'^\d{6}$').hasMatch(val)) return "Format: MMYYYY";
-                                      final m = int.tryParse(val.substring(0, 2));
-                                      if (m == null || m < 1 || m > 12) return "Invalid month";
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-
-                              CustomTextField(
-                                label: "Award Short Description",
-                                hintText: "Briefly describe the award and what you achieved",
-                                controller: fields['description'],
-                                isRequired: true,
-                                maxLines: 4,
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Add Another Award Button
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton.icon(
-                                  onPressed: controller.addAwardField,
-                                  icon: const Icon(Icons.add_circle_outline, size: 18),
-                                  label: const Text("Add Another Award"),
-                                  style: TextButton.styleFrom(foregroundColor: AppColors.primaryWhite),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    )),
-
-                    const SizedBox(height: 12),
-
-                    // Main "Add Award" Button
-                    ElevatedButton.icon(
-                      onPressed: controller.addAwardField,
-                      icon: const Icon(Icons.add, size: 18),
-                      label: const Text("Add Award"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        elevation: 0,
-                        side: BorderSide(color: Colors.grey.shade400),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 25),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Award Description*",
+                  style: TextStyle(
+                    color: AppColors.textBlack,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
+              const SizedBox(height: 7),
+
+              Obx(() {
+                final showFields = controller.awardFields.isNotEmpty;
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Award & Honors",
+                        style: TextStyle(
+                          color: const Color(0xFF0A0A0A),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Text(
+                        "Highlight your achievements and recognitions.",
+                        style: TextStyle(
+                          color: const Color(0xFF2A2A2A),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      const SizedBox(height: 12),
+
+                      // Dynamic Award Fields inside the same container
+                      Column(
+                        children: List.generate(controller.awardFields.length, (
+                          index,
+                        ) {
+                          final fields = controller.awardFields[index];
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade300),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomTextField(
+                                  label: "Award Title",
+                                  hintText: "e.g.Employee of the Year",
+                                  controller: fields['title'],
+                                  isRequired: true,
+                                ),
+                                const SizedBox(height: 8),
+                                CustomTextField(
+                                  label: "Program Name",
+                                  hintText: "e.g. Company Recognition Program",
+                                  controller: fields['issuer'],
+                                  isRequired: true,
+                                ),
+                                const SizedBox(height: 8),
+                                CustomTextField(
+                                  label: "Program Date",
+                                  hintText: "MMYYYY",
+                                  controller: fields['date'],
+                                  isRequired: true,
+                                ),
+                                const SizedBox(height: 8),
+                                CustomTextField(
+                                  label: "Award Short Description",
+                                  hintText: "Briefly describe the award",
+                                  controller: fields['description'],
+                                  isRequired: true,
+                                  maxLines: 3,
+                                ),
+                                const SizedBox(height: 8),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton(
+                                    onPressed: () =>
+                                        controller.removeAwardField(index),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red[100],
+                                      foregroundColor: Colors.red[800],
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 8,
+                                      ),
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                    ),
+                                    child: const Text("Remove Award"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+
+                      // Add Award Button always at bottom
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: ElevatedButton(
+                          onPressed: controller.addAwardField,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(
+                              0xFFFFFFFF,
+                            ), // white background
+                            foregroundColor: Colors.black, // text color
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              side: const BorderSide(
+                                color: Colors.grey, // border color
+                                width: 1, // border width
+                              ),
+                            ),
+                          ),
+                          child: const Text("Add Award"),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+
               const SizedBox(height: 16),
 
               // Save Button
               PrimaryButton(
                 text: "Save",
-                onPressed: () async {
+                onPressed: () {
                   if (controller.formKey.currentState!.validate()) {
-                    if (controller.isLoading.value) return;
-
-                    try {
-                      // Collect data
-                      final services = controller.getServices();
-                      final employees = controller
-                          .getEmployees(); // This contains: "Eshitta Mondol (eshitta@example.com)"
-                      final awards = controller.getAwards();
-
-                      // ──────────────────────────────────────────────────────────────
-                      // CRITICAL FIX: Extract only emails from "Name (email)" format
-                      // ──────────────────────────────────────────────────────────────
-                      final recruiterEmails = employees
-                          .map((e) {
-                            final match = RegExp(r'\(([^)]+)\)').firstMatch(e);
-                            if (match != null)
-                              return match.group(1)!; // extract email inside ()
-                            return e.contains('@') ? e.trim() : null;
-                          })
-                          .where((email) => email != null && email.isNotEmpty)
-                          .cast<String>()
-                          .toList();
-
-                      final cleanRecruiterIds = recruiterEmails.join(",");
-
-                      // Safe awards JSON
-                      final awardsJson = jsonEncode(controller.getAwards()); // always valid JSON
-
-                      // Debug print (optional - remove later)
-                      debugPrint("Recruiters being sent → $cleanRecruiterIds");
-                      debugPrint("Awards JSON → $awardsJson");
-
-                      // ──────────────────────────────────────────────────────────────
-                      // Validate required fields
-                      // ──────────────────────────────────────────────────────────────
-                      if (bannerPickerController.selectedImage.value == null) {
-                        Get.snackbar("Error", "Please upload a company banner");
-                        return;
-                      }
-                      if (imagePickerController.selectedImage.value == null) {
-                        Get.snackbar("Error", "Please upload a company logo");
-                        return;
-                      }
-
-                      final zipCode = int.tryParse(
-                        controller.postalCodeController.text.trim(),
-                      );
-                      if (zipCode == null) {
-                        Get.snackbar("Error", "Invalid postal code");
-                        return;
-                      }
-
-                      final country = jobController.selectedCountry.value ?? '';
-                      final city = jobController.selectedCity.value ?? '';
-                      if (country.isEmpty || city.isEmpty) {
-                        Get.snackbar("Error", "Please select country and city");
-                        return;
-                      }
-
-                      // ──────────────────────────────────────────────────────────────
-                      // FINAL API CALL WITH FIXED DATA
-                      // ──────────────────────────────────────────────────────────────
-                      await controller.createCompanyScreen(
-                        bannerPickerController.selectedImage.value!,
-                        imagePickerController.selectedImage.value!,
-                        controller.companyNameController.text.trim(),
-                        country,
-                        city,
-                        zipCode,
-                        controller.emailController.text.trim(),
-                        _descriptionTController.text.trim(),
-                        controller.industryController.text.trim(),
-                        _linkedINTEController.text.trim(),
-                        _twitterTEController.text.trim(),
-                        _upworkTEController.text.trim(),
-                        _facebookTEController.text.trim(),
-                        _tiktokTEController.text.trim(),
-                        _instaTEController.text.trim(),
-                        _fiverrTEController.text.trim(),
-                        _comapanyTEController.text.trim(),
-                        services.join(", "),
-                        cleanRecruiterIds, // ← NOW ONLY EMAILS: eshitta@example.com,john@doe.com
-                        awardsJson, // ← VALID JSON or "[]"
-                      );
-
-                      // Success navigation (only if API succeeds — already handled inside controller)
-                      // Get.off(() => CompanyDetailsPage());
-                    } catch (e) {
-                      debugPrint("Save Error: $e");
-                      Get.snackbar("Error", "Failed to create company: $e");
-                    }
+                    controller.saveForm();
+                    Get.to(
+                      () => CompanyDetailsPage(),
+                      transition: Transition.rightToLeft,
+                    );
                   }
                 },
-                width: double.infinity,
-                height: 45,
+                width: double.infinity, // optional
+                height: 45, // optional
               ),
             ],
           ),

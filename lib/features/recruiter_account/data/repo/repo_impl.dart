@@ -13,13 +13,17 @@ import '../../domain/repo/repo.dart';
 import '../models/connect_company_request_model.dart';
 import '../models/connect_company_response_model.dart';
 import '../models/create_recruiter_response_model.dart';
+import '../models/current_password_update_request_model.dart';
 import '../models/follow_request_model.dart';
 import '../models/follow_response_model.dart';
 import '../models/get_category_response_model.dart';
 import '../models/get_currency_response_model.dart';
 import '../models/get_recruiter_response_model.dart';
+import '../models/get_single_job_response_model.dart';
 import '../models/job_create_request_model.dart';
 import '../models/job_create_response_model.dart';
+import '../models/job_update_request_model.dart';
+import '../models/job_update_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
 import '../models/your_job_response_model.dart';
 
@@ -53,10 +57,11 @@ class RepoImplementation extends Repo {
         final List<dynamic> jsonList = json as List<dynamic>;
         return jsonList
             .map(
-              (item) => GetCurrencyResponseModel.fromJson(
+              (item) =>
+              GetCurrencyResponseModel.fromJson(
                 item as Map<String, dynamic>,
               ),
-            )
+        )
             .toList();
       },
     );
@@ -64,8 +69,7 @@ class RepoImplementation extends Repo {
 
   @override
   NetworkResult<List<JobPostResponseModel>> createNewJobPost(
-    JobPostRequestModel request,
-  ) {
+      JobPostRequestModel request,) {
     return _apiClient.post(
       ApiConstants.recruiter.createJob,
       data: request.toJson(),
@@ -75,7 +79,7 @@ class RepoImplementation extends Repo {
           return json
               .map(
                 (e) => JobPostResponseModel.fromJson(e as Map<String, dynamic>),
-              )
+          )
               .toList();
         } else if (json is Map<String, dynamic>) {
           // Sometimes API returns a single object
@@ -86,6 +90,38 @@ class RepoImplementation extends Repo {
       },
     );
   }
+
+  @override
+  NetworkResult<List<YourJobResponseModel>> yourJob() {
+    return _apiClient.get<List<YourJobResponseModel>>(
+      ApiConstants.recruiter.getJob,
+      // fromJsonT: (json) => [YourJobResponseModel.fromJson(json)]);
+      fromJsonT: (json) =>
+          (json as List)
+              .map((item) => YourJobResponseModel.fromJson(item))
+              .toList(),
+    );
+  }
+
+
+  @override
+  NetworkResult<GetSingleJobResponseModel> singleJob(String jobId) {
+    return _apiClient.get(
+      ApiConstants.recruiter.getSingleJob(jobId),
+      fromJsonT: (json) =>
+          GetSingleJobResponseModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+
+  @override
+  NetworkResult<JobUpdateResponseModel> singleJobUpdate(
+      UpdateJobRequest request, String jobId) {
+    return _apiClient.patch(
+      ApiConstants.recruiter.updateSingleJob(jobId), data: request.toJson(),
+      fromJsonT: (json) => JobUpdateResponseModel.fromJson(json),);
+  }
+
 
   @override
   NetworkResult<void> uploadVideo(String userId, FormData formData) {
@@ -106,19 +142,12 @@ class RepoImplementation extends Repo {
 
   @override
   NetworkResult<ConnectCompanyResponse> connectCompany(
-    ConnectCompanyRequest request,
-  ) {
+      ConnectCompanyRequest request,) {
     return _apiClient.post(
       ApiConstants.recruiter.connectCompany,
       data: request.toJson(),
       fromJsonT: (json) => ConnectCompanyResponse.fromJson(json),
     );
-  }
-
-  @override
-  NetworkResult<List<YourJobResponseModel>> yourJob() {
-    return _apiClient.get(ApiConstants.recruiter.getJob,
-        fromJsonT: (json) => (json as List).map((item) => YourJobResponseModel.fromJson(item)).toList());
   }
 
   @override
@@ -132,8 +161,7 @@ class RepoImplementation extends Repo {
 
   @override
   NetworkResult<CreateRecruiterResponseModel> createRecruiter(
-    FormData formData,
-  ) {
+      FormData formData,) {
     return _apiClient.post(
       ApiConstants.recruiter.createRecruiterAccount,
       formData: formData,
@@ -151,17 +179,25 @@ class RepoImplementation extends Repo {
     );
   }
 
+
   @override
-  NetworkResult<UpdateRecruiterResponseModel> updateRecruiter(
-    String userId,
-    FormData formData,
-  ) {
+  NetworkResult<UpdateRecruiterResponseModel> updateRecruiter(String userId,
+      FormData formData,) {
     DPrint.log("Repo Impl : ${formData.toString()}");
     return _apiClient.patch(
       ApiConstants.recruiter.updateRecruiter(userId),
       formData: formData,
       fromJsonT: (json) => UpdateRecruiterResponseModel.fromJson(json),
       isFormData: true,
+    );
+  }
+
+  @override
+  NetworkResult<void> changePass(UpdatePasswordRequestModel request) {
+    return _apiClient.post(
+      ApiConstants.recruiter.changePass,
+      data: request.toJson(),
+      fromJsonT: (json) => [],
     );
   }
 }
