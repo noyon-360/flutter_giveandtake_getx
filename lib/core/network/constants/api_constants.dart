@@ -1,6 +1,6 @@
 class ApiConstants {
   /// [Base Configuration]
-     static const String baseDomain = 'http://10.10.5.53:5001';  /// soykot ip
+     //static const String baseDomain = 'http://10.10.5.33:5001';  /// soykot ip
   // static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
@@ -9,8 +9,8 @@ class ApiConstants {
   // static const String baseDomain = 'http://10.10.5.88:5001'; // zafor
   //add by zafor end
 
-  // static const String baseDomain = 'https://api.evpitch.com';
-  // static const String baseDomain = 'http://10.10.5.33:5001';//eshita
+  //static const String baseDomain = 'https://api.evpitch.com';
+  static const String baseDomain = 'http://10.10.5.33:5001';//eshita
 
   // static const String baseUrl = '$baseDomain/api/v1';
 
@@ -78,6 +78,8 @@ class RecruiterAccountApi {
   String fetchRecruiterInfo(String userId) =>
       '$_base/recruiter-account/$userId';
   String updateRecruiter(String userId) => '$_base/recruiter-account/$userId';
+  String getSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId';
+  String updateSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/update/$jobId';
 }
 
 class ElevatorPitchVideo {

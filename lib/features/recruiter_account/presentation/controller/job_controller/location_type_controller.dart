@@ -26,4 +26,11 @@ class LocationTypeController extends GetxController {
   String getBackendValue(String displayName) {
     return locationTypeMap[displayName] ?? '';
   }
+
+  String getDisplayName(String backendValue) {
+    return locationTypeMap.entries
+        .firstWhere((e) => e.value == backendValue, orElse: () => const MapEntry('', ''))
+        .key;
+  }
+
 }

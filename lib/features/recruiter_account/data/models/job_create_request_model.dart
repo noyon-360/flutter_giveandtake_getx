@@ -1,3 +1,5 @@
+import 'job_update_request_model.dart';
+
 class JobPostRequestModel {
   final String userId;
   final String title;

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/all_jobs_screen.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
 import '../controller/recruiter_controller.dart';
 import '../screens/edit_profile_page.dart';
-import '../screens/post_job_screen.dart';
 import '../screens/public_view_screen.dart';
 import 'connect_with_company_dialog.dart';
 
@@ -55,8 +55,10 @@ class _MyDrawerState extends State<MyDrawer> {
                 icon: Icons.edit,
                 title: "Edit Profile",
                 onTap: () {
-                  Get.back();
-                  Get.to(() => EditProfilePage(recruiterResponseModel: user));
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.to(() => EditProfilePage(recruiterResponseModel: user));
+                  });
                 },
               ),
 
@@ -64,35 +66,10 @@ class _MyDrawerState extends State<MyDrawer> {
                 icon: Icons.business_center_outlined,
                 title: "Post a Job",
                 onTap: () {
-                  Get.back();
-                  Get.to(() => CreateJobScreen());
-                },
-              ),
-
-              drawerTile(
-                icon: Icons.public,
-                title: "Public View",
-                onTap: () {
-                  Get.back();
-                  Get.to(() => PublicViewScreen());
-                },
-              ),
-
-              drawerTile(
-                icon: Icons.post_add,
-                title: "Connect with Company",
-                onTap: () {
-                  Get.back();
-                  Get.dialog(ConnectCompanyDialog());
-                },
-              ),
-
-              drawerTile(
-                icon: Icons.lock_outline,
-                title: "Change Password",
-                onTap: () {
-                  Get.back();
-                  Get.to(() => ChangePasswordScreen());
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.to(() => CreateJobScreen());
+                  });
                 },
               ),
 
@@ -100,10 +77,47 @@ class _MyDrawerState extends State<MyDrawer> {
                 icon: Icons.lock_outline,
                 title: "All Jobs",
                 onTap: () {
-                  Get.back();
-                  Get.to(() => AllJobsScreen());
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.to(() => AllJobsScreen());
+                  });
                 },
               ),
+
+              drawerTile(
+                icon: Icons.public,
+                title: "Public View",
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.to(() => PublicViewScreen());
+                  });
+                },
+              ),
+
+              drawerTile(
+                icon: Icons.post_add,
+                title: "Connect with Company",
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.dialog(ConnectCompanyDialog());
+                  });
+                },
+              ),
+
+              drawerTile(
+                icon: Icons.lock_outline,
+                title: "Change Password",
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.to(() => ChangePasswordScreen());
+                  });
+                },
+              ),
+
+
 
               Padding(
                 padding: const EdgeInsets.all(8.0),

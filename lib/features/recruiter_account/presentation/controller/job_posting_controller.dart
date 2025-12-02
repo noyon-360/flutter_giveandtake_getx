@@ -1,8 +1,11 @@
 import 'package:get/get.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/get_single_job_response_model.dart' hide ApplicationRequirement, CustomQuestion;
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:karlfive/features/recruiter_account/data/models/job_create_request_model.dart';
+
+import '../models/job_model.dart';
 
 
 class JobPostingController extends GetxController {
@@ -68,6 +71,60 @@ class JobPostingController extends GetxController {
   RxString companyWebsite= ''.obs;
 
   RxList<String> customQuestion= <String>[].obs;
+
+
+  // -----------------------------
+  // Single Job Fetching
+  // -----------------------------
+  RxBool isLoading = false.obs;
+  RxString error = ''.obs;
+
+
+  void populateFieldsFromSingleJob() {
+    final job = recruiterController.singleJob.value;
+
+    if (job == null) return;
+
+    // Basic fields
+    jobTitle.value = job.title ?? '';
+    // department.value = job.department ?? ''; // Uncomment if you have department
+    vacancies.value = job.vacancy?.toString() ?? '';
+    compensation.value = job.compensation ?? '';
+
+    // Category & Role
+    selectedCategory.value = job.jobCategoryId ?? '';
+    updateRoles(selectedCategory.value); // populate roles
+    selectedRole.value = job.role ?? '';
+
+    // Description
+    jobDescriptionHtml.value = job.description ?? '';
+    updateJobDescriptionHtml(job.description ?? '');
+
+    // Publish Date & Flag
+    publishNow.value = job.publishDate == null || job.publishDate!.isBefore(DateTime.now());
+    selectedDate.value = job.publishDate ?? DateTime.now();
+
+    // --- Application Requirements ---
+    if (job.applicationRequirement != null) {
+      for (var requirement in job.applicationRequirement!) {
+        if (requirement.requirement?.toLowerCase() == 'resume') {
+          resume = requirement.requirement ?? '';
+          resumeStatus.value = requirement.status ?? 'Required';
+        } else if (requirement.requirement?.toLowerCase() == 'visa') {
+          visa = requirement.requirement ?? '';
+          visaStatus.value = requirement.status ?? 'Required';
+        }
+      }
+    }
+
+    // --- Custom Questions ---
+    if (job.customQuestion != null) {
+      customQuestion.value = job.customQuestion!.map((q) => q.question ?? '').toList();
+    }
+
+  }
+
+
 
 
   // -----------------------------

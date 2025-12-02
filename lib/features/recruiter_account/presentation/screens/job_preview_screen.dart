@@ -12,6 +12,7 @@ import '../controller/job_posting_controller.dart';
 import '../controller/recruiter_controller.dart';
 
 class JobPreviewScreen extends StatelessWidget {
+
   final controller = Get.find<JobPostingController>();
   final LocationController locationController = Get.find<LocationController>();
   final EmploymentTypeController employmentTypeController =
@@ -39,30 +40,7 @@ class JobPreviewScreen extends StatelessWidget {
   // Extract category ID (or empty if null)
   late final categoryId = selectedCategoryModel?.id ?? '';
 
-  // _submit() {
-  //   recruiterController.createJobPost(
-  //       controller.jobTitle.value,
-  //       controller.jobDescriptionPlain.value,
-  //       locationTypeController.selectedLocationType.value,
-  //       controller.vacanciesInt,
-  //       experienceController.selectedExperienceLevel.value,
-  //       jobPostingExpirationController
-  //           .selectedJobPostingExpiration
-  //           .value,
-  //       categoryId,
-  //       controller.selectedCategory.value,
-  //       controller.selectedRole.value,
-  //       controller.compensation.value,
-  //       controller.applicationRequirement,
-  //       controller.customQuestions,
-  //       employmentTypeController.getBackendValue(
-  //         employmentTypeController.selectedEmploymentType.value,
-  //       ),
-  //       controller.companyWebsite.value,
-  //       controller.selectedDate.value.toString(),
-  //       careerStageController.selectedCareerStage.value,
-  //       locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value));
-  // }
+
 
 
   _submit() {

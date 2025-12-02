@@ -811,7 +811,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 Container(
                   width: 150,
-                  child: ElevatedButton(onPressed: () => Get.back(),
+                  child: ElevatedButton(onPressed: () => Get.to(() => RecruiterPageScreen()),
                       style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2B7FD0),
                     shape: RoundedRectangleBorder(

@@ -6,6 +6,7 @@ import 'package:karlfive/features/create_job/presentation/controller/category_co
 import 'package:karlfive/features/job_listing/presentation/controller/job_listing_controller.dart';
 import 'package:karlfive/features/plan_pricing/presentation/controllers/paypal_controller.dart';
 import 'package:karlfive/features/plan_pricing/presentation/controllers/plan_pricing_controller.dart';
+import 'package:karlfive/features/recruiter_account/presentation/controller/country_city_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 
 void setupController() {
@@ -51,6 +52,10 @@ void setupController() {
   );
   Get.lazyPut<CompanyAccountController>(
     () => CompanyAccountController(Get.find()),
+    fenix: true,
+  );
+  Get.lazyPut<LocationController>(
+    () => LocationController(),
     fenix: true,
   );
 }

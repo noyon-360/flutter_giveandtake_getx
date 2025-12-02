@@ -29,4 +29,11 @@ class CareerStageController extends GetxController {
   String getBackendValue(String displayName) {
     return careerStageMap[displayName] ?? '';
   }
+
+  String getDisplayName(String backendValue) {
+    return careerStageMap.entries
+        .firstWhere((e) => e.value == backendValue, orElse: () => const MapEntry('', ''))
+        .key;
+  }
+
 }

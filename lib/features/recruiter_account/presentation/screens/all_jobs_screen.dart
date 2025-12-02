@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:intl/intl.dart';
-
+import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/job_update_screen.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/single_job_details_screen.dart';
+import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/utils/debug_print.dart';
 import '../controller/recruiter_controller.dart';
 import 'applicants_list_screen.dart';
-import 'archieve_job_view.dart';
+import 'job_preview_screen.dart';
 
 class AllJobsScreen extends StatefulWidget {
   const AllJobsScreen({super.key});
@@ -20,8 +22,18 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
   final ScrollController horizontalScrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    recruiterController.getJob();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      appBar: AppBar(
+        title: Text("All Jobs List", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: Colors.black,),),
+      ),
       body: Obx(() {
         if (recruiterController.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -46,10 +58,9 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Job List', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),),
-                SizedBox(height: 20,),
-                Divider(color: Colors.black,thickness: 2,),
-                SizedBox(height: 20,),
+                // Text('Job List', ),
+                // SizedBox(height: 20,),
+                // SizedBox(height: 20,),
                 // HEADER ROW
                 Row(
                   children: const [
@@ -95,7 +106,6 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
                         children: [
                           SizedBox(width: 200, child: Text(job.title, style: TextStyle(fontWeight: FontWeight.w600))),
                           SizedBox(width: 100, child: Text(job.status ?? "")),
-
                           SizedBox(width: 140, child: Text(formatDate(job.createdAt))),
                           SizedBox(width: 140, child: Text(formatDate(job.publishDate))),
                           SizedBox(width: 140, child: Text(formatDate(job.deadline))),
@@ -113,8 +123,8 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
                             child: Row(
                               children: [
                                 IconButton(
-                                  icon: Icon(Icons.remove_red_eye),
-                                  onPressed: () => Get.to(() => ArchieveJobView(jobId: job.id)),
+                                  icon: Icon(Icons.remove_red_eye_outlined, color: Colors.grey.shade600,),
+                                  onPressed: () => Get.to(() => JobDetailEditScreen(jobId: job.id)),
                                 ),
                                 ElevatedButton(
                                   onPressed: () { DPrint(); },
