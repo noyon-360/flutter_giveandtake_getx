@@ -4,6 +4,8 @@ import 'package:karlfive/core/init/app_initializer.dart';
 import 'package:karlfive/core/theme/app_theme.dart';
 import 'package:karlfive/features/auth/presentation/screens/splash_screen.dart';
 
+import 'features/company/presentation/screen/company_details_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'GiveAndTake',
       theme: AppTheme.light,
-      home: SplashScreen(),
+      home: CompanyDetailsPage(),
     );
   }
 }
