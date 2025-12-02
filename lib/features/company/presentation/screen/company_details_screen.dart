@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/company/presentation/screen/company_edit_profile.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/post_job_screen.dart';
+
 import 'package:url_launcher/url_launcher.dart';
+import '../../../recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../recruiter_account/presentation/widgets/elevator_pitch.dart';
 import '../../../recruiter_account/presentation/widgets/social_media.dart';
 import '../controller/company_details_controller.dart';
