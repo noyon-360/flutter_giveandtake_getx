@@ -63,7 +63,7 @@ class JobPreviewScreen extends StatelessWidget {
         controller.companyWebsite.value,
         controller.selectedDate.value.toString(),
         careerStageController.selectedCareerStage.value,
-        locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value));
+        locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value), controller.companyWebsite.value);
   }
 
   JobPreviewScreen({super.key});

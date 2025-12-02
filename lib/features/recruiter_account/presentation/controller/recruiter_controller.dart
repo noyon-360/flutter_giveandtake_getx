@@ -166,7 +166,7 @@ class RecruiterController extends BaseController {
       final String websiteUrl,
       final String publishDate,
       final String careerStage,
-      final String locationType,) async {
+      final String locationType, final String website_Url) async {
     setLoading(true);
     setError("");
 
@@ -195,7 +195,7 @@ class RecruiterController extends BaseController {
       websiteUrl: websiteUrl,
       publishDate: publishDate,
       careerStage: careerStage,
-      locationType: locationType,
+      locationType: locationType, website_Url: website_Url,
     );
 
     final result = await _recruiterRepo.createNewJobPost(request);
