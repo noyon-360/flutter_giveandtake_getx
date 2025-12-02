@@ -20,6 +20,7 @@ import 'package:karlfive/features/auth/presentation/screens/otp_verification_for
 import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
 import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
+import 'package:karlfive/features/company/presentation/screen/company_screen.dart';
 import 'package:karlfive/features/create_job/presentation/screen/create_job_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 
@@ -130,7 +131,7 @@ class AuthController extends BaseController {
             secureStore.storeData('password', password);
           }
           setLoading(false);
-          Get.offAll(() => CreateJobPostingScreen());
+          Get.offAll(() => CreateCompanyAccountPage());
         }else {
           setError("You are not authorized to login as candidate");
           setLoading(false);
