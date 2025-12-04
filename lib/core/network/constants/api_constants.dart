@@ -10,7 +10,7 @@ class ApiConstants {
   //add by zafor end
 
   //static const String baseDomain = 'https://api.evpitch.com';
-  static const String baseDomain = 'http://10.10.5.33:5001';//eshita
+  static const String baseDomain = 'http://10.10.5.53:5001';//eshita
 
   // static const String baseUrl = '$baseDomain/api/v1';
 
@@ -205,7 +205,19 @@ class CompanyAccountApi {
     String fetchCompanyInfo(String userId) =>
       '$_base/user/$userId';
 
+    String fetchEmployee(String userId) =>
+      '${ApiConstants.baseUrl}/company/company-employess/skills/$userId';
+
       String fetchUpdateInfo(String userId) =>
       '$_base/$userId';
+
+      String manageJobs(String companyId) =>
+      '${ApiConstants.baseUrl}/all-jobs-for-company/company/$companyId';
+
+      final String connectRecruiter = '$_base/add-employee-to-company';
+      final String removeRecruiter = '$_base/remove-employee-to-company';
+
+      
+
 
 }

@@ -37,7 +37,7 @@ class SplashController extends GetxController {
         Get.offAll(() => RecruiterPageScreen());
       } 
       else if (userRole == 'company') {
-        Get.offAll(() => CreateCompanyAccountPage());
+        Get.offAll(() => CompanyDetailsPage());
       } 
       else {
         // Unknown role, go to login

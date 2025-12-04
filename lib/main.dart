@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'GiveAndTake',
       theme: AppTheme.light,
-      home: CompanyDetailsPage(),
+      home: SplashScreen(),
     );
   }
 }

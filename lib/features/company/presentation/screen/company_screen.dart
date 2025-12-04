@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../create_job/presentation/controller/create_job_controller.dart';
@@ -73,8 +74,8 @@ class CreateCompanyAccountPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return AppScaffold(
+     
       // appBar: AppBar(
       //   backgroundColor: Colors.white,
 
@@ -617,7 +618,7 @@ class CreateCompanyAccountPage extends StatelessWidget {
                           label: "Add Profiles of Recruiters",
                           hintText: "Tap to select recruiter",
                           controller: controller.employeeControllers[0],
-                          isRequired: true,
+                          // isRequired: true,
                           readOnly: true, // keep it
                           // Remove onTap from here — it won't work reliably
                         ),
@@ -784,7 +785,8 @@ class CreateCompanyAccountPage extends StatelessWidget {
                                   if (result != null) {
                                     final month = result['month']!.toString().padLeft(2, '0');
                                     final year = result['year'].toString();
-                                    fields['date']?.text = month + year; // e.g. 122025
+                                    // fields['date']?.text = "$month/$year";
+                                    fields['date']?.text = month+year; // e.g. 122025
                                   }
                                 },
                                 child: AbsorbPointer(
@@ -943,7 +945,7 @@ class CreateCompanyAccountPage extends StatelessWidget {
                         _comapanyTEController.text.trim(),
                         services.join(", "),
                         cleanRecruiterIds, // ← NOW ONLY EMAILS: eshitta@example.com,john@doe.com
-                        awardsJson, // ← VALID JSON or "[]"
+                        
                       );
 
                       // Success navigation (only if API succeeds — already handled inside controller)
@@ -1079,7 +1081,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        // validator: Validators.name,
                       ),
 
                       SizedBox(height: 12),
@@ -1129,7 +1131,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        // validator: Validators.name,
                       ),
 
                       SizedBox(height: 12),
@@ -1179,7 +1181,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        // validator: Validators.name,
                       ),
 
                       SizedBox(height: 12),
@@ -1204,7 +1206,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        // validator: Validators.name,
                       ),
                       SizedBox(height: 12),
                       Text(
@@ -1228,7 +1230,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        // validator: Validators.name,
                       ),
                       SizedBox(height: 12),
                       Text(
@@ -1252,7 +1254,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        // validator: Validators.name,
                       ),
                     ],
                   ),
