@@ -10,7 +10,7 @@ class ApiConstants {
   //add by zafor end
 
   //static const String baseDomain = 'https://api.evpitch.com';
-  static const String baseDomain = 'http://10.10.5.33:5001';//eshita
+  static const String baseDomain = 'http://10.10.5.67:5001';//eshita
 
   // static const String baseUrl = '$baseDomain/api/v1';
 
