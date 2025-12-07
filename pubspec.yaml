@@ -23,7 +23,7 @@ dependencies:
 
     # UI
     google_fonts: ^6.3.1
-    flutx_core: ^1.1.0+1
+    flutx_core: ^1.1.1+1
     image_picker: ^1.2.0
     video_player: ^2.10.0
     pin_code_fields: ^8.0.1
@@ -35,6 +35,7 @@ dependencies:
     flutter_quill: ^11.4.2
     table_calendar: ^3.0.9
     html_editor_enhanced: ^2.7.1
+
 
     # Api and cache
     dio: ^5.9.0

@@ -1,9 +1,29 @@
-
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/core/base/base_controller.dart';
+import 'package:karlfive/features/company/data/model/single_Company_response_model.dart';
+import 'package:karlfive/features/company/domain/repo/company_repo.dart';
 
-class CompanyAccountController extends GetxController {
+import '../../../../core/network/services/auth_storage_service.dart';
+import '../../../../core/network/services/multiple_form_data_manager.dart';
+import '../../data/model/all_user_response_model.dart';
+import '../screen/company_details_screen.dart';
+
+class CompanyAccountController extends BaseController {
+  final CompanyRepository _companyRepo;
+  final AuthStorageService _authStorageService;
+
+  CompanyAccountController(this._companyRepo, this._authStorageService);
+  var recruiters = <AllUserResponseModel>[].obs;
+  final MultiFormDataManager _multiFormDataManager = MultiFormDataManager();
+
+  final Rxn<SingleCompanyResponseModel> userInfo =
+      Rxn<SingleCompanyResponseModel>();
+
   // Form Key
   final formKey = GlobalKey<FormState>();
 
@@ -26,6 +46,7 @@ class CompanyAccountController extends GetxController {
   final awardDescriptionController = TextEditingController();
   final addMoreLinksController = TextEditingController();
   final otherWebsiteController2 = TextEditingController();
+  final TextEditingController industryController = TextEditingController();
 
   // Observables
   var elevatorVideoPath = RxnString();
@@ -39,6 +60,8 @@ class CompanyAccountController extends GetxController {
   var employees = <String>[].obs;
   var awards = <Map<String, String>>[].obs;
   var additionalLinks = <String>[].obs;
+  final selectedCompany = RxnString();
+  var selectedCity = RxnString();
 
   @override
   void onInit() {
@@ -67,34 +90,16 @@ class CompanyAccountController extends GetxController {
         .toList();
   }
 
-  // --- Awards ---
-  // void addAward() {
-  //   if (awardTitleController.text.isNotEmpty &&
-  //       issuerController.text.isNotEmpty &&
-  //       issueDateController.text.isNotEmpty &&
-  //       awardDescriptionController.text.isNotEmpty) {
-  //     awards.add({
-  //       'title': awardTitleController.text,
-  //       'issuer': issuerController.text,
-  //       'date': issueDateController.text,
-  //       'description': awardDescriptionController.text,
-  //     });
-  //     awardTitleController.clear();
-  //     issuerController.clear();
-  //     issueDateController.clear();
-  //     awardDescriptionController.clear();
-  //   }
-  // }
+
 
   void addAwardField() {
-  awardFields.add({
-    'title': TextEditingController(),
-    'issuer': TextEditingController(),
-    'date': TextEditingController(),
-    'description': TextEditingController(),
-  });
-}
-
+    awardFields.add({
+      'title': TextEditingController(),
+      'issuer': TextEditingController(),
+      'date': TextEditingController(),
+      'description': TextEditingController(),
+    });
+  }
 
   // Remove award fields
   void removeAwardField(int index) {
@@ -207,8 +212,434 @@ class CompanyAccountController extends GetxController {
     for (var c in employeeControllers) {
       c.dispose();
     }
-    
 
     super.onClose();
+  }
+
+  Future<void> fetchUsers() async {
+    setLoading(true);
+    setError('');
+
+    final result = await _companyRepo.fetchAllUsers();
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+      (success) {
+        setLoading(false);
+
+        if (success.data == null || success.data.isEmpty) {
+          setError("No users found");
+          recruiters.clear();
+          return;
+        }
+
+        // Just store all users
+        recruiters.clear();
+        recruiters.addAll(success.data);
+
+        // Show in BottomSheet
+        _showUserBottomSheet();
+      },
+    );
+  }
+
+  // BottomSheet to select any user
+  void _showUserBottomSheet() {
+    final searchController = TextEditingController();
+
+    Get.bottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      Container(
+        height: Get.height * 0.8, // 80% of screen
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Select Recruiter",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Get.back(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Search Bar
+            TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: "Search by name or email...",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              onChanged: (_) => recruiters.refresh(),
+            ),
+            const SizedBox(height: 16),
+
+            // User List - This takes remaining space
+            Expanded(
+              child: Obx(() {
+                final query = searchController.text.toLowerCase();
+
+                // FILTER: Only recruiters + search match
+                final filtered = recruiters.where((user) {
+                  final name = (user.name ?? "").toLowerCase();
+                  final email = (user.email ?? "").toLowerCase();
+                  final role = (user.role ?? "").toLowerCase();
+
+                  return role == "recruiter" &&
+                      (name.contains(query) || email.contains(query));
+                }).toList();
+
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.person_off,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          query.isEmpty
+                              ? "No recruiters found"
+                              : "No recruiter matches '$query'",
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final user = filtered[index];
+                    final displayText = "${user.name} (${user.email})";
+
+                    final isAlreadyAdded = employeeControllers.any(
+                      (c) => c.text.contains(user.email),
+                    );
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        enabled: !isAlreadyAdded,
+                        leading: CircleAvatar(
+                          backgroundImage: user.avatarUrl.isNotEmpty
+                              ? NetworkImage(user.avatarUrl)
+                              : null,
+                          child: user.avatarUrl.isEmpty
+                              ? Text(
+                                  user.name.isNotEmpty
+                                      ? user.name[0].toUpperCase()
+                                      : "R",
+                                )
+                              : null,
+                        ),
+                        title: Text(user.name),
+                        subtitle: Text(user.email),
+                        trailing: isAlreadyAdded
+                            ? const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              )
+                            : const Icon(Icons.add_circle_outline),
+                        onTap: isAlreadyAdded
+                            ? null
+                            : () {
+                                final emptyCtrl = employeeControllers
+                                    .firstWhere(
+                                      (c) => c.text.isEmpty,
+                                      orElse: () => employeeControllers.last,
+                                    );
+
+                                // Store only the recruiter name
+                                emptyCtrl.text =
+                                    user.name; // 👈 Save only name (No email)
+
+                                Get.back();
+                                Get.snackbar(
+                                  "Added",
+                                  "${user.name} added as recruiter", // 👈 Message also simplified
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                );
+                              },
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> createCompanyScreen(
+    File banner,
+    File clogo,
+    String cname,
+    String country,
+    String city,
+    int zipCode,
+    String cemail,
+    String aboutUs,
+    String industry,
+    String linkedIn,
+    String twitter,
+    String upwork,
+    String facebook,
+    String tiktok,
+    String instagram,
+    String fiverr,
+    String companyWebsite,
+    String services, // comma-separated
+    String recruiters, // emails only, comma-separated
+    String awardsJson, // JSON string
+  ) async {
+    setLoading(true);
+    setError('');
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User ID not found. Please log in again.');
+      Get.snackbar('Error', 'User ID not found.');
+      setLoading(false);
+      return;
+    }
+
+    _multiFormDataManager.clear();
+
+    // FILES - MUST MATCH EXACTLY
+    _multiFormDataManager.addImageFile(banner, key: "banner");
+    _multiFormDataManager.addImageFile(
+      clogo,
+      key: "clogo",
+    ); // NOT "logo" → MUST BE "clogo"
+
+    // TEXT FIELDS - MUST MATCH EXACTLY WHAT BACKEND EXPECTS
+    _multiFormDataManager.addTextData("cname", cname);
+    _multiFormDataManager.addTextData("cemail", cemail);
+    _multiFormDataManager.addTextData("aboutUs", aboutUs);
+    _multiFormDataManager.addTextData("industry", industry);
+    _multiFormDataManager.addTextData("country", country);
+    _multiFormDataManager.addTextData("city", city);
+    _multiFormDataManager.addTextData(
+      "zipcode",
+      zipCode.toString(),
+    ); // ← zipcode, not zipCode
+    _multiFormDataManager.addTextData("userId", userId);
+
+    // Services & Recruiters
+    final serviceList = getServices();
+    if (serviceList.isNotEmpty) {
+      _multiFormDataManager.addTextData("service", jsonEncode(serviceList));
+    }
+
+    // 2. Employees → MUST SEND USER IDs (not names!), as JSON string
+    final employeeIds = employeeControllers
+        .map((c) => c.text.trim())
+        .where((id) => id.isNotEmpty && id.length >= 20) // rough ObjectId check
+        .toList();
+
+    if (employeeIds.isNotEmpty) {
+      _multiFormDataManager.addTextData("employeesId", jsonEncode(employeeIds));
+    } else {
+      _multiFormDataManager.addTextData("employeesId", jsonEncode([]));
+    }
+
+    // Awards as JSON string
+    _multiFormDataManager.addTextData("awards", awardsJson);
+
+    // SOCIAL LINKS - EXACTLY LIKE RECRUITER API (sLink[0][label], sLink[0][url])
+    List<Map<String, String>> sLinks = [];
+    if (linkedIn.isNotEmpty) sLinks.add({"label": "LinkedIn", "url": linkedIn});
+    if (twitter.isNotEmpty) sLinks.add({"label": "Twitter", "url": twitter});
+    if (upwork.isNotEmpty) sLinks.add({"label": "Upwork", "url": upwork});
+    if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
+    if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
+    if (instagram.isNotEmpty) {
+      sLinks.add({"label": "Instagram", "url": instagram});
+    }
+    if (fiverr.isNotEmpty) sLinks.add({"label": "Fiverr", "url": fiverr});
+    if (companyWebsite.isNotEmpty) {
+      sLinks.add({"label": "Website", "url": companyWebsite});
+    }
+
+    if (sLinks.isNotEmpty) {
+      _multiFormDataManager.addTextData("sLink", jsonEncode(sLinks));
+    }
+
+    final formData = await _multiFormDataManager.toFormDataAsync();
+
+    print("Final Fields: ${formData.fields}");
+
+    // print("Files: ${formData.files.entries.map((entry) => '${entry.key}: ${entry.value.filename}').join(', ')}");
+
+    final result = await _companyRepo.createCompany(formData);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("Create Company Failed: ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("Company Created: ${success.message}");
+        Get.snackbar("Success", "Company created successfully!");
+        Get.off(() => CompanyDetailsPage());
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> updateCompany(
+    String companyId,
+    File? banner,
+    File? clogo,
+    String cname,
+    String country,
+    String city,
+    int zipCode,
+    String cemail,
+    String aboutUs,
+    String industry,
+    String linkedIn,
+    String twitter,
+    String upwork,
+    String facebook,
+    String tiktok,
+    String instagram,
+    String fiverr,
+    String companyWebsite,
+    String services, // comma-separated
+    String recruiters, // emails only, comma-separated
+    String awardsJson, // JSON string
+  ) async {
+    setLoading(true);
+    setError('');
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User ID not found. Please log in again.');
+      Get.snackbar('Error', 'User ID not found.');
+      setLoading(false);
+      return;
+    }
+
+    _multiFormDataManager.clear();
+
+    // FILES - MUST MATCH EXACTLY
+    if (banner != null) {
+      _multiFormDataManager.addImageFile(banner, key: "banner");
+    }
+    if (clogo != null) {
+      _multiFormDataManager.addImageFile(clogo, key: "clogo");
+    } // NOT "logo" → MUST BE "clogo"
+
+    // TEXT FIELDS - MUST MATCH EXACTLY WHAT BACKEND EXPECTS
+    _multiFormDataManager.addTextData("cname", cname);
+    _multiFormDataManager.addTextData("cemail", cemail);
+    _multiFormDataManager.addTextData("aboutUs", aboutUs);
+    _multiFormDataManager.addTextData("industry", industry);
+    _multiFormDataManager.addTextData("country", country);
+    _multiFormDataManager.addTextData("city", city);
+    _multiFormDataManager.addTextData(
+      "zipcode",
+      zipCode.toString(),
+    ); // ← zipcode, not zipCode
+    _multiFormDataManager.addTextData("userId", userId);
+
+    // Services & Recruiters
+    final serviceList = getServices();
+    if (serviceList.isNotEmpty) {
+      _multiFormDataManager.addTextData("service", jsonEncode(serviceList));
+    }
+
+    // 2. Employees → MUST SEND USER IDs (not names!), as JSON string
+    final employeeIds = employeeControllers
+        .map((c) => c.text.trim())
+        .where((id) => id.isNotEmpty && id.length >= 20) // rough ObjectId check
+        .toList();
+
+    if (employeeIds.isNotEmpty) {
+      _multiFormDataManager.addTextData("employeesId", jsonEncode(employeeIds));
+    } else {
+      _multiFormDataManager.addTextData("employeesId", jsonEncode([]));
+    }
+
+    // Awards as JSON string
+    _multiFormDataManager.addTextData("awards", awardsJson);
+    // SOCIAL LINKS - EXACTLY LIKE RECRUITER API (sLink[0][label], sLink[0][url])
+    List<Map<String, String>> sLinks = [];
+    if (linkedIn.isNotEmpty) sLinks.add({"label": "LinkedIn", "url": linkedIn});
+    if (twitter.isNotEmpty) sLinks.add({"label": "Twitter", "url": twitter});
+    if (upwork.isNotEmpty) sLinks.add({"label": "Upwork", "url": upwork});
+    if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
+    if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
+    if (instagram.isNotEmpty) {
+      sLinks.add({"label": "Instagram", "url": instagram});
+    }
+    if (fiverr.isNotEmpty) sLinks.add({"label": "Fiverr", "url": fiverr});
+    if (companyWebsite.isNotEmpty) {
+      sLinks.add({"label": "Website", "url": companyWebsite});
+    }
+
+    if (sLinks.isNotEmpty) {
+      _multiFormDataManager.addTextData("sLink", jsonEncode(sLinks));
+    }
+
+    // final formData = await _multiFormDataManager.toFormDataAsync();
+
+    // Add social links as array
+    // for (int i = 0; i < sLinks.length; i++) {
+    //   _multiFormDataManager.addTextData(
+    //     "sLink[$i][label]",
+    //     sLinks[i]["label"]!,
+    //   );
+    //   _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
+    // }
+
+    final formRequest = await _multiFormDataManager.toFormDataAsync();
+
+    // final result = await _companyRepo.updateCompanyInfo(userId, formRequest);
+    final result = await _companyRepo.updateCompanyInfo(companyId, formRequest);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('Update Company: ${fail.message}');
+        setLoading(false);
+      },
+      (success) async {
+        DPrint.log('Update Company: ${success.message}');
+        // await fetchProfile(); // refresh profile
+        Get.to(() => CompanyDetailsPage());
+        setLoading(false);
+        Get.snackbar('Success', success.message);
+      },
+    );
   }
 }

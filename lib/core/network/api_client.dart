@@ -19,35 +19,22 @@ import 'services/secure_store_services.dart';
 import '/core/network/models/network_success.dart';
 
 class ApiClient {
+  // Core services
   late final Dio _dio;
-  late final CustomCacheInterceptor _cacheInterceptor;
+  CustomCacheInterceptor? _cacheInterceptor; // <- nullable & optional
   late final ConnectivityService _connectivityService;
 
   bool _isRefreshing = false;
   final List<Completer<void>> _pendingRequests = [];
 
   // Singleton instance
-  static ApiClient? _instance;
+  static final ApiClient _instance = ApiClient._internal();
   final SecureStoreServices _secureStoreServices = SecureStoreServices();
 
-  factory ApiClient() {
-    _instance ??= ApiClient._internal();
-    _instance!._initialize();
-    return _instance!;
-  }
+  factory ApiClient() => _instance;
 
-  ApiClient._internal();
-
-  Future<void> _initialize() async {
-    // Initialize connectivity service with error handling
-    try {
-      _connectivityService = ConnectivityService.instance;
-      await _connectivityService.initialize();
-    } catch (e) {
-      if (kDebugMode) DPrint.log("Using fallback connectivity: $e");
-      // _connectivityService = _FallbackConnectivityService();
-    }
-
+  ApiClient._internal() {
+    // Initialize Dio synchronously (always ready)
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseDomain,
@@ -62,7 +49,11 @@ class ApiClient {
       ),
     );
 
-    // Initialize cache interceptor
+    // Connectivity service instance
+    _connectivityService = ConnectivityService.instance;
+    _initConnectivity(); // fire-and-forget async init
+
+    // OPTIONAL: enable cache if you want it
     // _cacheInterceptor = CustomCacheInterceptor(
     //   maxCacheAge: const Duration(minutes: 15),
     //   staleWhileRevalidate: const Duration(minutes: 5),
@@ -70,8 +61,20 @@ class ApiClient {
     //   maxMemorySize: 5 * 1024 * 1024, // 5MB
     //   excludedPaths: ['/auth/', '/payment/', '/user/profile'],
     // );
+    //
+    // _dio.interceptors.add(_cacheInterceptor!);
+  }
 
-    // _dio.interceptors.add(_cacheInterceptor);
+  /// Async connectivity initialization (called once from constructor)
+  Future<void> _initConnectivity() async {
+    try {
+      await _connectivityService.initialize();
+    } catch (e) {
+      if (kDebugMode) {
+        DPrint.log("Using fallback connectivity: $e");
+      }
+      // You can optionally provide a fallback implementation here.
+    }
   }
 
   /// Check connectivity before making requests
@@ -151,15 +154,16 @@ class ApiClient {
   }) async {
     final connectivityCheck = await _checkConnectivity();
     if (connectivityCheck.isLeft()) {
-      if (method.toUpperCase() == 'GET') {
-        final cacheKey = _cacheInterceptor.generateCacheKey(
+      // Try cache only if enabled
+      if (method.toUpperCase() == 'GET' && _cacheInterceptor != null) {
+        final cacheKey = _cacheInterceptor!.generateCacheKey(
           RequestOptions(
             path: endpoint,
             queryParameters: queryParameters,
             headers: options?.headers ?? {},
           ),
         );
-        final cachedData = _cacheInterceptor.getCachedData(cacheKey);
+        final cachedData = _cacheInterceptor!.getCachedData(cacheKey);
         if (cachedData != null) {
           if (kDebugMode) {
             DPrint.info(
@@ -171,20 +175,16 @@ class ApiClient {
               data: fromJsonT(cachedData['data']),
               message: 'Served from cache due to no internet connection',
               statusCode:
-                  _cacheInterceptor.getCachedStatusCode(cacheKey) ?? 200,
+                  _cacheInterceptor!.getCachedStatusCode(cacheKey) ?? 200,
             ),
           );
         }
       }
+
       return connectivityCheck.fold(
         (failure) => Left(failure),
         (_) => const Left(UnknownFailure(message: 'Connectivity check failed')),
       );
-
-      // return connectivityCheck.fold(
-      //   (failure) => Left(failure),
-      //   (_) => const Left(UnknownFailure(message: 'Connectivity check failed')),
-      // );
     }
 
     try {
@@ -235,11 +235,9 @@ class ApiClient {
         );
       }
 
-      // Handle null data - if data is null but response is successful,
-      // try to create a default instance using fromJsonT with null
+      // Handle null data gracefully
       final T responseData = baseResponse.data ?? fromJsonT(null);
 
-      // Ensure message and statusCode are non-null
       final message = baseResponse.message;
       final statusCode = response.statusCode ?? 0;
 

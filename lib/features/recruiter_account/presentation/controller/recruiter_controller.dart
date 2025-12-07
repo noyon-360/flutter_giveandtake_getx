@@ -1,55 +1,98 @@
 import 'dart:developer' as DPrint;
 import 'dart:io';
-
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
+import 'package:karlfive/features/recruiter_account/data/models/connect_company_request_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/follow_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_company_response_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/get_single_job_response_model.dart' hide ApplicationRequirement, CustomQuestion;
+import 'package:karlfive/features/recruiter_account/data/models/job_update_request_model.dart' hide ApplicationRequirement, CustomQuestion;
 import 'package:karlfive/features/recruiter_account/domain/repo/repo.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/upload_elevator_pitch.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
 import '../../../../core/base/base_controller.dart';
 import '../../../../core/network/services/multiple_form_data_manager.dart';
+import '../../../../core/network/services/secure_store_services.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
+import '../../data/models/current_password_update_request_model.dart';
+import '../../data/models/get_job_response_model.dart'
+    hide ApplicationRequirement, CustomQuestion;
 import '../../data/models/get_recruiter_response_model.dart';
+import '../../data/models/job_create_request_model.dart';
 import '../models/job_model.dart';
 import 'package:http_parser/http_parser.dart';
 
+import '../widgets/populate_for_single_job_edit.dart';
+import 'job_controller/career_stage_controller.dart';
+import 'job_controller/employment_type_controller.dart';
+import 'job_controller/experience_level_controller.dart';
+import 'job_controller/location_type_controller.dart';
 
 class RecruiterController extends BaseController {
   final AuthStorageService _authStorageService;
+
   final Repo _recruiterRepo;
   var isSkipLoading = false.obs;
   var isContinueLoading = false.obs;
 
+  // inside RecruiterController class
+  final RxString searchText = ''.obs;
+
   final companies = <GetCompanyResponseModel>[].obs;
+  // In RecruiterController
+  final JobFormController jobFormController = Get.put(JobFormController());
+  RxString? companySearchQuery;
+
   final category = <Category>[].obs;
+  final currency = <GetCurrencyResponseModel>[].obs;
 
   // final selectedCompany = Rxn<GetCompanyResponseModel>();
   final selectedCompany = RxnString();
+
+  final yourJobList = <YourJobResponseModel>[].obs;
+  final Rxn<GetSingleJobResponseModel> singleJob = Rxn<
+      GetSingleJobResponseModel>();
+
 
   var archiveJobs = <JobModel>[].obs;
 
   final MultiFormDataManager _multiFormDataManager = MultiFormDataManager();
 
-
   RecruiterController(this._recruiterRepo, this._authStorageService);
 
-  final Rxn<FetchRecruiterResponseModel> userInfo = Rxn<
-      FetchRecruiterResponseModel>();
+  final Rxn<FetchRecruiterResponseModel> userInfo =
+  Rxn<FetchRecruiterResponseModel>();
 
   final RxString uploadedVideoPath = ''.obs;
   final RxBool successVideoUploaded = false.obs;
 
+  final EmploymentTypeController employeeController = Get.put(
+    EmploymentTypeController(),
+  );
+  final ExperienceLevelController experienceLevelController = Get.put(
+    ExperienceLevelController(),
+  );
+  final LocationTypeController locationTypeController = Get.put(
+    LocationTypeController(),
+  );
+  final CareerStageController careerStageController = Get.put(
+    CareerStageController(),
+  );
 
   @override
   void onInit() {
     super.onInit();
     fetchCompany(); //Fetch when controller is created
     fetchProfile();
-  }
+    fetchCategory();
+    fetchCurrency();
 
+    // getJob();
+  }
 
   Future<void> fetchCompany() async {
     setLoading(true);
@@ -57,13 +100,16 @@ class RecruiterController extends BaseController {
 
     final result = await _recruiterRepo.fetchCompany();
 
-    result.fold((fail) {
-      setError(fail.message);
-      setLoading(false);
-    }, (success) {
-      companies.value = success.data;
-      setLoading(false);
-    });
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+          (success) {
+        companies.value = success.data;
+        setLoading(false);
+      },
+    );
   }
 
   Future<void> fetchCategory() async {
@@ -72,17 +118,240 @@ class RecruiterController extends BaseController {
 
     final result = await _recruiterRepo.fetchCategory();
 
-    result.fold((fail) {
-      setError(fail.message);
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+          (success) {
+        category.value = success.data.category;
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> fetchCurrency() async {
+    setLoading(true);
+    setError('');
+
+    final result = await _recruiterRepo.fetchCurrency();
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+          (success) {
+        // success.data is already a List<GetCurrencyResponseModel>
+        currency.value = success.data;
+
+        setLoading(false);
+      },
+    );
+  }
+
+  Future createJobPost(final String title,
+      final String description,
+      final String location,
+      final int vacancy,
+      final String experience,
+      final String deadline,
+      final String jobCategoryId,
+      final String name,
+      final String role,
+      final String compensation,
+      final List<ApplicationRequirement> applicationRequirement,
+      final List<CustomQuestion> customQuestion,
+      final String employementType,
+      final String websiteUrl,
+      final String publishDate,
+      final String careerStage,
+      final String locationType, final String website_Url) async {
+    setLoading(true);
+    setError("");
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User ID not found. Please log in again.');
+      Get.snackbar('Error', 'User ID not found. Please log in again.');
       setLoading(false);
-    }, (success) {
-      category.value = success.data.category;
-      setLoading(false);
-    });
+      return;
+    }
+    final request = JobPostRequestModel(
+      userId: userId,
+      title: title,
+      description: description,
+      location: location,
+      vacancy: vacancy,
+      experience: experience,
+      deadline: deadline,
+      jobCategoryId: jobCategoryId,
+      name: name,
+      role: role,
+      compensation: compensation,
+      applicationRequirement: applicationRequirement,
+      customQuestion: customQuestion,
+      employementType: employementType,
+      websiteUrl: websiteUrl,
+      publishDate: publishDate,
+      careerStage: careerStage,
+      locationType: locationType, website_Url: website_Url,
+    );
+
+    final result = await _recruiterRepo.createNewJobPost(request);
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("create job success result : ${fail.message}");
+        setLoading(false);
+      },
+          (success) {
+        DPrint.log("create job success result : ${success.message}");
+        Get.to(() => RecruiterPageScreen());
+        setLoading(false);
+      },
+    );
   }
 
 
-  Future<void> uploadVideo(ElevatorPitchController elevatorPitchController) async {
+  Future<void> updateSingleJob({
+    required UpdateJobRequest request,
+    required String jobId,
+  }) async {
+    setLoading(true);
+    setError("");
+
+    final result = await _recruiterRepo.singleJobUpdate(request, jobId);
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("Update job failed: ${fail.message}");
+        setLoading(false);
+      },
+          (success) {
+        DPrint.log("Update job success: ${success.message}");
+        // if your repo returns updated job
+
+        Get.back();
+        setLoading(false);
+      },
+    );
+  }
+
+
+
+
+  Future connectCompany(final String companyId) async {
+    setLoading(true);
+    setError("");
+
+    final request = ConnectCompanyRequest(companyId: companyId);
+    final result = await _recruiterRepo.connectCompany(request);
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("connect company success result : ${fail.message}");
+        setLoading(false);
+      },
+          (success) {
+        DPrint.log("connect company success result : ${success.message}");
+        Get.back();
+        setLoading(false);
+      },
+    );
+  }
+
+  Future getJob() async {
+    //setLoading(true);
+    setError("");
+
+    final result = await _recruiterRepo.yourJob();
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("your job fetch failed result : ${fail.message}");
+        //setLoading(false);
+      },
+          (success) {
+        DPrint.log("your job fetch success result : ${success.message}");
+        yourJobList.value = success.data;
+        //setLoading(false);
+      },
+    );
+  }
+
+  Future getSingleJob(String jobId) async {
+    setLoading(true);
+    setError("");
+
+    final result = await _recruiterRepo.singleJob(jobId);
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("your job fetch failed result : ${fail.message}");
+        setLoading(false);
+      },
+          (success) {
+        DPrint.log("your job fetch success result : ${success.message}");
+        singleJob.value = success.data;
+        employeeController.selectedEmploymentType.value =
+            employeeController.getDisplayName(singleJob.value?.employementType ?? '');
+
+        experienceLevelController.selectedExperienceLevel.value =
+            experienceLevelController.getDisplayName(singleJob.value?.experience ?? '');
+
+        locationTypeController.selectedLocationType.value =
+            locationTypeController.getDisplayName(singleJob.value?.locationType ?? '');
+
+        careerStageController.selectedCareerStage.value =
+            careerStageController.getDisplayName(singleJob.value?.careerStage ?? '');
+
+        print("=== DEBUG DROPDOWNS ===");
+        print("Raw experience from API: '${singleJob.value?.experience}'");
+        print("Raw careerStage from API: '${singleJob.value?.careerStage}'");
+
+        print("Experience display name: '${experienceLevelController.getDisplayName(singleJob.value?.experience ?? '')}'");
+        print("CareerStage display name: '${careerStageController.getDisplayName(singleJob.value?.careerStage ?? '')}'");
+
+        print("Selected Experience: ${experienceLevelController.selectedExperienceLevel.value}");
+        print("Selected CareerStage: ${careerStageController.selectedCareerStage.value}");
+
+        setLoading(false);
+      },
+    );
+  }
+
+  Future follow(final String recruiterId, final String userId) async {
+    setLoading(true);
+    setError("");
+
+    final request = FollowRequestModel(
+      recruiterId: recruiterId,
+      userId: userId,
+    );
+    final result = await _recruiterRepo.follow(request);
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("Follow success result : ${fail.message}");
+        setLoading(false);
+      },
+          (success) {
+        DPrint.log("Follow success result : ${success.message}");
+        Get.back();
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> uploadVideo(
+      ElevatorPitchController elevatorPitchController,) async {
     final videoPath = elevatorPitchController.selectedVideoPath.value;
 
     //Check if video is selected
@@ -114,7 +383,10 @@ class RecruiterController extends BaseController {
       deleteResult.fold(
             (fail) {
           //DPrint.log('Failed to delete existing video: ${fail.message}');
-          Get.snackbar('Error', 'Could not delete previous video: ${fail.message}');
+          Get.snackbar(
+            'Error',
+            'Could not delete previous video: ${fail.message}',
+          );
           setLoading(false);
           return;
         },
@@ -129,7 +401,9 @@ class RecruiterController extends BaseController {
       final formData = FormData.fromMap({
         "videoFile": await MultipartFile.fromFile(
           file.path,
-          filename: file.path.split('/').last,
+          filename: file.path
+              .split('/')
+              .last,
           contentType: MediaType('video', 'mp4'),
         ),
       });
@@ -157,97 +431,6 @@ class RecruiterController extends BaseController {
       setLoading(false);
     }
   }
-
-
-
-  // Future<void> createRecruiterScreen(
-  //     File banner,
-  //     File recruiterLogo,
-  //     String description,
-  //     String firstName,
-  //     String surname,
-  //     String emailAddress,
-  //     String phoneNumber,
-  //     String title,
-  //     String country,
-  //     String city,
-  //     int zipCode,
-  //     String linkedIn,
-  //     String twitter,
-  //     String upwork,
-  //     String facebook,
-  //     String tiktok,
-  //     String instagram,
-  //     ) async {
-  //   setLoading(true);
-  //   setError('');
-  //
-  //   final userId = await _authStorageService.getUserId(); // get logged-in userId
-  //   if (userId == null || userId.isEmpty) {
-  //     setError('User ID not found. Please log in again.');
-  //     Get.snackbar('Error', 'User ID not found. Please log in again.');
-  //     setLoading(false);
-  //     return;
-  //   }
-  //
-  //   // Build social links list
-  //   List<Map<String, String>> sLinks = [];
-  //   if (linkedIn.isNotEmpty) sLinks.add({"label": "LinkedIn", "url": linkedIn});
-  //   if (twitter.isNotEmpty) sLinks.add({"label": "Twitter", "url": twitter});
-  //   if (upwork.isNotEmpty) sLinks.add({"label": "Upwork", "url": upwork});
-  //   if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
-  //   if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
-  //   if (instagram.isNotEmpty) sLinks.add({"label": "Instagram", "url": instagram});
-  //
-  //   // Add all text + file fields
-  //   _multiFormDataManager.addImageFile(key: "banner", banner);
-  //   _multiFormDataManager.addImageFile(key: "photo", recruiterLogo);
-  //   _multiFormDataManager.addTextData("firstName", firstName);
-  //   _multiFormDataManager.addTextData("sureName", surname);
-  //   _multiFormDataManager.addTextData("emailAddress", emailAddress);
-  //   _multiFormDataManager.addTextData("phoneNumber", phoneNumber);
-  //   _multiFormDataManager.addTextData("title", title);
-  //   _multiFormDataManager.addTextData("bio", description);
-  //   _multiFormDataManager.addTextData("country", country);
-  //   _multiFormDataManager.addTextData("city", city);
-  //   _multiFormDataManager.addTextData("zipCode", zipCode.toString());
-  //
-  //   //Add userId here
-  //   _multiFormDataManager.addTextData("userId", userId);
-  //
-  //   // Optionally include companyId if your backend expects it
-  //   if (selectedCompany.value != null) {
-  //     _multiFormDataManager.addTextData("companyId", selectedCompany.value!.id);
-  //   }
-  //
-  //   // Add social links
-  //   for (int i = 0; i < sLinks.length; i++) {
-  //     _multiFormDataManager.addTextData("sLink[$i][label]", sLinks[i]["label"]!);
-  //     _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
-  //   }
-  //
-  //   final formRequest = await _multiFormDataManager.toFormDataAsync();
-  //
-  //   print(' Fields: ${formRequest.fields}');
-  //   print(' Files: ${formRequest.files}');
-  //
-  //   final result = await _recruiterRepo.createRecruiter(formRequest);
-  //
-  //   result.fold(
-  //         (fail) {
-  //       setError(fail.message);
-  //       DPrint.log('Create Recruiter: ${fail.message}');
-  //       isLoading(false);
-  //     },
-  //         (success) {
-  //       DPrint.log('Create Recruiter: ${success.message}');
-  //       Get.to(() => RecruiterPageScreen());
-  //       isLoading(false);
-  //       setError(success.message);
-  //     },
-  //   );
-  // }
-
 
   Future<void> createRecruiterScreen(File banner,
       File recruiterLogo,
@@ -287,8 +470,7 @@ class RecruiterController extends BaseController {
     if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
     if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
     if (instagram.isNotEmpty) {
-      sLinks.add(
-        {"label": "Instagram", "url": instagram});
+      sLinks.add({"label": "Instagram", "url": instagram});
     }
 
     // Add all text + file fields
@@ -310,13 +492,18 @@ class RecruiterController extends BaseController {
     // Optionally include companyId if your backend expects it
     if (selectedCompany.value != null) {
       DPrint.log("Recruiter controller -> ${selectedCompany.value}");
-      _multiFormDataManager.addTextData("companyId", selectedCompany.value.toString());
+      _multiFormDataManager.addTextData(
+        "companyId",
+        selectedCompany.value.toString(),
+      );
     }
 
     // Add social links
     for (int i = 0; i < sLinks.length; i++) {
       _multiFormDataManager.addTextData(
-          "sLink[$i][label]", sLinks[i]["label"]!);
+        "sLink[$i][label]",
+        sLinks[i]["label"]!,
+      );
       _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
     }
 
@@ -344,7 +531,6 @@ class RecruiterController extends BaseController {
     );
   }
 
-
   Future<void> fetchProfile() async {
     setLoading(true);
     setError("");
@@ -360,18 +546,20 @@ class RecruiterController extends BaseController {
 
     final result = await _recruiterRepo.fetchRecruiterInfo(userId);
 
-    result.fold((fail) {
-      setError(fail.message);
-      DPrint.log('data fetch failed: ${fail.message}');
-      setLoading(false);
-    }, (success) {
-      userInfo.value = success.data;
-      setLoading(false);
-    });
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+          (success) {
+        userInfo.value = success.data;
+        setLoading(false);
+      },
+    );
   }
 
-  Future<void> updateRecruiter(
-      File? banner,
+  Future<void> updateRecruiter(File? banner,
       File? recruiterLogo,
       String description,
       String firstName,
@@ -384,7 +572,7 @@ class RecruiterController extends BaseController {
       String upwork,
       String facebook,
       String tiktok,
-      String instagram) async {
+      String instagram,) async {
     setLoading(true);
     setError("");
 
@@ -410,7 +598,6 @@ class RecruiterController extends BaseController {
       sLinks.add({"label": "Instagram", "url": instagram});
     }
 
-
     // Add images only if selected
     if (banner != null) {
       _multiFormDataManager.addImageFile(key: "banner", banner);
@@ -432,19 +619,22 @@ class RecruiterController extends BaseController {
     // Add company ID (dropdown)
     if (selectedCompany.value != null) {
       DPrint.log("Recruiter controller -> ${selectedCompany.value}");
-      _multiFormDataManager.addTextData("companyId", selectedCompany.value.toString());
+      _multiFormDataManager.addTextData(
+        "companyId",
+        selectedCompany.value.toString(),
+      );
     }
 
     // Add social links as array
     for (int i = 0; i < sLinks.length; i++) {
-      _multiFormDataManager.addTextData("sLink[$i][label]", sLinks[i]["label"]!);
+      _multiFormDataManager.addTextData(
+        "sLink[$i][label]",
+        sLinks[i]["label"]!,
+      );
       _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
     }
 
     final formRequest = await _multiFormDataManager.toFormDataAsync();
-
-    DPrint.log("📌 Fields: ${formRequest.fields}");
-    DPrint.log("📌 Files: ${formRequest.files}");
 
     final result = await _recruiterRepo.updateRecruiter(userId, formRequest);
 
@@ -464,8 +654,6 @@ class RecruiterController extends BaseController {
     );
   }
 
-
-
   Future<void> fetchArchiveJobs() async {
     try {
       isLoading.value = true;
@@ -474,6 +662,27 @@ class RecruiterController extends BaseController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> changePassword(String oldPassword, String newPassword) async {
+    final request = UpdatePasswordRequestModel(
+      newPassword: newPassword,
+      currentPassword: oldPassword,
+    );
+    final result = await _recruiterRepo.changePass(request);
+
+    result.fold(
+          (fail) {
+        setError(fail.message);
+        DPrint.log("change pass success result : ${fail.message}");
+        setLoading(false);
+      },
+          (success) {
+        DPrint.log("change pass success result : ${success.message}");
+        Get.to(() => RecruiterPageScreen());
+        setLoading(false);
+      },
+    );
   }
 
   void viewJobDetails(String id) {
@@ -488,5 +697,14 @@ class RecruiterController extends BaseController {
     // call API to remove from archive, then refresh
     //await _recruiterRepo.unarchiveJob(id);
     fetchArchiveJobs();
+  }
+
+  Future<void> logout() async {
+    await _authStorageService.clearAuthData();
+    final secureStore = SecureStoreServices();
+    await secureStore.deleteData('email');
+    await secureStore.deleteData('password');
+
+    Get.offAll(() => LoginScreen());
   }
 }

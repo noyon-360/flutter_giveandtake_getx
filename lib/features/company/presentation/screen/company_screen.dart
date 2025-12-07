@@ -1,22 +1,72 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../create_job/presentation/controller/create_job_controller.dart';
 import '../../../create_job/presentation/widgets/searchable_widgets.dart';
+import '../../../recruiter_account/data/models/get_category_response_model.dart';
+import '../../../recruiter_account/presentation/controller/company_image_controller.dart';
+import '../../../recruiter_account/presentation/controller/description_controller.dart';
+import '../../../recruiter_account/presentation/controller/image_controller.dart';
+import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
+import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
+import '../../../recruiter_account/presentation/widgets/bio.dart';
+import '../../../recruiter_account/presentation/widgets/video_player_widget.dart';
 import '../controller/company_account_controller.dart';
 import '../widget/custom_text_field.dart';
+import '../widget/month_added_widget.dart';
 import '../widget/upload_card_widget.dart';
 import '../widget/upload_video_widget.dart';
 import 'company_details_screen.dart';
 
 class CreateCompanyAccountPage extends StatelessWidget {
-  final CompanyAccountController controller = Get.put(
-    CompanyAccountController(),
-  );
+  // final CompanyAccountController controller = Get.put(
+  //   CompanyAccountController(),
+  // );
+  final CompanyAccountController controller =
+      Get.find<CompanyAccountController>();
+  final recruiterController = Get.find<RecruiterController>();
 
   final CreateJobPostingController jobController = Get.put(
     CreateJobPostingController(Get.find()),
+  );
+  final CompanyImageController bannerPickerController = Get.put(
+    CompanyImageController(),
+  );
+
+  final ImageController imagePickerController = Get.put(ImageController());
+  final TextEditingController _descriptionTController = TextEditingController();
+  final TextEditingController _linkedINTEController = TextEditingController();
+  final TextEditingController _twitterTEController = TextEditingController();
+  final TextEditingController _upworkTEController = TextEditingController();
+  final TextEditingController _facebookTEController = TextEditingController();
+  final TextEditingController _instaTEController = TextEditingController();
+  final TextEditingController _tiktokTEController = TextEditingController();
+  final TextEditingController _fiverrTEController = TextEditingController();
+  final TextEditingController _comapanyTEController = TextEditingController();
+
+  final companyNameController = TextEditingController();
+  final countryController = TextEditingController();
+  final cityController = TextEditingController();
+  final postalCodeController = TextEditingController();
+  final emailController = TextEditingController();
+
+  final FocusNode _linkedINFocusNode = FocusNode();
+  final FocusNode _twitterFocusNode = FocusNode();
+  final FocusNode _upworkFocusNode = FocusNode();
+  final FocusNode _facebookFocusNode = FocusNode();
+  final FocusNode _instaFocusNode = FocusNode();
+  final FocusNode _tiktokFocusNode = FocusNode();
+  final FocusNode _fiverrFocusNode = FocusNode();
+  final FocusNode _companyFocusNode = FocusNode();
+  late int zipCode = int.tryParse(postalCodeController.text) ?? 0;
+
+  final DescriptionController descriptionController = Get.put(
+    DescriptionController(),
   );
 
   CreateCompanyAccountPage({super.key});
@@ -73,89 +123,193 @@ class CreateCompanyAccountPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Upload Elevator Pitch
-              VideoUploadCardWidget(
-                title: "Upload your elevator pitch",
-                subtitle:
-                    "Share a video introduction to make your resume stand out",
-                buttonText: "Upload Elevator Pitch",
-                fileType:
-                    "Drop your file here \n Maximum size 24mb and 30 seconds or 60 seconds long (if upgraded) \n Choose File",
-                // isChecked: true,
-                // onChanged: (value) {},
+              GestureDetector(
+                onTap: () {
+                  Get.to(VideoUploadScreen());
+                },
+                child: Obx(() {
+                  if (recruiterController.successVideoUploaded.value &&
+                      recruiterController.uploadedVideoPath.value.isNotEmpty) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xFF191919),
+                      ),
+                      height: 200,
+                      width: double.infinity,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: VideoPlayerWidget(
+                          videoPath:
+                              recruiterController.uploadedVideoPath.value,
+                        ),
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xFF191919),
+                      ),
+                      height: 150,
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: Image(
+                              image: AssetImage('assets/icons/gallery.png'),
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          const Text(
+                            'Drop your files here',
+                            style: TextStyle(fontSize: 12, color: Colors.white),
+                          ),
+                          const SizedBox(height: 9.5),
+                          const Text(
+                            'Choose file',
+                            style: TextStyle(fontSize: 12, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                }),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 16),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Company Banner",
-                  style: TextStyle(
-                    color: AppColors.textBlack,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+              Text(
+                'Company Banner',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(width: 1, color: Color(0xFF999999)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: GestureDetector(
+                    onTap: bannerPickerController.showPickerOptions,
+                    child: Obx(() {
+                      return Container(
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Color(0xFFD9D9D9),
+                        ),
+                        child: Center(
+                          child:
+                              bannerPickerController.selectedImage.value != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  // same as container
+                                  child: Image.file(
+                                    bannerPickerController.selectedImage.value!,
+                                    width: double.infinity,
+                                    height: 150,
+                                    fit: BoxFit
+                                        .cover, // makes image fill the container
+                                  ),
+                                )
+                              : const Text(
+                                  'company banner',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                        ),
+                      );
+                    }),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
 
-              // Company Banner
-              UploadCardWidget(
-                title: "Upload banner",
-                subtitle:
-                    "Upload and crop a banner image to enhance your resume profile.",
-                buttonText: "Upload Banner",
-                fileType:
-                    "Drop your file here \n Supports JPG, PNG • Max 10MB • Will be cropped to 300px height \n Choose File",
-              ),
-
-              const SizedBox(height: 24),
+              SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Company Logo",
                   style: TextStyle(
-                    color: AppColors.textBlack,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
+                    color: Color(0xFF000000),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
 
-              // Company Logo
-              UploadCardWidget(
-                title: "",
-                subtitle: "",
-                buttonText: "Upload Logo",
-                fileType: "Drop your file here\nChoose Logo",
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    children: [
+                      SizedBox(height: 10),
+                      GestureDetector(
+                        onTap: imagePickerController.showPickerOptions,
+                        child: Obx(() {
+                          return Container(
+                            height: 130,
+                            width: 130,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Color(0xFFD9D9D9),
+                            ),
+                            child: Center(
+                              child:
+                                  imagePickerController.selectedImage.value !=
+                                      null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      // same as container
+                                      child: Image.file(
+                                        imagePickerController
+                                            .selectedImage
+                                            .value!,
+                                        height: 130,
+                                        width: 130,
+                                        fit: BoxFit
+                                            .cover, // makes image fill the container
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Company logo',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                            ),
+                          );
+                        }),
+                      ),
+
+                      SizedBox(height: 10),
+                    ],
+                  ),
+
+                  SizedBox(width: 15),
+
+                  Bio(
+                    descriptionTController: _descriptionTController,
+                    descriptionController: descriptionController,
+                  ),
+                ],
               ),
 
-              const SizedBox(height: 24),
-
-              // Align(
-              //   alignment: Alignment.centerLeft,
-              //   child: Text(
-              //     "About Us",
-              //     style: TextStyle(
-              //       color: AppColors.buttonText,
-              //       fontSize: 18,
-              //       fontWeight: FontWeight.w500,
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                maxLines: 5,
-                controller: controller.aboutUsController, // ✅ bind
-                label: 'About Us',
-
-                isRequired: false,
-                hintText: "Write here",
-              ),
               const SizedBox(height: 8),
               CustomTextField(
                 label: 'Company Name',
+                controller: controller.companyNameController,
 
                 isRequired: true,
                 hintText: "Enter Your Country Name",
@@ -216,23 +370,6 @@ class CreateCompanyAccountPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    // child: CustomTextField(
-                    //   label: 'Email',
-                    //   controller: controller.emailController,
-                    //   isRequired: true,
-                    //   keyboardType: TextInputType.emailAddress,
-                    //   hintText: "Enter your email",
-                    //   validator: (value) {
-                    //     if (value == null || value.isEmpty) {
-                    //       return "Email is required";
-                    //     }
-                    //     final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                    //     if (!regex.hasMatch(value)) {
-                    //       return "Enter a valid email address";
-                    //     }
-                    //     return null;
-                    //   },
-                    // ),
                     child: CustomTextField(
                       label: "Email",
                       controller: controller.emailController, // ✅ bind
@@ -243,88 +380,129 @@ class CreateCompanyAccountPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              CustomTextField(
-                label: 'Contact Number',
-                controller: controller.contactNumberController, // ✅ bind
 
-                isRequired: true,
-                hintText: "+49 97 23917 3740",
-              ),
-
-              // CustomTextField(
-              //   label: 'Contact Number',
-              //   controller: controller.contactNumberController,
-              //   isRequired: true,
-              //   hintText: "+49 97 23917 3740",
-              //   keyboardType: TextInputType.phone,
-              //   validator: (value) {
-              //     if (value == null || value.trim().isEmpty) {
-              //       return "Contact number is required";
-              //     }
-              //     final regex = RegExp(
-              //       r'^[+0-9\s]+$',
-              //     ); // allow +, numbers, spaces
-              //     if (!regex.hasMatch(value)) {
-              //       return "Enter a valid phone number";
-              //     }
-              //     if (value.replaceAll(RegExp(r'[^0-9]'), '').length < 8) {
-              //       return "Phone number must be at least 8 digits";
-              //     }
-              //     return null;
-              //   },
-              // ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                label: 'Website URL',
-                controller: controller.websiteController, // ✅ bind
-
-                isRequired: true,
-                hintText: "Enter Here",
+              SocialLink(
+                linkedINTEController: _linkedINTEController,
+                linkedINFocusNode: _linkedINFocusNode,
+                twitterTEController: _twitterTEController,
+                twitterFocusNode: _twitterFocusNode,
+                upworkTEController: _upworkTEController,
+                upworkFocusNode: _upworkFocusNode,
+                facebookTEController: _facebookTEController,
+                facebookFocusNode: _facebookFocusNode,
+                tiktokTEController: _tiktokTEController,
+                tiktokFocusNode: _tiktokFocusNode,
+                instaTEController: _instaTEController,
+                instaFocusNode: _instaFocusNode,
+                fiverTEController: _fiverrTEController,
+                fiverFocusNode: _fiverrFocusNode,
+                companyTEController: _comapanyTEController,
+                companyFocusNode: _companyFocusNode,
               ),
               const SizedBox(height: 8),
+
               CustomTextField(
-                label: 'Linkedin URL',
-                controller: controller.linkedInController, // ✅ bind
-
+                label: 'Industry',
+                hintText: "Select Industry",
                 isRequired: true,
-                hintText: "Enter Here",
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                label: 'Twitter-X URL',
-                controller: controller.twitterController, // ✅ bind
+                readOnly: true,
+                controller:
+                    controller.industryController, // create this controller
+                onTap: () async {
+                  await recruiterController.fetchCategory();
+                  recruiterController.searchText.value = "";
 
-                isRequired: true,
-                hintText: "Enter Here",
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                label: 'Upwork URL',
-                controller: controller.upworkController, // ✅ bind
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true, // needed to react to keyboard
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
+                    ),
+                    builder: (context) {
+                      final bottomPadding = MediaQuery.of(
+                        context,
+                      ).viewInsets.bottom;
 
-                isRequired: true,
-                hintText: "Enter Here",
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                label: 'Other Business Website',
+                      return Padding(
+                        // 🟦 pushes bottom sheet above keyboard
+                        padding: EdgeInsets.only(bottom: bottomPadding),
 
-                isRequired: true,
-                hintText: "Enter Here",
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                label: 'Country',
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Container(
+                            constraints: const BoxConstraints(
+                              maxHeight: 350, // dropdown height
+                            ),
+                            child: Column(
+                              children: [
+                                // 🔎 SEARCH FIELD
+                                TextField(
+                                  decoration: InputDecoration(
+                                    hintText: "Search Industry",
+                                    prefixIcon: Icon(Icons.search),
+                                    filled: true,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  onChanged: (value) {
+                                    recruiterController.searchText.value =
+                                        value;
+                                  },
+                                ),
 
-                isRequired: true,
-                hintText: "Industry",
+                                const SizedBox(height: 12),
+
+                                // 📋 FILTERED LIST
+                                Expanded(
+                                  child: Obx(() {
+                                    final filtered = recruiterController
+                                        .category
+                                        .where(
+                                          (item) =>
+                                              item.name.toLowerCase().contains(
+                                                recruiterController
+                                                    .searchText
+                                                    .value
+                                                    .toLowerCase(),
+                                              ),
+                                        )
+                                        .toList();
+
+                                    if (filtered.isEmpty) {
+                                      return const Center(
+                                        child: Text("No results found"),
+                                      );
+                                    }
+
+                                    return ListView.builder(
+                                      itemCount: filtered.length,
+                                      itemBuilder: (_, index) {
+                                        final item = filtered[index];
+                                        return ListTile(
+                                          title: Text(item.name),
+                                          onTap: () {
+                                            controller.industryController.text =
+                                                item.name;
+                                            Navigator.pop(context);
+                                          },
+                                        );
+                                      },
+                                    );
+                                  }),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
 
-              // const SizedBox(height: 8),
-              // const Text(
-              //   "Services",
-              //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              // ),
               const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,7 +511,7 @@ class CreateCompanyAccountPage extends StatelessWidget {
                   Expanded(
                     child: CustomTextField(
                       label: "Service",
-                      hintText: "Enter service",
+                      hintText: "Add Service",
                       controller: controller.serviceControllers[0],
                       isRequired: true,
                     ),
@@ -391,11 +569,11 @@ class CreateCompanyAccountPage extends StatelessWidget {
                           children: [
                             Expanded(
                               child: CustomTextField(
-                                label: "Service ${index + 0}",
+                                label: "",
                                 hintText: "Enter service",
                                 controller:
                                     controller.serviceControllers[index],
-                                isRequired: true,
+                                // isRequired: true,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -416,7 +594,7 @@ class CreateCompanyAccountPage extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "View your Company Employees",
+                  "View your Company recruiters",
                   style: TextStyle(
                     color: AppColors.textBlack,
                     fontSize: 16,
@@ -429,11 +607,21 @@ class CreateCompanyAccountPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: CustomTextField(
-                      label: "Add Profiles of Employees",
-                      hintText: "Add Here",
-                      controller: controller.employeeControllers[0],
-                      isRequired: true,
+                    child: GestureDetector(
+                      onTap: () {
+                        controller.fetchUsers(); // ← This WILL fire
+                      },
+                      child: AbsorbPointer(
+                        // ← Prevents keyboard from opening
+                        child: CustomTextField(
+                          label: "Add Profiles of Recruiters",
+                          hintText: "Tap to select recruiter",
+                          controller: controller.employeeControllers[0],
+                          isRequired: true,
+                          readOnly: true, // keep it
+                          // Remove onTap from here — it won't work reliably
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -486,12 +674,21 @@ class CreateCompanyAccountPage extends StatelessWidget {
                         child: Row(
                           children: [
                             Expanded(
-                              child: CustomTextField(
-                                label: "Employee ${index + 1}",
-                                hintText: "Enter employee profile",
-                                controller:
-                                    controller.employeeControllers[index],
-                                isRequired: true,
+                              child: Expanded(
+                                child: GestureDetector(
+                                  onTap: () => controller.fetchUsers(),
+                                  child: AbsorbPointer(
+                                    child: CustomTextField(
+                                      label: index == 0
+                                          ? "Add Profiles of Recruiters"
+                                          : "Recruiter ${index + 1}",
+                                      hintText: "Tap to select recruiter",
+                                      controller:
+                                          controller.employeeControllers[index],
+                                      readOnly: true,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -508,183 +705,563 @@ class CreateCompanyAccountPage extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 25),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Award Description*",
-                  style: TextStyle(
-                    color: AppColors.textBlack,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+            const SizedBox(height: 25),
+              const Text("Award Description*", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 12),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
-              ),
-              const SizedBox(height: 7),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Award & Honors", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+                    const Text("Highlight your achievements and recognitions.", style: TextStyle(fontSize: 12, color: AppColors.textGrey)),
 
-              Obx(() {
-                final showFields = controller.awardFields.isNotEmpty;
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Award & Honors",
-                        style: TextStyle(
-                          color: const Color(0xFF0A0A0A),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      Text(
-                        "Highlight your achievements and recognitions.",
-                        style: TextStyle(
-                          color: const Color(0xFF2A2A2A),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
+                    const SizedBox(height: 20),
 
-                      const SizedBox(height: 12),
+                    // Dynamic Award Cards
+                    Obx(() => Column(
+                      children: List.generate(controller.awardFields.length, (index) {
+                        final fields = controller.awardFields[index];
 
-                      // Dynamic Award Fields inside the same container
-                      Column(
-                        children: List.generate(controller.awardFields.length, (
-                          index,
-                        ) {
-                          final fields = controller.awardFields[index];
-                          return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade300),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.1),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CustomTextField(
-                                  label: "Award Title",
-                                  hintText: "e.g.Employee of the Year",
-                                  controller: fields['title'],
-                                  isRequired: true,
-                                ),
-                                const SizedBox(height: 8),
-                                CustomTextField(
-                                  label: "Program Name",
-                                  hintText: "e.g. Company Recognition Program",
-                                  controller: fields['issuer'],
-                                  isRequired: true,
-                                ),
-                                const SizedBox(height: 8),
-                                CustomTextField(
-                                  label: "Program Date",
-                                  hintText: "MMYYYY",
-                                  controller: fields['date'],
-                                  isRequired: true,
-                                ),
-                                const SizedBox(height: 8),
-                                CustomTextField(
-                                  label: "Award Short Description",
-                                  hintText: "Briefly describe the award",
-                                  controller: fields['description'],
-                                  isRequired: true,
-                                  maxLines: 3,
-                                ),
-                                const SizedBox(height: 8),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: ElevatedButton(
-                                    onPressed: () =>
-                                        controller.removeAwardField(index),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red[100],
-                                      foregroundColor: Colors.red[800],
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                            boxShadow: [
+                              BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 3)),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Header: Award Title + Remove Button
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Award ${index + 1}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                  IconButton(
+                                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                                    onPressed: () => controller.removeAwardField(index),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+                                ],
+                              ),
+                              const Divider(),
+
+                              CustomTextField(label: "Award Title", hintText: "e.g. Employee of the Year", controller: fields['title'], isRequired: true),
+                              const SizedBox(height: 12),
+
+                              CustomTextField(label: "Program Name", hintText: "e.g. Company Recognition Program", controller: fields['issuer'], isRequired: true),
+                              const SizedBox(height: 12),
+
+                              // Program Date - Month/Year Picker
+                              const Text("Program Date", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                              const SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () async {
+                                  int? initMonth, initYear;
+                                  final text = fields['date']!.text;
+                                  if (text.length == 6) {
+                                    initMonth = int.tryParse(text.substring(0, 2));
+                                    initYear = int.tryParse(text.substring(2));
+                                  }
+
+                                  final result = await showDialog<Map<String, int>>(
+                                    context: context,
+                                    builder: (_) => MonthYearPickerDialog(initialMonth: initMonth, initialYear: initYear),
+                                  );
+
+                                  if (result != null) {
+                                    final month = result['month']!.toString().padLeft(2, '0');
+                                    final year = result['year'].toString();
+                                    fields['date']?.text = month + year; // e.g. 122025
+                                  }
+                                },
+                                child: AbsorbPointer(
+                                  child: TextFormField(
+                                    controller: fields['date'],
+                                    decoration: InputDecoration(
+                                      hintText: "MMYYYY",
+                                      suffixIcon: const Icon(Icons.calendar_today_outlined, size: 20),
+                                      filled: true,
+                                      fillColor: Colors.grey[50],
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
                                     ),
-                                    child: const Text("Remove Award"),
+                                    validator: (val) {
+                                      if (val == null || val.isEmpty) return "Required";
+                                      if (!RegExp(r'^\d{6}$').hasMatch(val)) return "Format: MMYYYY";
+                                      final m = int.tryParse(val.substring(0, 2));
+                                      if (m == null || m < 1 || m > 12) return "Invalid month";
+                                      return null;
+                                    },
                                   ),
                                 ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ),
-
-                      // Add Award Button always at bottom
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: ElevatedButton(
-                          onPressed: controller.addAwardField,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(
-                              0xFFFFFFFF,
-                            ), // white background
-                            foregroundColor: Colors.black, // text color
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              side: const BorderSide(
-                                color: Colors.grey, // border color
-                                width: 1, // border width
                               ),
-                            ),
-                          ),
-                          child: const Text("Add Award"),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
+                              const SizedBox(height: 12),
 
+                              CustomTextField(
+                                label: "Award Short Description",
+                                hintText: "Briefly describe the award and what you achieved",
+                                controller: fields['description'],
+                                isRequired: true,
+                                maxLines: 4,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Add Another Award Button
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  onPressed: controller.addAwardField,
+                                  icon: const Icon(Icons.add_circle_outline, size: 18),
+                                  label: const Text("Add Another Award"),
+                                  style: TextButton.styleFrom(foregroundColor: AppColors.primaryWhite),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    )),
+
+                    const SizedBox(height: 12),
+
+                    // Main "Add Award" Button
+                    ElevatedButton.icon(
+                      onPressed: controller.addAwardField,
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text("Add Award"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        elevation: 0,
+                        side: BorderSide(color: Colors.grey.shade400),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
 
               // Save Button
               PrimaryButton(
                 text: "Save",
-                onPressed: () {
+                onPressed: () async {
                   if (controller.formKey.currentState!.validate()) {
-                    controller.saveForm();
-                    Get.to(
-                      () => CompanyDetailsPage(),
-                      transition: Transition.rightToLeft,
-                    );
+                    if (controller.isLoading.value) return;
+
+                    try {
+                      // Collect data
+                      final services = controller.getServices();
+                      final employees = controller
+                          .getEmployees(); // This contains: "Eshitta Mondol (eshitta@example.com)"
+                      final awards = controller.getAwards();
+
+                      // ──────────────────────────────────────────────────────────────
+                      // CRITICAL FIX: Extract only emails from "Name (email)" format
+                      // ──────────────────────────────────────────────────────────────
+                      final recruiterEmails = employees
+                          .map((e) {
+                            final match = RegExp(r'\(([^)]+)\)').firstMatch(e);
+                            if (match != null)
+                              return match.group(1)!; // extract email inside ()
+                            return e.contains('@') ? e.trim() : null;
+                          })
+                          .where((email) => email != null && email.isNotEmpty)
+                          .cast<String>()
+                          .toList();
+
+                      final cleanRecruiterIds = recruiterEmails.join(",");
+
+                      // Safe awards JSON
+                      final awardsJson = jsonEncode(controller.getAwards()); // always valid JSON
+
+                      // Debug print (optional - remove later)
+                      debugPrint("Recruiters being sent → $cleanRecruiterIds");
+                      debugPrint("Awards JSON → $awardsJson");
+
+                      // ──────────────────────────────────────────────────────────────
+                      // Validate required fields
+                      // ──────────────────────────────────────────────────────────────
+                      if (bannerPickerController.selectedImage.value == null) {
+                        Get.snackbar("Error", "Please upload a company banner");
+                        return;
+                      }
+                      if (imagePickerController.selectedImage.value == null) {
+                        Get.snackbar("Error", "Please upload a company logo");
+                        return;
+                      }
+
+                      final zipCode = int.tryParse(
+                        controller.postalCodeController.text.trim(),
+                      );
+                      if (zipCode == null) {
+                        Get.snackbar("Error", "Invalid postal code");
+                        return;
+                      }
+
+                      final country = jobController.selectedCountry.value ?? '';
+                      final city = jobController.selectedCity.value ?? '';
+                      if (country.isEmpty || city.isEmpty) {
+                        Get.snackbar("Error", "Please select country and city");
+                        return;
+                      }
+
+                      // ──────────────────────────────────────────────────────────────
+                      // FINAL API CALL WITH FIXED DATA
+                      // ──────────────────────────────────────────────────────────────
+                      await controller.createCompanyScreen(
+                        bannerPickerController.selectedImage.value!,
+                        imagePickerController.selectedImage.value!,
+                        controller.companyNameController.text.trim(),
+                        country,
+                        city,
+                        zipCode,
+                        controller.emailController.text.trim(),
+                        _descriptionTController.text.trim(),
+                        controller.industryController.text.trim(),
+                        _linkedINTEController.text.trim(),
+                        _twitterTEController.text.trim(),
+                        _upworkTEController.text.trim(),
+                        _facebookTEController.text.trim(),
+                        _tiktokTEController.text.trim(),
+                        _instaTEController.text.trim(),
+                        _fiverrTEController.text.trim(),
+                        _comapanyTEController.text.trim(),
+                        services.join(", "),
+                        cleanRecruiterIds, // ← NOW ONLY EMAILS: eshitta@example.com,john@doe.com
+                        awardsJson, // ← VALID JSON or "[]"
+                      );
+
+                      // Success navigation (only if API succeeds — already handled inside controller)
+                      // Get.off(() => CompanyDetailsPage());
+                    } catch (e) {
+                      debugPrint("Save Error: $e");
+                      Get.snackbar("Error", "Failed to create company: $e");
+                    }
                   }
                 },
-                width: double.infinity, // optional
-                height: 45, // optional
+                width: double.infinity,
+                height: 45,
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class SocialLink extends StatelessWidget {
+  const SocialLink({
+    super.key,
+    required TextEditingController linkedINTEController,
+    required FocusNode linkedINFocusNode,
+    required TextEditingController twitterTEController,
+    required FocusNode twitterFocusNode,
+    required TextEditingController upworkTEController,
+    required FocusNode upworkFocusNode,
+    required TextEditingController facebookTEController,
+    required FocusNode facebookFocusNode,
+    required TextEditingController tiktokTEController,
+    required FocusNode tiktokFocusNode,
+    required TextEditingController instaTEController,
+    required FocusNode instaFocusNode,
+    required TextEditingController fiverTEController,
+    required FocusNode fiverFocusNode,
+    required TextEditingController companyTEController,
+    required FocusNode companyFocusNode,
+  }) : _linkedINTEController = linkedINTEController,
+       _linkedINFocusNode = linkedINFocusNode,
+       _twitterTEController = twitterTEController,
+       _twitterFocusNode = twitterFocusNode,
+       _upworkTEController = upworkTEController,
+       _upworkFocusNode = upworkFocusNode,
+       _facebookTEController = facebookTEController,
+       _facebookFocusNode = facebookFocusNode,
+       _tiktokTEController = tiktokTEController,
+       _tiktokFocusNode = tiktokFocusNode,
+       _instaTEController = instaTEController,
+       _instaFocusNode = instaFocusNode,
+       _fiverrTEController = fiverTEController,
+       _fiverrFocusNode = fiverFocusNode,
+       _comapanyTEController = companyTEController,
+       _companyFocusNode = companyFocusNode;
+
+  final TextEditingController _linkedINTEController;
+  final FocusNode _linkedINFocusNode;
+  final TextEditingController _twitterTEController;
+  final FocusNode _twitterFocusNode;
+  final TextEditingController _upworkTEController;
+  final FocusNode _upworkFocusNode;
+  final TextEditingController _facebookTEController;
+  final FocusNode _facebookFocusNode;
+  final TextEditingController _tiktokTEController;
+  final FocusNode _tiktokFocusNode;
+  final TextEditingController _instaTEController;
+  final FocusNode _instaFocusNode;
+  final TextEditingController _fiverrTEController;
+  final FocusNode _fiverrFocusNode;
+  final TextEditingController _comapanyTEController;
+  final FocusNode _companyFocusNode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Color(0xFF999999), width: 1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Company Social Media Links',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                      // SizedBox(height: 4),
+                      // Text(
+                      //   'Add URLs for your social and professional profiles (optional)',
+                      //   style: TextStyle(
+                      //     fontSize: 14,
+                      //     color: Color(0xFF999999),
+                      //   ),
+                      // ),
+                      SizedBox(height: 12),
+                      Text(
+                        'LinkedIn URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _linkedINTEController,
+                        focusNode: _linkedINFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+
+                      SizedBox(height: 12),
+                      Text(
+                        'Twitter URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _twitterTEController,
+                        focusNode: _twitterFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+
+                      SizedBox(height: 12),
+                      Text(
+                        'Upwork URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _upworkTEController,
+                        focusNode: _upworkFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+
+                      SizedBox(height: 12),
+                      Text(
+                        'Facebook URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _facebookTEController,
+                        focusNode: _facebookFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+
+                      SizedBox(height: 12),
+                      Text(
+                        'TikTok URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _tiktokTEController,
+                        focusNode: _tiktokFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+
+                      SizedBox(height: 12),
+                      Text(
+                        'Instagram URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _instaTEController,
+                        focusNode: _instaFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Fiverr URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _fiverrTEController,
+                        focusNode: _fiverrFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Company Website URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _comapanyTEController,
+                        focusNode: _companyFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration.copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
