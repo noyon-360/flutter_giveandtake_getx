@@ -1,94 +1,245 @@
+// lib/features/elevator/presentation/widgets/skills_section.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../controller/elevator_resume_controller.dart';
 
-class SkillsSection extends StatelessWidget {
+class SkillsSection extends StatefulWidget {
   const SkillsSection({super.key});
 
   @override
+  State<SkillsSection> createState() => _SkillsSectionState();
+}
+
+class _SkillsSectionState extends State<SkillsSection> {
+  final TextEditingController _skillController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  // Dummy master list – ichcha moto add korte paro
+  final List<String> _allSkills = const [
+    'Flutter',
+    'Dart',
+    'Java',
+    'Kotlin',
+    'Swift',
+    'Objective-C',
+    'JavaScript',
+    'TypeScript',
+    'React',
+    'React Native',
+    'Node.js',
+    'Express',
+    'PHP',
+    'Laravel',
+    'Python',
+    'Django',
+    'Flask',
+    'C#',
+    '.NET',
+    'C++',
+    'HTML',
+    'CSS',
+    'Tailwind',
+    'Bootstrap',
+    'SQL',
+    'MySQL',
+    'PostgreSQL',
+    'MongoDB',
+    'Firebase',
+    'REST API',
+    'GraphQL',
+    'UI/UX Design',
+    'Figma',
+    'Git',
+    'GitHub',
+    'Jira',
+  ];
+
+  List<String> _filteredSkills = [];
+  bool _showSuggestions = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        setState(() {
+          _showSuggestions = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _skillController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onTextChanged(String value, ElevatorResumeController controller) {
+    final query = value.trim().toLowerCase();
+
+    if (query.isEmpty) {
+      setState(() {
+        _filteredSkills = [];
+        _showSuggestions = false;
+      });
+      return;
+    }
+
+    final selected = controller.skillsList;
+
+    setState(() {
+      _filteredSkills = _allSkills
+          .where(
+            (s) =>
+        s.toLowerCase().contains(query) &&
+            !selected.contains(s), // already selected hole dekhabo na
+      )
+          .take(8)
+          .toList();
+      _showSuggestions = _filteredSkills.isNotEmpty;
+    });
+  }
+
+  void _addSkillFromInput(ElevatorResumeController controller, String value) {
+    final text = value.trim();
+    if (text.isEmpty) return;
+
+    controller.addSkill(text);
+    _skillController.clear();
+    setState(() {
+      _filteredSkills = [];
+      _showSuggestions = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final controller = Get.find<ElevatorResumeController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Skills',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        // label "Skills*"
+        Text(
+          'Skills*',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        const SizedBox(height: 8),
-        Obx(() {
-          return Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              ...controller.skillsList.asMap().entries.map((entry) {
-                return Chip(
-                  label: Text(entry.value),
-                  onDeleted: () => controller.removeSkill(entry.key),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                );
-              }),
-              InkWell(
-                onTap: () => _showAddSkillDialog(context, controller),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add, size: 20),
-                      SizedBox(width: 4),
-                      Text('Add Skill'),
-                    ],
-                  ),
-                ),
+        const SizedBox(height: 6),
+
+        // search & add field
+        TextField(
+          controller: _skillController,
+          focusNode: _focusNode,
+          textInputAction: TextInputAction.done,
+          onChanged: (value) => _onTextChanged(value, controller),
+          onSubmitted: (value) => _addSkillFromInput(controller, value),
+          decoration: InputDecoration(
+            prefixIcon: Icon(
+              Icons.search,
+              color: Colors.grey[500],
+            ),
+            hintText:
+            'Search and add skills (e.g., Java, PHP, React...)',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF2563EB)),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        // suggestion list (textfield er niche)
+        if (_showSuggestions && _filteredSkills.isNotEmpty)
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: 200,
+            ),
+            child: Material(
+              elevation: 2,
+              borderRadius: BorderRadius.circular(8),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _filteredSkills.length,
+                itemBuilder: (context, index) {
+                  final skill = _filteredSkills[index];
+                  return ListTile(
+                    dense: true,
+                    title: Text(skill),
+                    onTap: () {
+                      controller.addSkill(skill);
+                      _skillController.clear();
+                      setState(() {
+                        _filteredSkills = [];
+                        _showSuggestions = false;
+                      });
+                    },
+                  );
+                },
               ),
-            ],
-          );
-        }),
-      ],
-    );
-  }
-
-  void _showAddSkillDialog(
-    BuildContext context,
-    ElevatorResumeController controller,
-  ) {
-    final TextEditingController skillController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Skill'),
-        content: TextField(
-          controller: skillController,
-          decoration: const InputDecoration(
-            labelText: 'Skill Name',
-            hintText: 'e.g., Web Design',
-            border: OutlineInputBorder(),
+            ),
           ),
-          autofocus: true,
+
+        const SizedBox(height: 8),
+
+        // chips / empty message
+        Obx(
+              () {
+            if (controller.skillsList.isEmpty) {
+              return Text(
+                'No skills selected. Start typing to search and add skills.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
+                ),
+              );
+            }
+
+            return Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: List.generate(
+                controller.skillsList.length,
+                    (index) {
+                  final skill = controller.skillsList[index];
+                  return Chip(
+                    label: Text(skill),
+                    shape: const StadiumBorder(),
+                    backgroundColor: const Color(0xFFE5F0FF),
+                    labelStyle: const TextStyle(
+                      color: Color(0xFF2563EB),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    deleteIcon: const Icon(
+                      Icons.close,
+                      size: 16,
+                    ),
+                    onDeleted: () => controller.removeSkill(index),
+                  );
+                },
+              ),
+            );
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (skillController.text.trim().isNotEmpty) {
-                controller.addSkill(skillController.text);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
