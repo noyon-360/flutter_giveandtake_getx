@@ -29,7 +29,17 @@ class _CompanyEmployeesScreenState extends State<CompanyEmployeesScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: AppBar(title: const Text("Internal Recruiters")),
+      appBar: AppBar(
+         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
+          ),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text("Internal Recruiters")),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());

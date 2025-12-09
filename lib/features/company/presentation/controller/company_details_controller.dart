@@ -2,15 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
+import 'package:karlfive/features/company/data/model/archieve_request_model.dart';
+import 'package:karlfive/features/company/data/model/archieve_response_model.dart';
+import 'package:karlfive/features/company/data/model/candidate_resume_response_model.dart';
+import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
 import 'package:karlfive/features/company/data/model/employee_fetch_single_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_response_model.dart';
+import 'package:karlfive/features/company/data/model/status_update_response_model.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/model/all_user_response_model.dart';
 import '../../data/model/company_details_model.dart';
 import '../../data/model/single_Company_response_model.dart';
 import '../../domain/repo/company_repo.dart';
 import '../screen/company_details_screen.dart';
+import 'company_account_controller.dart';
 
 class CompanyDetailsController extends BaseController {
   final CompanyRepository _companyRepo;
@@ -20,18 +26,27 @@ class CompanyDetailsController extends BaseController {
 
   // Change from Rxn (problematic) to Rx with explicit null
   final userInfo = Rx<SingleCompanyResponseModel?>(null);
-  final employee = Rx<EmployeeFetchSingleModel?>(
-    null,
-  );
+  final employee = Rx<EmployeeFetchSingleModel?>(null);
   final remove = Rx<RemoveRecruiterResponseModel?>(
     null,
-  );  // <AllUserResponseModel>
+  ); // <AllUserResponseModel>
   var recruiters = <AllUserResponseModel>[].obs;
+
+  Rx<ArchieveResponseModel?> jobData = Rx<ArchieveResponseModel?>(null);
+
+  Rx<StatusUpdateResponseModel?> status = Rx<StatusUpdateResponseModel?>(null);
+
+  // final Rx<ApplicantListResponseModel?> venue = Rx<ApplicantListResponseModel?>(
+  //   null,
+  // );
+
+  var venue = <ApplicantListResponseModel>[].obs;
+
+  var jobId = ''.obs;
 
   var isCompanyLoading = true.obs;
   var isEmployeeLoading = true.obs;
-
-
+  final Rx<CandidateResumeResponseModel?> candidate = Rx(null);
 
   Future<void> fetchCompanyProfile() async {
     setLoading(true);
@@ -100,50 +115,216 @@ class CompanyDetailsController extends BaseController {
         employee.value = success.data;
         employee.refresh(); // ← THIS IS THE CORRECT WAY
 
-       
         setLoading(false);
         // isEmployeeLoading.value = false;
       },
     );
   }
 
-Future<void> removeRecruiter(String employeeId) async {
-  setLoading(true);
-  setError("");
+  Future<void> removeRecruiter(String employeeId) async {
+    setLoading(true);
+    setError("");
 
-  final userId = await _authStorageService.getUserId();
-  if (userId == null || userId.isEmpty) {
-    setError('User not authenticated');
-    Get.snackbar('Error', 'User not authenticated');
-    setLoading(false);
-    return;
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User not authenticated');
+      Get.snackbar('Error', 'User not authenticated');
+      setLoading(false);
+      return;
+    }
+
+    final request = RemoveRecruiterRequestModel(
+      companyId: userId,
+      employeeId: employeeId,
+    );
+
+    final result = await _companyRepo.removeRecruiter(request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("Remove recruiter failed: ${fail.message}");
+        Get.snackbar(
+          "Error",
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        setLoading(false);
+      },
+      (success) async {
+        DPrint.log("Remove recruiter success: ${success.message}");
+
+        // Option 1: Refresh the employee list
+        await fetchEmployee(); // reloads employee list after deletion
+
+        setLoading(false);
+      },
+    );
   }
 
-  final request = RemoveRecruiterRequestModel(
-    companyId: userId,
-    employeeId: employeeId,
-  );
+  //  Future<void> archiveJobs(
+  //     String jobId,
+  //     // <-- just a list of task IDs
+  //   ) async {
+  //    setLoading(true);
+  //    setError("");
+  //         final userId = await _authStorageService.getUserId();
+  //   if (userId == null || userId.isEmpty) {
+  //     setError('User not authenticated');
+  //     Get.snackbar('Error', 'User not authenticated');
+  //     setLoading(false);
+  //     return;
+  //   }
 
-  final result = await _companyRepo.removeRecruiter(request);
+  //     final data = {
+  //       "userId": userId,
+  //       "jobId": jobId, // send list of ObjectId strings
+  //     };
 
-  result.fold(
-    (fail) {
-      setError(fail.message);
-      DPrint.log("Remove recruiter failed: ${fail.message}");
-      Get.snackbar("Error", fail.message,
-          backgroundColor: Colors.red, colorText: Colors.white);
+  //     final result = await _companyRepo.archiveJobs(jobId, data);
+
+  //     result.fold(
+  //       (fail) {
+  //         setError(fail.message);
+  //         DPrint.log('❌ Client info update failed: ${fail.message}');
+  //         isLoading(false);
+  //       },
+  //       (success) async {
+  //         DPrint.log('✅ Client info updated: ${success.message}');
+
+  //         Get.back(); // navigate back after success
+  //         isLoading(false);
+  //       },
+  //     );
+  //   }
+  Future<void> archiveJobs(String jobId) async {
+    setLoading(true);
+    setError("");
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User not authenticated');
+      Get.snackbar('Error', 'User not authenticated');
       setLoading(false);
-    },
-    (success) async {
-      DPrint.log("Remove recruiter success: ${success.message}");
-   
+      return;
+    }
 
-      // Option 1: Refresh the employee list
-      await fetchEmployee(); // reloads employee list after deletion
+    final data = {"userId": userId, "jobId": jobId};
 
+    final result = await _companyRepo.archiveJobs(jobId, data);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        Get.snackbar(
+          "Error",
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      },
+      (success) {
+        // Update the reactive job data
+        jobData.value = success.data;
+
+        // Show success message based on new state
+        Get.snackbar(
+          "Success",
+          success.data.arcrivedJob ? "Job archived" : "Job unarchived",
+          backgroundColor: success.data.arcrivedJob
+              ? Colors.orange
+              : Colors.green,
+          colorText: Colors.white,
+        );
+
+        // Optional: Refresh the full list to reflect changes everywhere
+        Get.find<CompanyAccountController>().manageJobs();
+      },
+    );
+
+    setLoading(false); // Always stop loading
+  }
+
+  Future<void> fetchApplicantList() async {
+    if (jobId.isEmpty) return;
+    setLoading(true);
+    final result = await _companyRepo.applicantJob(jobId.value);
+
+    result.fold(
+      (fail) {
+        setLoading(false);
+      },
+      (success) {
+        venue.value = success.data;
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> fetchCandidate() async {
+    setLoading(true);
+
+    final result = await _companyRepo.fetchCandidateInfo();
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        setLoading(false);
+      },
+      (success) {
+        candidate.value = success.data;
+
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> statusUpdated({
+    required String applicantId,
+    required String status,
+  }) async {
+    setLoading(true);
+    setError("");
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User not authenticated');
+      Get.snackbar('Error', 'User not authenticated');
       setLoading(false);
-    },
-  );
-}
+      return;
+    }
 
+    final data = {
+      "userId": userId,
+      "applicantId": applicantId,
+      "status": status,
+    };
+
+    final result = await _companyRepo.status(applicantId, data);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        Get.snackbar(
+          "Error",
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        setLoading(false);
+      },
+      (success) {
+        Get.snackbar(
+          "Success",
+          "Status updated to $status",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        // Refresh the applicant list to reflect new status
+        fetchApplicantList();
+      },
+    );
+  }
 }

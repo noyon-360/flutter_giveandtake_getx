@@ -1,130 +1,8 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import '../controller/manage_job_controller.dart';
-// import '../widget/job_req_card_widget.dart';
-// import 'job_details_screen.dart';
-
-// class ManageJobPostScreen extends StatelessWidget {
-//   final ManageJobPostController controller = Get.put(ManageJobPostController());
-
-//   ManageJobPostScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.white,
-//       body: SafeArea(
-//         child: Padding(
-//           padding: const EdgeInsets.all(12),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               /// 🔹 Title Section (Inside Body)
-//               Row(
-//                 children: [
-//                   GestureDetector(
-//                     onTap: () => Get.back(),
-//                     child: const Padding(
-//                       padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-//                     ),
-//                   ),
-//                   const Expanded(
-//                     child: Center(
-//                       child: Text(
-//                         "Manage job post request",
-//                         style: TextStyle(
-//                           color: Colors.black,
-//                           fontWeight: FontWeight.w600,
-//                           fontSize: 18,
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//                   const SizedBox(width: 48), // keeps title perfectly centered
-//                 ],
-//               ),
-
-//               const SizedBox(height: 10),
-
-//               /// 🔹 Job Request List
-//               Expanded(
-//                 child: Obx(() {
-//                   final jobs = controller.jobRequests.take(5).toList(); // max 5
-//                   return ListView.builder(
-//                     itemCount: jobs.length,
-//                     itemBuilder: (context, index) {
-//                       final job = jobs[index];
-//                       return JobRequestCard(
-//                         name: job["name"]!,
-//                         position: job["position"]!,
-//                         company: job["company"]!,
-//                         jobTitle: job["jobTitle"]!,
-//                         imageUrl: job["image"]!,
-//                         onViewDetails: () {
-//                           Get.to(
-//                             () => JobDetailsPage(),
-//                             transition: Transition.rightToLeft,
-//                           );
-//                         },
-//                       );
-//                     },
-//                   );
-//                 }),
-//               ),
-
-//               const SizedBox(height: 8),
-
-//               /// 🔹 Pagination Section
-//               Obx(
-//                 () => Row(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     IconButton(
-//                       icon: const Icon(Icons.arrow_back_ios, size: 16),
-//                       onPressed: controller.previousPage,
-//                     ),
-//                     Container(
-//                       decoration: BoxDecoration(
-//                         color: Color(0xFF2B7FD0),
-//                         borderRadius: BorderRadius.circular(6),
-//                       ),
-//                       padding: const EdgeInsets.symmetric(
-//                         horizontal: 10,
-//                         vertical: 6,
-//                       ),
-//                       child: Text(
-//                         "${controller.currentPage.value}",
-//                         style: const TextStyle(
-//                           color: Colors.white,
-//                           fontSize: 13,
-//                         ),
-//                       ),
-//                     ),
-//                     const SizedBox(width: 6),
-//                     const Text(
-//                       "of 3",
-//                       style: TextStyle(color: Colors.black54, fontSize: 13),
-//                     ),
-//                     IconButton(
-//                       icon: const Icon(Icons.arrow_forward_ios, size: 16),
-//                       onPressed: controller.nextPage,
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               const SizedBox(height: 10),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:karlfive/features/company/presentation/controller/company_account_controller.dart';
+import 'package:karlfive/features/company/presentation/controller/company_details_controller.dart';
 import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/job_update_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/single_job_details_screen.dart';
@@ -132,6 +10,7 @@ import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/utils/debug_print.dart';
 import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../recruiter_account/presentation/screens/applicants_list_screen.dart';
+import 'applicant_lists_screen.dart';
 
 class ManageJobPostScreen extends StatefulWidget {
   const ManageJobPostScreen({super.key});
@@ -146,6 +25,8 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
   final CompanyAccountController companyAccountController =
       Get.find<CompanyAccountController>();
   final ScrollController horizontalScrollController = ScrollController();
+  final CompanyDetailsController companyDetailsController =
+      Get.find<CompanyDetailsController>();
 
   @override
   void initState() {
@@ -157,6 +38,15 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
+          ),
+          onPressed: () => Get.back(),
+        ),
         title: Text(
           "All Jobs List",
           style: TextStyle(
@@ -183,8 +73,7 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: 
-          SingleChildScrollView(
+          child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +152,13 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                 // JOB ROWS
                 Column(
                   children: jobs.map((job) {
+                    // Create a reactive boolean for THIS specific job
+                    final RxBool isArchived = job.arcrivedJob.obs;
+
                     return Container(
+                      key: ValueKey(
+                        job.id,
+                      ), // Important: Helps Flutter identify each row
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -318,34 +213,95 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          // SizedBox(
+                          //   width: 140,
+                          //   child: Text("${job.applicantCount}"),
+                          // ),
                           SizedBox(
                             width: 140,
-                            child: Text("${job.applicantCount}"),
+                            child: GestureDetector(
+                              onTap: () {
+                                final controller =
+                                    Get.find<CompanyDetailsController>();
+                                controller.jobId.value =
+                                    job.id; // <-- Set the job ID
+                                controller
+                                    .fetchApplicantList(); // <-- Fetch applicants
+                                // Optionally navigate to a new screen to show applicants
+                                Get.to(
+                                  () => CompanyApplicantsListScreen(jobId: job.id),
+                                );
+                              },
+                              child: Text(
+                                "View (${job.applicantCount})",
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w600,
+                                  // decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
                           ),
+
                           SizedBox(width: 140, child: Text("${job.vacancy}")),
+
+                          // Actions Column
                           SizedBox(
                             width: 140,
                             child: Row(
                               children: [
                                 IconButton(
-                                  icon: Icon(Icons.remove_red_eye_outlined),
+                                  icon: const Icon(
+                                    Icons.remove_red_eye_outlined,
+                                  ),
                                   onPressed: () => Get.to(
                                     () => JobDetailEditScreen(jobId: job.id),
                                   ),
                                 ),
-                                ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green.shade100,
-                                    foregroundColor: Colors.green.shade800,
-                                    minimumSize: Size(60, 32),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8,
+
+                                // TOGGLE BUTTON: Archive / Unarchive
+                                Obx(
+                                  () => ElevatedButton(
+                                    onPressed:
+                                        companyDetailsController.isLoading.value
+                                        ? null // Disable while loading
+                                        : () async {
+                                            await companyDetailsController
+                                                .archiveJobs(job.id);
+
+                                            // Update the local reactive state from API response
+                                            if (companyDetailsController
+                                                    .jobData
+                                                    .value !=
+                                                null) {
+                                              isArchived.value =
+                                                  companyDetailsController
+                                                      .jobData
+                                                      .value!
+                                                      .arcrivedJob;
+                                            }
+                                          },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isArchived.value
+                                          ? Colors.red.shade100
+                                          : Colors.green.shade100,
+                                      foregroundColor: isArchived.value
+                                          ? Colors.red.shade800
+                                          : Colors.green.shade800,
+                                      minimumSize: const Size(80, 36),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
                                     ),
-                                  ),
-                                  child: Text(
-                                    "Archive",
-                                    style: TextStyle(fontSize: 12),
+                                    child: Text(
+                                      isArchived.value
+                                          ? "Unarchive"
+                                          : "Archive",
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -356,6 +312,105 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                     );
                   }).toList(),
                 ),
+                // Column(
+                //   children: jobs.map((job) {
+                //     return Container(
+                //       margin: const EdgeInsets.symmetric(vertical: 6),
+                //       padding: const EdgeInsets.all(12),
+                //       decoration: BoxDecoration(
+                //         color: Colors.white,
+                //         borderRadius: BorderRadius.circular(8),
+                //         boxShadow: [
+                //           BoxShadow(
+                //             color: Colors.black.withOpacity(0.2),
+                //             blurRadius: 6,
+                //             offset: const Offset(0, 3),
+                //           ),
+                //         ],
+                //       ),
+                //       child: Row(
+                //         children: [
+                //           SizedBox(
+                //             width: 200,
+                //             child: Text(
+                //               job.title ?? "",
+                //               overflow: TextOverflow.ellipsis,
+                //             ),
+                //           ),
+                //           SizedBox(
+                //             width: 200,
+                //             child: Text(
+                //               job.name ?? "",
+                //               overflow: TextOverflow.ellipsis,
+                //             ),
+                //           ),
+                //           SizedBox(
+                //             width: 200,
+                //             child: Text(
+                //               job.location,
+                //               overflow: TextOverflow.ellipsis,
+                //             ),
+                //           ),
+                //           SizedBox(
+                //             width: 100,
+                //             child: Text(
+                //               job.experience,
+                //               overflow: TextOverflow.ellipsis,
+                //             ),
+                //           ),
+                //           SizedBox(
+                //             width: 100,
+                //             child: Text(formatDate(job.deadline)),
+                //           ),
+                //           SizedBox(
+                //             width: 140,
+                //             child: Text(
+                //               job.derivedStatus,
+                //               overflow: TextOverflow.ellipsis,
+                //             ),
+                //           ),
+                //           SizedBox(
+                //             width: 140,
+                //             child: Text("${job.applicantCount}"),
+                //           ),
+                //           SizedBox(width: 140, child: Text("${job.vacancy}")),
+                //           SizedBox(
+                //             width: 140,
+                //             child: Row(
+                //               children: [
+                //                 IconButton(
+                //                   icon: Icon(Icons.remove_red_eye_outlined),
+                //                   onPressed: () => Get.to(
+                //                     () => JobDetailEditScreen(jobId: job.id),
+                //                   ),
+                //                 ),
+                //                 ElevatedButton(
+                //                   onPressed: () async {
+                //                     await companyDetailsController.archiveJobs(
+                //                       job.id,
+                //                     );
+                //                   },
+                //                   style: ElevatedButton.styleFrom(
+                //                     backgroundColor: Colors.green.shade100,
+                //                     foregroundColor: Colors.green.shade800,
+                //                     minimumSize: Size(60, 32),
+                //                     padding: EdgeInsets.symmetric(
+                //                       horizontal: 8,
+                //                     ),
+                //                   ),
+                //                   child: Text(
+                //                     "Archive",
+                //                     style: TextStyle(fontSize: 12),
+                //                   ),
+                //                 ),
+                //               ],
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //     );
+                //   }).toList(),
+                // ),
               ],
             ),
           ),

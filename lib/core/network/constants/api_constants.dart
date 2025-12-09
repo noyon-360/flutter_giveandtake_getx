@@ -216,6 +216,14 @@ class CompanyAccountApi {
 
       final String connectRecruiter = '$_base/add-employee-to-company';
       final String removeRecruiter = '$_base/remove-employee-to-company';
+      String archiveJobs(String jobId) =>
+      '${ApiConstants.baseUrl}/jobs/$jobId/archive';
+      String applicantJob(String jobId) =>
+      '${ApiConstants.baseUrl}/applied-jobs/job/$jobId';
+      final String candidateResume =
+      '${ApiConstants.baseUrl}/create-resume/get-resume/anjolie-reed';
+       String status(String jobId) =>
+      '${ApiConstants.baseUrl}/applied-jobs/$jobId/status';
 
       
 
