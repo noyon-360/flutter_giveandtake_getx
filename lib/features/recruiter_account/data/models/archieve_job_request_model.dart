@@ -1,14 +1,19 @@
-class UpdateJobRequest {
+class ArchieveJobRequestModel {
+  bool? adminApprove;
   List<ApplicationRequirement>? applicationRequirement;
   bool? arcrivedJob;
+  List<dynamic>? benefits;
+  String? billingPlanType;
   String? careerStage;
   String? compensation;
+  int? counter;
   String? createdAt;
   List<CustomQuestion>? customQuestion;
+  String? deactivatedAt;
   String? deadline;
   String? description;
-  String? department;
   List<dynamic>? educationExperience;
+  List<double>? embedding;
   String? employementType;
   String? experience;
   String? expiryDate;
@@ -18,8 +23,8 @@ class UpdateJobRequest {
   String? locationType;
   String? name;
   String? publishDate;
-  String? website_Url;
   String? recruiterId;
+  List<dynamic>? responsibilities;
   String? role;
   String? salaryRange;
   String? shift;
@@ -28,19 +33,26 @@ class UpdateJobRequest {
   String? updatedAt;
   String? userId;
   int? vacancy;
+  String? websiteUrl;
+  int? v;
   String? id;
 
-  UpdateJobRequest({
+  ArchieveJobRequestModel({
+    this.adminApprove,
     this.applicationRequirement,
     this.arcrivedJob,
+    this.benefits,
+    this.billingPlanType,
     this.careerStage,
     this.compensation,
+    this.counter,
     this.createdAt,
     this.customQuestion,
+    this.deactivatedAt,
     this.deadline,
     this.description,
-    this.department,
     this.educationExperience,
+    this.embedding,
     this.employementType,
     this.experience,
     this.expiryDate,
@@ -50,8 +62,8 @@ class UpdateJobRequest {
     this.locationType,
     this.name,
     this.publishDate,
-    this.website_Url,
     this.recruiterId,
+    this.responsibilities,
     this.role,
     this.salaryRange,
     this.shift,
@@ -60,27 +72,34 @@ class UpdateJobRequest {
     this.updatedAt,
     this.userId,
     this.vacancy,
+    this.websiteUrl,
+    this.v,
     this.id,
   });
 
-  factory UpdateJobRequest.fromJson(Map<String, dynamic> json) {
-    return UpdateJobRequest(
-      applicationRequirement: json['applicationRequirement'] != null
-          ? List<ApplicationRequirement>.from(json['applicationRequirement']
-          .map((x) => ApplicationRequirement.fromJson(x)))
-          : [],
+  factory ArchieveJobRequestModel.fromJson(Map<String, dynamic> json) {
+    return ArchieveJobRequestModel(
+      adminApprove: json['adminApprove'],
+      applicationRequirement: (json['applicationRequirement'] as List?)
+          ?.map((e) => ApplicationRequirement.fromJson(e))
+          .toList(),
       arcrivedJob: json['arcrivedJob'],
-      website_Url: json['website_Url'],
+      benefits: json['benefits'],
+      billingPlanType: json['billingPlanType'],
       careerStage: json['career_Stage'],
       compensation: json['compensation'],
+      counter: json['counter'],
       createdAt: json['createdAt'],
-      customQuestion: json['customQuestion'] != null
-          ? List<CustomQuestion>.from(
-          json['customQuestion'].map((x) => CustomQuestion.fromJson(x)))
-          : [],
+      customQuestion: (json['customQuestion'] as List?)
+          ?.map((e) => CustomQuestion.fromJson(e))
+          .toList(),
+      deactivatedAt: json['deactivatedAt'],
       deadline: json['deadline'],
       description: json['description'],
-      educationExperience: json['educationExperience'] ?? [],
+      educationExperience: json['educationExperience'],
+      embedding: (json['embedding'] as List?)
+          ?.map((e) => (e as num).toDouble())
+          .toList(),
       employementType: json['employement_Type'],
       experience: json['experience'],
       expiryDate: json['expiryDate'],
@@ -91,6 +110,7 @@ class UpdateJobRequest {
       name: json['name'],
       publishDate: json['publishDate'],
       recruiterId: json['recruiterId'],
+      responsibilities: json['responsibilities'],
       role: json['role'],
       salaryRange: json['salaryRange'],
       shift: json['shift'],
@@ -99,22 +119,30 @@ class UpdateJobRequest {
       updatedAt: json['updatedAt'],
       userId: json['userId'],
       vacancy: json['vacancy'],
+      websiteUrl: json['website_Url'],
+      v: json['__v'],
       id: json['_id'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'adminApprove': adminApprove,
+      'applicationRequirement':
+      applicationRequirement?.map((e) => e.toJson()).toList(),
       'arcrivedJob': arcrivedJob,
+      'benefits': benefits,
+      'billingPlanType': billingPlanType,
       'career_Stage': careerStage,
       'compensation': compensation,
+      'counter': counter,
       'createdAt': createdAt,
-      "applicationRequirement":
-      applicationRequirement?.map((e) => e.toJson()).toList(),
-      "customQuestion": customQuestion?.map((e) => e.toJson()).toList(),
+      'customQuestion': customQuestion?.map((e) => e.toJson()).toList(),
+      'deactivatedAt': deactivatedAt,
       'deadline': deadline,
       'description': description,
       'educationExperience': educationExperience,
+      'embedding': embedding,
       'employement_Type': employementType,
       'experience': experience,
       'expiryDate': expiryDate,
@@ -124,8 +152,8 @@ class UpdateJobRequest {
       'location_Type': locationType,
       'name': name,
       'publishDate': publishDate,
-      'companyUrl': website_Url,
       'recruiterId': recruiterId,
+      'responsibilities': responsibilities,
       'role': role,
       'salaryRange': salaryRange,
       'shift': shift,
@@ -134,6 +162,8 @@ class UpdateJobRequest {
       'updatedAt': updatedAt,
       'userId': userId,
       'vacancy': vacancy,
+      'website_Url': websiteUrl,
+      '__v': v,
       '_id': id,
     };
   }
@@ -154,11 +184,13 @@ class ApplicationRequirement {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'requirement': requirement,
-    'status': status,
-    '_id': id,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'requirement': requirement,
+      'status': status,
+      '_id': id,
+    };
+  }
 }
 
 class CustomQuestion {
@@ -174,8 +206,10 @@ class CustomQuestion {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'question': question,
-    '_id': id,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'question': question,
+      '_id': id,
+    };
+  }
 }

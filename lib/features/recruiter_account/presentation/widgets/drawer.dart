@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:karlfive/features/Home/presentation/screens/my_plan_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/all_jobs_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
@@ -17,7 +18,8 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
-  final RecruiterController recruiterController = Get.find<RecruiterController>();
+  final RecruiterController recruiterController =
+      Get.find<RecruiterController>();
   final ScrollController horizontalScrollController = ScrollController();
 
   late final user = recruiterController.userInfo.value!;
@@ -36,9 +38,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 child: SizedBox(
                   height: 70,
                   child: DrawerHeader(
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                    ),
+                    decoration: const BoxDecoration(color: Colors.grey),
                     child: Text(
                       "Recruiter Flow",
                       style: const TextStyle(
@@ -105,6 +105,16 @@ class _MyDrawerState extends State<MyDrawer> {
                   });
                 },
               ),
+              drawerTile(
+                icon: Icons.post_add,
+                title: "My Plan",
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.dialog(MyPlanScreen());
+                  });
+                },
+              ),
 
               drawerTile(
                 icon: Icons.lock_outline,
@@ -117,11 +127,9 @@ class _MyDrawerState extends State<MyDrawer> {
                 },
               ),
 
-
-
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: const Divider(color: Colors.grey,),
+                child: const Divider(color: Colors.grey),
               ),
 
               drawerTile(
@@ -140,7 +148,6 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 
-
   // ------------------ TILE WIDGET ------------------
   Widget drawerTile({
     required IconData icon,
@@ -154,6 +161,4 @@ class _MyDrawerState extends State<MyDrawer> {
       onTap: onTap,
     );
   }
-
-
 }

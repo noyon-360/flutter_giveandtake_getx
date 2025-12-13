@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:karlfive/features/recruiter_account/data/models/archieve_job_request_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/archieve_job_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/connect_company_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/connect_company_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/create_recruiter_response_model.dart';
@@ -27,6 +29,7 @@ abstract class Repo{
   NetworkResult<List<YourJobResponseModel>>yourJob();
   NetworkResult<GetSingleJobResponseModel>singleJob(String jobId);
   NetworkResult<JobUpdateResponseModel>singleJobUpdate(UpdateJobRequest request, String jobId);
+  NetworkResult<ArchieveJobResponseModel>archieveJobUpdate(ArchieveJobRequestModel request, String jobId);
   NetworkResult<List<GetCurrencyResponseModel>> fetchCurrency();
   NetworkResult<List<JobPostResponseModel>> createNewJobPost(JobPostRequestModel request);
   NetworkResult<void> uploadVideo(String userId, FormData formData);

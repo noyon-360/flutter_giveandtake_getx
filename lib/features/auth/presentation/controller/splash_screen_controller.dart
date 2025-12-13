@@ -9,8 +9,6 @@ import 'package:karlfive/features/recruiter_account/presentation/screens/recruit
 import '../../../company/presentation/screen/company_screen.dart';
 import '../screens/login_screen.dart';
 
-
-
 class SplashController extends GetxController {
   @override
   void onInit() {
@@ -18,17 +16,16 @@ class SplashController extends GetxController {
     _checkStartupFlow();
   }
 
-  Future<void> _checkStartupFlow() async {
-    await Future.delayed(const Duration(seconds: 2));
+  final AuthStorageService _authStorageService = AuthStorageService();
 
-    final AuthStorageService _authStorageService = AuthStorageService();
+  Future<void> _checkStartupFlow() async {
+    // Remove the old delay, but add a tiny one to ensure overlay is ready
+    await Future.delayed(const Duration(milliseconds: 500));
 
     final accessToken = await _authStorageService.getAccessToken();
 
     if (accessToken != null) {
-      // User is logged in, check their role and navigate accordingly
       final userRole = await _authStorageService.getUserRole();
-      DPrint.log("User Role: $userRole");
 
       if (userRole == 'candidate') {
         Get.offAll(() => DashboardScreen());
@@ -44,8 +41,7 @@ class SplashController extends GetxController {
         Get.offAll(() => LoginScreen());
       }
     } else {
-      // No access token, go to login
-      Get.offAll(() => LoginScreen());
+      Get.offAll(() => LoginScreen(), transition: Transition.fade);
     }
   }
 }
