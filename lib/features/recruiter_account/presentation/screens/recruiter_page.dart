@@ -24,16 +24,16 @@ class RecruiterPageScreen extends StatefulWidget {
 }
 
 class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
-  final RecruiterController recruiterController = Get.find<RecruiterController>();
+  final RecruiterController recruiterController =
+      Get.find<RecruiterController>();
   final ScrollController horizontalScrollController = ScrollController();
-
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await recruiterController.fetchProfile();
-      await recruiterController.getJob();   // <-- ADD THIS LINE
+      await recruiterController.getJob(); // <-- ADD THIS LINE
     });
   }
 
@@ -75,9 +75,9 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                             color: Colors.grey.shade300,
                             image: user.banner.isNotEmpty
                                 ? DecorationImage(
-                              image: NetworkImage(user.banner),
-                              fit: BoxFit.cover,
-                            )
+                                    image: NetworkImage(user.banner),
+                                    fit: BoxFit.cover,
+                                  )
                                 : null,
                           ),
                         ),
@@ -96,9 +96,9 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                             color: Colors.grey.shade300,
                             image: user.photo.isNotEmpty
                                 ? DecorationImage(
-                              image: NetworkImage(user.photo),
-                              fit: BoxFit.cover,
-                            )
+                                    image: NetworkImage(user.photo),
+                                    fit: BoxFit.cover,
+                                  )
                                 : null,
                           ),
                         ),
@@ -113,9 +113,16 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                             backgroundColor: const Color(0xFF2B7FD0),
                           ),
                           onPressed: () {
-                            Get.to(() => EditProfilePage(recruiterResponseModel: user,));
+                            Get.to(
+                              () =>
+                                  EditProfilePage(recruiterResponseModel: user),
+                            );
                           },
-                          icon: const Icon(Icons.edit, size: 15, color: Colors.white),
+                          icon: const Icon(
+                            Icons.edit,
+                            size: 15,
+                            color: Colors.white,
+                          ),
                           label: const Text(
                             'Edit Profile',
                             style: TextStyle(
@@ -147,7 +154,10 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                     const SizedBox(height: 6),
                     Text(
                       user.title,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -177,17 +187,25 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: (user.sLink)
-                      .map((link) => GestureDetector(
-                    onTap: () async {
-                      final Uri url = Uri.parse(link.url ?? '');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
-                      } else {
-                        Get.snackbar('Error', 'Could not open ${link.url}');
-                      }
-                    },
-                    child: SocialMedia(image: _getSocialIcon(link.label)),
-                  ))
+                      .map(
+                        (link) => GestureDetector(
+                          onTap: () async {
+                            final Uri url = Uri.parse(link.url ?? '');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } else {
+                              Get.snackbar(
+                                'Error',
+                                'Could not open ${link.url}',
+                              );
+                            }
+                          },
+                          child: SocialMedia(image: _getSocialIcon(link.label)),
+                        ),
+                      )
                       .toList(),
                 ),
 
@@ -209,7 +227,12 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              Get.dialog(ConnectCompanyDialog());
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                Get.dialog(
+                                  ConnectCompanyDialog(),
+                                  barrierDismissible: true,
+                                );
+                              });
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2B7FD0),
@@ -268,14 +291,14 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                           const SizedBox(width: 20),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
 
-                Divider(color: Color(0xFF999999),),
+                Divider(color: Color(0xFF999999)),
 
-                SizedBox(height: 20,),
+                SizedBox(height: 20),
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -300,7 +323,8 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                         'Accept': '*/*',
                         'Accept-Encoding': 'identity',
 
-                        "Authorization": "Bearer ${user.elevatorPitch?.video.encryptionKeyUrl}",
+                        "Authorization":
+                            "Bearer ${user.elevatorPitch?.video.encryptionKeyUrl}",
                         "Custom-Header": "value",
                       },
                     ),
@@ -335,25 +359,72 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Job List', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),),
-                          SizedBox(height: 20,),
-                          Divider(color: Colors.black,thickness: 2,),
-                          SizedBox(height: 20,),
+                          Text(
+                            'Job List',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Divider(color: Colors.black, thickness: 2),
+                          SizedBox(height: 20),
                           // HEADER ROW
-                        Row(
-                          children: const [
-                            SizedBox(width: 200, child: Text("Job Title", style: TextStyle(fontWeight: FontWeight.bold))),
-                            SizedBox(width: 100, child: Text("Status", style: TextStyle(fontWeight: FontWeight.bold))),
-                            SizedBox(width: 140, child: Text("Ordered", style: TextStyle(fontWeight: FontWeight.bold))),
-                            SizedBox(width: 140, child: Text("Published", style: TextStyle(fontWeight: FontWeight.bold))),
-                            SizedBox(width: 140, child: Text("Expiry", style: TextStyle(fontWeight: FontWeight.bold))),
-                            SizedBox(width: 120, child: Text("Applicants", style: TextStyle(fontWeight: FontWeight.bold))),
-                            SizedBox(width: 140, child: Text("Actions", style: TextStyle(fontWeight: FontWeight.bold))),
-                          ],
-                        ),
+                          Row(
+                            children: const [
+                              SizedBox(
+                                width: 200,
+                                child: Text(
+                                  "Job Title",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 100,
+                                child: Text(
+                                  "Status",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 140,
+                                child: Text(
+                                  "Ordered",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 140,
+                                child: Text(
+                                  "Published",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 140,
+                                child: Text(
+                                  "Expiry",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 120,
+                                child: Text(
+                                  "Applicants",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 140,
+                                child: Text(
+                                  "Actions",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
 
-
-                        const SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           const Divider(color: Colors.grey),
 
                           const SizedBox(height: 10),
@@ -370,7 +441,9 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey.shade300),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.grey.shade200,
@@ -382,18 +455,45 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
 
                                 child: Row(
                                   children: [
-                                    SizedBox(width: 200, child: Text(job.title, style: TextStyle(fontWeight: FontWeight.w600))),
-                                    SizedBox(width: 100, child: Text(job.status ?? "")),
+                                    SizedBox(
+                                      width: 200,
+                                      child: Text(
+                                        job.title,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(job.status ?? ""),
+                                    ),
 
-                                    SizedBox(width: 140, child: Text(formatDate(job.createdAt))),
-                                    SizedBox(width: 140, child: Text(formatDate(job.publishDate))),
-                                    SizedBox(width: 140, child: Text(formatDate(job.deadline))),
+                                    SizedBox(
+                                      width: 140,
+                                      child: Text(formatDate(job.createdAt)),
+                                    ),
+                                    SizedBox(
+                                      width: 140,
+                                      child: Text(formatDate(job.publishDate)),
+                                    ),
+                                    SizedBox(
+                                      width: 140,
+                                      child: Text(formatDate(job.deadline)),
+                                    ),
 
                                     SizedBox(
                                       width: 120,
                                       child: GestureDetector(
-                                        onTap: () => Get.to(() => ApplicantsListScreen(jobId: job.id)),
-                                        child: Text("View (${job.applicantCount})", style: TextStyle(color: Colors.blue)),
+                                        onTap: () => Get.to(
+                                          () => ApplicantsListScreen(
+                                            jobId: job.id,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "View (${job.applicantCount})",
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
                                       ),
                                     ),
 
@@ -403,36 +503,44 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                                         children: [
                                           IconButton(
                                             icon: Icon(Icons.remove_red_eye),
-                                            onPressed: () => Get.to(() => ArchieveJobView(jobId: job.id)),
+                                            onPressed: () => Get.to(
+                                              () => ArchieveJobView(
+                                                jobId: job.id,
+                                              ),
+                                            ),
                                           ),
                                           ElevatedButton(
-                                            onPressed: () { DPrint(); },
+                                            onPressed: () {
+                                              DPrint();
+                                            },
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.green.shade100,
-                                              foregroundColor: Colors.green.shade800,
+                                              backgroundColor:
+                                                  Colors.green.shade100,
+                                              foregroundColor:
+                                                  Colors.green.shade800,
                                               minimumSize: Size(60, 32),
-                                              padding: EdgeInsets.symmetric(horizontal: 8),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                              ),
                                             ),
-                                            child: Text("Archive", style: TextStyle(fontSize: 12)),
+                                            child: Text(
+                                              "Archive",
+                                              style: TextStyle(fontSize: 12),
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ],
                                 ),
-
                               );
                             }),
                           ),
-
                         ],
                       ),
                     ),
                   );
-
-
                 }),
-
               ],
             ),
           );
@@ -460,7 +568,6 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
     }
   }
 
-
   /// Safe date formatter — accepts String or DateTime (or null)
   String formatDate(dynamic date) {
     if (date == null) return '';
@@ -479,5 +586,4 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
       return date.toString();
     }
   }
-
 }
