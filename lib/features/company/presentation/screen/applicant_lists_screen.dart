@@ -1,162 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-
-// import '../controller/applicant_lists_controller.dart';
-
-// class CompanyApplicantsListScreen extends StatelessWidget {
-//   final String jobId;
-
-//   const CompanyApplicantsListScreen({super.key, required this.jobId});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final controller = Get.put(ApplicantListController(jobId));
-
-//     return Scaffold(
-//       backgroundColor: Colors.white,
-
-//       /// ---------------- APP BAR ----------------
-//       appBar: AppBar(
-//         elevation: 0,
-//         backgroundColor: Colors.white,
-//         leading: IconButton(
-//           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-//           onPressed: () => Get.back(),
-//         ),
-//         title: const Text(
-//           "Applicant List",
-//           style: TextStyle(
-//             color: Colors.black,
-//             fontSize: 20,
-//             fontWeight: FontWeight.w700,
-//           ),
-//         ),
-//       ),
-
-//       /// ---------------- BODY ----------------
-//       body: Padding(
-//         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             const Text(
-//               "Please update each applicant’s status at every stage of the recruitment process.",
-//               style: TextStyle(fontSize: 14, color: Colors.black54),
-//             ),
-
-//             const SizedBox(height: 20),
-
-//             /// ---------------- TABLE HEADERS ----------------
-//             Row(
-//               children: const [
-//                 Expanded(
-//                   flex: 3,
-//                   child: Text(
-//                     "Name",
-//                     style: TextStyle(
-//                       fontWeight: FontWeight.bold,
-//                       color: Color(0xff1e3a8a),
-//                     ),
-//                   ),
-//                 ),
-//                 Expanded(
-//                   flex: 2,
-//                   child: Text(
-//                     "Applied",
-//                     style: TextStyle(
-//                       fontWeight: FontWeight.bold,
-//                       color: Color(0xff1e3a8a),
-//                     ),
-//                   ),
-//                 ),
-//                 Expanded(
-//                   flex: 2,
-//                   child: Text(
-//                     "Details",
-//                     style: TextStyle(
-//                       fontWeight: FontWeight.bold,
-//                       color: Color(0xff1e3a8a),
-//                     ),
-//                   ),
-//                 ),
-//                 Expanded(
-//                   flex: 2,
-//                   child: Text(
-//                     "Status",
-//                     style: TextStyle(
-//                       fontWeight: FontWeight.bold,
-//                       color: Color(0xff1e3a8a),
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-
-//             const SizedBox(height: 8),
-//             Divider(color: Colors.grey.shade300),
-
-//             const SizedBox(height: 20),
-
-//             Expanded(
-//               child: Obx(() {
-//                 if (controller.isLoading.value) {
-//                   return const Center(child: CircularProgressIndicator());
-//                 }
-
-//                 if (controller.applicants.isEmpty) {
-//                   return const Center(
-//                     child: Text(
-//                       "No applications found",
-//                       style: TextStyle(color: Colors.black54, fontSize: 14),
-//                     ),
-//                   );
-//                 }
-
-//                 /// ---------------- APPLICANT LIST ----------------
-//                 return ListView.builder(
-//                   itemCount: controller.applicants.length,
-//                   itemBuilder: (context, index) {
-//                     final applicant = controller.applicants[index];
-
-//                     return Padding(
-//                       padding: const EdgeInsets.symmetric(vertical: 12),
-//                       child: Row(
-//                         children: [
-//                           Expanded(
-//                             flex: 3,
-//                             child: Text(applicant['name']),
-//                           ),
-//                           Expanded(
-//                             flex: 2,
-//                             child: Text(applicant['appliedDate']),
-//                           ),
-//                           Expanded(
-//                             flex: 2,
-//                             child: TextButton(
-//                               onPressed: () {},
-//                               child: const Text(
-//                                 "View",
-//                                 style: TextStyle(color: Colors.blue),
-//                               ),
-//                             ),
-//                           ),
-//                           Expanded(
-//                             flex: 2,
-//                             child: Text(applicant['status']),
-//                           ),
-//                         ],
-//                       ),
-//                     );
-//                   },
-//                 );
-//               }),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 // applicants_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -184,7 +25,19 @@ class _CompanyApplicantsListScreenState
     super.initState();
     controller = Get.find<CompanyDetailsController>();
     controller.jobId.value = widget.jobId;
-    controller.fetchApplicantList();
+
+    // First fetch applicants, THEN fetch resumes
+    controller.fetchApplicantList().then((_) {
+      // This runs only AFTER applicants are loaded
+      for (var applicant in controller.venue) {
+        final candidateUserId = applicant.user.id; 
+
+        // Optional: Add safety check
+        if (candidateUserId.isNotEmpty) {
+          controller.fetchResume(candidateUserId);
+        }
+      }
+    });
   }
 
   String formatAppliedDate(String isoString) {

@@ -8,6 +8,7 @@ import 'package:karlfive/features/company_pricing/presentation/screens/plan_pric
 import 'package:url_launcher/url_launcher.dart';
 import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../recruiter_account/presentation/screens/create_job_screen.dart';
+import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
 import '../../../recruiter_account/presentation/widgets/elevator_pitch.dart';
 import '../../../recruiter_account/presentation/widgets/social_media.dart';
 import '../controller/company_details_controller.dart';
@@ -184,17 +185,6 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
       ),
 
       body: Obx(() {
-        // if (controller.isCompanyLoading.value &&
-        //     controller.isEmployeeLoading.value) {
-        //   return const Center(child: CircularProgressIndicator());
-        // }
-
-        // if (controller.userInfo.value?.companies == null ||
-        //     controller.userInfo.value!.companies.isEmpty) {
-        //   return const Center(child: Text("No company data"));
-        // }
-
-        // final company = controller.userInfo.value!.companies.first;
         if (controller.isLoading.value) {
           return Center(child: CircularProgressIndicator());
         }
@@ -318,37 +308,6 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /// 🔹 Social Links on top
-                    // Align(
-                    //   alignment: Alignment.centerRight,
-                    //   child: Container(
-                    //     padding: const EdgeInsets.symmetric(
-                    //       horizontal: 6,
-                    //       vertical: 6,
-                    //     ),
-                    //     decoration: BoxDecoration(
-                    //       color: Colors.white,
-                    //       borderRadius: BorderRadius.circular(8),
-                    //       border: Border.all(color: Colors.grey.shade400),
-                    //     ),
-                    //     child: Wrap(
-                    //       spacing: 6,
-                    //       children: company.sLink.map((e) {
-                    //         IconData icon = FontAwesomeIcons.link;
-                    //         if (e.label.contains("LinkedIn"))
-                    //           icon = FontAwesomeIcons.linkedin;
-                    //         if (e.label.contains("Twitter"))
-                    //           icon = FontAwesomeIcons.twitter;
-                    //         if (e.label.contains("Facebook"))
-                    //           icon = FontAwesomeIcons.facebook;
-                    //         if (e.label.contains("Instagram"))
-                    //           icon = FontAwesomeIcons.instagram;
-
-                    //         return FaIcon(icon, size: 14, color: Colors.black);
-                    //       }).toList(),
-                    //     ),
-                    //   ),
-                    // ),
                     const SizedBox(height: 18),
 
                     /// 🔹 Promo text
@@ -458,37 +417,127 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
               ),
 
               /// ================= Elevator Pitch =================
-              sectionTitle("Elevator Pitch", canDelete: true),
+              // sectionTitle("Elevator Pitch", canDelete: true),
 
-              SizedBox(height: 20),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: const Color(0xFF999999), width: 1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              // SizedBox(height: 20),
+              // Container(
+              //   decoration: BoxDecoration(
+              //     color: Colors.white,
+              //     border: Border.all(color: const Color(0xFF999999), width: 1),
+              //     borderRadius: BorderRadius.circular(12),
+              //   ),
 
-                //fetch elevated pitch e
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    color: const Color(0xFF191919),
-                  ),
-                  height: 160,
-                  width: double.infinity,
-                  child: ElevatorPitchCompanySection(
-                    videoUrl: company.elevatorPitch?.video.hlsUrl,
-                    httpHeaders: {
-                      'Accept': '*/*',
-                      'Accept-Encoding': 'identity',
+              //   //fetch elevated pitch e
+              //   child: Container(
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.circular(4),
+              //       color: const Color(0xFF191919),
+              //     ),
+              //     height: 160,
+              //     width: double.infinity,
+              //     child: ElevatorPitchCompanySection(
+              //       videoUrl: company.elevatorPitch?.video.hlsUrl,
+              //       httpHeaders: {
+              //         'Accept': '*/*',
+              //         'Accept-Encoding': 'identity',
 
-                      "Authorization":
-                          "Bearer ${company.elevatorPitch?.video.encryptionKeyUrl}",
-                      "Custom-Header": "value",
-                    },
-                  ),
-                ),
-              ),
+              //         "Authorization":
+              //             "Bearer ${company.elevatorPitch?.video.encryptionKeyUrl}",
+              //         "Custom-Header": "value",
+              //       },
+              //     ),
+              //   ),
+              // ),
+              /// ================= Elevator Pitch =================
+              sectionTitle("Elevator Video Pitch"),
+              const SizedBox(height: 20),
+
+              // Check if elevator pitch exists
+              company.elevatorPitch?.video.hlsUrl != null &&
+                      company.elevatorPitch!.video.hlsUrl.isNotEmpty
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color(0xFF999999),
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: const Color(0xFF191919),
+                        ),
+                        height: 160,
+                        width: double.infinity,
+                        child: ElevatorPitchCompanySection(
+                          videoUrl: company.elevatorPitch!.video.hlsUrl,
+                          httpHeaders: {
+                            'Accept': '*/*',
+                            'Accept-Encoding': 'identity',
+                            "Authorization":
+                                "Bearer ${company.elevatorPitch!.video.encryptionKeyUrl}",
+                          },
+                        ),
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: () {
+                        // Navigate to video upload screen (same as create flow)
+                        Get.to(() => VideoUploadScreen());
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color(0xFF999999),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
+                        ),
+                        height: 160,
+                        width: double.infinity,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: const Color(0xFF191919),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/icons/gallery.png', // same icon used in create screen
+                                height: 32,
+                                width: 32,
+                                color: Colors.white70,
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Upload your company elevator pitch',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                ' Upload or view a short video',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+              const SizedBox(height: 20),
               SizedBox(height: 20),
 
               /// ================= COMPANY DETAILS =================

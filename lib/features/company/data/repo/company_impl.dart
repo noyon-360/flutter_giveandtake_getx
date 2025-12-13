@@ -30,6 +30,7 @@ import 'package:karlfive/features/company/data/model/recruiter_added_request_mod
 import 'package:karlfive/features/company/data/model/recruiter_added_response_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_response_model.dart';
+import 'package:karlfive/features/company/data/model/resume_updated_response_model.dart';
 import 'package:karlfive/features/company/data/model/single_Company_response_model.dart';
 import 'package:karlfive/features/company/data/model/status_update_response_model.dart';
 
@@ -220,6 +221,29 @@ class CompanyRepoImplementation extends CompanyRepository {
       ApiConstants.company.status(jobId),
       data: data, // send as JSON
       fromJsonT: (json) => StatusUpdateResponseModel.fromJson(json),
+    );
+  }
+
+   @override
+  NetworkResult<List<ResumeUpdatedResponseModel>> fetchResume(
+    String candidateUserId,
+  ) {
+    return _apiClient.get(
+      ApiConstants.company.fetchResume(candidateUserId),
+      fromJsonT: (json) {
+        // Critical Fix: Extract 'data' array from response
+        if (json is Map<String, dynamic> && json.containsKey('data')) {
+          final List<dynamic> dataList = json['data'];
+          return dataList
+              .map((item) => ResumeUpdatedResponseModel.fromJson(item))
+              .toList();
+        } else {
+          // Fallback: if backend sends raw list (unlikely)
+          return (json as List)
+              .map((item) => ResumeUpdatedResponseModel.fromJson(item))
+              .toList();
+        }
+      },
     );
   }
 }

@@ -36,7 +36,8 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      removePadding: true,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -229,7 +230,9 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                                     .fetchApplicantList(); // <-- Fetch applicants
                                 // Optionally navigate to a new screen to show applicants
                                 Get.to(
-                                  () => CompanyApplicantsListScreen(jobId: job.id),
+                                  () => CompanyApplicantsListScreen(
+                                    jobId: job.id,
+                                  ),
                                 );
                               },
                               child: Text(
@@ -247,7 +250,7 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
 
                           // Actions Column
                           SizedBox(
-                            width: 140,
+                            width: 180,
                             child: Row(
                               children: [
                                 IconButton(
@@ -260,27 +263,25 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                                 ),
 
                                 // TOGGLE BUTTON: Archive / Unarchive
-                                Obx(
-                                  () => ElevatedButton(
-                                    onPressed:
-                                        companyDetailsController.isLoading.value
-                                        ? null // Disable while loading
-                                        : () async {
-                                            await companyDetailsController
-                                                .archiveJobs(job.id);
+                                Obx(() {
+                                  return ElevatedButton(
+                                    onPressed: () async {
+                                      // Do NOT set isLoading globally → instead handle inside row only
+                                      await companyDetailsController
+                                          .archiveJobs(job.id);
 
-                                            // Update the local reactive state from API response
-                                            if (companyDetailsController
-                                                    .jobData
-                                                    .value !=
-                                                null) {
-                                              isArchived.value =
-                                                  companyDetailsController
-                                                      .jobData
-                                                      .value!
-                                                      .arcrivedJob;
-                                            }
-                                          },
+                                      // Update only THIS row
+                                      if (companyDetailsController
+                                              .jobData
+                                              .value !=
+                                          null) {
+                                        isArchived.value =
+                                            companyDetailsController
+                                                .jobData
+                                                .value!
+                                                .arcrivedJob;
+                                      }
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: isArchived.value
                                           ? Colors.red.shade100
@@ -289,9 +290,6 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                                           ? Colors.red.shade800
                                           : Colors.green.shade800,
                                       minimumSize: const Size(80, 36),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                      ),
                                     ),
                                     child: Text(
                                       isArchived.value
@@ -302,8 +300,8 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                }),
                               ],
                             ),
                           ),
@@ -312,318 +310,12 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                     );
                   }).toList(),
                 ),
-                // Column(
-                //   children: jobs.map((job) {
-                //     return Container(
-                //       margin: const EdgeInsets.symmetric(vertical: 6),
-                //       padding: const EdgeInsets.all(12),
-                //       decoration: BoxDecoration(
-                //         color: Colors.white,
-                //         borderRadius: BorderRadius.circular(8),
-                //         boxShadow: [
-                //           BoxShadow(
-                //             color: Colors.black.withOpacity(0.2),
-                //             blurRadius: 6,
-                //             offset: const Offset(0, 3),
-                //           ),
-                //         ],
-                //       ),
-                //       child: Row(
-                //         children: [
-                //           SizedBox(
-                //             width: 200,
-                //             child: Text(
-                //               job.title ?? "",
-                //               overflow: TextOverflow.ellipsis,
-                //             ),
-                //           ),
-                //           SizedBox(
-                //             width: 200,
-                //             child: Text(
-                //               job.name ?? "",
-                //               overflow: TextOverflow.ellipsis,
-                //             ),
-                //           ),
-                //           SizedBox(
-                //             width: 200,
-                //             child: Text(
-                //               job.location,
-                //               overflow: TextOverflow.ellipsis,
-                //             ),
-                //           ),
-                //           SizedBox(
-                //             width: 100,
-                //             child: Text(
-                //               job.experience,
-                //               overflow: TextOverflow.ellipsis,
-                //             ),
-                //           ),
-                //           SizedBox(
-                //             width: 100,
-                //             child: Text(formatDate(job.deadline)),
-                //           ),
-                //           SizedBox(
-                //             width: 140,
-                //             child: Text(
-                //               job.derivedStatus,
-                //               overflow: TextOverflow.ellipsis,
-                //             ),
-                //           ),
-                //           SizedBox(
-                //             width: 140,
-                //             child: Text("${job.applicantCount}"),
-                //           ),
-                //           SizedBox(width: 140, child: Text("${job.vacancy}")),
-                //           SizedBox(
-                //             width: 140,
-                //             child: Row(
-                //               children: [
-                //                 IconButton(
-                //                   icon: Icon(Icons.remove_red_eye_outlined),
-                //                   onPressed: () => Get.to(
-                //                     () => JobDetailEditScreen(jobId: job.id),
-                //                   ),
-                //                 ),
-                //                 ElevatedButton(
-                //                   onPressed: () async {
-                //                     await companyDetailsController.archiveJobs(
-                //                       job.id,
-                //                     );
-                //                   },
-                //                   style: ElevatedButton.styleFrom(
-                //                     backgroundColor: Colors.green.shade100,
-                //                     foregroundColor: Colors.green.shade800,
-                //                     minimumSize: Size(60, 32),
-                //                     padding: EdgeInsets.symmetric(
-                //                       horizontal: 8,
-                //                     ),
-                //                   ),
-                //                   child: Text(
-                //                     "Archive",
-                //                     style: TextStyle(fontSize: 12),
-                //                   ),
-                //                 ),
-                //               ],
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     );
-                //   }).toList(),
-                // ),
+              
               ],
             ),
           ),
 
-          // SingleChildScrollView(
-          //   scrollDirection: Axis.horizontal,
-          //   child: ConstrainedBox(
-          //     constraints: BoxConstraints(minWidth: 1000),
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.center,
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       children: [
-          //         // Text('Job List', ),
-          //         // SizedBox(height: 20,),
-          //         // SizedBox(height: 20,),
-          //         // HEADER ROW
-          //         Row(
-          //           children: const [
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Title",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Category",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Location",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Experience",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Deadline",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Status",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Applicants List",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Vacancy",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-
-          //             SizedBox(
-          //               width: 140,
-          //               child: Text(
-          //                 "Actions",
-          //                 style: TextStyle(fontWeight: FontWeight.bold),
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-
-          //         const SizedBox(height: 10),
-          //         const Divider(color: Colors.grey),
-
-          //         const SizedBox(height: 10),
-
-          //         // ----- JOB ROWS -----
-          //         // ----- JOB ROWS AS CARDS -----
-          //         Column(
-          //           children: List.generate(jobs.length, (index) {
-          //             final job = jobs[index];
-
-          //             return Container(
-          //               margin: const EdgeInsets.only(bottom: 12),
-          //               padding: const EdgeInsets.all(16),
-          //               decoration: BoxDecoration(
-          //                 color: Colors.white,
-          //                 borderRadius: BorderRadius.circular(12),
-          //                 border: Border.all(color: Colors.grey.shade300),
-          //                 boxShadow: [
-          //                   BoxShadow(
-          //                     color: Colors.grey.shade200,
-          //                     blurRadius: 4,
-          //                     offset: const Offset(0, 2),
-          //                   ),
-          //                 ],
-          //               ),
-
-          //               child: Row(
-          //                 children: [
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: Text(
-          //                       job.title ?? "",
-          //                       style: TextStyle(
-          //                         fontWeight: FontWeight.w600,
-          //                       ),
-          //                     ),
-          //                   ),
-          //                   SizedBox(
-          //                     width: 100,
-          //                     child: Text(job.jobCategoryId ?? ""),
-          //                   ),
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: Text(formatDate(job.location)),
-          //                   ),
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: Text(formatDate(job.experience)),
-          //                   ),
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: Text(formatDate(job.deadline)),
-          //                   ),
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: Text(formatDate(job.status)),
-          //                   ),
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: Text(
-          //                       formatDate(job.applicationRequirement),
-          //                     ),
-          //                   ),
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: Text(formatDate(job.vacancy)),
-          //                   ),
-
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: GestureDetector(
-          //                       onTap: () => Get.to(
-          //                         () => ApplicantsListScreen(jobId: job.id),
-          //                       ),
-          //                       child: Text(
-          //                         "View (${job.applicantCount})",
-          //                         style: TextStyle(color: Colors.blue),
-          //                       ),
-          //                     ),
-          //                   ),
-
-          //                   SizedBox(
-          //                     width: 140,
-          //                     child: Row(
-          //                       children: [
-          //                         IconButton(
-          //                           icon: Icon(
-          //                             Icons.remove_red_eye_outlined,
-          //                             color: Colors.grey.shade600,
-          //                           ),
-          //                           onPressed: () => Get.to(
-          //                             () => JobDetailEditScreen(
-          //                               jobId: job.id,
-          //                             ),
-          //                           ),
-          //                         ),
-          //                         ElevatedButton(
-          //                           onPressed: () {
-          //                             DPrint();
-          //                           },
-          //                           style: ElevatedButton.styleFrom(
-          //                             backgroundColor:
-          //                                 Colors.green.shade100,
-          //                             foregroundColor:
-          //                                 Colors.green.shade800,
-          //                             minimumSize: Size(60, 32),
-          //                             padding: EdgeInsets.symmetric(
-          //                               horizontal: 8,
-          //                             ),
-          //                           ),
-          //                           child: Text(
-          //                             "Archive",
-          //                             style: TextStyle(fontSize: 12),
-          //                           ),
-          //                         ),
-          //                       ],
-          //                     ),
-          //                   ),
-          //                 ],
-          //               ),
-          //             );
-          //           }),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+   
         );
       }),
     );

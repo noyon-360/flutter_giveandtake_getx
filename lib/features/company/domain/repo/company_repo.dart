@@ -13,6 +13,7 @@ import '../../data/model/recruiter_added_request_model.dart';
 import '../../data/model/recruiter_added_response_model.dart';
 import '../../data/model/remove_recruiter_request_model.dart';
 import '../../data/model/remove_recruiter_response_model.dart';
+import '../../data/model/resume_updated_response_model.dart';
 import '../../data/model/single_Company_response_model.dart';
 import '../../data/model/status_update_response_model.dart';
 import '../../data/model/update_company_response_model.dart';
@@ -44,4 +45,5 @@ abstract class CompanyRepository {
     String jobId,
     Map<String, dynamic> data,
   );
+  NetworkResult<List<ResumeUpdatedResponseModel>> fetchResume(String userId);
 }

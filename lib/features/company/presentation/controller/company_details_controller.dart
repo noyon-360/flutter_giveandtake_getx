@@ -9,6 +9,7 @@ import 'package:karlfive/features/company/data/model/company_applicant_list_resp
 import 'package:karlfive/features/company/data/model/employee_fetch_single_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_response_model.dart';
+import 'package:karlfive/features/company/data/model/resume_updated_response_model.dart';
 import 'package:karlfive/features/company/data/model/status_update_response_model.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/model/all_user_response_model.dart';
@@ -27,6 +28,7 @@ class CompanyDetailsController extends BaseController {
   // Change from Rxn (problematic) to Rx with explicit null
   final userInfo = Rx<SingleCompanyResponseModel?>(null);
   final employee = Rx<EmployeeFetchSingleModel?>(null);
+    var resume = <ResumeUpdatedResponseModel>[].obs;
   final remove = Rx<RemoveRecruiterResponseModel?>(
     null,
   ); // <AllUserResponseModel>
@@ -327,4 +329,31 @@ class CompanyDetailsController extends BaseController {
       },
     );
   }
+
+
+Future<void> fetchResume(String candidateUserId) async {
+  setLoading(true);
+  setError("");
+
+  if (candidateUserId.isEmpty) {
+    setError('Invalid candidate ID');
+    setLoading(false);
+    return;
+  }
+
+  final result = await _companyRepo.fetchResume(candidateUserId);
+
+  result.fold(
+    (fail) {
+      setError(fail.message);
+      DPrint.log('data fetch failed: ${fail.message}');
+      setLoading(false);
+    },
+    (success) {
+      DPrint.log('data fetch successfully: ${success.message}');
+      resume.value = success.data;
+      setLoading(false);
+    },
+  );
+}
 }
