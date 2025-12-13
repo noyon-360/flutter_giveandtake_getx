@@ -2,7 +2,7 @@ import 'job_update_request_model.dart';
 
 class GetSingleJobResponseModel {
   String? id;
-  //User? user;
+  User? user;
   Recruiter? recruiter;
   String? title;
   String? description;
@@ -26,6 +26,7 @@ class GetSingleJobResponseModel {
   List<ApplicationRequirement>? applicationRequirement;
   List<CustomQuestion>? customQuestion;
   String? jobApprove;
+  String? website_Url;
   bool? adminApprove;
   DateTime? publishDate;
   String? employementType;
@@ -40,7 +41,7 @@ class GetSingleJobResponseModel {
 
   GetSingleJobResponseModel({
     this.id,
-    //this.user,
+    this.user,
     this.recruiter,
     this.title,
     this.description,
@@ -64,6 +65,7 @@ class GetSingleJobResponseModel {
     this.applicationRequirement,
     this.customQuestion,
     this.jobApprove,
+    this.website_Url,
     this.adminApprove,
     this.publishDate,
     this.employementType,
@@ -80,12 +82,13 @@ class GetSingleJobResponseModel {
   factory GetSingleJobResponseModel.fromJson(Map<String, dynamic> json) {
     return GetSingleJobResponseModel(
       id: json['_id'],
-      //user: json['userId'] != null ? User.fromJson(json['userId']) : null,
+      user: json['userId'] != null ? User.fromJson(json['userId']) : null,
       recruiter: json['recruiterId'] != null ? Recruiter.fromJson(json['recruiterId']) : null,
       title: json['title'],
       description: json['description'],
       salaryRange: json['salaryRange'],
       location: json['location'],
+      website_Url: json['website_Url'],
       shift: json['shift'],
       responsibilities: json['responsibilities'] != null ? List<String>.from(json['responsibilities']) : [],
       educationExperience: json['educationExperience'] != null ? List<String>.from(json['educationExperience']) : [],
@@ -122,72 +125,67 @@ class GetSingleJobResponseModel {
   }
 }
 
-// ----------------- Nested Models -----------------
-// class User {
-//   String? id;
-//   Avatar? avatar;
-//   VerificationInfo? verificationInfo;
-//   String? name;
-//   String? email;
-//   String? role;
-//   String? address;
-//   DateTime? dateOfBirth;
-//   bool? deactivate;
-//   List<SecurityQuestion>? securityQuestions;
-//   DateTime? createdAt;
-//   DateTime? updatedAt;
-//   String? slug;
-//
-//   User({
-//     this.id,
-//     this.avatar,
-//     this.verificationInfo,
-//     this.name,
-//     this.email,
-//     this.role,
-//     this.address,
-//     this.dateOfBirth,
-//     this.deactivate,
-//     this.securityQuestions,
-//     this.createdAt,
-//     this.updatedAt,
-//     this.slug,
-//   });
-//
-//   factory User.fromJson(Map<String, dynamic> json) => User(
-//     id: json['_id'],
-//     avatar: json['avatar'] != null ? Avatar.fromJson(json['avatar']) : null,
-//     verificationInfo: json['verificationInfo'] != null ? VerificationInfo.fromJson(json['verificationInfo']) : null,
-//     name: json['name'],
-//     email: json['email'],
-//     role: json['role'],
-//     address: json['address'],
-//     dateOfBirth: json['dateOfbirth'] != null ? DateTime.parse(json['dateOfbirth']) : null,
-//     deactivate: json['deactivate'],
-//     securityQuestions: json['securityQuestions'] != null
-//         ? List<SecurityQuestion>.from(json['securityQuestions'].map((x) => SecurityQuestion.fromJson(x)))
-//         : [],
-//     createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-//     updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
-//     slug: json['slug'],
-//   );
-//
-//   Map<String, dynamic> toJson() => {
-//     '_id': id,
-//     'avatar': avatar?.toJson(),
-//     'verificationInfo': verificationInfo?.toJson(),
-//     'name': name,
-//     'email': email,
-//     'role': role,
-//     'address': address,
-//     'dateOfbirth': dateOfBirth?.toIso8601String(),
-//     'deactivate': deactivate,
-//     'securityQuestions': securityQuestions?.map((x) => x.toJson()).toList(),
-//     'createdAt': createdAt?.toIso8601String(),
-//     'updatedAt': updatedAt?.toIso8601String(),
-//     'slug': slug,
-//   };
-// }
+class User {
+  final Avatar avatar;
+  final VerificationInfo verificationInfo;
+  final String id;
+  final String name;
+  final String email;
+  final String role;
+  final String address;
+  final String dateOfBirth;
+  final String passwordResetToken;
+  final bool deactivate;
+  final List<SecurityQuestion> securityQuestions;
+  final String createdAt;
+  final String updatedAt;
+  final String slug;
+  final int v;
+  final String refreshToken;
+
+  User({
+    required this.avatar,
+    required this.verificationInfo,
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.role,
+    required this.address,
+    required this.dateOfBirth,
+    required this.passwordResetToken,
+    required this.deactivate,
+    required this.securityQuestions,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.slug,
+    required this.v,
+    required this.refreshToken,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      avatar: Avatar.fromJson(json["avatar"]),
+      verificationInfo: VerificationInfo.fromJson(json["verificationInfo"]),
+      id: json["_id"],
+      name: json["name"],
+      email: json["email"],
+      role: json["role"],
+      address: json["address"],
+      dateOfBirth: json["dateOfbirth"],
+      passwordResetToken: json["password_reset_token"],
+      deactivate: json["deactivate"],
+      securityQuestions: (json["securityQuestions"] as List)
+          .map((e) => SecurityQuestion.fromJson(e))
+          .toList(),
+      createdAt: json["createdAt"],
+      updatedAt: json["updatedAt"],
+      slug: json["slug"],
+      v: json["__v"],
+      refreshToken: json["refresh_token"],
+    );
+  }
+}
+
 
 class Avatar {
   String? url;

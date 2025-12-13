@@ -19,7 +19,7 @@ dependencies:
     http_auth: ^1.0.4
 
     # State manage
-    get: ^4.7.2
+    get: ^4.7.3
 
     # UI
     google_fonts: ^6.3.1

@@ -10,6 +10,8 @@ import 'package:karlfive/features/recruiter_account/data/models/get_job_response
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../domain/repo/repo.dart';
+import '../models/archieve_job_request_model.dart';
+import '../models/archieve_job_response_model.dart';
 import '../models/connect_company_request_model.dart';
 import '../models/connect_company_response_model.dart';
 import '../models/create_recruiter_response_model.dart';
@@ -120,6 +122,14 @@ class RepoImplementation extends Repo {
     return _apiClient.patch(
       ApiConstants.recruiter.updateSingleJob(jobId), data: request.toJson(),
       fromJsonT: (json) => JobUpdateResponseModel.fromJson(json),);
+  }
+
+
+  @override
+  NetworkResult<ArchieveJobResponseModel>archieveJobUpdate(ArchieveJobRequestModel request, String jobId) {
+    return _apiClient.patch(
+      ApiConstants.recruiter.updateArchieveJob(jobId), data: request.toJson(),
+      fromJsonT: (json) => ArchieveJobResponseModel.fromJson(json),);
   }
 
 

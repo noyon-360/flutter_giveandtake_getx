@@ -15,25 +15,27 @@ import 'package:get/get.dart';
 class CareerStageController extends GetxController {
   final RxString selectedCareerStage = ''.obs;
 
-  // Map display names to backend enum values
   final Map<String, String> careerStageMap = {
-    'New Entry': 'new_entry',
-    'Experienced Professional': 'experienced_professional',
-    'Career Returner': 'career_returner',
+    'New Entry': 'New Entry',
+    'Experienced Professional': 'Experienced Professional',
+    'Career Returner': 'Career Returner',
   };
 
-  // List for dropdown display
   List<String> get careerStages => careerStageMap.keys.toList();
 
-  // Get backend value
-  String getBackendValue(String displayName) {
-    return careerStageMap[displayName] ?? '';
-  }
-
+  // Convert backend → display name
   String getDisplayName(String backendValue) {
+    if (backendValue.isEmpty) return '';
     return careerStageMap.entries
-        .firstWhere((e) => e.value == backendValue, orElse: () => const MapEntry('', ''))
+        .firstWhere(
+          (e) => e.value == backendValue,
+      orElse: () => const MapEntry('', ''),
+    )
         .key;
   }
 
+  // Convert display → backend value (for saving)
+  String getBackendValue(String displayName) {
+    return careerStageMap[displayName] ?? '';
+  }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
+import 'package:karlfive/features/recruiter_account/data/models/archieve_job_request_model.dart' hide ApplicationRequirement, CustomQuestion;
 import 'package:karlfive/features/recruiter_account/data/models/connect_company_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/follow_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
@@ -46,6 +47,8 @@ class RecruiterController extends BaseController {
   // In RecruiterController
   final JobFormController jobFormController = Get.put(JobFormController());
   RxString? companySearchQuery;
+  // Add this line in RecruiterController
+  final archiveLoadingMap = <String, bool>{}.obs;
 
   final category = <Category>[].obs;
   final currency = <GetCurrencyResponseModel>[].obs;
@@ -222,6 +225,9 @@ class RecruiterController extends BaseController {
     setLoading(true);
     setError("");
 
+    // ADD THIS PRINT
+    print("SENDING TO BACKEND → companyUrl = '${request.website_Url}'");
+    print("FULL JSON BEING SENT → ${request.toJson()}");
     final result = await _recruiterRepo.singleJobUpdate(request, jobId);
 
     result.fold(
@@ -233,6 +239,8 @@ class RecruiterController extends BaseController {
           (success) {
         DPrint.log("Update job success: ${success.message}");
         // if your repo returns updated job
+        DPrint.log(success.data.website_Url);
+        DPrint.log("FULL JSON BEING SENT → ${request.toJson()}");
 
         Get.back();
         setLoading(false);
@@ -240,6 +248,37 @@ class RecruiterController extends BaseController {
     );
   }
 
+
+
+  Future<void> updateArchieveJob({
+    required ArchieveJobRequestModel request,
+    required String jobId,
+  }) async {
+    final result = await _recruiterRepo.archieveJobUpdate(request, jobId);
+
+    result.fold(
+          (fail) {
+        DPrint.log("Archive job failed: ${fail.message}");
+        // you can show snackbar here if you want
+      },
+          (success) {
+        DPrint.log("Archive job success: ${success.message}");
+
+        // THIS IS THE IMPORTANT PART
+        final index = yourJobList.indexWhere((j) => j.id == jobId);
+        if (index != -1) {
+          // Update the field directly on the existing model
+          yourJobList[index].arcrivedJob = request.arcrivedJob!;
+          yourJobList[index] = yourJobList[index];
+          // Tell GetX the list changed → UI updates immediately
+          //yourJobList.refresh();
+        }
+
+        // Optional: refresh whole list from server (safe fallback)
+        // getJob();
+      },
+    );
+  }
 
 
 
@@ -298,12 +337,19 @@ class RecruiterController extends BaseController {
       },
           (success) {
         DPrint.log("your job fetch success result : ${success.message}");
+
+
+
         singleJob.value = success.data;
         employeeController.selectedEmploymentType.value =
             employeeController.getDisplayName(singleJob.value?.employementType ?? '');
 
+        // 2. Experience Level (field: experience → "Entry Level", "Senior Level", etc.)
+        final rawExperience = singleJob.value?.experience?.trim() ?? '';
         experienceLevelController.selectedExperienceLevel.value =
-            experienceLevelController.getDisplayName(singleJob.value?.experience ?? '');
+        experienceLevelController.experienceLevels.contains(rawExperience)
+            ? rawExperience
+            : 'Mid Level'; // fallback
 
         locationTypeController.selectedLocationType.value =
             locationTypeController.getDisplayName(singleJob.value?.locationType ?? '');
@@ -315,7 +361,7 @@ class RecruiterController extends BaseController {
         print("Raw experience from API: '${singleJob.value?.experience}'");
         print("Raw careerStage from API: '${singleJob.value?.careerStage}'");
 
-        print("Experience display name: '${experienceLevelController.getDisplayName(singleJob.value?.experience ?? '')}'");
+        //print("Experience display name: '${experienceLevelController.getDisplayName(singleJob.value?.experience ?? '')}'");
         print("CareerStage display name: '${careerStageController.getDisplayName(singleJob.value?.careerStage ?? '')}'");
 
         print("Selected Experience: ${experienceLevelController.selectedExperienceLevel.value}");

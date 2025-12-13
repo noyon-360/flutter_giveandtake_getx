@@ -81,6 +81,7 @@ class RecruiterAccountApi {
   String updateRecruiter(String userId) => '$_base/recruiter-account/$userId';
   String getSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId';
   String updateSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/update/$jobId';
+  String updateArchieveJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId/archive';
 }
 
 class ElevatorPitchVideo {
