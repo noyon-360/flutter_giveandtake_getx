@@ -1,3 +1,5 @@
+import 'job_update_request_model.dart';
+
 class JobPostRequestModel {
   final String userId;
   final String title;
@@ -24,6 +26,7 @@ class JobPostRequestModel {
   final String publishDate;
   final String careerStage;
   final String locationType;
+  final String website_Url;
 
   JobPostRequestModel({
     required this.userId,
@@ -51,6 +54,7 @@ class JobPostRequestModel {
     required this.publishDate,
     required this.careerStage,
     required this.locationType,
+    required this.website_Url,
   });
 
   Map<String, dynamic> toJson() {

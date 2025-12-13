@@ -1,7 +1,7 @@
 class ApiConstants {
   /// [Base Configuration]
-  // static const String baseDomain = 'http://10.10.5.59:5001'; /// soykot ip
-  static const String baseDomain = 'https://api.evpitch.com';
+     //static const String baseDomain = 'http://10.10.5.33:5001';  /// soykot ip
+  // static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
   // add by zafor
@@ -9,8 +9,8 @@ class ApiConstants {
   // static const String baseDomain = 'http://10.10.5.88:5001'; // zafor
   //add by zafor end
 
-  // static const String baseDomain = 'https://api.evpitch.com';
-  // static const String baseDomain = 'http://10.10.5.33:5001';//eshita
+  //static const String baseDomain = 'https://api.evpitch.com';
+  static const String baseDomain = 'http://10.10.5.33:5001';//eshita
 
   // static const String baseUrl = '$baseDomain/api/v1';
 
@@ -53,8 +53,8 @@ class ApiConstants {
   static ContentEndpoints get content => ContentEndpoints();
   static ElevatorPitchVideo get elevatorPitchVideo => ElevatorPitchVideo();
   static CategoryEndpoints get category => CategoryEndpoints();
-  static  AlluserEndpoints get allusers => AlluserEndpoints();
-  
+  static AlluserEndpoints get allusers => AlluserEndpoints();
+  static CompanyAccountApi get company => CompanyAccountApi();
 }
 
 class JobEndpoints {
@@ -63,12 +63,14 @@ class JobEndpoints {
 
 class RecruiterAccountApi {
   final String getCompany = '${ApiConstants.baseUrl}/all/companies';
+  final String changePass = '${ApiConstants.baseUrl}/user/change-password';
   final String getCategory = '${ApiConstants.baseUrl}/category/job-category';
   final String getCurrency = '${ApiConstants.baseUrl}/courency';
   final String uploadVideo = '${ApiConstants.baseUrl}/all/companies';
   final String createJob = '${ApiConstants.baseUrl}/jobs';
   final String getJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
-  final String connectCompany = '${ApiConstants.baseUrl}/company/apply-for-company-employee';
+  final String connectCompany =
+      '${ApiConstants.baseUrl}/company/apply-for-company-employee';
   final String follow = '${ApiConstants.baseUrl}/following/follow';
   //final String yourJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
 
@@ -77,6 +79,9 @@ class RecruiterAccountApi {
   String fetchRecruiterInfo(String userId) =>
       '$_base/recruiter-account/$userId';
   String updateRecruiter(String userId) => '$_base/recruiter-account/$userId';
+  String getSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId';
+  String updateSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/update/$jobId';
+  String updateArchieveJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId/archive';
 }
 
 class ElevatorPitchVideo {
@@ -194,4 +199,14 @@ class CategoryEndpoints {
 class AlluserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/all';
   final String alluser = '$_base/user';
+}
+class CompanyAccountApi {
+  static const String _base = '${ApiConstants.baseUrl}/company';
+  final String createcompany = '$_base';
+    String fetchCompanyInfo(String userId) =>
+      '$_base/user/$userId';
+
+      String fetchUpdateInfo(String userId) =>
+      '$_base/$userId';
+
 }

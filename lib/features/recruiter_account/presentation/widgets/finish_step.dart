@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/country_city_controller.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/job_preview_screen.dart';
 import '../controller/job_controller/career_stage_controller.dart';
 import '../controller/job_controller/employment_type_controller.dart';
 import '../controller/job_controller/experience_level_controller.dart';
@@ -8,7 +9,7 @@ import '../controller/job_controller/job_posting_expiration_controller.dart';
 import '../controller/job_controller/location_type_controller.dart';
 import '../controller/job_posting_controller.dart';
 import '../controller/recruiter_controller.dart';
-import '../screens/job_preview_screen.dart';
+import '../screens/job_update_screen.dart';
 
 class FinishStep extends StatelessWidget {
   const FinishStep({super.key});
@@ -39,15 +40,17 @@ class FinishStep extends StatelessWidget {
     // Extract category ID (or empty if null)
     final categoryId = selectedCategoryModel?.id ?? '';
 
-    _submit() {
+    submit() {
       recruiterController.createJobPost(
           controller.jobTitle.value,
           controller.jobDescriptionPlain.value,
           '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
           controller.vacanciesInt,
-          experienceController.selectedExperienceLevel.value,
+          // 5. Experience Level → backend expects: "Entry Level", "Senior Level", etc.
+          experienceController.selectedExperienceLevel.value.isNotEmpty
+              ? experienceController.selectedExperienceLevel.value
+              : '',
           '${jobPostingExpirationController.finalDeadlineDate.value}',
-          //here i have to add category id how to do it
           categoryId,
           controller.selectedCategory.value,
           controller.selectedRole.value,
@@ -58,10 +61,9 @@ class FinishStep extends StatelessWidget {
             employmentTypeController.selectedEmploymentType.value,
           ),
           controller.companyWebsite.value,
-          //here i have to pass two date together
           controller.selectedDate.value.toString(),
-          careerStageController.selectedCareerStage.value,
-          locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value));
+          careerStageController.getBackendValue(careerStageController.selectedCareerStage.value),
+          locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value), controller.companyWebsite.value);
     }
 
 
@@ -108,7 +110,7 @@ class FinishStep extends StatelessWidget {
               // Publish Button
               ElevatedButton(
                 onPressed: () {
-                  _submit();
+                  submit();
                   Get.snackbar(
                     "Success",
                     "Job post published successfully!",

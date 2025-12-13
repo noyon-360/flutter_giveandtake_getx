@@ -2,12 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/archive_job.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/edit_profile_page.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/post_job_screen.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/public_view_screen.dart';
-import 'package:karlfive/features/recruiter_account/presentation/widgets/connect_with_company_dialog.dart';
-import 'package:karlfive/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../create_job/presentation/screen/create_job_screen.dart';
 import '../widgets/social_media.dart';
@@ -33,6 +27,9 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      appBar: AppBar(
+        title: Text('Public view'),
+      ),
       body: SafeArea(
         child: Obx(() {
           if (recruiterController.isLoading.value) {

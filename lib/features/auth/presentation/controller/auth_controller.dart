@@ -132,7 +132,7 @@ class AuthController extends BaseController {
           }
           setLoading(false);
           Get.offAll(() => CreateCompanyAccountPage());
-        } else {
+        }else {
           setError("You are not authorized to login as candidate");
           setLoading(false);
         }

@@ -66,7 +66,7 @@ class CreateJobScreen extends StatelessWidget {
                         child: stepWidget,
                       ),
                     ),
-                
+
                     SizedBox()
                   ],
                 ),

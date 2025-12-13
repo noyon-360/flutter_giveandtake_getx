@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_recruiter_response_model.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/company_image_controller.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/video_upload_screen.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../controller/country_city_controller.dart';
@@ -810,7 +811,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 Container(
                   width: 150,
-                  child: ElevatedButton(onPressed: (){Get.back();},
+                  child: ElevatedButton(onPressed: () => Get.to(() => RecruiterPageScreen()),
                       style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2B7FD0),
                     shape: RoundedRectangleBorder(
