@@ -15,6 +15,7 @@ import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
 import '../../../home_static_screens/presentation/screen/blog.dart';
 import '../../../home_static_screens/presentation/screen/frequently_questions.dart';
 import '../../../home_static_screens/presentation/screen/privacy_policy.dart';
+import '../../../job_listing/presentation/screens/all_jobs_screen.dart';
 import '../screens/my_plan_screen.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -45,6 +46,13 @@ class _AppDrawerState extends State<AppDrawer> {
               title: "Elevator Pitch & Resume",
               onTap: () {
                 Get.to (()=> ElevatorResumeScreen ());
+              },
+            ),
+            ListTileForNav(
+              title: "Jobs",
+              liconPath: "assets/icons/list.png", // Reusing list icon or suitable one
+              onTap: () {
+                Get.to(() => const AllJobsScreen());
               },
             ),
             ListTileForNav(

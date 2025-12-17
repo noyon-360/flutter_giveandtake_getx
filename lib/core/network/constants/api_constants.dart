@@ -60,7 +60,13 @@ class ApiConstants {
 }
 
 class JobEndpoints {
-  String getJobs(int limit) => '${ApiConstants.baseUrl}/jobs?limit=$limit';
+  String getJobs(int page, int limit, {String? search}) {
+    String url = '${ApiConstants.baseUrl}/jobs?page=$page&limit=$limit';
+    if (search != null && search.isNotEmpty) {
+      url += '&search=${Uri.encodeQueryComponent(search)}';
+    }
+    return url;
+  }
 }
 
 class RecruiterAccountApi {
