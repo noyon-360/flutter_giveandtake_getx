@@ -1,19 +1,14 @@
 class UpdateJobRequest {
-  bool? adminApprove;
   List<ApplicationRequirement>? applicationRequirement;
   bool? arcrivedJob;
-  List<dynamic>? benefits;
-  String? billingPlanType;
   String? careerStage;
   String? compensation;
-  int? counter;
   String? createdAt;
   List<CustomQuestion>? customQuestion;
   String? deadline;
   String? description;
   String? department;
   List<dynamic>? educationExperience;
-  List<double>? embedding;
   String? employementType;
   String? experience;
   String? expiryDate;
@@ -23,8 +18,8 @@ class UpdateJobRequest {
   String? locationType;
   String? name;
   String? publishDate;
+  String? website_Url;
   String? recruiterId;
-  List<dynamic>? responsibilities;
   String? role;
   String? salaryRange;
   String? shift;
@@ -36,21 +31,16 @@ class UpdateJobRequest {
   String? id;
 
   UpdateJobRequest({
-    this.adminApprove,
     this.applicationRequirement,
     this.arcrivedJob,
-    this.benefits,
-    this.billingPlanType,
     this.careerStage,
     this.compensation,
-    this.counter,
     this.createdAt,
     this.customQuestion,
     this.deadline,
     this.description,
     this.department,
     this.educationExperience,
-    this.embedding,
     this.employementType,
     this.experience,
     this.expiryDate,
@@ -60,8 +50,8 @@ class UpdateJobRequest {
     this.locationType,
     this.name,
     this.publishDate,
+    this.website_Url,
     this.recruiterId,
-    this.responsibilities,
     this.role,
     this.salaryRange,
     this.shift,
@@ -75,17 +65,14 @@ class UpdateJobRequest {
 
   factory UpdateJobRequest.fromJson(Map<String, dynamic> json) {
     return UpdateJobRequest(
-      adminApprove: json['adminApprove'],
       applicationRequirement: json['applicationRequirement'] != null
           ? List<ApplicationRequirement>.from(json['applicationRequirement']
           .map((x) => ApplicationRequirement.fromJson(x)))
           : [],
       arcrivedJob: json['arcrivedJob'],
-      benefits: json['benefits'] ?? [],
-      billingPlanType: json['billingPlanType'],
+      website_Url: json['website_Url'],
       careerStage: json['career_Stage'],
       compensation: json['compensation'],
-      counter: json['counter'],
       createdAt: json['createdAt'],
       customQuestion: json['customQuestion'] != null
           ? List<CustomQuestion>.from(
@@ -94,9 +81,6 @@ class UpdateJobRequest {
       deadline: json['deadline'],
       description: json['description'],
       educationExperience: json['educationExperience'] ?? [],
-      embedding: json['embedding'] != null
-          ? List<double>.from(json['embedding'].map((x) => x.toDouble()))
-          : [],
       employementType: json['employement_Type'],
       experience: json['experience'],
       expiryDate: json['expiryDate'],
@@ -107,7 +91,6 @@ class UpdateJobRequest {
       name: json['name'],
       publishDate: json['publishDate'],
       recruiterId: json['recruiterId'],
-      responsibilities: json['responsibilities'] ?? [],
       role: json['role'],
       salaryRange: json['salaryRange'],
       shift: json['shift'],
@@ -122,14 +105,9 @@ class UpdateJobRequest {
 
   Map<String, dynamic> toJson() {
     return {
-      'adminApprove': adminApprove,
-
       'arcrivedJob': arcrivedJob,
-      'benefits': benefits,
-      'billingPlanType': billingPlanType,
       'career_Stage': careerStage,
       'compensation': compensation,
-      'counter': counter,
       'createdAt': createdAt,
       "applicationRequirement":
       applicationRequirement?.map((e) => e.toJson()).toList(),
@@ -137,7 +115,6 @@ class UpdateJobRequest {
       'deadline': deadline,
       'description': description,
       'educationExperience': educationExperience,
-      'embedding': embedding,
       'employement_Type': employementType,
       'experience': experience,
       'expiryDate': expiryDate,
@@ -147,8 +124,8 @@ class UpdateJobRequest {
       'location_Type': locationType,
       'name': name,
       'publishDate': publishDate,
+      'companyUrl': website_Url,
       'recruiterId': recruiterId,
-      'responsibilities': responsibilities,
       'role': role,
       'salaryRange': salaryRange,
       'shift': shift,

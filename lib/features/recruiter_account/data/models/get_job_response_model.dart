@@ -1,63 +1,63 @@
-import 'package:flutx_core/core/debug_print.dart';
-
+// job_response.dart
 class YourJobResponseModel {
   final String id;
   final String userId;
-  final String companyId;
+  final String recruiterId;
   final String title;
   final String description;
-  final String? salaryRange;
+  final String salaryRange;
   final String location;
-  final String? shift;
-  final List<dynamic>? responsibilities;
-  final List<dynamic>? educationExperience;
-  final List<dynamic>? benefits;
+  final String shift;
+  final List<dynamic> responsibilities;
+  final List<dynamic> educationExperience;
+  final List<dynamic> benefits;
   final int vacancy;
   final int counter;
   final List<double> embedding;
   final String experience;
-  final DateTime deadline;
-  final String? status;
+  final DateTime? deadline;
+  final String status;
   final String jobCategoryId;
   final String name;
   final String role;
   final String compensation;
-  final bool arcrivedJob;
+   bool arcrivedJob;
   final List<ApplicationRequirement> applicationRequirement;
   final List<CustomQuestion> customQuestion;
   final String jobApprove;
   final bool adminApprove;
-  final DateTime publishDate;
+  final DateTime? publishDate;
   final String employementType;
   final String locationType;
   final String careerStage;
-  final String websiteUrl;
-  final DateTime expiryDate;
+  final String websiteUrl; // mapped from website_Url
+  final DateTime? expiryDate;
   final String billingPlanType;
   final DateTime? deactivatedAt;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final int v;
   final int applicantCount;
   final String derivedStatus;
 
   YourJobResponseModel({
     required this.id,
     required this.userId,
-    required this.companyId,
+    required this.recruiterId,
     required this.title,
     required this.description,
-    this.salaryRange,
+    required this.salaryRange,
     required this.location,
-    this.shift,
-    this.responsibilities,
-    this.educationExperience,
-    this.benefits,
+    required this.shift,
+    required this.responsibilities,
+    required this.educationExperience,
+    required this.benefits,
     required this.vacancy,
     required this.counter,
     required this.embedding,
     required this.experience,
-    required this.deadline,
-    this.status,
+    this.deadline,
+    required this.status,
     required this.jobCategoryId,
     required this.name,
     required this.role,
@@ -67,46 +67,60 @@ class YourJobResponseModel {
     required this.customQuestion,
     required this.jobApprove,
     required this.adminApprove,
-    required this.publishDate,
+    this.publishDate,
     required this.employementType,
     required this.locationType,
     required this.careerStage,
     required this.websiteUrl,
-    required this.expiryDate,
+    this.expiryDate,
     required this.billingPlanType,
     this.deactivatedAt,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
+    required this.v,
     required this.applicantCount,
     required this.derivedStatus,
   });
 
+  static DateTime? _parseDate(dynamic v) {
+    if (v == null) return null;
+    if (v is DateTime) return v;
+    try {
+      return DateTime.parse(v.toString());
+    } catch (_) {
+      return null;
+    }
+  }
+
   factory YourJobResponseModel.fromJson(Map<String, dynamic> json) {
+    List<double> toDoubleList(dynamic list) {
+      if (list is! List) return [];
+      return list.map<double>((e) => (e is num) ? e.toDouble() : double.tryParse(e.toString()) ?? 0.0).toList();
+    }
+
     return YourJobResponseModel(
-      id: json['_id'] as String,
-      userId: json['userId'] as String,
-      companyId: json['companyId'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      salaryRange: json['salaryRange'] as String?,
-      location: json['location'] as String,
-      shift: json['shift'] as String?,
-      responsibilities: json['responsibilities'] as List<dynamic>?,
-      educationExperience: json['educationExperience'] as List<dynamic>?,
-      benefits: json['benefits'] as List<dynamic>?,
-      vacancy: json['vacancy'] as int,
-      counter: json['counter'] as int? ?? 0,
-      embedding: (json['embedding'] as List<dynamic>)
-          .map((e) => (e as num).toDouble())
-          .toList(),
-      experience: json['experience'] as String,
-      deadline: DateTime.parse(json['deadline'] as String),
-      status: json['status'] as String?,
-      jobCategoryId: json['jobCategoryId'] as String,
-      name: json['name'] as String,
-      role: json['role'] as String,
-      compensation: json['compensation'] as String? ?? '',
-      arcrivedJob: json['arcrivedJob'] as bool? ?? false,
+      id: json['_id']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
+      recruiterId: json['recruiterId']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      salaryRange: json['salaryRange']?.toString() ?? '',
+      location: json['location']?.toString() ?? '',
+      shift: json['shift']?.toString() ?? '',
+      responsibilities: json['responsibilities'] as List<dynamic>? ?? [],
+      educationExperience: json['educationExperience'] as List<dynamic>? ?? [],
+      benefits: json['benefits'] as List<dynamic>? ?? [],
+      vacancy: (json['vacancy'] is int) ? json['vacancy'] : int.tryParse('${json['vacancy']}') ?? 0,
+      counter: (json['counter'] is int) ? json['counter'] : int.tryParse('${json['counter']}') ?? 0,
+      embedding: toDoubleList(json['embedding']),
+      experience: json['experience']?.toString() ?? '',
+      deadline: _parseDate(json['deadline']),
+      status: json['status']?.toString() ?? '',
+      jobCategoryId: json['jobCategoryId']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      role: json['role']?.toString() ?? '',
+      compensation: json['compensation']?.toString() ?? '',
+      arcrivedJob: json['arcrivedJob'] == true,
       applicationRequirement: (json['applicationRequirement'] as List<dynamic>?)
           ?.map((e) => ApplicationRequirement.fromJson(e as Map<String, dynamic>))
           .toList() ??
@@ -115,25 +129,70 @@ class YourJobResponseModel {
           ?.map((e) => CustomQuestion.fromJson(e as Map<String, dynamic>))
           .toList() ??
           [],
-      jobApprove: json['jobApprove'] as String? ?? 'pending',
-      adminApprove: json['adminApprove'] as bool? ?? false,
-      publishDate: DateTime.parse(json['publishDate'] as String),
-      employementType: json['employement_Type'] as String? ?? 'full-time',
-      locationType: json['location_Type'] as String? ?? 'onsite',
-      careerStage: json['career_Stage'] as String? ?? 'New Entry',
-      websiteUrl: (json['website_Url'] as String?) ?? '',
-      expiryDate: DateTime.parse(json['expiryDate'] as String),
-      billingPlanType: json['billingPlanType'] as String? ?? 'free',
-      deactivatedAt: json['deactivatedAt'] != null
-          ? DateTime.parse(json['deactivatedAt'] as String)
-          : null,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      applicantCount: json['applicantCount'] as int? ?? 0,
-      derivedStatus: json['derivedStatus'] as String? ?? 'Pending',
+      jobApprove: json['jobApprove']?.toString() ?? '',
+      adminApprove: json['adminApprove'] == true,
+      publishDate: _parseDate(json['publishDate']),
+      employementType: json['employement_Type']?.toString() ?? '',
+      locationType: json['location_Type']?.toString() ?? '',
+      careerStage: json['career_Stage']?.toString() ?? '',
+      websiteUrl: json['website_Url']?.toString() ?? '',
+      expiryDate: _parseDate(json['expiryDate']),
+      billingPlanType: json['billingPlanType']?.toString() ?? '',
+      deactivatedAt: _parseDate(json['deactivatedAt']),
+      createdAt: _parseDate(json['createdAt']),
+      updatedAt: _parseDate(json['updatedAt']),
+      v: (json['__v'] is int) ? json['__v'] : int.tryParse('${json['__v']}') ?? 0,
+      applicantCount: (json['applicantCount'] is int) ? json['applicantCount'] : int.tryParse('${json['applicantCount']}') ?? 0,
+      derivedStatus: json['derivedStatus']?.toString() ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    String? toIso(DateTime? d) => d?.toUtc().toIso8601String();
+    return {
+      '_id': id,
+      'userId': userId,
+      'recruiterId': recruiterId,
+      'title': title,
+      'description': description,
+      'salaryRange': salaryRange,
+      'location': location,
+      'shift': shift,
+      'responsibilities': responsibilities,
+      'educationExperience': educationExperience,
+      'benefits': benefits,
+      'vacancy': vacancy,
+      'counter': counter,
+      'embedding': embedding,
+      'experience': experience,
+      'deadline': toIso(deadline),
+      'status': status,
+      'jobCategoryId': jobCategoryId,
+      'name': name,
+      'role': role,
+      'compensation': compensation,
+      'arcrivedJob': arcrivedJob,
+      'applicationRequirement': applicationRequirement.map((e) => e.toJson()).toList(),
+      'customQuestion': customQuestion.map((e) => e.toJson()).toList(),
+      'jobApprove': jobApprove,
+      'adminApprove': adminApprove,
+      'publishDate': toIso(publishDate),
+      'employement_Type': employementType,
+      'location_Type': locationType,
+      'career_Stage': careerStage,
+      'website_Url': websiteUrl,
+      'expiryDate': toIso(expiryDate),
+      'billingPlanType': billingPlanType,
+      'deactivatedAt': toIso(deactivatedAt),
+      'createdAt': toIso(createdAt),
+      'updatedAt': toIso(updatedAt),
+      '__v': v,
+      'applicantCount': applicantCount,
+      'derivedStatus': derivedStatus,
+    };
+  }
 }
+
 class ApplicationRequirement {
   final String requirement;
   final String status;
@@ -145,17 +204,21 @@ class ApplicationRequirement {
     required this.id,
   });
 
-  factory ApplicationRequirement.fromJson(Map<String, dynamic> json) => ApplicationRequirement(
-    requirement: json["requirement"],
-    status: json["status"],
-    id: json["_id"],
-  );
+  factory ApplicationRequirement.fromJson(Map<String, dynamic> json) {
+    return ApplicationRequirement(
+      requirement: json['requirement']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      id: json['_id']?.toString() ?? '',
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-    "requirement": requirement,
-    "status": status,
-    "_id": id,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'requirement': requirement,
+      'status': status,
+      '_id': id,
+    };
+  }
 }
 
 class CustomQuestion {
@@ -167,13 +230,14 @@ class CustomQuestion {
     required this.id,
   });
 
-  factory CustomQuestion.fromJson(Map<String, dynamic> json) => CustomQuestion(
-    question: json["question"],
-    id: json["_id"],
-  );
+  factory CustomQuestion.fromJson(Map<String, dynamic> json) {
+    return CustomQuestion(
+      question: json['question']?.toString() ?? '',
+      id: json['_id']?.toString() ?? '',
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-    "question": question,
-    "_id": id,
-  };
+  Map<String, dynamic> toJson() {
+    return {'question': question, '_id': id};
+  }
 }

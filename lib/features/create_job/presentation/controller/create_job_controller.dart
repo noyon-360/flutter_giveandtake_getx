@@ -1,11 +1,10 @@
 import 'dart:convert';
+
 // import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-
-import '../../../../core/network/api_client.dart';
 import '../../domain/category_repo.dart';
 
 class CreateJobPostingController extends GetxController {
@@ -52,7 +51,7 @@ class CreateJobPostingController extends GetxController {
   //   CategoryController(CategoryRepoImpl(apiClient: ApiClient())),
   // );
 
-  final String apiUrl = "https://countriesnow.space/api/v0.1/countries";
+  final String apiUrl = "http:localhost:5009/api/v1/countries";
   // final String categoryApiUrl =
   //     "https://api.evpitch.com/api/v1/category/job-category";
 

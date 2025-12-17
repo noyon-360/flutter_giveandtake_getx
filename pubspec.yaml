@@ -19,7 +19,7 @@ dependencies:
     http_auth: ^1.0.4
 
     # State manage
-    get: ^4.7.2
+    get: ^4.7.3
 
     # UI
     google_fonts: ^6.3.1
@@ -35,6 +35,8 @@ dependencies:
     flutter_quill: ^11.4.2
     table_calendar: ^3.0.9
     html_editor_enhanced: ^2.7.1
+    dotted_border: ^2.0.0
+  
 
 
     # Api and cache

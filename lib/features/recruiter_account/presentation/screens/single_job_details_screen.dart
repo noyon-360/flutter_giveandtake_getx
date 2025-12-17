@@ -11,7 +11,9 @@ import '../../../../core/theme/input_decoration_extensions.dart';
 import '../controller/job_controller/career_stage_controller.dart';
 import '../controller/job_controller/employment_type_controller.dart';
 import '../controller/job_controller/experience_level_controller.dart';
+import '../controller/job_controller/job_posting_expiration_controller.dart';
 import '../controller/job_controller/location_type_controller.dart';
+import '../widgets/recuired_item.dart';
 
 class JobDetailEditScreen extends StatefulWidget {
   final String jobId;
@@ -26,28 +28,18 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
   late JobEditController controller = Get.put(JobEditController());
   late LocationController locationController = LocationController();
 
-  // final EmploymentTypeController employeeController = Get.put(
-  //   EmploymentTypeController(),
-  // );
-  // final ExperienceLevelController experienceLevelController = Get.put(
-  //   ExperienceLevelController(),
-  // );
-  // final LocationTypeController locationTypeController = Get.put(
-  //   LocationTypeController(),
-  // );
-  // final CareerStageController careerStageController = Get.put(
-  //   CareerStageController(),
-  // );
-
   late EmploymentTypeController employeeController;
   late ExperienceLevelController experienceLevelController;
   late LocationTypeController locationTypeController;
   late CareerStageController careerStageController;
+  late JobPostingExpirationController jobPostingExpirationController;
+
 
   @override
   void initState() {
     super.initState();
 
+    jobPostingExpirationController = Get.put(JobPostingExpirationController());
     // Put all controllers safely
     controller = Get.put(JobEditController());
     locationController = Get.put(LocationController());
@@ -74,23 +66,7 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
         actions: [
           Obx(
             () => controller.isEditMode.value
-                ? Row(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          controller.isEditMode(false);
-                        },
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: controller.saveJob,
-                        child: const Text("Save"),
-                      ),
-                    ],
-                  )
+                ? Row(children: [])
                 : IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: controller.toggleEditMode,
@@ -128,22 +104,80 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
           child: Text(text ?? "Not Provided"),
         );
 
+
+
+        List<String>? parts = job.location?.split(",");
+
+        String? city = parts?.first;
+        String? country = parts?.last;
+
+        print("City: $city");
+        print("Country: $country");
+
+
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ====== VIEW MODE ======
               if (!controller.isEditMode.value) ...[
+
+
                 title("Job Title"),
                 readonlyValue(job.title),
-                title("Department"),
-                readonlyValue(job.department),
                 title("Category"),
                 readonlyValue(job.name),
                 title("Role"),
                 readonlyValue(job.role),
-                title("Location"),
-                readonlyValue(job.location),
+                Row(mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          title("Country"),
+                          Container(
+                            width:double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: Colors.grey.shade300
+                              )
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(country!),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(width: 6,),
+
+                    Expanded(
+                      child: Column(
+                        children: [
+                          title("City"),
+                          Container(
+                            width:double.infinity,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                    color: Colors.grey.shade300
+                                )
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(city!),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  ],
+                ),
                 title("Employment Type"),
                 readonlyValue(job.employementType),
                 title("Experience Level"),
@@ -172,6 +206,11 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                       ? DateFormat('yyyy-MM-dd').format(job.publishDate!)
                       : "Immediately",
                 ),
+
+                title("Company Website"),
+                readonlyValue(
+                  job.website_Url ?? "",
+                ),
                 const SizedBox(height: 50),
               ]
               // ====== EDIT MODE ======
@@ -187,19 +226,6 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   onChanged: (v) => controller.jobTitle.value = v,
                   decoration: context.primaryInputDecoration.copyWith(
                     hintText: "Enter job title",
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                const Text(
-                  "Department*",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                ),
-                TextFormField(
-                  initialValue: controller.department.value,
-                  onChanged: (v) => controller.department.value = v,
-                  decoration: context.primaryInputDecoration.copyWith(
-                    hintText: "Enter department",
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -286,18 +312,21 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                 ),
                 const SizedBox(height: 16),
 
+
+                // here add fetched country and city
                 CountryCitySearchableDropdown(controller: locationController),
 
                 // Add all other fields similarly...
                 // (Vacancies, Compensation, Employment Type, etc.)
                 // For brevity, I’ll skip repeating all — just follow the same pattern
-
                 const Text("Number of Vacancies *"),
                 TextFormField(
                   initialValue: controller.vacancies.value,
                   keyboardType: TextInputType.number,
                   onChanged: (v) => controller.vacancies.value = v,
-                  decoration: context.primaryInputDecoration.copyWith(hintText: "1"),
+                  decoration: context.primaryInputDecoration.copyWith(
+                    hintText: "1",
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -305,7 +334,9 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                 TextFormField(
                   initialValue: controller.compensation.value,
                   onChanged: (v) => controller.compensation.value = v,
-                  decoration: context.primaryInputDecoration.copyWith(hintText: "e.g. 50,000"),
+                  decoration: context.primaryInputDecoration.copyWith(
+                    hintText: "e.g. 50,000",
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -314,6 +345,11 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   employeeController.selectedEmploymentType,
                   employeeController.employmentTypes,
                 ),
+                _buildDropdown(
+                  "Location Type *",
+                  locationTypeController.selectedLocationType,
+                  locationTypeController.locationTypes,
+                ),
 
                 _buildDropdown(
                   "Experience Level *",
@@ -321,11 +357,6 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   experienceLevelController.experienceLevels,
                 ),
 
-                _buildDropdown(
-                  "Location Type *",
-                  locationTypeController.selectedLocationType,
-                  locationTypeController.locationTypes,
-                ),
 
                 _buildDropdown(
                   "Career Stage *",
@@ -361,6 +392,132 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   ),
                 ),
 
+                const SizedBox(height: 20),
+
+                // ====================== PUBLISH DATE SECTION ======================
+                const Text(
+                  "Publish Settings",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+
+                // Publish Now Switch
+                Obx(
+                  () => Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Publish Now",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Switch(
+                        value: controller.publishNow.value,
+                        activeColor: Theme.of(context).primaryColor,
+                        onChanged: (bool value) {
+                          controller.togglePublishNow(value);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Schedule Publish Calendar (only if NOT publish now)
+                // Schedule Publish Calendar (only if NOT publish now)
+                Obx(() {
+                  if (controller.publishNow.value) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Schedule Publish Date",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          SizedBox(
+                            height: 340,
+                            child: CalendarDatePicker(
+                              initialDate: controller.safeInitialDate,
+                              firstDate: DateTime(
+                                DateTime.now().year,
+                                DateTime.now().month,
+                                DateTime.now().day,
+                              ), // today at 00:00
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365),
+                              ),
+                              onDateChanged: (date) =>
+                                  controller.updateSelectedPublishDate(date),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          Obx(() {
+                            final date = controller.selectedPublishDate.value;
+                            if (date == null) return const SizedBox.shrink();
+
+                            final formatted = DateFormat(
+                              'dd MMMM yyyy',
+                            ).format(date);
+                            return Text(
+                              "Job will be published on: $formatted",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.blueAccent,
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 30),
+
+                // Application Requirements
+                const Text(
+                  "Application Requirements",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Obx(
+                  () => controller.resumeVisible.value
+                      ? RequirementItem(
+                          label: "Resume",
+                          selectedStatus: controller.resumeStatus,
+                          onDelete: () =>
+                              controller.removeRequirement('resume'),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                const SizedBox(height: 12),
+                Obx(
+                  () => controller.visaVisible.value
+                      ? RequirementItem(
+                          label: "Valid visa for this job location?",
+                          selectedStatus: controller.visaStatus,
+                          onDelete: () => controller.removeRequirement('visa'),
+                        )
+                      : const SizedBox.shrink(),
+                ),
                 const SizedBox(height: 30),
 
                 // Custom Questions (simplified)
@@ -369,10 +526,21 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ...controller.customQuestions.map(
-                  (q) => Padding(
+                      (q) => Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: TextFormField(
                       initialValue: q,
+                      decoration: InputDecoration(
+                        hintText: "Enter question",
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(), // default border
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey,),
+                        ),
+                      ),
                       onChanged: (v) {
                         final i = controller.customQuestions.indexOf(q);
                         controller.customQuestions[i] = v;
@@ -380,6 +548,7 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                     ),
                   ),
                 ),
+
                 TextButton.icon(
                   onPressed: () => controller.customQuestions.add(''),
                   icon: const Icon(Icons.add),
@@ -387,6 +556,58 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                 ),
 
                 const SizedBox(height: 40),
+
+                const Text("Company Website)"),
+                TextFormField(
+                  initialValue: controller.companyWebsite.value,
+                  onChanged: (v) => controller.companyWebsite.value = v,
+                  decoration: context.primaryInputDecoration.copyWith(
+                    hintText: "company website",
+                  ),
+                ),
+
+
+                SizedBox(height: 30,),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        controller.isEditMode(false);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2B7FD0),
+                        minimumSize: const Size(160, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    SizedBox(width: 30),
+                    ElevatedButton(
+                      onPressed: controller.saveJob,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2B7FD0),
+                        minimumSize: const Size(160, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+
+                      child: const Text(
+                        "Save",
+                        style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 50,)
               ],
             ],
           ),

@@ -18,9 +18,11 @@ import '../../../recruiter_account/presentation/controller/upload_elevator_pitch
 import '../../../recruiter_account/presentation/widgets/bio.dart';
 
 import '../../data/model/single_Company_response_model.dart';
+import '../../data/model/update_company_response_model.dart';
 import '../controller/company_account_controller.dart';
 import '../widget/custom_text_field.dart';
 
+import '../widget/month_added_widget.dart';
 import 'company_details_screen.dart';
 
 class CompanyEditAccountPage extends StatefulWidget {
@@ -106,12 +108,15 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
   void initState() {
     super.initState();
     final company = widget.companyData.companies.first;
+    // final honor = widget.companyData.honors.first;
+    final List<Honor> awards = widget.companyData.honors;
 
     // Fill text fields
     controller.companyNameController.text = company.cname ?? '';
     controller.postalCodeController.text = company.zipcode ?? '';
     controller.emailController.text = company.cemail ?? '';
     controller.industryController.text = company.industry ?? '';
+    // controller.awardFields = honor.title.map((e) => {'title': e}).toList();
 
     // About Us
     String cleanAboutUs(String? html) {
@@ -159,16 +164,79 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
     if (company.clogo.isNotEmpty) {
       imagePickerController.existingImageUrl.value = company.clogo;
     }
+
+    // === SERVICES ===
+    controller.serviceControllers.clear();
+    if (company.service != null && company.service.isNotEmpty) {
+      for (var service in company.service) {
+        controller.serviceControllers.add(TextEditingController(text: service));
+      }
+    } else {
+      controller.serviceControllers.add(TextEditingController());
+    }
+
+    // === RECRUITERS ===
+    controller.employeeControllers.clear();
+    controller.employeeIdMap.clear();
+    if (company.employeesId != null && company.employeesId.isNotEmpty) {
+      for (var email in company.employeesId) {
+        controller.employeeControllers.add(TextEditingController(text: email));
+      }
+    }
+    if (controller.employeeControllers.isEmpty) {
+      controller.employeeControllers.add(TextEditingController());
+    }
+
+    // === AWARDS & HONORS ===
+    controller.awardFields.clear();
+
+    if (awards.isNotEmpty) {
+      for (var award in awards) {
+        controller.awardFields.add({
+          'title': TextEditingController(text: award.title ?? ''),
+          'issuer': TextEditingController(
+            text: award.programeName ?? '',
+          ), // ← Use programeName
+          'date': TextEditingController(text: award.programeDate ?? ''),
+          'description': TextEditingController(text: award.description ?? ''),
+        });
+      }
+    } else {
+      controller.addAwardField(); // add one empty field
+    }
+
+    controller.awardFields.refresh();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
+          ),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          "Edit Company Account",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        actions: const [
+          SizedBox(width: 48), // Balances the leading icon
+        ],
+      ),
 
-      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -177,16 +245,15 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
 
             children: [
-              const SizedBox(height: 51),
-              Text(
-                " Edit Company Account",
-                style: TextStyle(
-                  color: AppColors.textBlack,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-
+              // const SizedBox(height: 51),
+              // Text(
+              //   " Edit Company Account",
+              //   style: TextStyle(
+              //     color: AppColors.textBlack,
+              //     fontSize: 18,
+              //     fontWeight: FontWeight.w500,
+              //   ),
+              // ),
               const SizedBox(height: 28),
 
               Text(
@@ -949,122 +1016,212 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
               ),
 
               const SizedBox(height: 25),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Award Description*",
-                  style: TextStyle(
-                    color: AppColors.textBlack,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+
+              const Text(
+                "Award Description*",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
-              const SizedBox(height: 7),
+              const SizedBox(height: 12),
 
-              Obx(() {
-                final showFields = controller.awardFields.isNotEmpty;
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Award & Honors",
-                        style: TextStyle(
-                          color: const Color(0xFF0A0A0A),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                        ),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Award & Honors",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
                       ),
-                      Text(
-                        "Highlight your achievements and recognitions.",
-                        style: TextStyle(
-                          color: const Color(0xFF2A2A2A),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
+                    ),
+                    const Text(
+                      "Highlight your achievements and recognitions.",
+                      style: TextStyle(fontSize: 12, color: AppColors.textGrey),
+                    ),
 
-                      const SizedBox(height: 12),
+                    const SizedBox(height: 20),
 
-                      // Dynamic Award Fields inside the same container
-                      Column(
+                    // Dynamic Award Cards
+                    Obx(
+                      () => Column(
                         children: List.generate(controller.awardFields.length, (
                           index,
                         ) {
                           final fields = controller.awardFields[index];
+
                           return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Colors.grey.shade300),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.1),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
                                 ),
                               ],
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Header: Award Title + Remove Button
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Award ${index + 1}",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                      onPressed: () =>
+                                          controller.removeAwardField(index),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(),
+
                                 CustomTextField(
                                   label: "Award Title",
-                                  hintText: "e.g.Employee of the Year",
+                                  hintText: "e.g. Employee of the Year",
                                   controller: fields['title'],
                                   isRequired: true,
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 12),
+
                                 CustomTextField(
                                   label: "Program Name",
                                   hintText: "e.g. Company Recognition Program",
                                   controller: fields['issuer'],
                                   isRequired: true,
                                 ),
-                                const SizedBox(height: 8),
-                                CustomTextField(
-                                  label: "Program Date",
-                                  hintText: "MMYYYY",
-                                  controller: fields['date'],
-                                  isRequired: true,
+                                const SizedBox(height: 12),
+
+                                // Program Date - Month/Year Picker
+                                const Text(
+                                  "Program Date",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () async {
+                                    int? initMonth, initYear;
+                                    final text = fields['date']!.text;
+                                    if (text.length == 6) {
+                                      initMonth = int.tryParse(
+                                        text.substring(0, 2),
+                                      );
+                                      initYear = int.tryParse(
+                                        text.substring(2),
+                                      );
+                                    }
+
+                                    final result =
+                                        await showDialog<Map<String, int>>(
+                                          context: context,
+                                          builder: (_) => MonthYearPickerDialog(
+                                            initialMonth: initMonth,
+                                            initialYear: initYear,
+                                          ),
+                                        );
+
+                                    if (result != null) {
+                                      final month = result['month']!
+                                          .toString()
+                                          .padLeft(2, '0');
+                                      final year = result['year'].toString();
+                                      // fields['date']?.text = "$month/$year";
+                                      fields['date']?.text =
+                                          month + year; // e.g. 122025
+                                    }
+                                  },
+                                  child: AbsorbPointer(
+                                    child: TextFormField(
+                                      controller: fields['date'],
+                                      decoration: InputDecoration(
+                                        hintText: "MMYYYY",
+                                        suffixIcon: const Icon(
+                                          Icons.calendar_today_outlined,
+                                          size: 20,
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.grey[50],
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.grey.shade400,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                      validator: (val) {
+                                        if (val == null || val.isEmpty)
+                                          return "Required";
+                                        if (!RegExp(r'^\d{6}$').hasMatch(val))
+                                          return "Format: MMYYYY";
+                                        final m = int.tryParse(
+                                          val.substring(0, 2),
+                                        );
+                                        if (m == null || m < 1 || m > 12)
+                                          return "Invalid month";
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
                                 CustomTextField(
                                   label: "Award Short Description",
-                                  hintText: "Briefly describe the award",
+                                  hintText:
+                                      "Briefly describe the award and what you achieved",
                                   controller: fields['description'],
                                   isRequired: true,
-                                  maxLines: 3,
+                                  maxLines: 4,
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 16),
+
+                                // Add Another Award Button
                                 Align(
                                   alignment: Alignment.centerRight,
-                                  child: ElevatedButton(
-                                    onPressed: () =>
-                                        controller.removeAwardField(index),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red[100],
-                                      foregroundColor: Colors.red[800],
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
+                                  child: TextButton.icon(
+                                    onPressed: controller.addAwardField,
+                                    icon: const Icon(
+                                      Icons.add_circle_outline,
+                                      size: 18,
                                     ),
-                                    child: const Text("Remove Award"),
+                                    label: const Text("Add Another Award"),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.primaryWhite,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -1072,37 +1229,32 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                           );
                         }),
                       ),
+                    ),
 
-                      // Add Award Button always at bottom
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: ElevatedButton(
-                          onPressed: controller.addAwardField,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(
-                              0xFFFFFFFF,
-                            ), // white background
-                            foregroundColor: Colors.black, // text color
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              side: const BorderSide(
-                                color: Colors.grey, // border color
-                                width: 1, // border width
-                              ),
-                            ),
-                          ),
-                          child: const Text("Add Award"),
+                    const SizedBox(height: 12),
+
+                    // Main "Add Award" Button
+                    ElevatedButton.icon(
+                      onPressed: controller.addAwardField,
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text("Add Award"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        elevation: 0,
+                        side: BorderSide(color: Colors.grey.shade400),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
                       ),
-                    ],
-                  ),
-                );
-              }),
+                    ),
+                  ],
+                ),
+              ),
 
               const SizedBox(height: 16),
 
@@ -1119,31 +1271,6 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                         if (controller.isLoading.value) return;
 
                         try {
-                          // Collect data
-                          final services = controller.getServices();
-                          final employees = controller.getEmployees();
-
-                          // Extract emails from "Name (email)" format
-                          final recruiterEmails = employees
-                              .map((e) {
-                                final match = RegExp(
-                                  r'\(([^)]+)\)',
-                                ).firstMatch(e);
-                                return match?.group(1) ??
-                                    (e.contains('@') ? e.trim() : null);
-                              })
-                              .where(
-                                (email) => email != null && email.isNotEmpty,
-                              )
-                              .cast<String>()
-                              .toList();
-
-                          final cleanRecruiterIds = recruiterEmails.join(",");
-
-                          final awardsJson = controller.getAwards().isEmpty
-                              ? "[]"
-                              : jsonEncode(controller.getAwards());
-
                           // Validate country & city
                           final country =
                               jobController.selectedCountry.value ?? '';
@@ -1164,7 +1291,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                             return;
                           }
 
-                          // Allow saving if either new image OR existing URL exists
+                          // Validate banner & logo
                           if (bannerPickerController.selectedImage.value ==
                                   null &&
                               bannerPickerController
@@ -1190,15 +1317,14 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                             return;
                           }
 
-                          // CALL THE API – Pass File? (nullable!)
+                          // Get awards JSON
+                          final awardsJson = jsonEncode(controller.getAwards());
+
+                          // Call updateCompany
                           await controller.updateCompany(
                             widget.companyData.companies.first.id,
-                            bannerPickerController
-                                .selectedImage
-                                .value, // File? → null = keep old
-                            imagePickerController
-                                .selectedImage
-                                .value, // File? → null = keep old
+                            bannerPickerController.selectedImage.value, // File?
+                            imagePickerController.selectedImage.value, // File?
                             controller.companyNameController.text.trim(),
                             country,
                             city,
@@ -1214,8 +1340,8 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                             _instaTEController.text.trim(),
                             _fiverrTEController.text.trim(),
                             _comapanyTEController.text.trim(),
-                            services.join(", "),
-                            cleanRecruiterIds,
+                            "", // services (handled internally by getServices())
+                            "", // recruiters (handled by employeeIdMap)
                             awardsJson,
                           );
 
@@ -1223,7 +1349,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                             "Success",
                             "Company updated successfully!",
                           );
-                          // Optional: Get.off(() => CompanyDetailsPage());
+                          Get.off(() => CompanyDetailsPage());
                         } catch (e) {
                           debugPrint("Save Error: $e");
                           Get.snackbar("Error", "Failed to update company: $e");
@@ -1261,7 +1387,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                         ),
                       ),
                       child: Text(
-                        'Cancle',
+                        'Cancel',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -1272,103 +1398,6 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                   ),
                 ],
               ),
-
-              // Save Button
-              // PrimaryButton(
-              //   text: "Save",
-              //   onPressed: () async {
-              //     if (!controller.formKey.currentState!.validate()) return;
-              //     if (controller.isLoading.value) return;
-
-              //     try {
-              //       // Collect data
-              //       final services = controller.getServices();
-              //       final employees = controller.getEmployees();
-
-              //       // Extract emails from "Name (email)" format
-              //       final recruiterEmails = employees
-              //           .map((e) {
-              //             final match = RegExp(r'\(([^)]+)\)').firstMatch(e);
-              //             return match?.group(1) ??
-              //                 (e.contains('@') ? e.trim() : null);
-              //           })
-              //           .where((email) => email != null && email.isNotEmpty)
-              //           .cast<String>()
-              //           .toList();
-
-              //       final cleanRecruiterIds = recruiterEmails.join(",");
-
-              //       final awardsJson = controller.getAwards().isEmpty
-              //           ? "[]"
-              //           : jsonEncode(controller.getAwards());
-
-              //       // Validate country & city
-              //       final country = jobController.selectedCountry.value ?? '';
-              //       final city = jobController.selectedCity.value ?? '';
-              //       if (country.isEmpty || city.isEmpty) {
-              //         Get.snackbar("Error", "Please select country and city");
-              //         return;
-              //       }
-
-              //       final zipCode = int.tryParse(
-              //         controller.postalCodeController.text.trim(),
-              //       );
-              //       if (zipCode == null) {
-              //         Get.snackbar("Error", "Invalid postal code");
-              //         return;
-              //       }
-
-              //       // Allow saving if either new image OR existing URL exists
-              //       if (bannerPickerController.selectedImage.value == null &&
-              //           bannerPickerController.existingImageUrl.value.isEmpty) {
-              //         Get.snackbar("Error", "Please upload a company banner");
-              //         return;
-              //       }
-              //       if (imagePickerController.selectedImage.value == null &&
-              //           imagePickerController.existingImageUrl.value.isEmpty) {
-              //         Get.snackbar("Error", "Please upload a company logo");
-              //         return;
-              //       }
-
-              //       // CALL THE API – Pass File? (nullable!)
-              //       await controller.updateCompany(
-              //         widget.companyData.companies.first.id,
-              //         bannerPickerController
-              //             .selectedImage
-              //             .value, // File? → null = keep old
-              //         imagePickerController
-              //             .selectedImage
-              //             .value, // File? → null = keep old
-              //         controller.companyNameController.text.trim(),
-              //         country,
-              //         city,
-              //         zipCode,
-              //         controller.emailController.text.trim(),
-              //         _descriptionTController.text.trim(),
-              //         controller.industryController.text.trim(),
-              //         _linkedINTEController.text.trim(),
-              //         _twitterTEController.text.trim(),
-              //         _upworkTEController.text.trim(),
-              //         _facebookTEController.text.trim(),
-              //         _tiktokTEController.text.trim(),
-              //         _instaTEController.text.trim(),
-              //         _fiverrTEController.text.trim(),
-              //         _comapanyTEController.text.trim(),
-              //         services.join(", "),
-              //         cleanRecruiterIds,
-              //         awardsJson,
-              //       );
-
-              //       Get.snackbar("Success", "Company updated successfully!");
-              //       // Optional: Get.off(() => CompanyDetailsPage());
-              //     } catch (e) {
-              //       debugPrint("Save Error: $e");
-              //       Get.snackbar("Error", "Failed to update company: $e");
-              //     }
-              //   },
-              //   width: double.infinity,
-              //   height: 45,
-              // ),
             ],
           ),
         ),

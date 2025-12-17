@@ -3,13 +3,18 @@ import 'dart:io';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
+import 'package:karlfive/features/company/presentation/screen/manage_job_req_screen.dart';
+import 'package:karlfive/features/recruiter_account/data/models/archieve_job_request_model.dart'
+    hide ApplicationRequirement, CustomQuestion;
 import 'package:karlfive/features/recruiter_account/data/models/connect_company_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/follow_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_company_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_single_job_response_model.dart' hide ApplicationRequirement, CustomQuestion;
-import 'package:karlfive/features/recruiter_account/data/models/job_update_request_model.dart' hide ApplicationRequirement, CustomQuestion;
+import 'package:karlfive/features/recruiter_account/data/models/get_single_job_response_model.dart'
+    hide ApplicationRequirement, CustomQuestion;
+import 'package:karlfive/features/recruiter_account/data/models/job_update_request_model.dart'
+    hide ApplicationRequirement, CustomQuestion;
 import 'package:karlfive/features/recruiter_account/domain/repo/repo.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/upload_elevator_pitch.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
@@ -46,6 +51,8 @@ class RecruiterController extends BaseController {
   // In RecruiterController
   final JobFormController jobFormController = Get.put(JobFormController());
   RxString? companySearchQuery;
+  // Add this line in RecruiterController
+  final archiveLoadingMap = <String, bool>{}.obs;
 
   final category = <Category>[].obs;
   final currency = <GetCurrencyResponseModel>[].obs;
@@ -54,9 +61,8 @@ class RecruiterController extends BaseController {
   final selectedCompany = RxnString();
 
   final yourJobList = <YourJobResponseModel>[].obs;
-  final Rxn<GetSingleJobResponseModel> singleJob = Rxn<
-      GetSingleJobResponseModel>();
-
+  final Rxn<GetSingleJobResponseModel> singleJob =
+      Rxn<GetSingleJobResponseModel>();
 
   var archiveJobs = <JobModel>[].obs;
 
@@ -65,7 +71,7 @@ class RecruiterController extends BaseController {
   RecruiterController(this._recruiterRepo, this._authStorageService);
 
   final Rxn<FetchRecruiterResponseModel> userInfo =
-  Rxn<FetchRecruiterResponseModel>();
+      Rxn<FetchRecruiterResponseModel>();
 
   final RxString uploadedVideoPath = ''.obs;
   final RxBool successVideoUploaded = false.obs;
@@ -101,11 +107,11 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.fetchCompany();
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         setLoading(false);
       },
-          (success) {
+      (success) {
         companies.value = success.data;
         setLoading(false);
       },
@@ -119,11 +125,11 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.fetchCategory();
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         setLoading(false);
       },
-          (success) {
+      (success) {
         category.value = success.data.category;
         setLoading(false);
       },
@@ -137,11 +143,11 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.fetchCurrency();
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         setLoading(false);
       },
-          (success) {
+      (success) {
         // success.data is already a List<GetCurrencyResponseModel>
         currency.value = success.data;
 
@@ -150,23 +156,26 @@ class RecruiterController extends BaseController {
     );
   }
 
-  Future createJobPost(final String title,
-      final String description,
-      final String location,
-      final int vacancy,
-      final String experience,
-      final String deadline,
-      final String jobCategoryId,
-      final String name,
-      final String role,
-      final String compensation,
-      final List<ApplicationRequirement> applicationRequirement,
-      final List<CustomQuestion> customQuestion,
-      final String employementType,
-      final String websiteUrl,
-      final String publishDate,
-      final String careerStage,
-      final String locationType, final String website_Url) async {
+  Future createJobPost(
+    final String title,
+    final String description,
+    final String location,
+    final int vacancy,
+    final String experience,
+    final String deadline,
+    final String jobCategoryId,
+    final String name,
+    final String role,
+    final String compensation,
+    final List<ApplicationRequirement> applicationRequirement,
+    final List<CustomQuestion> customQuestion,
+    final String employementType,
+    final String websiteUrl,
+    final String publishDate,
+    final String careerStage,
+    final String locationType,
+    final String website_Url,
+  ) async {
     setLoading(true);
     setError("");
 
@@ -195,25 +204,30 @@ class RecruiterController extends BaseController {
       websiteUrl: websiteUrl,
       publishDate: publishDate,
       careerStage: careerStage,
-      locationType: locationType, website_Url: website_Url,
+      locationType: locationType,
+      website_Url: website_Url,
     );
 
     final result = await _recruiterRepo.createNewJobPost(request);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log("create job success result : ${fail.message}");
         setLoading(false);
       },
-          (success) {
+      (success) async {
         DPrint.log("create job success result : ${success.message}");
-        Get.to(() => RecruiterPageScreen());
+        final userRole = await _authStorageService.getUserRole();
+        if (userRole == 'recruiter') {
+          Get.to(() => RecruiterPageScreen());
+        } else {
+          Get.to(() => ManageJobPostScreen());
+        }
         setLoading(false);
       },
     );
   }
-
 
   Future<void> updateSingleJob({
     required UpdateJobRequest request,
@@ -222,17 +236,22 @@ class RecruiterController extends BaseController {
     setLoading(true);
     setError("");
 
+    // ADD THIS PRINT
+    print("SENDING TO BACKEND → companyUrl = '${request.website_Url}'");
+    print("FULL JSON BEING SENT → ${request.toJson()}");
     final result = await _recruiterRepo.singleJobUpdate(request, jobId);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log("Update job failed: ${fail.message}");
         setLoading(false);
       },
-          (success) {
+      (success) {
         DPrint.log("Update job success: ${success.message}");
         // if your repo returns updated job
+        DPrint.log(success.data.website_Url);
+        DPrint.log("FULL JSON BEING SENT → ${request.toJson()}");
 
         Get.back();
         setLoading(false);
@@ -240,8 +259,35 @@ class RecruiterController extends BaseController {
     );
   }
 
+  Future<void> updateArchieveJob({
+    required ArchieveJobRequestModel request,
+    required String jobId,
+  }) async {
+    final result = await _recruiterRepo.archieveJobUpdate(request, jobId);
 
+    result.fold(
+      (fail) {
+        DPrint.log("Archive job failed: ${fail.message}");
+        // you can show snackbar here if you want
+      },
+      (success) {
+        DPrint.log("Archive job success: ${success.message}");
 
+        // THIS IS THE IMPORTANT PART
+        final index = yourJobList.indexWhere((j) => j.id == jobId);
+        if (index != -1) {
+          // Update the field directly on the existing model
+          yourJobList[index].arcrivedJob = request.arcrivedJob!;
+          yourJobList[index] = yourJobList[index];
+          // Tell GetX the list changed → UI updates immediately
+          //yourJobList.refresh();
+        }
+
+        // Optional: refresh whole list from server (safe fallback)
+        // getJob();
+      },
+    );
+  }
 
   Future connectCompany(final String companyId) async {
     setLoading(true);
@@ -251,12 +297,12 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.connectCompany(request);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log("connect company success result : ${fail.message}");
         setLoading(false);
       },
-          (success) {
+      (success) {
         DPrint.log("connect company success result : ${success.message}");
         Get.back();
         setLoading(false);
@@ -271,12 +317,12 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.yourJob();
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log("your job fetch failed result : ${fail.message}");
         //setLoading(false);
       },
-          (success) {
+      (success) {
         DPrint.log("your job fetch success result : ${success.message}");
         yourJobList.value = success.data;
         //setLoading(false);
@@ -291,35 +337,48 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.singleJob(jobId);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log("your job fetch failed result : ${fail.message}");
         setLoading(false);
       },
-          (success) {
+      (success) {
         DPrint.log("your job fetch success result : ${success.message}");
-        singleJob.value = success.data;
-        employeeController.selectedEmploymentType.value =
-            employeeController.getDisplayName(singleJob.value?.employementType ?? '');
 
+        singleJob.value = success.data;
+        employeeController.selectedEmploymentType.value = employeeController
+            .getDisplayName(singleJob.value?.employementType ?? '');
+
+        // 2. Experience Level (field: experience → "Entry Level", "Senior Level", etc.)
+        final rawExperience = singleJob.value?.experience?.trim() ?? '';
         experienceLevelController.selectedExperienceLevel.value =
-            experienceLevelController.getDisplayName(singleJob.value?.experience ?? '');
+            experienceLevelController.experienceLevels.contains(rawExperience)
+            ? rawExperience
+            : 'Mid Level'; // fallback
 
         locationTypeController.selectedLocationType.value =
-            locationTypeController.getDisplayName(singleJob.value?.locationType ?? '');
+            locationTypeController.getDisplayName(
+              singleJob.value?.locationType ?? '',
+            );
 
-        careerStageController.selectedCareerStage.value =
-            careerStageController.getDisplayName(singleJob.value?.careerStage ?? '');
+        careerStageController.selectedCareerStage.value = careerStageController
+            .getDisplayName(singleJob.value?.careerStage ?? '');
 
         print("=== DEBUG DROPDOWNS ===");
         print("Raw experience from API: '${singleJob.value?.experience}'");
         print("Raw careerStage from API: '${singleJob.value?.careerStage}'");
 
-        print("Experience display name: '${experienceLevelController.getDisplayName(singleJob.value?.experience ?? '')}'");
-        print("CareerStage display name: '${careerStageController.getDisplayName(singleJob.value?.careerStage ?? '')}'");
+        //print("Experience display name: '${experienceLevelController.getDisplayName(singleJob.value?.experience ?? '')}'");
+        print(
+          "CareerStage display name: '${careerStageController.getDisplayName(singleJob.value?.careerStage ?? '')}'",
+        );
 
-        print("Selected Experience: ${experienceLevelController.selectedExperienceLevel.value}");
-        print("Selected CareerStage: ${careerStageController.selectedCareerStage.value}");
+        print(
+          "Selected Experience: ${experienceLevelController.selectedExperienceLevel.value}",
+        );
+        print(
+          "Selected CareerStage: ${careerStageController.selectedCareerStage.value}",
+        );
 
         setLoading(false);
       },
@@ -337,12 +396,12 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.follow(request);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log("Follow success result : ${fail.message}");
         setLoading(false);
       },
-          (success) {
+      (success) {
         DPrint.log("Follow success result : ${success.message}");
         Get.back();
         setLoading(false);
@@ -351,7 +410,8 @@ class RecruiterController extends BaseController {
   }
 
   Future<void> uploadVideo(
-      ElevatorPitchController elevatorPitchController,) async {
+    ElevatorPitchController elevatorPitchController,
+  ) async {
     final videoPath = elevatorPitchController.selectedVideoPath.value;
 
     //Check if video is selected
@@ -381,7 +441,7 @@ class RecruiterController extends BaseController {
       //Delete any existing video unconditionally
       final deleteResult = await _recruiterRepo.deleteVideo(userId);
       deleteResult.fold(
-            (fail) {
+        (fail) {
           //DPrint.log('Failed to delete existing video: ${fail.message}');
           Get.snackbar(
             'Error',
@@ -390,7 +450,7 @@ class RecruiterController extends BaseController {
           setLoading(false);
           return;
         },
-            (_) {
+        (_) {
           DPrint.log('Existing video deleted successfully');
           uploadedVideoPath.value = '';
           successVideoUploaded.value = false;
@@ -401,9 +461,7 @@ class RecruiterController extends BaseController {
       final formData = FormData.fromMap({
         "videoFile": await MultipartFile.fromFile(
           file.path,
-          filename: file.path
-              .split('/')
-              .last,
+          filename: file.path.split('/').last,
           contentType: MediaType('video', 'mp4'),
         ),
       });
@@ -411,12 +469,12 @@ class RecruiterController extends BaseController {
       final uploadResult = await _recruiterRepo.uploadVideo(userId, formData);
 
       uploadResult.fold(
-            (fail) {
+        (fail) {
           setError(fail.message);
           DPrint.log('Upload video failed: ${fail.message}');
           Get.snackbar('Error', fail.message);
         },
-            (success) {
+        (success) {
           uploadedVideoPath.value = videoPath;
           successVideoUploaded.value = true;
           DPrint.log('Upload video success: ${success.message}');
@@ -432,23 +490,25 @@ class RecruiterController extends BaseController {
     }
   }
 
-  Future<void> createRecruiterScreen(File banner,
-      File recruiterLogo,
-      String description,
-      String firstName,
-      String surname,
-      String emailAddress,
-      String phoneNumber,
-      String title,
-      String country,
-      String city,
-      int zipCode,
-      String linkedIn,
-      String twitter,
-      String upwork,
-      String facebook,
-      String tiktok,
-      String instagram,) async {
+  Future<void> createRecruiterScreen(
+    File banner,
+    File recruiterLogo,
+    String description,
+    String firstName,
+    String surname,
+    String emailAddress,
+    String phoneNumber,
+    String title,
+    String country,
+    String city,
+    int zipCode,
+    String linkedIn,
+    String twitter,
+    String upwork,
+    String facebook,
+    String tiktok,
+    String instagram,
+  ) async {
     setLoading(true);
     setError('');
 
@@ -515,12 +575,12 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.createRecruiter(formRequest);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log('Create Recruiter: ${fail.message}');
         setLoading(false); // Fix: Use setLoading instead of isLoading
       },
-          (success) async {
+      (success) async {
         DPrint.log('Create Recruiter: ${success.message}');
         // Fetch the updated profile data before navigating
         await fetchProfile(); // Add this line to refresh userInfo
@@ -547,32 +607,34 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.fetchRecruiterInfo(userId);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log('data fetch failed: ${fail.message}');
         setLoading(false);
       },
-          (success) {
+      (success) {
         userInfo.value = success.data;
         setLoading(false);
       },
     );
   }
 
-  Future<void> updateRecruiter(File? banner,
-      File? recruiterLogo,
-      String description,
-      String firstName,
-      String surname,
-      String title,
-      String country,
-      String city,
-      String linkedIn,
-      String twitter,
-      String upwork,
-      String facebook,
-      String tiktok,
-      String instagram,) async {
+  Future<void> updateRecruiter(
+    File? banner,
+    File? recruiterLogo,
+    String description,
+    String firstName,
+    String surname,
+    String title,
+    String country,
+    String city,
+    String linkedIn,
+    String twitter,
+    String upwork,
+    String facebook,
+    String tiktok,
+    String instagram,
+  ) async {
     setLoading(true);
     setError("");
 
@@ -639,12 +701,12 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.updateRecruiter(userId, formRequest);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log('Update Recruiter: ${fail.message}');
         setLoading(false);
       },
-          (success) async {
+      (success) async {
         DPrint.log('Update Recruiter: ${success.message}');
         await fetchProfile(); // refresh profile
         Get.to(() => RecruiterPageScreen());
@@ -672,12 +734,12 @@ class RecruiterController extends BaseController {
     final result = await _recruiterRepo.changePass(request);
 
     result.fold(
-          (fail) {
+      (fail) {
         setError(fail.message);
         DPrint.log("change pass success result : ${fail.message}");
         setLoading(false);
       },
-          (success) {
+      (success) {
         DPrint.log("change pass success result : ${success.message}");
         Get.to(() => RecruiterPageScreen());
         setLoading(false);

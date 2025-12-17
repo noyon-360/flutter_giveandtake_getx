@@ -10,6 +10,7 @@ class JobUpdateResponseModel {
   final String experience;
   final String role;
   final String compensation;
+  final String website_Url;
   final String employmentType;
   final String careerStage;
   final DateTime? deadline;
@@ -32,7 +33,7 @@ class JobUpdateResponseModel {
     required this.careerStage,
     required this.deadline,
     required this.applicationRequirement,
-    required this.customQuestion,
+    required this.customQuestion, required this.website_Url,
   });
 
   factory JobUpdateResponseModel.fromJson(Map<String, dynamic> json) {
@@ -62,7 +63,7 @@ class JobUpdateResponseModel {
           ? (json['customQuestion'] as List)
           .map((e) => CustomQuestion.fromJson(e))
           .toList()
-          : [],
+          : [], website_Url: json['website_Url'],
     );
   }
 }
