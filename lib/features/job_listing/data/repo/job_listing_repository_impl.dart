@@ -11,10 +11,17 @@ class JobListingRepositoryImpl implements JobListingRepository {
     : _apiClient = apiClient;
 
   @override
-  NetworkResult<JobListingResponseModel> getJobs({int limit = 100}) {
+  NetworkResult<JobListingResponseModel> getJobs({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) {
     return _apiClient.get<JobListingResponseModel>(
-      ApiConstants.jobs.getJobs(limit),
-      fromJsonT: (json) => JobListingResponseModel.fromJson(json),
+      ApiConstants.jobs.getJobs(page, limit, search: search),
+      fromJsonT: (json) {
+        print("DEBUG: JobListingRepositoryImpl raw json: $json");
+        return JobListingResponseModel.fromJson(json);
+      },
     );
   }
 }

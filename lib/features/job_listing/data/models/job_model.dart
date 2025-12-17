@@ -67,11 +67,13 @@ class JobModel {
   factory JobModel.fromJson(Map<String, dynamic> json) {
     return JobModel(
       id: json['_id'] ?? '',
-      userId: json['userId'] ?? '',
-      companyId: json['companyId'] != null
+      userId: json['userId'] is Map<String, dynamic>
+          ? (json['userId']['_id'] ?? '')
+          : (json['userId'] ?? ''),
+      companyId: json['companyId'] is Map<String, dynamic>
           ? CompanyModel.fromJson(json['companyId'] as Map<String, dynamic>)
           : null,
-      recruiterId: json['recruiterId'] != null
+      recruiterId: json['recruiterId'] is Map<String, dynamic>
           ? RecruiterModel.fromJson(json['recruiterId'] as Map<String, dynamic>)
           : null,
       title: json['title'] ?? '',
@@ -184,6 +186,8 @@ class JobModel {
       'raw': toJson(),
     };
   }
+
+  String get timePostedFormatted => _calculateTimePosted();
 
   String _calculateTimePosted() {
     final date = publishDate ?? createdAt;
