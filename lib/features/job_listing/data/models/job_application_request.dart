@@ -4,6 +4,7 @@ class JobApplicationRequest {
   final String? elevatorPitchUrl;
   final String? expectedSalary;
   final String? resumeFileName;
+  final List<Map<String, String>>? customQuestions;
 
   JobApplicationRequest({
     required this.jobId,
@@ -11,6 +12,7 @@ class JobApplicationRequest {
     this.elevatorPitchUrl,
     this.expectedSalary,
     this.resumeFileName,
+    this.customQuestions,
   });
 
   Map<String, dynamic> toJson() {
@@ -20,6 +22,7 @@ class JobApplicationRequest {
       'elevatorPitchUrl': elevatorPitchUrl,
       'expectedSalary': expectedSalary,
       'resumeFileName': resumeFileName,
+      'customQuestions': customQuestions,
     };
   }
 }

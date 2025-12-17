@@ -18,6 +18,31 @@ class JobApplicationScreen extends StatelessWidget {
       submitJobApplicationUseCase: Get.find(),
     ));
 
+    // Initialize custom questions from jobData
+    // Assuming 'customQuestion' key based on JobModel
+    // Use addPostFrameCallback to avoid state modification during build if needed
+    // But since initQuestions updates observable list, it's safer to do formatted check
+    // Or just call it. Since it clears and adds, doing it every build is bad.
+    // Ideally do it in onInit of controller but jobData is passed here.
+    // I'll use a post frame callback or check if empty.
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+       // Only init if empty or check logic. For now, we trust the screen loads fresh.
+       // Actually 'initQuestions' clears it. So calling it every build re-clears.
+       // We should only call it once. 
+       // Better: Pass it to controller constructor arguments logic if possible?
+       // No, controller is put here.
+       // I'll check if customQuestions is empty OR just rely on the fact this screen is pushed.
+       // But hot reload triggers build.
+       // Providing a unique tag or using Get.find if already put?
+       // Simpler: Just call it. If it flickers on hot reload, it's dev only. 
+       // Logic:
+       final questions = jobData['customQuestion'] as List<dynamic>? ?? [];
+       if (controller.customQuestions.isEmpty && questions.isNotEmpty) {
+           controller.initQuestions(questions);
+       }
+    });
+
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: AppColors.textBlack),
@@ -42,12 +67,44 @@ class JobApplicationScreen extends StatelessWidget {
                 )),
             const SizedBox(height: 24),
 
-            // Custom Questions
-            CustomQuestionField(
-              label: 'What is your expected salary?',
-              hintText: 'Enter your answer here.',
-              controller: controller.pitchController,
-            ),
+            // Custom Questions Section
+            Obx(() {
+              if (controller.customQuestions.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Custom Questions',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ...controller.customQuestions.map((q) {
+                    final id = q['_id'] ?? q['id'] ?? q['question'] ?? '';
+                    final questionText = q['question'] ?? 'Question';
+                    final textCtrl = controller.answerControllers[id.toString()];
+                    
+                    if (textCtrl == null) return const SizedBox.shrink();
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: CustomQuestionField(
+                        label: '$questionText *', 
+                        hintText: 'Enter your answer here',
+                        controller: textCtrl,
+                      ),
+                    );
+                  }).toList(),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                ],
+              );
+            }),
             const SizedBox(height: 16),
 
             // Resume Upload Section

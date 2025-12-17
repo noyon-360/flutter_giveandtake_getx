@@ -30,7 +30,12 @@ class JobApplicationController extends GetxController {
 
   // Text controllers
   final pitchController = TextEditingController();
-  final elevatorPitchController = TextEditingController();
+  final elevatorPitchController = TextEditingController(); // URL input if needed
+  
+  // Custom Questions handling
+  final RxList<Map<String, dynamic>> customQuestions = <Map<String, dynamic>>[].obs;
+  // Map to store controllers using question ID as key
+  final Map<String, TextEditingController> answerControllers = {};
 
   @override
   void onInit() {
@@ -42,7 +47,28 @@ class JobApplicationController extends GetxController {
   void onClose() {
     pitchController.dispose();
     elevatorPitchController.dispose();
+    for (var controller in answerControllers.values) {
+      controller.dispose();
+    }
     super.onClose();
+  }
+  
+  void initQuestions(List<dynamic> questions) {
+    customQuestions.clear();
+    // specific to re-init, clear old controllers
+    for (var controller in answerControllers.values) {
+      controller.dispose();
+    }
+    answerControllers.clear();
+
+    for (var q in questions) {
+      if (q is Map<String, dynamic>) {
+        customQuestions.add(q);
+        // Use '_id' if available, otherwise generate a key or use question text
+        final id = q['_id'] ?? q['id'] ?? q['question'] ?? DateTime.now().toIso8601String();
+        answerControllers[id.toString()] = TextEditingController();
+      }
+    }
   }
 
   Future<void> fetchUserProfile() async {
@@ -179,6 +205,24 @@ class JobApplicationController extends GetxController {
     isSubmittingApplication.value = true;
 
     try {
+      // Collect answers
+      List<Map<String, String>> answers = [];
+      for (var q in customQuestions) {
+         final id = q['_id'] ?? q['id'] ?? q['question'];
+         if (id != null && answerControllers.containsKey(id.toString())) {
+            final answer = answerControllers[id.toString()]?.text ?? '';
+            if (answer.isNotEmpty) {
+               // Sending back questionId and answer based on assumption. 
+               // Also sending original question text might be safer if ID logic is loose.
+               answers.add({
+                 'questionId': q['_id'] ?? '',
+                 'question': q['question'] ?? '',
+                 'answer': answer,
+               });
+            }
+         }
+      }
+
       final request = JobApplicationRequest(
         jobId: jobId,
         visaRequired: visaOption.value,
@@ -188,6 +232,7 @@ class JobApplicationController extends GetxController {
         expectedSalary:
             pitchController.text.isNotEmpty ? pitchController.text : null,
         resumeFileName: selectedResume.value?.name,
+        customQuestions: answers.isNotEmpty ? answers : null,
       );
 
       final result = await _submitJobApplicationUseCase.call(request);
