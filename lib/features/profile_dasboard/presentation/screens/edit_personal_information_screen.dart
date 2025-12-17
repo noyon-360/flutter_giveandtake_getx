@@ -364,7 +364,9 @@ class _EditProfileState extends State<EditProfile> {
                               : (user != null &&
                                         user.avatarUrl != null &&
                                         user.avatarUrl!.isNotEmpty
-                                    ? NetworkImage(user.avatarUrl!)
+                                    ? NetworkImage(user.avatarUrl!.startsWith('http')
+                                        ? user.avatarUrl!
+                                        : '${ApiConstants.baseDomain}/${user.avatarUrl!}')
                                     : const AssetImage(
                                         "assets/images/profile.jpg",
                                       )),
