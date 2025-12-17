@@ -5,10 +5,10 @@ import 'package:get/get.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../controller/elevator_resume_controller.dart';
-import '../widgets/photo_bio_section.dart';
-import '../widgets/experience_form_section.dart';
-import '../widgets/education_form_section.dart';
 import '../widgets/awards_form_section.dart';
+import '../widgets/education_form_section.dart';
+import '../widgets/experience_form_section.dart';
+import '../widgets/photo_bio_section.dart';
 import '../widgets/skills_section.dart';
 
 
@@ -21,6 +21,7 @@ class ElevatorResumeScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppScaffold(
+      removePadding: true,
       appBar: AppBar(
         elevation: 0,
         title: const Text('Create Your Profile', style: TextStyle(color: Colors.black),),
@@ -482,41 +483,74 @@ class ElevatorResumeScreen extends StatelessWidget {
                       () => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const Text('Add Certification', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Expanded(
-                            child: _LabeledTextField(
-                              label: 'Add Certification',
-                              hint: 'e.g. AWS Certified Solutions Architect',
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: TextField(
+                                controller: controller.certificationController, // Assuming controller has this or similar
+                                decoration: InputDecoration(
+                                  hintText: 'e.g. AWS Certified Solutions Architect',
+                                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: Colors.grey.shade300)
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: Colors.grey.shade300)
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: controller.addCertification,
-                            child: const Text('Add'),
+                          SizedBox(
+                            height: 48,
+                            child: OutlinedButton(
+                              onPressed: () { 
+                                  if (controller.certificationController.text.isNotEmpty) {
+                                      controller.addCertification(); 
+                                      // ensure controller clears text or handled inside
+                                  } 
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Colors.grey.shade300),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                foregroundColor: Colors.black,
+                              ),
+                              child: const Text('Add'),
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       if (controller.certifications.isEmpty)
-                        Text(
-                          'No certifications added yet. Add your professional certifications above.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            'No certifications added yet. Add your professional certifications above.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                            ),
                           ),
                         )
                       else
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: controller.certifications
-                              .map(
-                                (cert) => Padding(
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 4.0),
-                              child: Text('• $cert'),
-                            ),
-                          )
-                              .toList(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12.0),
+                          child: Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: controller.certifications.map((cert) => Chip(
+                                  label: Text(cert),
+                                  onDeleted: () => controller.removeCertification(cert),
+                                  backgroundColor: Colors.grey[100],
+                              )).toList()
+                          ),
                         ),
                     ],
                   ),
@@ -532,19 +566,61 @@ class ElevatorResumeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _LabeledTextField(
-                      label: 'Add Language',
-                      hint: 'Search and add languages (e.g., English)',
-                    ),
+                    const Text('Add Language', style: TextStyle(fontWeight: FontWeight.w500)),
+                     const SizedBox(height: 8),
+                     Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: TextField(
+                                controller: controller.languageController, // Assuming controller has this
+                                onSubmitted: (value) {
+                                  if (value.trim().isNotEmpty) {
+                                    controller.addLanguage(value);
+                                    controller.languageController.clear();
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  hintText: 'Search and add languages (e.g., English)',
+                                   hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: Colors.grey.shade300)
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: Colors.grey.shade300)
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Note: Screenshot for Languages shows "Add Language" label and search box. 
+                          // It doesn't explicitly show an "Add" button NEXT to it in the screenshot provided (uploaded_image_3 is Skills, uploaded_image_1 is Certifications).
+                          // Wait, uploaded_image_3 shows "Languages" card partially? No.
+                          // uploaded_image_2 shows "Languages" with "Add Language" label and search box.
+                          // It does NOT show an "Add" button to the right. It says "No languages selected. Start typing to search and add languages."
+                          // So Languages behaves like Skills (search & select), unlike Certifications (text & add button).
+                          // I will interpret Languages to be like Skills based on the text "Start typing to search and add languages".
+                          // The "Add" button in Certifications screenshot is distinct.
+                        ],
+                      ),
+                    
                     const SizedBox(height: 8),
                     Obx(
                           () => controller.languages.isEmpty
-                          ? Text(
+                          ? Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
                         'No languages selected. Start typing to search and add languages.',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
+                            color: Colors.grey[600],
                         ),
-                      )
+                      ),
+                          )
                           : Wrap(
                         spacing: 8,
                         runSpacing: 4,

@@ -143,6 +143,10 @@ class ElevatorResumeController extends GetxController {
   ];
 
   /// ================== LIFECYCLE ==================
+  final certificationController = TextEditingController();
+  final languageController = TextEditingController();
+
+  /// ================== LIFECYCLE ==================
   @override
   void onInit() {
     super.onInit();
@@ -164,6 +168,8 @@ class ElevatorResumeController extends GetxController {
   @override
   void onClose() {
     aboutMeQuillController.dispose();
+    certificationController.dispose();
+    languageController.dispose();
     super.onClose();
   }
 
@@ -224,10 +230,17 @@ class ElevatorResumeController extends GetxController {
     });
   }
 
-
-
   void addEducation() {
     educationList.add({'presentlyAttendHere': false});
+  }
+
+  // Update specific field in education item
+  void updateEducationField(int index, String key, dynamic value) {
+    if (index >= 0 && index < educationList.length) {
+      final item = Map<String, dynamic>.from(educationList[index]);
+      item[key] = value;
+      educationList[index] = item;
+    }
   }
 
   void addAward() {
@@ -259,9 +272,7 @@ class ElevatorResumeController extends GetxController {
   }
 
   void togglePresentlyAttendHere(int index) {
-    educationList[index]['presentlyAttendHere'] =
-    !(educationList[index]['presentlyAttendHere'] ?? false);
-    educationList.refresh();
+    updateEducationField(index, 'presentlyAttendHere', !(educationList[index]['presentlyAttendHere'] ?? false));
   }
 
   /// ================== SKILLS ==================
@@ -289,32 +300,30 @@ class ElevatorResumeController extends GetxController {
 
   /// ================== CERTIFICATIONS ==================
   void addCertification() {
-    final textController = TextEditingController();
-
-    Get.defaultDialog(
-      title: 'Add Certification',
-      content: TextField(
-        controller: textController,
-        decoration: const InputDecoration(
-          hintText: 'e.g. AWS Certified Solutions Architect',
-        ),
-      ),
-      textConfirm: 'Add',
-      textCancel: 'Cancel',
-      onConfirm: () {
-        final text = textController.text.trim();
-        if (text.isNotEmpty) {
-          certifications.add(text);
-        }
-        Get.back();
-      },
-      onCancel: () {},
-    );
+    final text = certificationController.text.trim();
+    if (text.isNotEmpty && !certifications.contains(text)) {
+      certifications.add(text);
+      certificationController.clear();
+    }
+  }
+  
+  void removeCertification(String cert) {
+    certifications.remove(cert);
   }
 
   /// ================== LANGUAGES ==================
   void addLanguage(String lang) {
-    final l = lang.trim();
+     final l = lang.trim(); 
+     // Support direct add via controller if argument is empty
+     if (l.isEmpty && languageController.text.isNotEmpty) {
+          final fromController = languageController.text.trim();
+          if (fromController.isNotEmpty && !languages.contains(fromController)) {
+              languages.add(fromController);
+              languageController.clear();
+          }
+          return;
+     }
+
     if (l.isNotEmpty && !languages.contains(l)) {
       languages.add(l);
     }

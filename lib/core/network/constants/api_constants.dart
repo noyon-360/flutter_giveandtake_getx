@@ -1,6 +1,6 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'http://localhost:5009';// soykot ip
+  static const String baseDomain = 'http://localhost:5005';// soykot ip
   // static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
@@ -57,6 +57,12 @@ class ApiConstants {
   static CategoryEndpoints get category => CategoryEndpoints();
   static AlluserEndpoints get allusers => AlluserEndpoints();
   static CompanyAccountApi get company => CompanyAccountApi();
+  static ResumeEndpoints get resume => ResumeEndpoints();
+}
+
+class ResumeEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/create-resume';
+  final String getResume = '$_base/get-resume';
 }
 
 class JobEndpoints {

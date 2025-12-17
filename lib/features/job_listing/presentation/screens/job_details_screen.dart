@@ -6,6 +6,7 @@ import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs
 import 'package:karlfive/features/job_listing/presentation/screens/job_application_screen.dart';
 
 import '../controllers/bookmark_controller.dart';
+import '../controllers/job_details_controller.dart';
 
 class JobDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> jobData;
@@ -337,7 +338,19 @@ class JobDetailsScreen extends StatelessWidget {
                           height: 48,
                           child: ElevatedButton(
                             onPressed: () {
-                              Get.to(() => JobApplicationScreen(jobData: jobData));
+                              // Initialize controller
+                              final controller = Get.put(JobDetailsController());
+                              
+                              // Prepare data for JobApplicationScreen which expects specific keys
+                              final applicationData = {
+                                'id': raw['_id'] ?? jobData['_id'] ?? jobData['id'],
+                                'jobTitle': title,
+                                'companyName': company,
+                                'location': location,
+                                ...jobData, // Include original data as fallback
+                              };
+                              
+                              controller.checkResumeAndApply(applicationData);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2563EB), // Primary Blue
