@@ -3,7 +3,6 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/job_application_screen.dart';
 
 import '../controllers/bookmark_controller.dart';
 import '../controllers/job_details_controller.dart';
@@ -56,6 +55,16 @@ class JobDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Back to Job',
+          style: TextStyle(
+            color: AppColors.textBlack,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -107,26 +116,6 @@ class JobDetailsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Back Button
-                  InkWell(
-                    onTap: () => Get.back(),
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20.0),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.arrow_back, size: 20, color: Colors.black),
-                          SizedBox(width: 8),
-                          Text(
-                            'Back to jobs',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
 
                   // Job Header (Logo + Title + Info)
                   Container(
@@ -342,11 +331,15 @@ class JobDetailsScreen extends StatelessWidget {
                               final controller = Get.put(JobDetailsController());
                               
                               // Prepare data for JobApplicationScreen which expects specific keys
+                              final jobId = raw['_id'] ?? jobData['_id'] ?? jobData['id'] ?? '';
                               final applicationData = {
-                                'id': raw['_id'] ?? jobData['_id'] ?? jobData['id'],
+                                '_id': jobId,  // Use _id as the primary key
+                                'id': jobId,   // Also include id for backward compatibility
                                 'jobTitle': title,
                                 'companyName': company,
                                 'location': location,
+                                'customQuestion': raw['customQuestion'] ?? [],  // Include custom questions
+                                'raw': raw,  // Include raw data for complete job info
                                 ...jobData, // Include original data as fallback
                               };
                               

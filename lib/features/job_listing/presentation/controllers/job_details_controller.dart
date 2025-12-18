@@ -21,10 +21,20 @@ class JobDetailsController extends GetxController {
       }
 
       final uri = Uri.parse(ApiConstants.resume.getResume);
+      
+      print('========== CHECKING RESUME ==========');
+      print('Endpoint: ${ApiConstants.resume.getResume}');
+      print('=====================================');
+      
       final response = await http.get(
         uri,
         headers: ApiConstants.authHeaders(token),
       );
+
+      print('========== RESUME API RESPONSE ==========');
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      print('=========================================');
 
       if (response.statusCode == 200) {
         final body = json.decode(response.body);
@@ -33,10 +43,34 @@ class JobDetailsController extends GetxController {
         final resume = data['resume'];
 
         if (resume != null) {
+          // Extract resumeId from the resume object
+          String? resumeId;
+          
+          if (resume is Map<String, dynamic>) {
+            resumeId = resume['_id'] ?? resume['id'];
+          } else if (resume is String) {
+            resumeId = resume;
+          }
+          
+          print('========== RESUME ID EXTRACTED ==========');
+          print('Resume ID: $resumeId');
+          print('Resume Data: $resume');
+          print('=========================================');
+          
+          // Add resumeId to jobData before passing to JobApplicationScreen
+          final updatedJobData = {
+            ...jobData,
+            'resumeId': resumeId,
+          };
+          
           // Resume exists, proceed to application
-          Get.to(() => JobApplicationScreen(jobData: jobData));
+          Get.to(() => JobApplicationScreen(jobData: updatedJobData));
         } else {
           // Resume is null, redirect to create resume
+          print('========== NO RESUME FOUND ==========');
+          print('User needs to create a resume first');
+          print('=====================================');
+          
           Get.snackbar(
             'Resume Required',
             'You need to upload a resume first.',
@@ -50,21 +84,17 @@ class JobDetailsController extends GetxController {
                 child: const Text("Create", style: TextStyle(color: Colors.white))
             )
           );
-          // Small delay to let user see snackbar or just direct navigation? 
-          // User request says: "show a scnackbar then need to upload resume first and then redirect"
-          // I will redirect after a short delay or just redirect immediately with snackbar showing?
-          // "redirect user to the ElevatorResumeScreen" - explicit action.
           
-          // Let's go there immediately but keep snackbar visible? 
-          // Or wait?
-          // I'll navigate immediately so they can start.
+          // Navigate to create resume screen
           Get.to(() => const ElevatorResumeScreen());
         }
       } else {
         Get.snackbar('Error', 'Failed to check resume status: ${response.statusCode}');
       }
     } catch (e) {
-      print("Error checking resume: $e");
+      print("========== RESUME CHECK ERROR ==========");
+      print("Error: $e");
+      print("========================================");
       Get.snackbar('Error', 'An error occurred while checking resume.');
     } finally {
       isLoading.value = false;

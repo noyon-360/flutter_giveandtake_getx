@@ -3,22 +3,28 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karlfive/core/network/constants/key_constants.dart';
+import 'package:karlfive/core/network/services/secure_store_services.dart';
 import 'package:karlfive/features/job_listing/data/models/job_application_request.dart';
 import 'package:karlfive/features/job_listing/data/models/user_profile_model.dart';
+import 'package:karlfive/features/job_listing/domain/usecases/get_job_details_usecase.dart';
 import 'package:karlfive/features/job_listing/domain/usecases/get_user_profile_usecase.dart';
 import 'package:karlfive/features/job_listing/domain/usecases/submit_job_application_usecase.dart';
-import 'package:karlfive/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/job_listing_screen.dart';
 import 'package:path_provider/path_provider.dart';
 
 class JobApplicationController extends GetxController {
   final GetUserProfileUseCase _getUserProfileUseCase;
   final SubmitJobApplicationUseCase _submitJobApplicationUseCase;
+  final GetJobDetailsUseCase _getJobDetailsUseCase;
 
   JobApplicationController({
     required GetUserProfileUseCase getUserProfileUseCase,
     required SubmitJobApplicationUseCase submitJobApplicationUseCase,
+    required GetJobDetailsUseCase getJobDetailsUseCase,
   })  : _getUserProfileUseCase = getUserProfileUseCase,
-        _submitJobApplicationUseCase = submitJobApplicationUseCase;
+        _submitJobApplicationUseCase = submitJobApplicationUseCase,
+        _getJobDetailsUseCase = getJobDetailsUseCase;
 
   // Observable variables
   final Rxn<UserProfileModel> userProfile = Rxn<UserProfileModel>();
@@ -71,9 +77,30 @@ class JobApplicationController extends GetxController {
     }
   }
 
+  Future<void> fetchJobDetails(String jobId) async {
+    try {
+      final result = await _getJobDetailsUseCase.call(jobId);
+      result.fold(
+        (failure) {
+          //  print("Failed to fetch job details: ${failure.message}");
+        },
+        (success) {
+           final jobModel = success.data;
+           // jobModel.customQuestion is non-nullable List<CustomQuestionModel>
+           if (jobModel.customQuestion.isNotEmpty) {
+              final questionMaps = jobModel.customQuestion.map((e) => e.toJson()).toList();
+              initQuestions(questionMaps);
+           }
+        }
+      );
+    } catch (e) {
+      print("Error fetching job details: $e");
+    }
+  }
+
   Future<void> fetchUserProfile() async {
     isLoadingProfile.value = true;
-
+    
     try {
       final result = await _getUserProfileUseCase.call();
 
@@ -190,7 +217,13 @@ class JobApplicationController extends GetxController {
     }
   }
 
-  Future<void> submitApplication(String jobId) async {
+  Future<void> submitApplication(String jobId, {String? resumeId}) async {
+    print('========== SUBMIT APPLICATION CALLED ==========');
+    print('JobId received: "$jobId"');
+    print('JobId isEmpty: ${jobId.isEmpty}');
+    print('ResumeId received: "$resumeId"');
+    print('===============================================');
+    
     if (selectedResume.value == null) {
       Get.snackbar(
         'Error',
@@ -205,40 +238,69 @@ class JobApplicationController extends GetxController {
     isSubmittingApplication.value = true;
 
     try {
-      // Collect answers
+      // Get userId from secure storage
+      final secureStore = SecureStoreServices();
+      final userId = await secureStore.retrieveData(KeyConstants.userId);
+      
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'User ID not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        isSubmittingApplication.value = false;
+        return;
+      }
+
+      // Collect answers in the new format
       List<Map<String, String>> answers = [];
       for (var q in customQuestions) {
          final id = q['_id'] ?? q['id'] ?? q['question'];
          if (id != null && answerControllers.containsKey(id.toString())) {
             final answer = answerControllers[id.toString()]?.text ?? '';
             if (answer.isNotEmpty) {
-               // Sending back questionId and answer based on assumption. 
-               // Also sending original question text might be safer if ID logic is loose.
                answers.add({
-                 'questionId': q['_id'] ?? '',
                  'question': q['question'] ?? '',
-                 'answer': answer,
+                 'ans': answer,  // Changed from 'answer' to 'ans' to match API spec
                });
             }
          }
       }
 
+      // Use resumeId from parameter if provided, otherwise show error
+      if (resumeId == null || resumeId.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Resume ID not found. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        isSubmittingApplication.value = false;
+        return;
+      }
+
       final request = JobApplicationRequest(
         jobId: jobId,
-        visaRequired: visaOption.value,
-        elevatorPitchUrl: elevatorPitchController.text.isNotEmpty
-            ? elevatorPitchController.text
-            : null,
-        expectedSalary:
-            pitchController.text.isNotEmpty ? pitchController.text : null,
-        resumeFileName: selectedResume.value?.name,
-        customQuestions: answers.isNotEmpty ? answers : null,
+        userId: userId,
+        resumeId: resumeId,
+        status: 'pending',
+        answer: answers.isNotEmpty ? answers : null,
       );
 
       final result = await _submitJobApplicationUseCase.call(request);
 
+      print('========== SUBMIT APPLICATION RESULT ==========');
+      print('Result: $result');
+      print('Is Right (Success): ${result.isRight()}');
+      print('Is Left (Failure): ${result.isLeft()}');
+      print('================================================');
+
       result.fold(
         (failure) {
+          print('❌ FAILURE CALLBACK - Message: ${failure.message}');
           Get.snackbar(
             'Error',
             failure.message,
@@ -248,22 +310,27 @@ class JobApplicationController extends GetxController {
           );
         },
         (success) {
+          print('✅ SUCCESS CALLBACK - Message: ${success.message}');
+          // Show success snackbar
           Get.snackbar(
             'Success',
             'Application submitted successfully!',
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.green,
             colorText: Colors.white,
+            duration: const Duration(seconds: 2),
           );
-
-          // Navigate to success screen or plan pricing
-          Get.to(() => PlanPricingScreen());
+          
+          // Navigate directly to All Jobs screen after a short delay
+          Future.delayed(const Duration(milliseconds: 800), () {
+            Get.offAll(() => const JobListingScreen());
+          });
         },
       );
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Failed to submit application',
+        'Failed to submit application: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

@@ -16,27 +16,23 @@ class JobApplicationScreen extends StatelessWidget {
     final controller = Get.put(JobApplicationController(
       getUserProfileUseCase: Get.find(),
       submitJobApplicationUseCase: Get.find(),
+      getJobDetailsUseCase: Get.find(),
     ));
 
-    // Initialize custom questions from jobData
-    // Assuming 'customQuestion' key based on JobModel
-    // Use addPostFrameCallback to avoid state modification during build if needed
-    // But since initQuestions updates observable list, it's safer to do formatted check
-    // Or just call it. Since it clears and adds, doing it every build is bad.
-    // Ideally do it in onInit of controller but jobData is passed here.
-    // I'll use a post frame callback or check if empty.
-    
     WidgetsBinding.instance.addPostFrameCallback((_) {
-       // Only init if empty or check logic. For now, we trust the screen loads fresh.
-       // Actually 'initQuestions' clears it. So calling it every build re-clears.
-       // We should only call it once. 
-       // Better: Pass it to controller constructor arguments logic if possible?
-       // No, controller is put here.
-       // I'll check if customQuestions is empty OR just rely on the fact this screen is pushed.
-       // But hot reload triggers build.
-       // Providing a unique tag or using Get.find if already put?
-       // Simpler: Just call it. If it flickers on hot reload, it's dev only. 
-       // Logic:
+       print('========== JOB APPLICATION SCREEN DATA ==========');
+       print('JobData: $jobData');
+       print('JobData _id: ${jobData['_id']}');
+       print('JobData id: ${jobData['id']}');
+       print('================================================');
+       
+       // Always fetch fresh job details to get latest custom questions
+       final jobId = jobData['_id']?.toString() ?? jobData['id']?.toString() ?? '';
+       if (jobId.isNotEmpty) {
+          controller.fetchJobDetails(jobId);
+       }
+       
+       // Fallback to passed data if available immediately (optional, but good for UI responsiveness before API returns)
        final questions = jobData['customQuestion'] as List<dynamic>? ?? [];
        if (controller.customQuestions.isEmpty && questions.isNotEmpty) {
            controller.initQuestions(questions);
@@ -45,7 +41,6 @@ class JobApplicationScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: AppColors.textBlack),
         title: const Text(
           'Job Application',
           style: TextStyle(
@@ -65,7 +60,8 @@ class JobApplicationScreen extends StatelessWidget {
                   userProfile: controller.userProfile.value,
                   isLoading: controller.isLoadingProfile.value,
                 )),
-            const SizedBox(height: 24),
+            
+            const SizedBox(height: 16),
 
             // Custom Questions Section
             Obx(() {
@@ -139,8 +135,9 @@ class JobApplicationScreen extends StatelessWidget {
                     onPressed: controller.isSubmittingApplication.value
                         ? null
                         : () {
-                            final jobId = jobData['id']?.toString() ?? '';
-                            controller.submitApplication(jobId);
+                            final jobId = jobData['_id']?.toString() ?? '';
+                            final resumeId = jobData['resumeId']?.toString();
+                            controller.submitApplication(jobId, resumeId: resumeId);
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryBlue,

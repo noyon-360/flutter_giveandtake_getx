@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/network/api_client.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
+
 import '../../data/repo/job_listing_repository_impl.dart';
 import '../../domain/repo/job_listing_repository.dart';
 import '../../domain/usecases/get_jobs_usecase.dart';
-import '../../../Home/presentation/widgets/app_drawer.dart';
-import '../../data/models/job_model.dart';
 import '../controller/all_jobs_controller.dart';
-import 'job_details_screen.dart';
+import '../controllers/job_details_controller.dart';
 import '../widgets/job_card.dart';
+import 'job_details_screen.dart';
 
 class AllJobsScreen extends GetView<AllJobsController> {
   const AllJobsScreen({super.key});
@@ -39,9 +39,14 @@ class AllJobsScreen extends GetView<AllJobsController> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
+        title: const Text(
+          'Back to Drawer',
+          style: TextStyle(
+            color: AppColors.textBlack,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
@@ -216,7 +221,29 @@ class AllJobsScreen extends GetView<AllJobsController> {
                          onTap: () {
                             Get.to(() => JobDetailsScreen(jobData: job.toDisplayMap()));
                          },
-                         onEasyApply: () {},
+                         onEasyApply: () {
+                            // Initialize JobDetailsController
+                            final jobDetailsController = Get.put(JobDetailsController());
+                            
+                            // Prepare complete job data for JobApplicationScreen
+                            final jobId = job.id;
+                            final companyName = job.companyId?.cname ?? 
+                                               job.recruiterId?.fullName ?? 
+                                               "Unknown Company";
+                            
+                            final applicationData = {
+                              '_id': jobId,
+                              'id': jobId,
+                              'jobTitle': job.title,
+                              'companyName': companyName,
+                              'location': job.location,
+                              'customQuestion': job.customQuestion.map((e) => e.toJson()).toList(),
+                              'raw': job.toJson(),
+                            };
+                            
+                            // Call the same method used by Job Details screen
+                            jobDetailsController.checkResumeAndApply(applicationData);
+                          },
                        );
                      },
                      childCount: controller.jobList.length,
