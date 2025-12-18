@@ -1,6 +1,6 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'http://localhost:5005';// soykot ip
+  static const String baseDomain = 'http://10.10.5.67:5005';// soykot ip
   // static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
@@ -73,6 +73,8 @@ class JobEndpoints {
     }
     return url;
   }
+  
+  final String applyJob = '${ApiConstants.baseUrl}/applied-jobs';
 }
 
 class RecruiterAccountApi {

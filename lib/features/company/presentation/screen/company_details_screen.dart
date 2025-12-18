@@ -4,17 +4,14 @@ import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/company/presentation/screen/company_edit_profile.dart';
 import 'package:karlfive/features/company/presentation/screen/connect_company_dialog_screen.dart';
 import 'package:karlfive/features/company_pricing/presentation/screens/plan_pricing_screen.dart';
-
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
-import '../../../recruiter_account/presentation/widgets/elevator_pitch.dart';
 import '../../../recruiter_account/presentation/widgets/social_media.dart';
 import '../controller/company_details_controller.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widget/elevator-pitch_company_widget.dart';
-import '../widget/falcon_button_widget.dart';
 import 'company_change_password_screen.dart';
 import 'employee_screen.dart';
 import 'manage_job_req_screen.dart';
@@ -216,7 +213,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
