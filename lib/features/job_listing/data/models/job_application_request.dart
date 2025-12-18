@@ -1,28 +1,25 @@
 class JobApplicationRequest {
   final String jobId;
-  final String visaRequired;
-  final String? elevatorPitchUrl;
-  final String? expectedSalary;
-  final String? resumeFileName;
-  final List<Map<String, String>>? customQuestions;
+  final String userId;
+  final String status;
+  final String resumeId;
+  final List<Map<String, String>>? answer;
 
   JobApplicationRequest({
     required this.jobId,
-    required this.visaRequired,
-    this.elevatorPitchUrl,
-    this.expectedSalary,
-    this.resumeFileName,
-    this.customQuestions,
+    required this.userId,
+    required this.resumeId,
+    this.status = 'pending',
+    this.answer,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'jobId': jobId,
-      'visaRequired': visaRequired,
-      'elevatorPitchUrl': elevatorPitchUrl,
-      'expectedSalary': expectedSalary,
-      'resumeFileName': resumeFileName,
-      'customQuestions': customQuestions,
+      'userId': userId,
+      'status': status,
+      'resumeId': resumeId,
+      'answer': answer,
     };
   }
 }
