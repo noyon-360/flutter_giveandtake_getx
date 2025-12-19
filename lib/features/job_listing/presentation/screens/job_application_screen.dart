@@ -26,6 +26,9 @@ class JobApplicationScreen extends StatelessWidget {
        print('JobData id: ${jobData['id']}');
        print('================================================');
        
+       // Store jobData in controller for use after successful submission
+       controller.jobData.value = jobData;
+       
        // Always fetch fresh job details to get latest custom questions
        final jobId = jobData['_id']?.toString() ?? jobData['id']?.toString() ?? '';
        if (jobId.isNotEmpty) {

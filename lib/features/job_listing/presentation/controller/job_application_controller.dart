@@ -10,7 +10,7 @@ import 'package:karlfive/features/job_listing/data/models/user_profile_model.dar
 import 'package:karlfive/features/job_listing/domain/usecases/get_job_details_usecase.dart';
 import 'package:karlfive/features/job_listing/domain/usecases/get_user_profile_usecase.dart';
 import 'package:karlfive/features/job_listing/domain/usecases/submit_job_application_usecase.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/job_listing_screen.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
 import 'package:path_provider/path_provider.dart';
 
 class JobApplicationController extends GetxController {
@@ -33,6 +33,9 @@ class JobApplicationController extends GetxController {
   final Rxn<PlatformFile> selectedResume = Rxn<PlatformFile>();
   final RxString visaOption = 'Yes'.obs;
   final RxBool agreeToShareCV = true.obs;
+  
+  // Store jobData for navigation after successful submission
+  final Rxn<Map<String, dynamic>> jobData = Rxn<Map<String, dynamic>>();
 
   // Text controllers
   final pitchController = TextEditingController();
@@ -321,9 +324,15 @@ class JobApplicationController extends GetxController {
             duration: const Duration(seconds: 2),
           );
           
-          // Navigate directly to All Jobs screen after a short delay
+          // Navigate back to Job Details screen after a short delay
           Future.delayed(const Duration(milliseconds: 800), () {
-            Get.offAll(() => const JobListingScreen());
+            final currentJobData = jobData.value;
+            if (currentJobData != null) {
+              Get.offAll(() => JobDetailsScreen(jobData: currentJobData));
+            } else {
+              // Fallback if jobData is not available
+              Get.back();
+            }
           });
         },
       );
