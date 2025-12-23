@@ -7,6 +7,7 @@ import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
 import 'package:karlfive/features/Home/presentation/widgets/app_drawer.dart';
 import 'package:karlfive/features/company/presentation/widget/elevator-pitch_company_widget.dart';
+import 'package:karlfive/features/elevator/presentation/screens/elevator_resume_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/video_upload_screen.dart';
 
 class CandidateDashboardScreen extends StatefulWidget {
@@ -146,7 +147,8 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
                       ),
                       TextButton.icon(
                         onPressed: () {
-                          // TODO: Navigate to edit profile
+                          // Navigate to elevator resume screen
+                          Get.to(() => const ElevatorResumeScreen());
                         },
                         icon: const Icon(Icons.edit, size: 16, color: Colors.white),
                         label: const Text(
