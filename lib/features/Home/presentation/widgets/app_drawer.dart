@@ -3,19 +3,20 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/elevator/presentation/screens/elevator_resume_screen.dart';
-import 'package:karlfive/features/elevator/presentation/screens/elevator_speech_resume_screen.dart';
 import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
 
-import '../../../elevator/presentation/screens/applied_jobs_screen.dart';
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
 import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
 import '../../../home_static_screens/presentation/screen/blog.dart';
 import '../../../home_static_screens/presentation/screen/frequently_questions.dart';
 import '../../../home_static_screens/presentation/screen/privacy_policy.dart';
 import '../../../job_listing/presentation/screens/all_jobs_screen.dart';
+import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
+import '../../../profile_dasboard/presentation/screens/job_history.dart';
+import '../../../profile_dasboard/presentation/screens/payment_history.dart';
+import '../screen/candidate_dashboard_screen.dart';
 import '../screens/my_plan_screen.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -45,12 +46,13 @@ class _AppDrawerState extends State<AppDrawer> {
             ListTileForNav(
               title: "Elevator Pitch & Resume",
               onTap: () {
-                Get.to (()=> ElevatorResumeScreen ());
+                Get.to(() => ElevatorResumeScreen());
               },
             ),
             ListTileForNav(
               title: "Jobs",
-              liconPath: "assets/icons/list.png", // Reusing list icon or suitable one
+              liconPath:
+                  "assets/icons/list.png", // Reusing list icon or suitable one
               onTap: () {
                 Get.to(() => const AllJobsScreen());
               },
@@ -58,7 +60,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ListTileForNav(
               title: "Blogs",
               onTap: () {
-                Get.to (()=> BlogScreen());
+                Get.to(() => BlogScreen());
               },
             ),
 
@@ -84,28 +86,28 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/home.png",
                       title: "About Us",
                       onTap: () {
-                       Get.to(()=> AboutUs());
+                        Get.to(() => AboutUs());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/list.png",
                       title: "Privacy Policy",
                       onTap: () {
-                        Get.to(()=> PrivacyPolicy());
+                        Get.to(() => PrivacyPolicy());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/book-open-01.png",
                       title: "Terms & Conditions",
                       onTap: () {
-                        Get.to(()=> TermsandConditions());
+                        Get.to(() => TermsandConditions());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/Icon (5).png",
                       title: "Frequently Asked Questions",
                       onTap: () {
-                        Get.to(()=> FrequentlyQuestions());
+                        Get.to(() => FrequentlyQuestions());
                       },
                     ),
 
@@ -113,10 +115,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/contactus.png",
                       title: "Contact Us",
                       onTap: () {
-                        Get.to(()=> ContactUsScreen(member: EditProfileModel()));
+                        Get.to(
+                          () => ContactUsScreen(member: EditProfileModel()),
+                        );
                       },
                     ),
-                    
                   ],
                 ),
               ),
@@ -142,14 +145,31 @@ class _AppDrawerState extends State<AppDrawer> {
                   children: [
                     ListTileForNav(
                       liconPath: "assets/icons/home.png",
-                      title: "My Profile",
+                      title: "My EVP Profile",
                       onTap: () {
-                        Get.to(()=> PersonalInfoScreen());
+                        Get.back(); // Close drawer first
+                        Get.to(() => const CandidateDashboardScreen());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/list.png",
-                      title: "My Plan",
+                      title: "Job History",
+                      onTap: () {
+                        Get.back(); // Close drawer first
+                        Get.to(() => const JobHistoryScreen());
+                      },
+                    ),
+                    ListTileForNav(
+                      liconPath: "assets/icons/book-open-01.png",
+                      title: "Payment History",
+                      onTap: () {
+                        Get.back(); // Close drawer first
+                        Get.to(() => const PaymentHistoryScreen());
+                      },
+                    ),
+                    ListTileForNav(
+                      liconPath: "assets/icons/list.png",
+                      title: "All Plans",
                       onTap: () {
                         Get.back();
                         Get.to(() => const MyPlanScreen());
@@ -162,6 +182,14 @@ class _AppDrawerState extends State<AppDrawer> {
                         // Close the drawer then navigate to Bookmark Jobs screen
                         Get.back();
                         Get.to(() => BookmarkJobsScreen());
+                      },
+                    ),
+                    ListTileForNav(
+                      liconPath: "assets/icons/changepass.png",
+                      title: "Change Password",
+                      onTap: () {
+                        Get.back(); // Close drawer first
+                        Get.to(() => ChangePasswordScreen());
                       },
                     ),
                   ],

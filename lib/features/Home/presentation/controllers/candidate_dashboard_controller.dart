@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
 import 'package:karlfive/core/network/api_client.dart';
@@ -18,7 +17,7 @@ class CandidateDashboardController extends BaseController {
     ApiClient? apiClient,
   })  : _authStorageService = authStorageService ?? Get.find<AuthStorageService>(),
         _apiClient = apiClient ?? ApiClient() {
-          _appliedJobsRepo = AppliedJobsRepoImpl(apiClient: _apiClient);
+          _appliedJobsRepo = AppliedJobsRepoImpl();
         }
 
   final Rxn<CandidateResumeResponseModel> resumeData = Rxn<CandidateResumeResponseModel>();
@@ -34,73 +33,119 @@ class CandidateDashboardController extends BaseController {
   }
 
   Future<void> fetchDashboardData() async {
+    print('🔄 [CandidateDashboard] Starting to fetch dashboard data...');
+    
     final userId = await _authStorageService.getUserId();
     if (userId == null) {
+      print('❌ [CandidateDashboard] User ID not found in storage');
       setError("User ID not found");
       return;
     }
+
+    print('✅ [CandidateDashboard] User ID: $userId');
 
     await Future.wait([
       fetchResume(userId),
       fetchAppliedJobs(userId),
     ]);
+    
+    print('✅ [CandidateDashboard] Dashboard data fetch completed');
   }
 
   Future<void> fetchResume(String userId) async {
+    print('📄 [CandidateDashboard] Fetching resume data...');
     isLoadingResume.value = true;
+    
     try {
-      // Trying to fetch the full resume including Elevator Pitch
-      // Note: The CompanyRepo uses a hardcoded URL. We attempt to use the generic structure.
-      // If there is no endpoint like /create-resume/get-resume without parameter, 
-      // we might need to rely on what we can find.
-      // Assuming a GET request to /create-resume/get-resume retrieves the logged-in user's resume
-      // Or we try to use the endpoint pattern: /create-resume/get-resume
+      final endpoint = '${ApiConstants.baseUrl}/create-resume/get-resume';
+      print('🌐 [CandidateDashboard] API Endpoint: $endpoint');
       
       final result = await _apiClient.get(
-        '${ApiConstants.baseUrl}/create-resume/get-resume',
+        endpoint,
         fromJsonT: (json) => CandidateResumeResponseModel.fromJson(json as Map<String, dynamic>),
       );
 
       result.fold(
         (fail) {
-           print("Failed to fetch full resume: ${fail.message}");
-           // If failed opacity, we might not show the full data
+          print('❌ [CandidateDashboard] Failed to fetch resume: ${fail.message}');
+          print('❌ [CandidateDashboard] Error details: ${fail.toString()}');
         },
         (success) {
           resumeData.value = success.data;
+          print('✅ [CandidateDashboard] Resume data fetched successfully!');
+          
+          // Log resume details
+          final resume = success.data.resume;
+          if (resume != null) {
+            print('👤 [CandidateDashboard] Name: ${resume.firstName} ${resume.lastName}');
+            print('📧 [CandidateDashboard] Email: ${resume.email}');
+            print('📍 [CandidateDashboard] Location: ${resume.city}, ${resume.country}');
+            print('🖼️ [CandidateDashboard] Photo: ${resume.photo != null ? "✓" : "✗"}');
+            print('🎨 [CandidateDashboard] Banner: ${resume.banner != null ? "✓" : "✗"}');
+            print('📝 [CandidateDashboard] About: ${resume.aboutUs != null && resume.aboutUs!.isNotEmpty ? "✓" : "✗"}');
+            print('🎯 [CandidateDashboard] Skills count: ${resume.skills.length}');
+            print('🎯 [CandidateDashboard] Skills: ${resume.skills.join(", ")}');
+          }
+          
+          // Log elevator pitch
+          final elevatorPitches = success.data.elevatorPitch;
+          print('🎬 [CandidateDashboard] Elevator Pitches count: ${elevatorPitches.length}');
+          if (elevatorPitches.isNotEmpty) {
+            final firstPitch = elevatorPitches.first;
+            print('🎬 [CandidateDashboard] Elevator Pitch Video URL: ${firstPitch.video?.hlsUrl ?? "N/A"}');
+            print('🎬 [CandidateDashboard] Video Status: ${firstPitch.status ?? "N/A"}');
+          }
+          
+          // Log experiences
+          final experiences = success.data.experiences;
+          print('💼 [CandidateDashboard] Experiences count: ${experiences.length}');
+          
+          // Log education
+          final education = success.data.education;
+          print('🎓 [CandidateDashboard] Education count: ${education.length}');
+          
+          // Log awards
+          final awards = success.data.awardsAndHonors;
+          print('🏆 [CandidateDashboard] Awards count: ${awards.length}');
         },
       );
-    } catch (e) {
-      print("Error fetching resume: $e");
+    } catch (e, stackTrace) {
+      print('❌ [CandidateDashboard] Error fetching resume: $e');
+      print('❌ [CandidateDashboard] Stack trace: $stackTrace');
     } finally {
       isLoadingResume.value = false;
+      print('📄 [CandidateDashboard] Resume fetch completed (loading: false)');
     }
   }
 
   Future<void> fetchAppliedJobs(String userId) async {
+    print('💼 [CandidateDashboard] Fetching applied jobs...');
     isLoadingJobs.value = true;
+    
     try {
       final result = await _appliedJobsRepo.fetchUserApplications(userId: userId);
       
       result.fold(
         (fail) {
-          // handle error
+          print('❌ [CandidateDashboard] Failed to fetch applied jobs: ${fail.message}');
         },
         (success) {
           appliedJobs.assignAll(success.data.applications);
+          print('✅ [CandidateDashboard] Applied jobs fetched successfully!');
+          print('💼 [CandidateDashboard] Applied jobs count: ${appliedJobs.length}');
           
           // Fallback: If fetchResume failed or returned null, try to use valid data from here
-          // createResume in AppliedJobsResponseModel is simpler (no elevator pitch)
           if (resumeData.value == null && success.data.createResume != null) {
-             // We can map partial data if needed, but UI expects CandidateResumeResponseModel.
-             // For now we prioritize the dedicated resume fetch.
+            print('⚠️ [CandidateDashboard] Resume data is null, but found in applied jobs response');
           }
         },
       );
-    } catch (e) {
-      print("Error fetching jobs: $e");
+    } catch (e, stackTrace) {
+      print('❌ [CandidateDashboard] Error fetching applied jobs: $e');
+      print('❌ [CandidateDashboard] Stack trace: $stackTrace');
     } finally {
       isLoadingJobs.value = false;
+      print('💼 [CandidateDashboard] Applied jobs fetch completed (loading: false)');
     }
   }
 }

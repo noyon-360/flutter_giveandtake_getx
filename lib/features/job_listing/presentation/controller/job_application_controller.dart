@@ -10,7 +10,7 @@ import 'package:karlfive/features/job_listing/data/models/user_profile_model.dar
 import 'package:karlfive/features/job_listing/domain/usecases/get_job_details_usecase.dart';
 import 'package:karlfive/features/job_listing/domain/usecases/get_user_profile_usecase.dart';
 import 'package:karlfive/features/job_listing/domain/usecases/submit_job_application_usecase.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
+import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
 import 'package:path_provider/path_provider.dart';
 
 class JobApplicationController extends GetxController {
@@ -22,9 +22,9 @@ class JobApplicationController extends GetxController {
     required GetUserProfileUseCase getUserProfileUseCase,
     required SubmitJobApplicationUseCase submitJobApplicationUseCase,
     required GetJobDetailsUseCase getJobDetailsUseCase,
-  })  : _getUserProfileUseCase = getUserProfileUseCase,
-        _submitJobApplicationUseCase = submitJobApplicationUseCase,
-        _getJobDetailsUseCase = getJobDetailsUseCase;
+  }) : _getUserProfileUseCase = getUserProfileUseCase,
+       _submitJobApplicationUseCase = submitJobApplicationUseCase,
+       _getJobDetailsUseCase = getJobDetailsUseCase;
 
   // Observable variables
   final Rxn<UserProfileModel> userProfile = Rxn<UserProfileModel>();
@@ -33,16 +33,18 @@ class JobApplicationController extends GetxController {
   final Rxn<PlatformFile> selectedResume = Rxn<PlatformFile>();
   final RxString visaOption = 'Yes'.obs;
   final RxBool agreeToShareCV = true.obs;
-  
+
   // Store jobData for navigation after successful submission
   final Rxn<Map<String, dynamic>> jobData = Rxn<Map<String, dynamic>>();
 
   // Text controllers
   final pitchController = TextEditingController();
-  final elevatorPitchController = TextEditingController(); // URL input if needed
-  
+  final elevatorPitchController =
+      TextEditingController(); // URL input if needed
+
   // Custom Questions handling
-  final RxList<Map<String, dynamic>> customQuestions = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> customQuestions =
+      <Map<String, dynamic>>[].obs;
   // Map to store controllers using question ID as key
   final Map<String, TextEditingController> answerControllers = {};
 
@@ -61,7 +63,7 @@ class JobApplicationController extends GetxController {
     }
     super.onClose();
   }
-  
+
   void initQuestions(List<dynamic> questions) {
     customQuestions.clear();
     // specific to re-init, clear old controllers
@@ -74,7 +76,11 @@ class JobApplicationController extends GetxController {
       if (q is Map<String, dynamic>) {
         customQuestions.add(q);
         // Use '_id' if available, otherwise generate a key or use question text
-        final id = q['_id'] ?? q['id'] ?? q['question'] ?? DateTime.now().toIso8601String();
+        final id =
+            q['_id'] ??
+            q['id'] ??
+            q['question'] ??
+            DateTime.now().toIso8601String();
         answerControllers[id.toString()] = TextEditingController();
       }
     }
@@ -88,13 +94,15 @@ class JobApplicationController extends GetxController {
           //  print("Failed to fetch job details: ${failure.message}");
         },
         (success) {
-           final jobModel = success.data;
-           // jobModel.customQuestion is non-nullable List<CustomQuestionModel>
-           if (jobModel.customQuestion.isNotEmpty) {
-              final questionMaps = jobModel.customQuestion.map((e) => e.toJson()).toList();
-              initQuestions(questionMaps);
-           }
-        }
+          final jobModel = success.data;
+          // jobModel.customQuestion is non-nullable List<CustomQuestionModel>
+          if (jobModel.customQuestion.isNotEmpty) {
+            final questionMaps = jobModel.customQuestion
+                .map((e) => e.toJson())
+                .toList();
+            initQuestions(questionMaps);
+          }
+        },
       );
     } catch (e) {
       print("Error fetching job details: $e");
@@ -103,7 +111,7 @@ class JobApplicationController extends GetxController {
 
   Future<void> fetchUserProfile() async {
     isLoadingProfile.value = true;
-    
+
     try {
       final result = await _getUserProfileUseCase.call();
 
@@ -226,7 +234,7 @@ class JobApplicationController extends GetxController {
     print('JobId isEmpty: ${jobId.isEmpty}');
     print('ResumeId received: "$resumeId"');
     print('===============================================');
-    
+
     if (selectedResume.value == null) {
       Get.snackbar(
         'Error',
@@ -244,7 +252,7 @@ class JobApplicationController extends GetxController {
       // Get userId from secure storage
       final secureStore = SecureStoreServices();
       final userId = await secureStore.retrieveData(KeyConstants.userId);
-      
+
       if (userId == null || userId.isEmpty) {
         Get.snackbar(
           'Error',
@@ -260,16 +268,16 @@ class JobApplicationController extends GetxController {
       // Collect answers in the new format
       List<Map<String, String>> answers = [];
       for (var q in customQuestions) {
-         final id = q['_id'] ?? q['id'] ?? q['question'];
-         if (id != null && answerControllers.containsKey(id.toString())) {
-            final answer = answerControllers[id.toString()]?.text ?? '';
-            if (answer.isNotEmpty) {
-               answers.add({
-                 'question': q['question'] ?? '',
-                 'ans': answer,  // Changed from 'answer' to 'ans' to match API spec
-               });
-            }
-         }
+        final id = q['_id'] ?? q['id'] ?? q['question'];
+        if (id != null && answerControllers.containsKey(id.toString())) {
+          final answer = answerControllers[id.toString()]?.text ?? '';
+          if (answer.isNotEmpty) {
+            answers.add({
+              'question': q['question'] ?? '',
+              'ans': answer, // Changed from 'answer' to 'ans' to match API spec
+            });
+          }
+        }
       }
 
       // Use resumeId from parameter if provided, otherwise show error
@@ -323,16 +331,10 @@ class JobApplicationController extends GetxController {
             colorText: Colors.white,
             duration: const Duration(seconds: 2),
           );
-          
-          // Navigate back to Job Details screen after a short delay
+
+          // Navigate to Job History screen after a short delay
           Future.delayed(const Duration(milliseconds: 800), () {
-            final currentJobData = jobData.value;
-            if (currentJobData != null) {
-              Get.offAll(() => JobDetailsScreen(jobData: currentJobData));
-            } else {
-              // Fallback if jobData is not available
-              Get.back();
-            }
+            Get.offAll(() => const JobHistoryScreen());
           });
         },
       );

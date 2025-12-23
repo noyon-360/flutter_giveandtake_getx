@@ -4,6 +4,7 @@ class ApplicationModel {
   final String companyName;
   final String appliedDate;
   final String status;
+  final String createdAt;
   final Map<String, dynamic> raw;
 
   ApplicationModel({
@@ -12,12 +13,15 @@ class ApplicationModel {
     required this.companyName,
     required this.appliedDate,
     required this.status,
+    required this.createdAt,
     required this.raw,
   });
 
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
     final job = json['jobId'] as Map<String, dynamic>?;
-    final company = job != null ? job['companyId'] as Map<String, dynamic>? : null;
+    final company = job != null
+        ? job['companyId'] as Map<String, dynamic>?
+        : null;
 
     return ApplicationModel(
       id: json['_id'] ?? '',
@@ -25,12 +29,10 @@ class ApplicationModel {
       companyName: company?['cname'] ?? '',
       appliedDate: json['createdAt']?.toString().split('T').first ?? '',
       status: json['status'] ?? '',
+      createdAt: json['createdAt'] ?? '',
       raw: Map<String, dynamic>.from(json),
     );
   }
-
-
-
 }
 
 class CreateResumeModel {
@@ -88,8 +90,13 @@ class AppliedJobsResponseModel {
 
   factory AppliedJobsResponseModel.fromJson(Map<String, dynamic>? json) {
     if (json == null) return AppliedJobsResponseModel(applications: []);
+
+    // Check if response has 'data' wrapper (like {success, message, data: {applications: [...]}})
+    final dataMap = json['data'] as Map<String, dynamic>?;
+    final actualData = dataMap ?? json;
+
     final apps =
-        (json['applications'] as List?)
+        (actualData['applications'] as List?)
             ?.map((e) {
               return ApplicationModel.fromJson(
                 Map<String, dynamic>.from(e as Map),
@@ -98,9 +105,9 @@ class AppliedJobsResponseModel {
             .toList(growable: false) ??
         <ApplicationModel>[];
 
-    final resume = json['createResume'] != null
+    final resume = actualData['createResume'] != null
         ? CreateResumeModel.fromJson(
-            Map<String, dynamic>.from(json['createResume'] as Map),
+            Map<String, dynamic>.from(actualData['createResume'] as Map),
           )
         : null;
 

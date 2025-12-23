@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../../core/network/constants/api_constants.dart';
+import '../../../../core/network/constants/key_constants.dart';
+import '../../../../core/network/services/secure_store_services.dart';
 import '../../../../core/services/get_user_profile_service.dart';
 import '../../../auth/data/models/user_model.dart';
 
@@ -46,9 +49,9 @@ class ElevatorResumeController extends GetxController {
   var isPlaying = false.obs;
   var currentPosition = Duration.zero.obs;
   var totalDuration = Duration.zero.obs;
-  
+
   VideoPlayerController? videoPlayerController;
-  
+
   var photoPath = Rx<String?>(null);
   var bannerImagePath = Rx<String?>(null);
 
@@ -218,7 +221,7 @@ class ElevatorResumeController extends GetxController {
     try {
       print('Setting up user profile listener...');
       final userProfileService = Get.find<GetUserProfileService>();
-      
+
       // Listen to changes in user profile
       ever(userProfileService.userInfoRx, (user) {
         print('User profile changed! User is null: ${user == null}');
@@ -265,10 +268,10 @@ class ElevatorResumeController extends GetxController {
     try {
       print('========== REFRESHING USER PROFILE DATA ==========');
       final userProfileService = Get.find<GetUserProfileService>();
-      
+
       // Force fetch from API
       await userProfileService.getUserProfile();
-      
+
       // Get the updated user
       final user = userProfileService.userInfo;
       if (user != null) {
@@ -288,17 +291,17 @@ class ElevatorResumeController extends GetxController {
     print('User email: "${user.email}"');
     print('User phoneNumber: "${user.phoneNumber}"');
     print('User profileImage: "${user.profileImage}"');
-    
+
     // Parse name into first name and surname
     final nameParts = user.name.trim().split(' ');
     print('Name parts count: ${nameParts.length}');
     print('Name parts: $nameParts');
-    
+
     if (nameParts.isNotEmpty) {
       final firstName = nameParts.first.trim();
       print('Setting first name to: "$firstName"');
       firstNameController.text = firstName;
-      
+
       if (nameParts.length > 1) {
         final surname = nameParts.sublist(1).join(' ').trim();
         print('Setting surname to: "$surname"');
@@ -313,7 +316,9 @@ class ElevatorResumeController extends GetxController {
     emailController.text = user.email;
 
     // Set phone number
-    print('Phone number check - isEmpty: ${user.phoneNumber.isEmpty}, value: "${user.phoneNumber}"');
+    print(
+      'Phone number check - isEmpty: ${user.phoneNumber.isEmpty}, value: "${user.phoneNumber}"',
+    );
     if (user.phoneNumber.isNotEmpty) {
       print('Setting phone number to: "${user.phoneNumber}"');
     } else {
@@ -506,12 +511,17 @@ class ElevatorResumeController extends GetxController {
   /// ================== API CALLS ==================
   Future<void> fetchCountriesWithCities() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://10.10.5.59:8001/api/v1/countries'),
-      );
+      print("🌍 Fetching countries from API...");
+      final url = '${ApiConstants.baseUrl}/countries';
+      print("🔗 URL: $url");
+
+      final response = await http.get(Uri.parse(url));
+
+      print("📡 Response status: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print("📦 Response data keys: ${data.keys}");
 
         for (var country in data['data']) {
           if (country['cities'] != null &&
@@ -523,23 +533,28 @@ class ElevatorResumeController extends GetxController {
         }
 
         countries.value = countryCityMap.keys.toList();
-        print("Countries loaded: ${countries.length}");
+        print("✅ Countries loaded: ${countries.length}");
       } else {
-        print("Failed to load countries");
+        print("❌ Failed to load countries - Status: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error fetching countries: $e");
+      print("❌ Error fetching countries: $e");
     }
   }
 
   Future<void> fetchLanguages() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://10.10.5.59:8001/api/v1/language'),
-      );
+      print("🌐 Fetching languages from API...");
+      final url = '${ApiConstants.baseUrl}/language';
+      print("🔗 URL: $url");
+
+      final response = await http.get(Uri.parse(url));
+
+      print("📡 Response status: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print("📦 Response data keys: ${data.keys}");
 
         // Parse language names from the data array
         if (data['data'] != null) {
@@ -547,13 +562,13 @@ class ElevatorResumeController extends GetxController {
               .map((item) => item['name'] as String)
               .where((name) => name != 'name') // Filter out the invalid entry
               .toList();
-          print("Languages loaded: ${availableLanguages.length}");
+          print("✅ Languages loaded: ${availableLanguages.length}");
         }
       } else {
-        print("Failed to load languages");
+        print("❌ Failed to load languages - Status: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error fetching languages: $e");
+      print("❌ Error fetching languages: $e");
     }
   }
 
@@ -784,16 +799,35 @@ class ElevatorResumeController extends GetxController {
         };
       }).toList();
 
-      // Create multipart request
-      const apiUrl = 'http://10.10.5.59:8001/api/v1/create-resume/create-resume';
-      print('API URL: $apiUrl');
-      
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse(apiUrl),
-      );
+      // Get auth token
+      print('Retrieving auth token...');
+      final secureStore = SecureStoreServices();
+      final token = await secureStore.retrieveData(KeyConstants.accessToken);
 
-      // Add text fields
+      if (token == null || token.isEmpty) {
+        print('ERROR: No auth token found');
+        Get.snackbar(
+          'Error',
+          'Authentication token not found. Please login again.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        isUploadingResume.value = false;
+        return;
+      }
+      print('Auth token retrieved successfully');
+
+      // Create multipart request
+      final apiUrl = ApiConstants.resume.createResume;
+      print('API URL: $apiUrl');
+
+      var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+
+      // Add Authorization header
+      request.headers['Authorization'] = 'Bearer $token';
+      print('Authorization header added');
+
+      // Add text fields - IMPORTANT: Match the exact field names from your Postman request
       request.fields['userId'] = user.id;
       request.fields['resume'] = jsonEncode(resumeData);
       request.fields['experiences'] = jsonEncode(experiencesData);
@@ -801,7 +835,8 @@ class ElevatorResumeController extends GetxController {
       request.fields['awardsAndHonors'] = jsonEncode(awardsData);
 
       print('Resume data added to request');
-      print('  - Resume: ${resumeData.keys.toList()}');
+      print('  - UserId: ${user.id}');
+      print('  - Resume fields: ${resumeData.keys.toList()}');
       print('  - Experiences count: ${experiencesData.length}');
       print('  - Education count: ${educationData.length}');
       print('  - Awards count: ${awardsData.length}');
@@ -812,6 +847,8 @@ class ElevatorResumeController extends GetxController {
         request.files.add(
           await http.MultipartFile.fromPath('photo', photoPath.value!),
         );
+      } else {
+        print('No photo selected');
       }
 
       // Add banner file if selected
@@ -820,33 +857,40 @@ class ElevatorResumeController extends GetxController {
         request.files.add(
           await http.MultipartFile.fromPath('banner', bannerImagePath.value!),
         );
+      } else {
+        print('No banner selected');
       }
 
-      print('Files added. Sending request...');
+      print('All fields and files added. Sending request...');
 
       // Show loading dialog
       Get.dialog(
         WillPopScope(
           onWillPop: () async => false, // Prevent dismissal
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: const Center(child: CircularProgressIndicator()),
         ),
         barrierDismissible: false,
       );
 
       // Send request with timeout
       print('Sending multipart request to API...');
+      print('Request headers: ${request.headers}');
+      print('Request fields: ${request.fields.keys.toList()}');
+      print('Request files: ${request.files.map((f) => f.field).toList()}');
+
       final streamedResponse = await request.send().timeout(
         const Duration(seconds: 30),
         onTimeout: () {
           throw TimeoutException('Resume upload request timed out');
         },
       );
-      
+
       final response = await http.Response.fromStream(streamedResponse);
-      print('Response received. Status code: ${response.statusCode}');
+      print('========== API RESPONSE ==========');
+      print('Status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
       print('Response body: ${response.body}');
+      print('==================================');
 
       // Close loading dialog
       if (Get.isDialogOpen ?? false) {
@@ -858,7 +902,7 @@ class ElevatorResumeController extends GetxController {
           final data = jsonDecode(response.body);
           final message = data['message'] ?? 'Resume created successfully!';
           print('SUCCESS: $message');
-          
+
           Get.snackbar(
             'Success',
             message,
@@ -866,7 +910,7 @@ class ElevatorResumeController extends GetxController {
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
           );
-          
+
           // Clear form and navigate back
           clearForm();
           Future.delayed(const Duration(seconds: 2), () {
@@ -880,7 +924,7 @@ class ElevatorResumeController extends GetxController {
             backgroundColor: Colors.green,
             colorText: Colors.white,
           );
-          
+
           // Clear form and navigate back
           clearForm();
           Future.delayed(const Duration(seconds: 2), () {
@@ -888,37 +932,46 @@ class ElevatorResumeController extends GetxController {
           });
         }
       } else {
+        print('❌ Upload failed with status: ${response.statusCode}');
+
         try {
           final data = jsonDecode(response.body);
-          final errorMessage = data['message'] ?? data['error'] ?? 'Failed to create resume';
-          print('ERROR Response: $errorMessage');
-          
+          print('Error response data: $data');
+
+          final errorMessage =
+              data['message'] ?? data['error'] ?? 'Failed to create resume';
+          print('ERROR Message: $errorMessage');
+
           Get.snackbar(
             'Upload Failed',
             errorMessage.toString(),
             backgroundColor: Colors.red,
             colorText: Colors.white,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 4),
+            snackPosition: SnackPosition.BOTTOM,
           );
         } catch (e) {
           print('Error parsing error response: $e');
+          print('Raw response body: ${response.body}');
+
           Get.snackbar(
             'Upload Failed',
-            'Status: ${response.statusCode} - ${response.body}',
+            'Status: ${response.statusCode}\nPlease check your internet connection and try again.',
             backgroundColor: Colors.red,
             colorText: Colors.white,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 4),
+            snackPosition: SnackPosition.BOTTOM,
           );
         }
       }
     } on TimeoutException catch (e) {
       print('TIMEOUT ERROR: $e');
-      
+
       // Close loading if open
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-      
+
       Get.snackbar(
         'Timeout',
         'Upload took too long. Please check your connection and try again.',
@@ -928,12 +981,12 @@ class ElevatorResumeController extends GetxController {
       );
     } catch (e) {
       print('EXCEPTION ERROR: $e');
-      
+
       // Close loading if open
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-      
+
       Get.snackbar(
         'Error',
         'An error occurred: ${e.toString()}',
@@ -950,7 +1003,7 @@ class ElevatorResumeController extends GetxController {
   /// Clear all form fields
   void clearForm() {
     print('Clearing form...');
-    
+
     // Clear text controllers
     firstNameController.clear();
     surnameController.clear();
@@ -965,34 +1018,36 @@ class ElevatorResumeController extends GetxController {
     upworkController.clear();
     fiverrController.clear();
     portfolioController.clear();
-    
+
     // Clear Quill controller
     aboutMeQuillController.clear();
-    
+
     // Reset selections
     selectedTitle.value = 'Mr.';
     selectedCountry.value = null;
     selectedCity.value = null;
     immediatelyAvailable.value = false;
-    
+
     // Clear lists
     experienceList.clear();
-    educationList.value = [{'presentlyAttendHere': false}];
+    educationList.value = [
+      {'presentlyAttendHere': false},
+    ];
     awardsList.value = [{}];
     skillsList.clear();
     otherUrlsList.clear();
     certifications.clear();
     languages.clear();
-    
+
     // Clear media files
     photoPath.value = null;
     bannerImagePath.value = null;
     elevatorVideoPath.value = '';
     isVideoUploaded.value = false;
-    
+
     // Reset word count
     aboutMeWordCount.value = 0;
-    
+
     print('Form cleared successfully');
   }
 
@@ -1019,9 +1074,12 @@ class ElevatorResumeController extends GetxController {
       return 'Email address is required';
     }
 
-    if (educationList.isEmpty || educationList.every((edu) => 
-        (edu['institution'] ?? '').isEmpty && 
-        (edu['degree'] ?? '').isEmpty)) {
+    if (educationList.isEmpty ||
+        educationList.every(
+          (edu) =>
+              (edu['institution'] ?? '').isEmpty &&
+              (edu['degree'] ?? '').isEmpty,
+        )) {
       return 'At least one education entry is required';
     }
 
@@ -1030,7 +1088,7 @@ class ElevatorResumeController extends GetxController {
 
   void onUploadElevatorPitchFirst() {
     print('========== RESUME UPLOAD STARTED =========');
-    
+
     // Validate form
     final validationError = validateResume();
     if (validationError != null) {

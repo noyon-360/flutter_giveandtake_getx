@@ -51,7 +51,7 @@ class CreateJobPostingController extends GetxController {
   //   CategoryController(CategoryRepoImpl(apiClient: ApiClient())),
   // );
 
-  final String apiUrl = "http:localhost:5009/api/v1/countries";
+  final String apiUrl = "http://10.10.5.67:5007/api/v1/countries";
   // final String categoryApiUrl =
   //     "https://api.evpitch.com/api/v1/category/job-category";
 

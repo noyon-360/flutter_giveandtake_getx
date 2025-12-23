@@ -63,6 +63,7 @@ class ApiConstants {
 class ResumeEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/create-resume';
   final String getResume = '$_base/get-resume';
+  final String createResume = '$_base/create-resume';
 }
 
 class JobEndpoints {
@@ -186,11 +187,14 @@ class ContentEndpoints {
 
 // New payment endpoints
 class PaymentEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/payment';
+  static const String _base = '${ApiConstants.baseUrl}/payments';
 
   final String createPayment = '$_base/create-payment';
 
   final String confirmPayment = '$_base/confirm-payment';
+  
+  String getUserPayments(String userId, int page, int limit) =>
+      '$_base/user/$userId?page=$page&limit=$limit';
 }
 
 // PayPal endpoints
