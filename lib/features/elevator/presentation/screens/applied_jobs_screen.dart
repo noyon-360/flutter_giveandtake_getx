@@ -14,7 +14,7 @@ class AppliedJobsScreen extends StatelessWidget {
         children: [
           AppliedJobCard(
             jobLogo: "assets/images/applied_jobs_sample_logo.png",
-            title: 'Software Engineer',
+            title: 'Software Engineers',
             description:
                 'Lorem ipsum dolor sit amet consectetur. Tellus laoreet vel maec enas in. Aliq uet aliquet a diam mi luctus quis masdf',
           ),
@@ -28,7 +28,7 @@ class AppliedJobsScreen extends StatelessWidget {
             jobLogo: "assets/images/applied_jobs_sample_logo.png",
             title: 'Software Engineer',
             description:
-                'Lorem ipsum dolor sit amet consectetur. Tellus laoreet vel maec enas in. Aliq uet aliquet a diam mi luctus quis masdf',
+                'Lorem ipsum dolor sit amet consectetur. Tellus laoreet vel maec enas in. Aliq uet aliquet a diam mi luctus quis masdfghgj',
           ),
           AppliedJobCard(
             jobLogo: "assets/images/applied_jobs_sample_logo.png",

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/elevator_resume_controller.dart';
-import 'package:intl/intl.dart';
+import '../screens/elevator_resume_screen.dart';
 
 class EducationFormSection extends StatelessWidget {
   final int index;
@@ -68,53 +68,27 @@ class EducationFormSection extends StatelessWidget {
 
           const SizedBox(height: 16),
           _buildLabel('Country'),
-           const SizedBox(height: 8),
-          Obx(() => Container(
-             padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: controller.educationList[index]['country'],
-                hint: const Text('Select Country'),
-                items: controller.countries.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (val) => controller.updateEducationField(index, 'country', val),
-              ),
-            ),
+          const SizedBox(height: 8),
+          Obx(() => SearchableDropdown(
+            hint: 'Select Country',
+            items: controller.countries.toList(),
+            value: controller.educationList[index]['country'],
+            onChanged: (val) {
+              controller.updateEducationField(index, 'country', val);
+              controller.updateEducationField(index, 'city', null);
+            },
           )),
 
           const SizedBox(height: 16),
           _buildLabel('City'),
-           const SizedBox(height: 8),
-          Obx(() => Container(
-             padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: controller.educationList[index]['city'],
-                 hint: const Text('Select country first'), // Logic should update hint if country selected?
-                 // For now static hint is okay as per design
-                items: controller.cities.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (val) => controller.updateEducationField(index, 'city', val),
-              ),
-            ),
+          const SizedBox(height: 8),
+          Obx(() => SearchableDropdown(
+            hint: 'Select City',
+            items: controller.cities.toList(),
+            value: controller.educationList[index]['city'],
+            onChanged: (val) {
+              controller.updateEducationField(index, 'city', val);
+            },
           )),
 
           const SizedBox(height: 16),
@@ -138,20 +112,76 @@ class EducationFormSection extends StatelessWidget {
           }),
 
           const SizedBox(height: 16),
-           _buildLabel('Start Date'),
+          _buildLabel('Start Date'),
           const SizedBox(height: 8),
-           _buildTextField(
-            hint: 'MM/YYYY',
-            onChanged: (val) => controller.updateEducationField(index, 'startDate', val),
+          GestureDetector(
+            onTap: () => _selectDate(context, index, 'startDate'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    controller.educationList[index]['startDate']?.toString().isEmpty ?? true
+                        ? 'MM/YYYY'
+                        : controller.educationList[index]['startDate'],
+                    style: TextStyle(
+                      color: controller.educationList[index]['startDate']?.toString().isEmpty ?? true
+                          ? Colors.grey
+                          : Colors.black,
+                    ),
+                  ),
+                  const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+                ],
+              ),
+            ),
           ),
 
           const SizedBox(height: 16),
-           _buildLabel('Graduation Date'),
+          _buildLabel('Graduation Date'),
           const SizedBox(height: 8),
-           _buildTextField(
-            hint: 'MM/YYYY',
-            onChanged: (val) => controller.updateEducationField(index, 'graduationDate', val),
-          ),
+          Obx(() {
+            final isChecked = controller.educationList[index]['presentlyAttendHere'] == true;
+            return GestureDetector(
+              onTap: isChecked ? null : () => _selectDate(context, index, 'graduationDate'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: isChecked ? Colors.grey.shade200 : Colors.grey.shade300,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  color: isChecked ? Colors.grey.shade50 : Colors.white,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      controller.educationList[index]['graduationDate']?.toString().isEmpty ?? true
+                          ? 'MM/YYYY'
+                          : controller.educationList[index]['graduationDate'],
+                      style: TextStyle(
+                        color: isChecked
+                            ? Colors.grey.shade400
+                            : (controller.educationList[index]['graduationDate']?.toString().isEmpty ?? true
+                                ? Colors.grey
+                                : Colors.black),
+                      ),
+                    ),
+                    Icon(
+                      Icons.calendar_today,
+                      size: 18,
+                      color: isChecked ? Colors.grey.shade300 : Colors.grey,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
           
           if (index > 0) ...[
             const SizedBox(height: 16),
@@ -196,5 +226,32 @@ class EducationFormSection extends StatelessWidget {
       ),
       onChanged: onChanged,
     );
+  }
+
+  /// Date picker for MM/YYYY format
+  Future<void> _selectDate(
+    BuildContext context,
+    int index,
+    String dateField,
+  ) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1990),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+    );
+
+    if (picked != null) {
+      // Format as MM/YYYY
+      final month = picked.month.toString().padLeft(2, '0');
+      final year = picked.year.toString();
+      final formattedDate = '$month/$year';
+
+      Get.find<ElevatorResumeController>().updateEducationField(
+        index,
+        dateField,
+        formattedDate,
+      );
+    }
   }
 }
