@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:karlfive/features/Home/presentation/screen/home_screen.dart';
 
 import '../../../core/bottomNavbar/widgets/custom_bottom_navbar.dart';
+import '../../../core/services/get_user_profile_service.dart';
+import '../../../features/Home/presentation/screen/candidate_dashboard_screen.dart';
 import '../../../features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 import '../controllers/bottom_nav_controller.dart';
 
@@ -15,12 +17,7 @@ class DashboardScreen extends StatelessWidget {
       ? Get.find<BottomNavController>()
       : Get.put(BottomNavController());
 
-  final List<Widget> screens = const [
-    HomeScreen(),
-    Center(child: Text("Chat Screen")),
-    Center(child: Text("Notifications")),
-    ProfileDashboardScreen(),
-  ];
+  final GetUserProfileService profileService = Get.find<GetUserProfileService>();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +28,23 @@ class DashboardScreen extends StatelessWidget {
     });
 
     return Scaffold(
-      body: Obx(() => screens[navController.currentIndex.value]),
+      body: Obx(() {
+        final user = profileService.userInfoRx.value;
+        Widget home = const HomeScreen();
+        
+        if (user != null && user.role == 'candidate') {
+           home = const CandidateDashboardScreen();
+        }
+
+        final List<Widget> screens = [
+          home,
+          const Center(child: Text("Chat Screen")),
+          const Center(child: Text("Notifications")),
+          const ProfileDashboardScreen(),
+        ];
+        
+        return screens[navController.currentIndex.value];
+      }),
       bottomNavigationBar: CustomBottomNavBar(),
     );
   }
