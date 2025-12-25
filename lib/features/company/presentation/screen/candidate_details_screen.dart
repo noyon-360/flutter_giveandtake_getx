@@ -7,6 +7,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../widget/pdf_download_widget.dart';
+
 class CandidateDetailsScreen extends StatefulWidget {
   const CandidateDetailsScreen({super.key});
 
@@ -52,12 +54,15 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
         }
 
         final candidateData = controller.candidate.value;
+        final resumeData = controller.resume.value;
 
         if (candidateData == null || candidateData.resume == null) {
           return const Center(child: Text("No candidate data available"));
         }
 
         final resume = candidateData.resume!;
+        final resumepdf = resumeData;
+
         final elevatorPitches = candidateData.elevatorPitch;
         final hasElevatorPitch =
             elevatorPitches.isNotEmpty &&
@@ -71,7 +76,6 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
               const SizedBox(height: 10),
 
               // ==================== HEADER ====================
-           
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -160,22 +164,26 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                         alignment: Alignment.centerRight,
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            // TODO: Open or download resume
+                            if (resumeData.isNotEmpty &&
+                                resumeData.first.file.isNotEmpty &&
+                                resumeData.first.file.first.url.isNotEmpty) {
+                              final fileUrl = resumepdf.first.file.first.url;
+
+                              downloadAndOpenPdf(
+                                fileUrl,
+                                resumepdf.first.file.first.filename,
+                              );
+                            } else {
+                              Get.snackbar(
+                                "Unavailable",
+                                "Resume not found",
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                            }
                           },
+
                           icon: const Icon(Icons.download, color: Colors.white),
                           label: const Text("Resume"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 3,
-                          ),
                         ),
                       ),
                     ],
