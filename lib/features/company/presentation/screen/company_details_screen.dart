@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
 import 'package:karlfive/features/company/presentation/screen/company_edit_profile.dart';
 import 'package:karlfive/features/company/presentation/screen/connect_company_dialog_screen.dart';
+import 'package:karlfive/features/company/presentation/screen/recruiter_request_screen.dart';
 import 'package:karlfive/features/company_pricing/presentation/screens/plan_pricing_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -143,6 +144,14 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
               onTap: () {
                 Get.back();
                 Get.to(() => PlanPricingScreen()); // or your profile page
+              },
+            ),
+             ListTile(
+              leading: const Icon(Icons.edit_calendar_sharp),
+              title: const Text('Recruiter Request'),
+              onTap: () {
+                Get.back();
+                Get.to(() => RecruiterRequestsScreen()); // or your profile page
               },
             ),
             ListTile(

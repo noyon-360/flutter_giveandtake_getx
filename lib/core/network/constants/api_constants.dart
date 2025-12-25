@@ -1,6 +1,6 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'http://10.10.5.59:8001';// soykot ip
+  static const String baseDomain = 'http://10.10.5.53:5004';// soykot ip
   // static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
@@ -244,6 +244,9 @@ class CompanyAccountApi {
 
       String fetchResume(String candidateUserId) =>
       '${ApiConstants.baseUrl}/resume/user/$candidateUserId';
+
+          String updateRecCompany(String recId) =>
+      '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
 
 
       

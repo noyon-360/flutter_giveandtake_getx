@@ -26,6 +26,7 @@ import 'package:karlfive/features/company/data/model/archieve_response_model.dar
 import 'package:karlfive/features/company/data/model/candidate_resume_response_model.dart';
 import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
 import 'package:karlfive/features/company/data/model/manage_job_response_model.dart';
+import 'package:karlfive/features/company/data/model/rec_company_response_model.dart';
 import 'package:karlfive/features/company/data/model/recruiter_added_request_model.dart';
 import 'package:karlfive/features/company/data/model/recruiter_added_response_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
@@ -244,6 +245,18 @@ class CompanyRepoImplementation extends CompanyRepository {
               .toList();
         }
       },
+    );
+  }
+
+    @override
+  NetworkResult<RecCompanyResponseModel> updateRecCompany(
+    String recId,
+    Map<String, dynamic> data,
+  ) {
+    return _apiClient.patch(
+      ApiConstants.company.updateRecCompany(recId),
+      data: data, // send as JSON
+      fromJsonT: (json) => RecCompanyResponseModel.fromJson(json),
     );
   }
 }
