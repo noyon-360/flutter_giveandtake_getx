@@ -10,6 +10,7 @@ class ApiConstants {
   //add by zafor end
 
   //static const String baseDomain = 'https://api.evpitch.com';
+  // static const String baseDomain = 'http://10.10.5.67:5001';//eshita
   // static const String baseDomain = 'http://10.10.5.53:5001';//eshita
   // static const String baseDomain = 'http://10.10.5.33:5001';//eshita
 
@@ -56,10 +57,24 @@ class ApiConstants {
   static CategoryEndpoints get category => CategoryEndpoints();
   static AlluserEndpoints get allusers => AlluserEndpoints();
   static CompanyAccountApi get company => CompanyAccountApi();
+  static ResumeEndpoints get resume => ResumeEndpoints();
+}
+
+class ResumeEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/create-resume';
+  final String getResume = '$_base/get-resume';
 }
 
 class JobEndpoints {
-  String getJobs(int limit) => '${ApiConstants.baseUrl}/jobs?limit=$limit';
+  String getJobs(int page, int limit, {String? search}) {
+    String url = '${ApiConstants.baseUrl}/jobs?page=$page&limit=$limit';
+    if (search != null && search.isNotEmpty) {
+      url += '&search=${Uri.encodeQueryComponent(search)}';
+    }
+    return url;
+  }
+  
+  final String applyJob = '${ApiConstants.baseUrl}/applied-jobs';
 }
 
 class RecruiterAccountApi {
@@ -229,5 +244,12 @@ class CompanyAccountApi {
 
       String fetchResume(String candidateUserId) =>
       '${ApiConstants.baseUrl}/resume/user/$candidateUserId';
+
+          String updateRecCompany(String recId) =>
+      '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
+
+
+      
+
 
 }

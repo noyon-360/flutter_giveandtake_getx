@@ -43,7 +43,9 @@ class UserModel {
       deactivate: json['deactivate'] as bool?,
       dateOfdeactivate: json['dateOfdeactivate'] as String?,
       address: json['address'],
-      avatarUrl: avatar != null ? (avatar['url'] as String?) : null,
+      avatarUrl: (avatar is Map && avatar['url'] != null)
+          ? avatar['url']
+          : (avatar is String ? avatar : json['profileImage'] as String?),
       refreshToken: json['refresh_token'] as String?,
       title: json['title'] as String?,
       isValid: json['isValid'] as bool?,

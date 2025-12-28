@@ -1,24 +1,48 @@
+class AnswerModel {
+  final String question;
+  final String ans;
+  final String id;
+
+  AnswerModel({
+    required this.question,
+    required this.ans,
+    required this.id,
+  });
+
+  factory AnswerModel.fromJson(Map<String, dynamic> json) {
+    return AnswerModel(
+      question: json['question'] ?? '',
+      ans: json['ans'] ?? '',
+      id: json['_id'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'question': question,
+      'ans': ans,
+      '_id': id,
+    };
+  }
+}
+
 class JobApplicationResponse {
   final String id;
   final String jobId;
-  final String candidateId;
+  final String userId;
   final String status;
-  final String visaRequired;
-  final String? elevatorPitchUrl;
-  final String? expectedSalary;
-  final String? resumeFileName;
+  final List<AnswerModel> answer;
+  final String resumeId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   JobApplicationResponse({
     required this.id,
     required this.jobId,
-    required this.candidateId,
+    required this.userId,
     required this.status,
-    required this.visaRequired,
-    this.elevatorPitchUrl,
-    this.expectedSalary,
-    this.resumeFileName,
+    required this.answer,
+    required this.resumeId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -27,12 +51,13 @@ class JobApplicationResponse {
     return JobApplicationResponse(
       id: json['_id'] ?? '',
       jobId: json['jobId'] ?? '',
-      candidateId: json['candidateId'] ?? '',
+      userId: json['userId'] ?? '',
       status: json['status'] ?? 'pending',
-      visaRequired: json['visaRequired'] ?? 'No',
-      elevatorPitchUrl: json['elevatorPitchUrl'],
-      expectedSalary: json['expectedSalary'],
-      resumeFileName: json['resumeFileName'],
+      answer: (json['answer'] as List<dynamic>?)
+              ?.map((e) => AnswerModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      resumeId: json['resumeId'] ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
@@ -46,12 +71,10 @@ class JobApplicationResponse {
     return {
       '_id': id,
       'jobId': jobId,
-      'candidateId': candidateId,
+      'userId': userId,
       'status': status,
-      'visaRequired': visaRequired,
-      'elevatorPitchUrl': elevatorPitchUrl,
-      'expectedSalary': expectedSalary,
-      'resumeFileName': resumeFileName,
+      'answer': answer.map((e) => e.toJson()).toList(),
+      'resumeId': resumeId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

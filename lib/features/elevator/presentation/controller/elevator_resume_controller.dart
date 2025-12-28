@@ -1,7 +1,16 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:http/http.dart' as http;
+import 'package:video_player/video_player.dart';
+
+import '../../../../core/services/get_user_profile_service.dart';
+import '../../../auth/data/models/user_model.dart';
 
 class ElevatorResumeController extends GetxController {
   final ImagePicker _picker = ImagePicker();
@@ -29,8 +38,17 @@ class ElevatorResumeController extends GetxController {
   /// Immediately Available checkbox
   var immediatelyAvailable = false.obs;
 
-  /// ================== FILE PATHS ==================
-  var elevatorVideoPath = Rx<String?>(null);
+  /// Check if resume upload is in progress
+  var isUploadingResume = false.obs;
+  var elevatorVideoPath = ''.obs;
+  var isVideoUploaded = false.obs;
+  var isVideoInitialized = false.obs;
+  var isPlaying = false.obs;
+  var currentPosition = Duration.zero.obs;
+  var totalDuration = Duration.zero.obs;
+  
+  VideoPlayerController? videoPlayerController;
+  
   var photoPath = Rx<String?>(null);
   var bannerImagePath = Rx<String?>(null);
 
@@ -54,33 +72,15 @@ class ElevatorResumeController extends GetxController {
 
   /// Languages list
   var languages = <String>[].obs;
+  var availableLanguages = <String>[].obs; // All languages from API
 
   /// ================== DUMMY DATA ==================
   final List<String> titles = ['Mr.', 'Mrs.', 'Ms.', 'Dr.'];
 
-  final List<String> countries = [
-    'United States',
-    'United Kingdom',
-    'Canada',
-    'Australia',
-    'Germany',
-    'France',
-    'India',
-    'China',
-    'Japan',
-  ];
-
-  final List<String> cities = [
-    'New York',
-    'London',
-    'Toronto',
-    'Sydney',
-    'Berlin',
-    'Paris',
-    'Mumbai',
-    'Beijing',
-    'Tokyo',
-  ];
+  // Dynamic countries and cities from API
+  var countries = <String>[].obs;
+  var cities = <String>[].obs;
+  Map<String, List<String>> countryCityMap = {};
 
   final List<String> jobTitles = [
     'Software Engineer',
@@ -110,7 +110,7 @@ class ElevatorResumeController extends GetxController {
 
   final List<String> years = List.generate(
     50,
-        (index) => (DateTime.now().year - index).toString(),
+    (index) => (DateTime.now().year - index).toString(),
   );
 
   final List<String> availabilities = [
@@ -142,6 +142,23 @@ class ElevatorResumeController extends GetxController {
     'Professional Certificate',
   ];
 
+  /// ================== FORM CONTROLLERS ==================
+  final firstNameController = TextEditingController();
+  final surnameController = TextEditingController();
+  final emailController = TextEditingController();
+  final certificationController = TextEditingController();
+  final languageController = TextEditingController();
+
+  // Social media links
+  final linkedinController = TextEditingController();
+  final twitterController = TextEditingController();
+  final facebookController = TextEditingController();
+  final tiktokController = TextEditingController();
+  final instagramController = TextEditingController();
+  final upworkController = TextEditingController();
+  final fiverrController = TextEditingController();
+  final portfolioController = TextEditingController();
+
   /// ================== LIFECYCLE ==================
   @override
   void onInit() {
@@ -149,6 +166,18 @@ class ElevatorResumeController extends GetxController {
 
     aboutMeQuillController = quill.QuillController.basic();
     aboutMeQuillController.addListener(_updateWordCountFromQuill);
+
+    // Fetch dynamic data from APIs
+    fetchCountriesWithCities();
+    fetchLanguages();
+
+    // Load user profile data with delay to ensure service is ready
+    Future.delayed(Duration.zero, () {
+      _loadUserProfileData();
+    });
+
+    // Also listen to userInfoRx for reactive updates
+    _setupUserProfileListener();
   }
 
   void _updateWordCountFromQuill() {
@@ -156,28 +185,285 @@ class ElevatorResumeController extends GetxController {
     if (plain.isEmpty) {
       aboutMeWordCount.value = 0;
     } else {
-      aboutMeWordCount.value =
-          plain.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+      aboutMeWordCount.value = plain
+          .split(RegExp(r'\s+'))
+          .where((w) => w.isNotEmpty)
+          .length;
     }
   }
 
   @override
   void onClose() {
+    print('========== ELEVATOR RESUME CONTROLLER CLOSING ==========');
+    videoPlayerController?.dispose();
     aboutMeQuillController.dispose();
+    firstNameController.dispose();
+    surnameController.dispose();
+    emailController.dispose();
+    certificationController.dispose();
+    languageController.dispose();
+    linkedinController.dispose();
+    twitterController.dispose();
+    facebookController.dispose();
+    tiktokController.dispose();
+    instagramController.dispose();
+    upworkController.dispose();
+    fiverrController.dispose();
+    portfolioController.dispose();
     super.onClose();
+  }
+
+  /// ================== LOAD USER PROFILE ==================
+  void _setupUserProfileListener() {
+    try {
+      print('Setting up user profile listener...');
+      final userProfileService = Get.find<GetUserProfileService>();
+      
+      // Listen to changes in user profile
+      ever(userProfileService.userInfoRx, (user) {
+        print('User profile changed! User is null: ${user == null}');
+        if (user != null) {
+          print('Calling _populateUserData from listener');
+          _populateUserData(user);
+        }
+      });
+      print('User profile listener set up successfully');
+    } catch (e) {
+      print('Error setting up user profile listener: $e');
+    }
+  }
+
+  void _loadUserProfileData() {
+    try {
+      print('Loading user profile data...');
+      final userProfileService = Get.find<GetUserProfileService>();
+      final user = userProfileService.userInfo;
+
+      print('User info is null: ${user == null}');
+      if (user != null) {
+        print('User found, calling _populateUserData');
+        _populateUserData(user);
+      } else {
+        // If user is null, try to fetch from API
+        print('User info is null, attempting to fetch from API');
+        userProfileService.getUserProfile().then((_) {
+          // After fetching, try to populate again
+          final updatedUser = userProfileService.userInfo;
+          if (updatedUser != null) {
+            print('User fetched from API, now populating');
+            _populateUserData(updatedUser);
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading user profile data: $e');
+    }
+  }
+
+  /// Refresh all user profile data (called when screen opens/closes)
+  Future<void> refreshUserProfileData() async {
+    try {
+      print('========== REFRESHING USER PROFILE DATA ==========');
+      final userProfileService = Get.find<GetUserProfileService>();
+      
+      // Force fetch from API
+      await userProfileService.getUserProfile();
+      
+      // Get the updated user
+      final user = userProfileService.userInfo;
+      if (user != null) {
+        _populateUserData(user);
+        print('User profile refreshed successfully');
+      } else {
+        print('User profile is still null after refresh');
+      }
+    } catch (e) {
+      print('Error refreshing user profile: $e');
+    }
+  }
+
+  void _populateUserData(UserModel user) {
+    print('========== POPULATING USER DATA ==========');
+    print('Full user name: "${user.name}"');
+    print('User email: "${user.email}"');
+    print('User phoneNumber: "${user.phoneNumber}"');
+    print('User profileImage: "${user.profileImage}"');
+    
+    // Parse name into first name and surname
+    final nameParts = user.name.trim().split(' ');
+    print('Name parts count: ${nameParts.length}');
+    print('Name parts: $nameParts');
+    
+    if (nameParts.isNotEmpty) {
+      final firstName = nameParts.first.trim();
+      print('Setting first name to: "$firstName"');
+      firstNameController.text = firstName;
+      
+      if (nameParts.length > 1) {
+        final surname = nameParts.sublist(1).join(' ').trim();
+        print('Setting surname to: "$surname"');
+        surnameController.text = surname;
+      } else {
+        print('No surname found');
+      }
+    }
+
+    // Set email
+    print('Setting email to: "${user.email}"');
+    emailController.text = user.email;
+
+    // Set phone number
+    print('Phone number check - isEmpty: ${user.phoneNumber.isEmpty}, value: "${user.phoneNumber}"');
+    if (user.phoneNumber.isNotEmpty) {
+      print('Setting phone number to: "${user.phoneNumber}"');
+    } else {
+      print('Phone number is empty, not setting');
+    }
+
+    // Set profile image if available
+    if (user.profileImage != null && user.profileImage!.isNotEmpty) {
+      print('Setting profile image to: "${user.profileImage}"');
+      photoPath.value = user.profileImage;
+    } else {
+      print('No profile image available');
+    }
+
+    print('========== USER DATA POPULATION COMPLETE ==========');
   }
 
   /// ================== PICKERS ==================
   Future<void> pickElevatorVideo() async {
     try {
-      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
-      if (video != null) {
-        elevatorVideoPath.value = video.path;
-        Get.snackbar('Success', 'Video selected successfully');
-      }
+      final source = await Get.bottomSheet<ImageSource>(
+        Container(
+          color: const Color(0xFFFFFFFF),
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.video_library),
+                title: const Text('Pick from Gallery'),
+                onTap: () => Get.back(result: ImageSource.gallery),
+              ),
+              ListTile(
+                leading: const Icon(Icons.videocam),
+                title: const Text('Record New Video'),
+                onTap: () => Get.back(result: ImageSource.camera),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (source == null) return;
+
+      final XFile? video = await _picker.pickVideo(
+        source: source,
+        maxDuration: const Duration(seconds: 60),
+      );
+
+      if (video == null) return;
+
+      elevatorVideoPath.value = video.path;
+      isVideoInitialized.value = false;
+      isVideoUploaded.value = false;
+
+      videoPlayerController?.dispose();
+
+      videoPlayerController = VideoPlayerController.file(File(video.path))
+        ..initialize().then((_) {
+          isVideoInitialized.value = true;
+          totalDuration.value = videoPlayerController!.value.duration;
+
+          videoPlayerController!.setLooping(false);
+          videoPlayerController!.play();
+          isPlaying.value = true;
+
+          videoPlayerController!.addListener(() {
+            final position = videoPlayerController!.value.position;
+            currentPosition.value = position;
+
+            if (position >= videoPlayerController!.value.duration &&
+                !videoPlayerController!.value.isPlaying) {
+              isPlaying.value = false;
+            }
+          });
+        });
     } catch (e) {
       Get.snackbar('Error', 'Failed to pick video: $e');
     }
+  }
+
+  void togglePlayPause() {
+    if (videoPlayerController == null) return;
+
+    if (videoPlayerController!.value.isPlaying) {
+      videoPlayerController!.pause();
+      isPlaying.value = false;
+    } else {
+      if (currentPosition.value >= videoPlayerController!.value.duration) {
+        videoPlayerController!.seekTo(Duration.zero);
+      }
+      videoPlayerController!.play();
+      isPlaying.value = true;
+    }
+  }
+
+  void seekTo(Duration position) {
+    videoPlayerController?.seekTo(position);
+  }
+
+  String formatDuration(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  Future<void> uploadElevatorVideo() async {
+    if (elevatorVideoPath.value.isEmpty) {
+      Get.snackbar('Error', 'Please select a video first.');
+      return;
+    }
+
+    try {
+      // Show loading
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      // TODO: Implement actual API upload here
+      // For now, simulate upload
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Close loading
+      Get.back();
+
+      isVideoUploaded.value = true;
+      Get.snackbar(
+        'Success',
+        'Elevator pitch upload finish! We\'re processing your video—feel free to submit your resume while it finalizes.',
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade900,
+        duration: const Duration(seconds: 5),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      Get.snackbar('Error', 'Failed to upload video: $e');
+    }
+  }
+
+  void deleteElevatorVideo() {
+    videoPlayerController?.dispose();
+    videoPlayerController = null;
+    elevatorVideoPath.value = '';
+    isVideoUploaded.value = false;
+    isVideoInitialized.value = false;
+    isPlaying.value = false;
+    currentPosition.value = Duration.zero;
+    totalDuration.value = Duration.zero;
   }
 
   Future<void> pickPhoto() async {
@@ -207,7 +493,68 @@ class ElevatorResumeController extends GetxController {
   /// ================== DROPDOWN HELPERS ==================
   void onCountryChanged(String? value) {
     selectedCountry.value = value;
-    // future e jodi per-country city filter chai, ekhane handle korbe
+    if (value != null) {
+      cities.value = countryCityMap[value] ?? [];
+      selectedCity.value = null; // Reset city selection
+      print("Loaded ${cities.length} cities for $value");
+    } else {
+      cities.clear();
+      selectedCity.value = null;
+    }
+  }
+
+  /// ================== API CALLS ==================
+  Future<void> fetchCountriesWithCities() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.10.5.59:8001/api/v1/countries'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        for (var country in data['data']) {
+          if (country['cities'] != null &&
+              (country['cities'] as List).isNotEmpty) {
+            countryCityMap[country['country']] = List<String>.from(
+              country['cities'],
+            );
+          }
+        }
+
+        countries.value = countryCityMap.keys.toList();
+        print("Countries loaded: ${countries.length}");
+      } else {
+        print("Failed to load countries");
+      }
+    } catch (e) {
+      print("Error fetching countries: $e");
+    }
+  }
+
+  Future<void> fetchLanguages() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.10.5.59:8001/api/v1/language'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Parse language names from the data array
+        if (data['data'] != null) {
+          availableLanguages.value = (data['data'] as List)
+              .map((item) => item['name'] as String)
+              .where((name) => name != 'name') // Filter out the invalid entry
+              .toList();
+          print("Languages loaded: ${availableLanguages.length}");
+        }
+      } else {
+        print("Failed to load languages");
+      }
+    } catch (e) {
+      print("Error fetching languages: $e");
+    }
   }
 
   /// ================== EXPERIENCE / EDUCATION / AWARDS ==================
@@ -224,10 +571,17 @@ class ElevatorResumeController extends GetxController {
     });
   }
 
-
-
   void addEducation() {
     educationList.add({'presentlyAttendHere': false});
+  }
+
+  // Update specific field in education item
+  void updateEducationField(int index, String key, dynamic value) {
+    if (index >= 0 && index < educationList.length) {
+      final item = Map<String, dynamic>.from(educationList[index]);
+      item[key] = value;
+      educationList[index] = item;
+    }
   }
 
   void addAward() {
@@ -254,14 +608,16 @@ class ElevatorResumeController extends GetxController {
 
   void togglePresentlyWorkHere(int index) {
     experienceList[index]['presentlyWorkHere'] =
-    !(experienceList[index]['presentlyWorkHere'] ?? false);
+        !(experienceList[index]['presentlyWorkHere'] ?? false);
     experienceList.refresh();
   }
 
   void togglePresentlyAttendHere(int index) {
-    educationList[index]['presentlyAttendHere'] =
-    !(educationList[index]['presentlyAttendHere'] ?? false);
-    educationList.refresh();
+    updateEducationField(
+      index,
+      'presentlyAttendHere',
+      !(educationList[index]['presentlyAttendHere'] ?? false),
+    );
   }
 
   /// ================== SKILLS ==================
@@ -289,32 +645,30 @@ class ElevatorResumeController extends GetxController {
 
   /// ================== CERTIFICATIONS ==================
   void addCertification() {
-    final textController = TextEditingController();
+    final text = certificationController.text.trim();
+    if (text.isNotEmpty && !certifications.contains(text)) {
+      certifications.add(text);
+      certificationController.clear();
+    }
+  }
 
-    Get.defaultDialog(
-      title: 'Add Certification',
-      content: TextField(
-        controller: textController,
-        decoration: const InputDecoration(
-          hintText: 'e.g. AWS Certified Solutions Architect',
-        ),
-      ),
-      textConfirm: 'Add',
-      textCancel: 'Cancel',
-      onConfirm: () {
-        final text = textController.text.trim();
-        if (text.isNotEmpty) {
-          certifications.add(text);
-        }
-        Get.back();
-      },
-      onCancel: () {},
-    );
+  void removeCertification(String cert) {
+    certifications.remove(cert);
   }
 
   /// ================== LANGUAGES ==================
   void addLanguage(String lang) {
     final l = lang.trim();
+    // Support direct add via controller if argument is empty
+    if (l.isEmpty && languageController.text.isNotEmpty) {
+      final fromController = languageController.text.trim();
+      if (fromController.isNotEmpty && !languages.contains(fromController)) {
+        languages.add(fromController);
+        languageController.clear();
+      }
+      return;
+    }
+
     if (l.isNotEmpty && !languages.contains(l)) {
       languages.add(l);
     }
@@ -325,19 +679,373 @@ class ElevatorResumeController extends GetxController {
   }
 
   /// ================== SUBMIT / SAVE ==================
-  void saveResume() {
-    // TODO: API call + validation
-    Get.snackbar('Success', 'Resume saved successfully!');
+  Future<void> saveResume() async {
+    try {
+      // Prevent duplicate submissions
+      if (isUploadingResume.value) {
+        print('Upload already in progress');
+        return;
+      }
+
+      isUploadingResume.value = true;
+      print('Starting resume upload...');
+
+      // Get user info
+      final userProfileService = Get.find<GetUserProfileService>();
+      final user = userProfileService.userInfo;
+
+      if (user == null) {
+        print('ERROR: User not logged in');
+        Get.snackbar(
+          'Error',
+          'User not logged in. Please login again.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        isUploadingResume.value = false;
+        return;
+      }
+
+      print('User ID: ${user.id}, Email: ${user.email}');
+
+      // Get about me as plain text
+      final aboutMe = aboutMeQuillController.document.toPlainText().trim();
+      print('About me text length: ${aboutMe.length}');
+
+      // Prepare resume object
+      print('Preparing resume data...');
+      final resumeData = {
+        'type': 'candidate',
+        'firstName': firstNameController.text.trim(),
+        'lastName': surnameController.text.trim(),
+        'email': emailController.text.trim(),
+        'country': selectedCountry.value,
+        'city': selectedCity.value,
+        'immediatelyAvailable': immediatelyAvailable.value,
+        'about': aboutMe,
+        'certifications': certifications.toList(),
+        'languages': languages.toList(),
+        'skills': skillsList.toList(),
+        'sLink': [
+          if (linkedinController.text.trim().isNotEmpty)
+            {'platform': 'LinkedIn', 'url': linkedinController.text.trim()},
+          if (twitterController.text.trim().isNotEmpty)
+            {'platform': 'Twitter', 'url': twitterController.text.trim()},
+          if (facebookController.text.trim().isNotEmpty)
+            {'platform': 'Facebook', 'url': facebookController.text.trim()},
+          if (tiktokController.text.trim().isNotEmpty)
+            {'platform': 'TikTok', 'url': tiktokController.text.trim()},
+          if (instagramController.text.trim().isNotEmpty)
+            {'platform': 'Instagram', 'url': instagramController.text.trim()},
+          if (upworkController.text.trim().isNotEmpty)
+            {'platform': 'Upwork', 'url': upworkController.text.trim()},
+          if (fiverrController.text.trim().isNotEmpty)
+            {'platform': 'Fiverr', 'url': fiverrController.text.trim()},
+          if (portfolioController.text.trim().isNotEmpty)
+            {'platform': 'Portfolio', 'url': portfolioController.text.trim()},
+        ],
+      };
+
+      // Prepare experiences array
+      final experiencesData = experienceList.map((exp) {
+        return {
+          'position': exp['jobTitle'] ?? '',
+          'company': exp['companyName'] ?? '',
+          'country': exp['country'] ?? '',
+          'city': exp['city'] ?? '',
+          'startDate': exp['startDate'] ?? '',
+          'endDate': exp['endDate'] ?? '',
+          'duration': exp['duration'] ?? '',
+          'presentlyWorkHere': exp['presentlyWorkHere'] ?? false,
+          'description': exp['description'] ?? '',
+        };
+      }).toList();
+
+      // Prepare education array
+      final educationData = educationList.map((edu) {
+        return {
+          'institution': edu['institution'] ?? '',
+          'degree': edu['degree'] ?? '',
+          'fieldOfStudy': edu['fieldOfStudy'] ?? '',
+          'country': edu['country'] ?? '',
+          'city': edu['city'] ?? '',
+          'startDate': edu['startDate'] ?? '',
+          'graduationDate': edu['graduationDate'] ?? '',
+          'presentlyAttendHere': edu['presentlyAttendHere'] ?? false,
+        };
+      }).toList();
+
+      // Prepare awards array
+      final awardsData = awardsList.map((award) {
+        return {
+          'title': award['title'] ?? '',
+          'year': award['year'] ?? '',
+          'description': award['description'] ?? '',
+        };
+      }).toList();
+
+      // Create multipart request
+      const apiUrl = 'http://10.10.5.59:8001/api/v1/create-resume/create-resume';
+      print('API URL: $apiUrl');
+      
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(apiUrl),
+      );
+
+      // Add text fields
+      request.fields['userId'] = user.id;
+      request.fields['resume'] = jsonEncode(resumeData);
+      request.fields['experiences'] = jsonEncode(experiencesData);
+      request.fields['educationList'] = jsonEncode(educationData);
+      request.fields['awardsAndHonors'] = jsonEncode(awardsData);
+
+      print('Resume data added to request');
+      print('  - Resume: ${resumeData.keys.toList()}');
+      print('  - Experiences count: ${experiencesData.length}');
+      print('  - Education count: ${educationData.length}');
+      print('  - Awards count: ${awardsData.length}');
+
+      // Add photo file if selected
+      if (photoPath.value != null) {
+        print('Adding photo file: ${photoPath.value}');
+        request.files.add(
+          await http.MultipartFile.fromPath('photo', photoPath.value!),
+        );
+      }
+
+      // Add banner file if selected
+      if (bannerImagePath.value != null) {
+        print('Adding banner file: ${bannerImagePath.value}');
+        request.files.add(
+          await http.MultipartFile.fromPath('banner', bannerImagePath.value!),
+        );
+      }
+
+      print('Files added. Sending request...');
+
+      // Show loading dialog
+      Get.dialog(
+        WillPopScope(
+          onWillPop: () async => false, // Prevent dismissal
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        barrierDismissible: false,
+      );
+
+      // Send request with timeout
+      print('Sending multipart request to API...');
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Resume upload request timed out');
+        },
+      );
+      
+      final response = await http.Response.fromStream(streamedResponse);
+      print('Response received. Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      // Close loading dialog
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        try {
+          final data = jsonDecode(response.body);
+          final message = data['message'] ?? 'Resume created successfully!';
+          print('SUCCESS: $message');
+          
+          Get.snackbar(
+            'Success',
+            message,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+          
+          // Clear form and navigate back
+          clearForm();
+          Future.delayed(const Duration(seconds: 2), () {
+            Get.back();
+          });
+        } catch (e) {
+          print('Error parsing success response: $e');
+          Get.snackbar(
+            'Success',
+            'Resume uploaded successfully!',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+          
+          // Clear form and navigate back
+          clearForm();
+          Future.delayed(const Duration(seconds: 2), () {
+            Get.back();
+          });
+        }
+      } else {
+        try {
+          final data = jsonDecode(response.body);
+          final errorMessage = data['message'] ?? data['error'] ?? 'Failed to create resume';
+          print('ERROR Response: $errorMessage');
+          
+          Get.snackbar(
+            'Upload Failed',
+            errorMessage.toString(),
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        } catch (e) {
+          print('Error parsing error response: $e');
+          Get.snackbar(
+            'Upload Failed',
+            'Status: ${response.statusCode} - ${response.body}',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        }
+      }
+    } on TimeoutException catch (e) {
+      print('TIMEOUT ERROR: $e');
+      
+      // Close loading if open
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      
+      Get.snackbar(
+        'Timeout',
+        'Upload took too long. Please check your connection and try again.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } catch (e) {
+      print('EXCEPTION ERROR: $e');
+      
+      // Close loading if open
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      
+      Get.snackbar(
+        'Error',
+        'An error occurred: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isUploadingResume.value = false;
+      print('========== RESUME UPLOAD COMPLETED =========');
+    }
+  }
+
+  /// Clear all form fields
+  void clearForm() {
+    print('Clearing form...');
+    
+    // Clear text controllers
+    firstNameController.clear();
+    surnameController.clear();
+    emailController.clear();
+    certificationController.clear();
+    languageController.clear();
+    linkedinController.clear();
+    twitterController.clear();
+    facebookController.clear();
+    tiktokController.clear();
+    instagramController.clear();
+    upworkController.clear();
+    fiverrController.clear();
+    portfolioController.clear();
+    
+    // Clear Quill controller
+    aboutMeQuillController.clear();
+    
+    // Reset selections
+    selectedTitle.value = 'Mr.';
+    selectedCountry.value = null;
+    selectedCity.value = null;
+    immediatelyAvailable.value = false;
+    
+    // Clear lists
+    experienceList.clear();
+    educationList.value = [{'presentlyAttendHere': false}];
+    awardsList.value = [{}];
+    skillsList.clear();
+    otherUrlsList.clear();
+    certifications.clear();
+    languages.clear();
+    
+    // Clear media files
+    photoPath.value = null;
+    bannerImagePath.value = null;
+    elevatorVideoPath.value = '';
+    isVideoUploaded.value = false;
+    
+    // Reset word count
+    aboutMeWordCount.value = 0;
+    
+    print('Form cleared successfully');
+  }
+
+  /// Validation for resume submission
+  String? validateResume() {
+    // Validate required fields
+    if (firstNameController.text.trim().isEmpty) {
+      return 'First name is required';
+    }
+
+    if (surnameController.text.trim().isEmpty) {
+      return 'Surname is required';
+    }
+
+    if (selectedCountry.value == null || selectedCountry.value!.isEmpty) {
+      return 'Country is required';
+    }
+
+    if (selectedCity.value == null || selectedCity.value!.isEmpty) {
+      return 'City is required';
+    }
+
+    if (emailController.text.trim().isEmpty) {
+      return 'Email address is required';
+    }
+
+    if (educationList.isEmpty || educationList.every((edu) => 
+        (edu['institution'] ?? '').isEmpty && 
+        (edu['degree'] ?? '').isEmpty)) {
+      return 'At least one education entry is required';
+    }
+
+    return null; // No errors
   }
 
   void onUploadElevatorPitchFirst() {
-    if (elevatorVideoPath.value == null) {
+    print('========== RESUME UPLOAD STARTED =========');
+    
+    // Validate form
+    final validationError = validateResume();
+    if (validationError != null) {
+      print('Validation Error: $validationError');
       Get.snackbar(
-        'Upload required',
-        'Please upload your Elevator Video Pitch before submitting the form.',
+        'Validation Error',
+        validationError,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
       );
       return;
     }
+
+    print('Validation passed, proceeding with resume save');
     saveResume();
   }
 }

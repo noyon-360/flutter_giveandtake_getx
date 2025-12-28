@@ -146,10 +146,11 @@ class _SkillsSectionState extends State<SkillsSection> {
               Icons.search,
               color: Colors.grey[500],
             ),
-            hintText:
-            'Search and add skills (e.g., Java, PHP, React...)',
+            hintText: 'Search and add skills (e.g., Java, Python, React, JavaScript)',
+            hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

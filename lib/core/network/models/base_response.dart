@@ -63,6 +63,7 @@ class BaseResponse<T> {
       }
     }
 
+    print("DEBUG: BaseResponse extracted data: $parsedData");
     return BaseResponse<T>(
       success: successValue,
       message: json['message'] ?? '',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controller/elevator_resume_controller.dart';
+import '../screens/elevator_resume_screen.dart';
 
 class ExperienceFormSection extends StatelessWidget {
   final int index;
@@ -59,33 +60,10 @@ class ExperienceFormSection extends StatelessWidget {
           // Country
           const Text('Country'),
           const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
+          SearchableDropdown(
+            hint: 'Select Country',
+            items: controller.countries.toList(),
             value: selectedCountry,
-            isExpanded: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                borderSide: BorderSide(color: Color(0xFF2563EB)),
-              ),
-              contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            ),
-            hint: const Text('Select Country'),
-            items: controller.countries
-                .map(
-                  (country) => DropdownMenuItem(
-                value: country,
-                child: Text(country),
-              ),
-            )
-                .toList(),
             onChanged: (value) {
               exp['country'] = value;
               exp['city'] = null; // country change -> city reset
@@ -97,42 +75,11 @@ class ExperienceFormSection extends StatelessWidget {
           // City
           const Text('City'),
           const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            isExpanded: true,
-            value: selectedCountry == null ? null : selectedCity,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                borderSide: BorderSide(color: Color(0xFF2563EB)),
-              ),
-              contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            ),
-            hint: Text(
-              selectedCountry == null ? 'Select country first' : 'Select City',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color:
-                selectedCountry == null ? Colors.grey : Colors.grey[700],
-              ),
-            ),
-            items: controller.cities
-                .map(
-                  (city) => DropdownMenuItem(
-                value: city,
-                child: Text(city),
-              ),
-            )
-                .toList(),
-            onChanged: selectedCountry == null
-                ? null
-                : (value) {
+          SearchableDropdown(
+            hint: 'Select City',
+            items: controller.cities.toList(),
+            value: selectedCity,
+            onChanged: (value) {
               exp['city'] = value;
               controller.experienceList.refresh();
             },
@@ -153,19 +100,73 @@ class ExperienceFormSection extends StatelessWidget {
           const SizedBox(height: 8),
 
           // Start Date
-          TextFormField(
-            decoration: _inputDecoration('Start Date', 'MM/YYYY'),
-            keyboardType: TextInputType.datetime,
-            onChanged: (v) => exp['startDate'] = v,
+          const Text('Start Date'),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: () => _selectDate(context, exp, 'startDate'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    exp['startDate']?.toString().isEmpty ?? true
+                        ? 'MM/YYYY'
+                        : exp['startDate'],
+                    style: TextStyle(
+                      color: exp['startDate']?.toString().isEmpty ?? true
+                          ? Colors.grey
+                          : Colors.black,
+                    ),
+                  ),
+                  const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 12),
 
           // End Date (disabled if currently working)
-          TextFormField(
-            decoration: _inputDecoration('End Date', 'MM/YYYY'),
-            keyboardType: TextInputType.datetime,
-            enabled: !currentlyWorking,
-            onChanged: (v) => exp['endDate'] = v,
+          const Text('End Date'),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: currentlyWorking ? null : () => _selectDate(context, exp, 'endDate'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: currentlyWorking ? Colors.grey.shade200 : Colors.grey.shade300,
+                ),
+                borderRadius: BorderRadius.circular(8),
+                color: currentlyWorking ? Colors.grey.shade50 : Colors.white,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    exp['endDate']?.toString().isEmpty ?? true
+                        ? 'MM/YYYY'
+                        : exp['endDate'],
+                    style: TextStyle(
+                      color: currentlyWorking
+                          ? Colors.grey.shade400
+                          : (exp['endDate']?.toString().isEmpty ?? true
+                              ? Colors.grey
+                              : Colors.black),
+                    ),
+                  ),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 18,
+                    color: currentlyWorking ? Colors.grey.shade300 : Colors.grey,
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 12),
 
@@ -223,5 +224,29 @@ class ExperienceFormSection extends StatelessWidget {
         ],
       );
     });
+  }
+
+  /// Date picker for MM/YYYY format
+  Future<void> _selectDate(
+    BuildContext context,
+    Map<String, dynamic> exp,
+    String dateField,
+  ) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1990),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+    );
+
+    if (picked != null) {
+      // Format as MM/YYYY
+      final month = picked.month.toString().padLeft(2, '0');
+      final year = picked.year.toString();
+      final formattedDate = '$month/$year';
+
+      exp[dateField] = formattedDate;
+      Get.find<ElevatorResumeController>().experienceList.refresh();
+    }
   }
 }

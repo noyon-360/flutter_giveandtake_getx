@@ -7,7 +7,11 @@ class GetJobsUseCase {
 
   GetJobsUseCase(this._repository);
 
-  NetworkResult<JobListingResponseModel> call({int limit = 100}) {
-    return _repository.getJobs(limit: limit);
+  NetworkResult<JobListingResponseModel> call({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) {
+    return _repository.getJobs(page: page, limit: limit, search: search);
   }
 }

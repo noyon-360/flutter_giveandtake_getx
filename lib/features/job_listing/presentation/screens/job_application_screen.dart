@@ -16,11 +16,34 @@ class JobApplicationScreen extends StatelessWidget {
     final controller = Get.put(JobApplicationController(
       getUserProfileUseCase: Get.find(),
       submitJobApplicationUseCase: Get.find(),
+      getJobDetailsUseCase: Get.find(),
     ));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+       print('========== JOB APPLICATION SCREEN DATA ==========');
+       print('JobData: $jobData');
+       print('JobData _id: ${jobData['_id']}');
+       print('JobData id: ${jobData['id']}');
+       print('================================================');
+       
+       // Store jobData in controller for use after successful submission
+       controller.jobData.value = jobData;
+       
+       // Always fetch fresh job details to get latest custom questions
+       final jobId = jobData['_id']?.toString() ?? jobData['id']?.toString() ?? '';
+       if (jobId.isNotEmpty) {
+          controller.fetchJobDetails(jobId);
+       }
+       
+       // Fallback to passed data if available immediately (optional, but good for UI responsiveness before API returns)
+       final questions = jobData['customQuestion'] as List<dynamic>? ?? [];
+       if (controller.customQuestions.isEmpty && questions.isNotEmpty) {
+           controller.initQuestions(questions);
+       }
+    });
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: AppColors.textBlack),
         title: const Text(
           'Job Application',
           style: TextStyle(
@@ -40,14 +63,47 @@ class JobApplicationScreen extends StatelessWidget {
                   userProfile: controller.userProfile.value,
                   isLoading: controller.isLoadingProfile.value,
                 )),
-            const SizedBox(height: 24),
+            
+            const SizedBox(height: 16),
 
-            // Custom Questions
-            CustomQuestionField(
-              label: 'What is your expected salary?',
-              hintText: 'Enter your answer here.',
-              controller: controller.pitchController,
-            ),
+            // Custom Questions Section
+            Obx(() {
+              if (controller.customQuestions.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Custom Questions',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ...controller.customQuestions.map((q) {
+                    final id = q['_id'] ?? q['id'] ?? q['question'] ?? '';
+                    final questionText = q['question'] ?? 'Question';
+                    final textCtrl = controller.answerControllers[id.toString()];
+                    
+                    if (textCtrl == null) return const SizedBox.shrink();
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: CustomQuestionField(
+                        label: '$questionText *', 
+                        hintText: 'Enter your answer here',
+                        controller: textCtrl,
+                      ),
+                    );
+                  }).toList(),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                ],
+              );
+            }),
             const SizedBox(height: 16),
 
             // Resume Upload Section
@@ -82,8 +138,9 @@ class JobApplicationScreen extends StatelessWidget {
                     onPressed: controller.isSubmittingApplication.value
                         ? null
                         : () {
-                            final jobId = jobData['id']?.toString() ?? '';
-                            controller.submitApplication(jobId);
+                            final jobId = jobData['_id']?.toString() ?? '';
+                            final resumeId = jobData['resumeId']?.toString();
+                            controller.submitApplication(jobId, resumeId: resumeId);
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryBlue,
