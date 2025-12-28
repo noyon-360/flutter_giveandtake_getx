@@ -9,7 +9,6 @@ import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../create_job/presentation/controller/create_job_controller.dart';
 import '../../../create_job/presentation/widgets/searchable_widgets.dart';
-import '../../../recruiter_account/data/models/get_category_response_model.dart';
 import '../../../recruiter_account/presentation/controller/company_image_controller.dart';
 import '../../../recruiter_account/presentation/controller/description_controller.dart';
 import '../../../recruiter_account/presentation/controller/image_controller.dart';
@@ -24,30 +23,47 @@ import '../widget/upload_card_widget.dart';
 import '../widget/upload_video_widget.dart';
 import 'company_details_screen.dart';
 
-class CreateCompanyAccountPage extends StatelessWidget {
+class CreateCompanyAccountPage extends StatefulWidget {
+  const CreateCompanyAccountPage({super.key});
+
+  @override
+  State<CreateCompanyAccountPage> createState() =>
+      _CreateCompanyAccountPageState();
+}
+
+class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
   // final CompanyAccountController controller = Get.put(
-  //   CompanyAccountController(),
-  // );
   final CompanyAccountController controller =
       Get.find<CompanyAccountController>();
+
   final recruiterController = Get.find<RecruiterController>();
 
   final CreateJobPostingController jobController = Get.put(
     CreateJobPostingController(Get.find()),
   );
+
   final CompanyImageController bannerPickerController = Get.put(
     CompanyImageController(),
   );
 
   final ImageController imagePickerController = Get.put(ImageController());
+
   final TextEditingController _descriptionTController = TextEditingController();
+
   final TextEditingController _linkedINTEController = TextEditingController();
+
   final TextEditingController _twitterTEController = TextEditingController();
+
   final TextEditingController _upworkTEController = TextEditingController();
+
   final TextEditingController _facebookTEController = TextEditingController();
+
   final TextEditingController _instaTEController = TextEditingController();
+
   final TextEditingController _tiktokTEController = TextEditingController();
+
   final TextEditingController _fiverrTEController = TextEditingController();
+
   final TextEditingController _comapanyTEController = TextEditingController();
 
   final companyNameController = TextEditingController();
@@ -57,20 +73,25 @@ class CreateCompanyAccountPage extends StatelessWidget {
   final emailController = TextEditingController();
 
   final FocusNode _linkedINFocusNode = FocusNode();
+
   final FocusNode _twitterFocusNode = FocusNode();
+
   final FocusNode _upworkFocusNode = FocusNode();
+
   final FocusNode _facebookFocusNode = FocusNode();
+
   final FocusNode _instaFocusNode = FocusNode();
+
   final FocusNode _tiktokFocusNode = FocusNode();
+
   final FocusNode _fiverrFocusNode = FocusNode();
+
   final FocusNode _companyFocusNode = FocusNode();
   late int zipCode = int.tryParse(postalCodeController.text) ?? 0;
 
   final DescriptionController descriptionController = Get.put(
     DescriptionController(),
   );
-
-  CreateCompanyAccountPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -610,7 +631,9 @@ class CreateCompanyAccountPage extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        controller.fetchUsers(); // ← This WILL fire
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          controller.fetchUsers();
+                        });
                       },
                       child: AbsorbPointer(
                         // ← Prevents keyboard from opening

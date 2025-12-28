@@ -5,6 +5,7 @@ import 'package:karlfive/features/company/presentation/screen/applicant_lists_sc
 import 'package:karlfive/features/recruiter_account/presentation/screens/single_job_details_screen.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/utils/debug_print.dart';
+import '../../../company/presentation/screen/applicant_lists_screen.dart';
 import '../../data/models/archieve_job_request_model.dart';
 import '../controller/recruiter_controller.dart';
 import 'applicants_list_screen.dart';
