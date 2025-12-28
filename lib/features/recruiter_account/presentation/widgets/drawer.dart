@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:karlfive/features/Home/presentation/screens/my_plan_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/all_jobs_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
@@ -102,6 +103,17 @@ class _MyDrawerState extends State<MyDrawer> {
                   Navigator.pop(context);
                   Future.delayed(const Duration(milliseconds: 150), () {
                     Get.dialog(ConnectCompanyDialog());
+                  });
+                },
+              ),
+
+              drawerTile(
+                icon: Icons.post_add,
+                title: "My Plan",
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.dialog(MyPlanScreen());
                   });
                 },
               ),
