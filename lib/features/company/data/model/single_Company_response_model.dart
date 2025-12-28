@@ -12,28 +12,32 @@ class SingleCompanyResponseModel {
   });
 
   // FIXED: Now correctly extracts from 'data' field
+// In single_company_response_model.dart
 factory SingleCompanyResponseModel.fromJson(Map<String, dynamic> json) {
   print("RAW JSON RECEIVED: $json");
 
-  // 1️⃣ Correct extraction always checks for top-level 'data'
-  final data = (json['data'] is Map<String, dynamic>)
-      ? json['data']
-      : json;
+  // 'json' is already dataMap, so no need to extract 'data'
+  final meta = json['meta'] is Map<String, dynamic>
+      ? Meta.fromJson(json['meta'])
+      : Meta(currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 10);
+
+  final companies = (json['companies'] as List?)
+      ?.whereType<Map<String, dynamic>>()
+      .map((e) => Company.fromJson(e))
+      .toList() ?? [];
+
+  final honors = (json['honors'] as List?)
+      ?.whereType<Map<String, dynamic>>()
+      .map((e) => Honor.fromJson(e))
+      .toList() ?? [];
 
   return SingleCompanyResponseModel(
-    meta: data['meta'] != null
-        ? Meta.fromJson(data['meta'])
-        : Meta(currentPage: 0, totalPages: 0, totalItems: 0, itemsPerPage: 0), // prevents crash
-
-    companies: (data['companies'] as List? ?? [])
-        .map((e) => Company.fromJson(e))
-        .toList(),
-
-    honors: (data['honors'] as List? ?? [])
-        .map((e) => Honor.fromJson(e))
-        .toList(),
+    meta: meta,
+    companies: companies,
+    honors: honors,
   );
 }
+
 
 
 
@@ -49,7 +53,8 @@ class Honor {
   final String id;
   final String userId;
   final String title;
-  final String issuer;
+  final String programeName;
+  final String programeDate;
   final String description;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -58,7 +63,8 @@ class Honor {
     required this.id,
     required this.userId,
     required this.title,
-    required this.issuer,
+    required this.programeName,
+    required this.programeDate,
     required this.description,
     required this.createdAt,
     required this.updatedAt,
@@ -69,7 +75,8 @@ class Honor {
       id: json['_id'] as String,
       userId: json['userId'] as String,
       title: json['title'] as String? ?? '',
-      issuer: json['issuer'] as String? ?? '',
+      programeName: json['programeName'] as String? ?? '',
+      programeDate: json['programeDate'] as String? ?? '',
       description: json['description'] as String? ?? '',
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
@@ -80,7 +87,8 @@ class Honor {
         "_id": id,
         "userId": userId,
         "title": title,
-        "issuer": issuer,
+        "programeName": programeName,
+        "programeDate": programeDate,
         "description": description,
         "createdAt": createdAt.toIso8601String(),
         "updatedAt": updatedAt.toIso8601String(),

@@ -12,16 +12,9 @@ class Meta {
   });
 
   factory Meta.fromJson(Map<String, dynamic> json) => Meta(
-        currentPage: json['currentPage'],
-        totalPages: json['totalPages'],
-        totalItems: json['totalItems'],
-        itemsPerPage: json['itemsPerPage'],
+        currentPage: json['currentPage'] as int? ?? 1,
+        totalPages: json['totalPages'] as int? ?? 1,
+        totalItems: json['totalItems'] as int? ?? 0,
+        itemsPerPage: json['itemsPerPage'] as int? ?? 10,
       );
-
-  Map<String, dynamic> toJson() => {
-        "currentPage": currentPage,
-        "totalPages": totalPages,
-        "totalItems": totalItems,
-        "itemsPerPage": itemsPerPage,
-      };
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
+import 'package:karlfive/features/company/presentation/screen/manage_job_req_screen.dart';
 import 'package:karlfive/features/recruiter_account/data/models/archieve_job_request_model.dart' hide ApplicationRequirement, CustomQuestion;
 import 'package:karlfive/features/recruiter_account/data/models/connect_company_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/follow_request_model.dart';
@@ -209,9 +210,14 @@ class RecruiterController extends BaseController {
         DPrint.log("create job success result : ${fail.message}");
         setLoading(false);
       },
-          (success) {
+          (success) async {
         DPrint.log("create job success result : ${success.message}");
-        Get.to(() => RecruiterPageScreen());
+        final userRole = await _authStorageService.getUserRole();
+        if(userRole == 'recruiter') {
+          Get.to(() => RecruiterPageScreen());
+        }else{
+          Get.to(() => ManageJobPostScreen());
+        }
         setLoading(false);
       },
     );
