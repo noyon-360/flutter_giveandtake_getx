@@ -117,6 +117,17 @@ class _MyDrawerState extends State<MyDrawer> {
               ),
 
               drawerTile(
+                icon: Icons.post_add,
+                title: "My Plan",
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    Get.dialog(MyPlanScreen());
+                  });
+                },
+              ),
+
+              drawerTile(
                 icon: Icons.lock_outline,
                 title: "Change Password",
                 onTap: () {

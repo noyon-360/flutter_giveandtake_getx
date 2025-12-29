@@ -1,5 +1,6 @@
 class ApiConstants {
   /// [Base Configuration]
+  // static const String baseDomain = 'http://10.10.5.33:5001';// soykot ip
   // static const String baseDomain = 'http://10.10.5.53:5004';// soykot ip
   static const String baseDomain = 'http://10.10.5.48:5004'; // noyon ip
   // static const String baseDomain = 'https://api.evpitch.com';
