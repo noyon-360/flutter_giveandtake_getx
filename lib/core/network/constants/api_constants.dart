@@ -1,6 +1,8 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'http://10.10.5.33:5001';// soykot ip
+  // static const String baseDomain = 'http://10.10.5.33:5001';// soykot ip
+  // static const String baseDomain = 'http://10.10.5.53:5004';// soykot ip
+  static const String baseDomain = 'http://10.10.5.48:5004'; // noyon ip
   // static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
@@ -73,7 +75,7 @@ class JobEndpoints {
     }
     return url;
   }
-  
+
   final String applyJob = '${ApiConstants.baseUrl}/applied-jobs';
 }
 
@@ -96,8 +98,10 @@ class RecruiterAccountApi {
       '$_base/recruiter-account/$userId';
   String updateRecruiter(String userId) => '$_base/recruiter-account/$userId';
   String getSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId';
-  String updateSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/update/$jobId';
-  String updateArchieveJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId/archive';
+  String updateSingleJob(String jobId) =>
+      '${ApiConstants.baseUrl}/jobs/update/$jobId';
+  String updateArchieveJob(String jobId) =>
+      '${ApiConstants.baseUrl}/jobs/$jobId/archive';
 }
 
 class ElevatorPitchVideo {
@@ -216,40 +220,34 @@ class AlluserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/all';
   final String alluser = '$_base/user';
 }
+
 class CompanyAccountApi {
   static const String _base = '${ApiConstants.baseUrl}/company';
   final String createcompany = '$_base';
-    String fetchCompanyInfo(String userId) =>
-      '$_base/user/$userId';
+  String fetchCompanyInfo(String userId) => '$_base/user/$userId';
 
-    String fetchEmployee(String userId) =>
+  String fetchEmployee(String userId) =>
       '${ApiConstants.baseUrl}/company/company-employess/skills/$userId';
 
-      String fetchUpdateInfo(String userId) =>
-      '$_base/$userId';
+  String fetchUpdateInfo(String userId) => '$_base/$userId';
 
-      String manageJobs(String companyId) =>
+  String manageJobs(String companyId) =>
       '${ApiConstants.baseUrl}/all-jobs-for-company/company/$companyId';
 
-      final String connectRecruiter = '$_base/add-employee-to-company';
-      final String removeRecruiter = '$_base/remove-employee-to-company';
-      String archiveJobs(String jobId) =>
+  final String connectRecruiter = '$_base/add-employee-to-company';
+  final String removeRecruiter = '$_base/remove-employee-to-company';
+  String archiveJobs(String jobId) =>
       '${ApiConstants.baseUrl}/jobs/$jobId/archive';
-      String applicantJob(String jobId) =>
+  String applicantJob(String jobId) =>
       '${ApiConstants.baseUrl}/applied-jobs/job/$jobId';
-      final String candidateResume =
+  final String candidateResume =
       '${ApiConstants.baseUrl}/create-resume/get-resume/anjolie-reed';
-       String status(String jobId) =>
+  String status(String jobId) =>
       '${ApiConstants.baseUrl}/applied-jobs/$jobId/status';
 
-      String fetchResume(String candidateUserId) =>
+  String fetchResume(String candidateUserId) =>
       '${ApiConstants.baseUrl}/resume/user/$candidateUserId';
 
-          String updateRecCompany(String recId) =>
+  String updateRecCompany(String recId) =>
       '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
-
-
-      
-
-
 }
