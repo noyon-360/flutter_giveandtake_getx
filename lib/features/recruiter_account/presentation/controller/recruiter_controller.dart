@@ -613,6 +613,7 @@ class RecruiterController extends BaseController {
       },
       (success) {
         userInfo.value = success.data;
+
         setLoading(false);
       },
     );
