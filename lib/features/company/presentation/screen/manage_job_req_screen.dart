@@ -466,7 +466,11 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                           const SizedBox(height: 6),
                           _infoRow("Category", job.name),
                           _infoRow("Location", job.location),
-                          _infoRow("Experience", job.experience),
+                          _infoRow(
+                            "Experience",
+                            capitalizeFirst(job.experience),
+                          ),
+
                           _infoRow("Deadline", formatDate(job.deadline)),
                           _infoRow("Status", job.derivedStatus),
                           _infoRow("Vacancy", "${job.vacancy}"),
@@ -702,4 +706,9 @@ Widget _summaryTile({
       ],
     ),
   );
+}
+
+String capitalizeFirst(String? text) {
+  if (text == null || text.isEmpty) return '';
+  return text[0].toUpperCase() + text.substring(1);
 }
