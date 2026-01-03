@@ -2,7 +2,7 @@ class ApiConstants {
   /// [Base Configuration]
   // static const String baseDomain = 'http://10.10.5.33:5001';// soykot ip
   // static const String baseDomain = 'http://10.10.5.53:5004';// soykot ip
-  static const String baseDomain = 'http://10.10.5.48:5004'; // noyon ip
+  static const String baseDomain = 'http://10.10.5.53:5004'; // noyon ip
   // static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
@@ -250,4 +250,6 @@ class CompanyAccountApi {
 
   String updateRecCompany(String recId) =>
       '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
+
+  final String getJobUsage = '${ApiConstants.baseUrl}/jobs/posting/usage';
 }

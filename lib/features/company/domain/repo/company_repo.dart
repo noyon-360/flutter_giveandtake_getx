@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/network_result.dart';
+import '../../../recruiter_account/data/models/job_update_response_model.dart';
 import '../../data/model/all_user_response_model.dart';
 import '../../data/model/archieve_request_model.dart';
 import '../../data/model/archieve_response_model.dart';
@@ -8,6 +9,7 @@ import '../../data/model/candidate_resume_response_model.dart';
 import '../../data/model/company_applicant_list_response_model.dart';
 import '../../data/model/company_response_model.dart';
 import '../../data/model/employee_fetch_single_model.dart';
+import '../../data/model/job_usage_response_model.dart';
 import '../../data/model/manage_job_response_model.dart';
 import '../../data/model/rec_company_response_model.dart';
 import '../../data/model/recruiter_added_request_model.dart';
@@ -51,4 +53,5 @@ abstract class CompanyRepository {
     String recId,
     Map<String, dynamic> data,
   );
+  NetworkResult<JobUsageResponseModel> fetchJobUsage();
 }

@@ -255,7 +255,7 @@ class _CompanyApplicantsListScreenState
                                     ? () {
                                         controller.statusUpdated(
                                           applicantId: applicant.id,
-                                          status: "unsuccessful",
+                                          status: "rejected",
                                         );
                                       }
                                     : null,

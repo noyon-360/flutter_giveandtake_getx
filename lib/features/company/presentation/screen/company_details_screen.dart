@@ -38,6 +38,11 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
     });
   }
 
+  Future<void> _onRefresh() async {
+    await controller.fetchCompanyProfile();
+    await controller.fetchEmployee();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -146,7 +151,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                 Get.to(() => PlanPricingScreen()); // or your profile page
               },
             ),
-             ListTile(
+            ListTile(
               leading: const Icon(Icons.edit_calendar_sharp),
               title: const Text('Recruiter Request'),
               onTap: () {
@@ -202,707 +207,719 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
 
         final company = controller.userInfo.value!.companies.first;
 
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 46),
+        return RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: Colors.blue,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 46),
 
-              /// ================= HEADER =================
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.grey.shade300),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 6,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+                /// ================= HEADER =================
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey.shade300),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// ───────── Avatar ─────────
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: NetworkImage(company.clogo),
+                      ),
+
+                      /// ───────── Company Name + Location ─────────
+                      /// ================= HEADER =================
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Company name
+                            Text(
+                              company.cname,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            // Industry
+                            Text(
+                              company.industry ?? "No industry info",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            // Location + Recruiters row
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  size: 14,
+                                  color: Colors.black54,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "${company.city}, ${company.country}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black54,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                const SizedBox(width: 12),
+                                Icon(
+                                  Icons.people,
+                                  size: 14,
+                                  color: Colors.black54,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "${company.employeesId.length} recruiter${company.employeesId.length > 1 ? "s" : ""}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+                    ],
+                  ),
                 ),
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// ───────── Avatar ─────────
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage: NetworkImage(company.clogo),
-                    ),
 
-                    /// ───────── Company Name + Location ─────────
-                    /// ================= HEADER =================
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                /// ================= PROMO SECTION =================
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 18),
+
+                      /// 🔹 Promo text
+                      Text(
+                        "Post Your First Job at No Cost!",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      Text(
+                        "Easily post job openings & reach the right talent fast.",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF727272),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // ----- Social Media -----
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: (company.sLink)
+                            .map(
+                              (link) => GestureDetector(
+                                onTap: () async {
+                                  final Uri url = Uri.parse(link.url ?? '');
+                                  if (await canLaunchUrl(url)) {
+                                    await launchUrl(
+                                      url,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  } else {
+                                    Get.snackbar(
+                                      'Error',
+                                      'Could not open ${link.url}',
+                                    );
+                                  }
+                                },
+                                child: SocialMedia(
+                                  image: _getSocialIcon(link.label),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// 🔹 Buttons in one row
+                      Row(
                         children: [
-                          // Company name
-                          Text(
-                            company.cname,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
+                          // ElevatedButton(
+                          //   onPressed: () => Get.to(() => ManageJobPostScreen()),
+                          //   style: ElevatedButton.styleFrom(
+                          //     backgroundColor: Color(0xFF2B7FD0),
+                          //     foregroundColor: Colors.white,
+                          //     padding: EdgeInsets.symmetric(horizontal: 14),
+                          //     shape: RoundedRectangleBorder(
+                          //       borderRadius: BorderRadius.circular(10),
+                          //     ),
+                          //   ),
+                          //   child: Text("Manage Jobs"),
+                          // ),
 
-                          const SizedBox(height: 4),
+                          // const SizedBox(width: 10),
 
-                          // Industry
-                          Text(
-                            company.industry ?? "No industry info",
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black54,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
+                          // ElevatedButton(
+                          //   onPressed: () {},
+                          //   style: ElevatedButton.styleFrom(
+                          //     backgroundColor: Color(0xFF2B7FD0),
+                          //     foregroundColor: Colors.white,
+                          //     padding: EdgeInsets.symmetric(horizontal: 14),
+                          //     shape: RoundedRectangleBorder(
+                          //       borderRadius: BorderRadius.circular(10),
+                          //     ),
+                          //   ),
+                          //   child: Text(
+                          //     "Post A Job",
+                          //   ), // ⬅ added beside Manage Job
+                          // ),
 
-                          const SizedBox(height: 6),
-
-                          // Location + Recruiters row
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.location_on,
-                                size: 14,
-                                color: Colors.black54,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "${company.city}, ${company.country}",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black54,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                              const SizedBox(width: 12),
-                              Icon(
-                                Icons.people,
-                                size: 14,
-                                color: Colors.black54,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "${company.employeesId.length} recruiter${company.employeesId.length > 1 ? "s" : ""}",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ],
-                          ),
+                          // const SizedBox(width: 10),
+                          // ElevatedButton(
+                          //   onPressed: () {
+                          //     Get.to(
+                          //       () => CompanyEditAccountPage(
+                          //         companyData: controller.userInfo.value!,
+                          //       ),
+                          //     );
+                          //   },
+                          //   style: ElevatedButton.styleFrom(
+                          //     backgroundColor: Color(0xFF2B7FD0),
+                          //     foregroundColor: Colors.white,
+                          //     padding: EdgeInsets.symmetric(horizontal: 14),
+                          //     shape: RoundedRectangleBorder(
+                          //       borderRadius: BorderRadius.circular(10),
+                          //     ),
+                          //   ),
+                          //   child: Text("Edit Profile"),
+                          // ),
                         ],
                       ),
-                    ),
-
-                    const SizedBox(width: 10),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              /// ================= PROMO SECTION =================
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 18),
+                /// ================= Elevator Pitch =================
+                // sectionTitle("Elevator Pitch", canDelete: true),
 
-                    /// 🔹 Promo text
-                    Text(
-                      "Post Your First Job at No Cost!",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
+                // SizedBox(height: 20),
+                // Container(
+                //   decoration: BoxDecoration(
+                //     color: Colors.white,
+                //     border: Border.all(color: const Color(0xFF999999), width: 1),
+                //     borderRadius: BorderRadius.circular(12),
+                //   ),
 
-                    Text(
-                      "Easily post job openings & reach the right talent fast.",
-                      style: TextStyle(fontSize: 12, color: Color(0xFF727272)),
-                    ),
+                //   //fetch elevated pitch e
+                //   child: Container(
+                //     decoration: BoxDecoration(
+                //       borderRadius: BorderRadius.circular(4),
+                //       color: const Color(0xFF191919),
+                //     ),
+                //     height: 160,
+                //     width: double.infinity,
+                //     child: ElevatorPitchCompanySection(
+                //       videoUrl: company.elevatorPitch?.video.hlsUrl,
+                //       httpHeaders: {
+                //         'Accept': '*/*',
+                //         'Accept-Encoding': 'identity',
 
-                    const SizedBox(height: 20),
+                //         "Authorization":
+                //             "Bearer ${company.elevatorPitch?.video.encryptionKeyUrl}",
+                //         "Custom-Header": "value",
+                //       },
+                //     ),
+                //   ),
+                // ),
+                /// ================= Elevator Pitch =================
+                sectionTitle("Elevator Video Pitch"),
+                const SizedBox(height: 20),
 
-                    // ----- Social Media -----
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: (company.sLink)
-                          .map(
-                            (link) => GestureDetector(
-                              onTap: () async {
-                                final Uri url = Uri.parse(link.url ?? '');
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(
-                                    url,
-                                    mode: LaunchMode.externalApplication,
-                                  );
-                                } else {
-                                  Get.snackbar(
-                                    'Error',
-                                    'Could not open ${link.url}',
-                                  );
-                                }
-                              },
-                              child: SocialMedia(
-                                image: _getSocialIcon(link.label),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    /// 🔹 Buttons in one row
-                    Row(
-                      children: [
-                        // ElevatedButton(
-                        //   onPressed: () => Get.to(() => ManageJobPostScreen()),
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor: Color(0xFF2B7FD0),
-                        //     foregroundColor: Colors.white,
-                        //     padding: EdgeInsets.symmetric(horizontal: 14),
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(10),
-                        //     ),
-                        //   ),
-                        //   child: Text("Manage Jobs"),
-                        // ),
-
-                        // const SizedBox(width: 10),
-
-                        // ElevatedButton(
-                        //   onPressed: () {},
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor: Color(0xFF2B7FD0),
-                        //     foregroundColor: Colors.white,
-                        //     padding: EdgeInsets.symmetric(horizontal: 14),
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(10),
-                        //     ),
-                        //   ),
-                        //   child: Text(
-                        //     "Post A Job",
-                        //   ), // ⬅ added beside Manage Job
-                        // ),
-
-                        // const SizedBox(width: 10),
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     Get.to(
-                        //       () => CompanyEditAccountPage(
-                        //         companyData: controller.userInfo.value!,
-                        //       ),
-                        //     );
-                        //   },
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor: Color(0xFF2B7FD0),
-                        //     foregroundColor: Colors.white,
-                        //     padding: EdgeInsets.symmetric(horizontal: 14),
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(10),
-                        //     ),
-                        //   ),
-                        //   child: Text("Edit Profile"),
-                        // ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              /// ================= Elevator Pitch =================
-              // sectionTitle("Elevator Pitch", canDelete: true),
-
-              // SizedBox(height: 20),
-              // Container(
-              //   decoration: BoxDecoration(
-              //     color: Colors.white,
-              //     border: Border.all(color: const Color(0xFF999999), width: 1),
-              //     borderRadius: BorderRadius.circular(12),
-              //   ),
-
-              //   //fetch elevated pitch e
-              //   child: Container(
-              //     decoration: BoxDecoration(
-              //       borderRadius: BorderRadius.circular(4),
-              //       color: const Color(0xFF191919),
-              //     ),
-              //     height: 160,
-              //     width: double.infinity,
-              //     child: ElevatorPitchCompanySection(
-              //       videoUrl: company.elevatorPitch?.video.hlsUrl,
-              //       httpHeaders: {
-              //         'Accept': '*/*',
-              //         'Accept-Encoding': 'identity',
-
-              //         "Authorization":
-              //             "Bearer ${company.elevatorPitch?.video.encryptionKeyUrl}",
-              //         "Custom-Header": "value",
-              //       },
-              //     ),
-              //   ),
-              // ),
-              /// ================= Elevator Pitch =================
-              sectionTitle("Elevator Video Pitch"),
-              const SizedBox(height: 20),
-
-              // Check if elevator pitch exists
-              company.elevatorPitch?.video.hlsUrl != null &&
-                      company.elevatorPitch!.video.hlsUrl.isNotEmpty
-                  ? Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: const Color(0xFF999999),
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Container(
+                // Check if elevator pitch exists
+                company.elevatorPitch?.video.hlsUrl != null &&
+                        company.elevatorPitch!.video.hlsUrl.isNotEmpty
+                    ? Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: const Color(0xFF191919),
-                        ),
-                        height: 160,
-                        width: double.infinity,
-                        child: ElevatorPitchCompanySection(
-                          videoUrl: company.elevatorPitch!.video.hlsUrl,
-                          httpHeaders: {
-                            'Accept': '*/*',
-                            'Accept-Encoding': 'identity',
-                            "Authorization":
-                                "Bearer ${company.elevatorPitch!.video.encryptionKeyUrl}",
-                          },
-                        ),
-                      ),
-                    )
-                  : GestureDetector(
-                      onTap: () {
-                        // Navigate to video upload screen (same as create flow)
-                        Get.to(() => VideoUploadScreen());
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
+                          color: Colors.white,
                           border: Border.all(
                             color: const Color(0xFF999999),
                             width: 1,
                           ),
                           borderRadius: BorderRadius.circular(12),
-                          color: Colors.white,
                         ),
-                        height: 160,
-                        width: double.infinity,
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             color: const Color(0xFF191919),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/icons/gallery.png', // same icon used in create screen
-                                height: 32,
-                                width: 32,
-                                color: Colors.white70,
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Upload your company elevator pitch',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                ' Upload or view a short video',
-                                style: TextStyle(
+                          height: 160,
+                          width: double.infinity,
+                          child: ElevatorPitchCompanySection(
+                            videoUrl: company.elevatorPitch!.video.hlsUrl,
+                            httpHeaders: {
+                              'Accept': '*/*',
+                              'Accept-Encoding': 'identity',
+                              "Authorization":
+                                  "Bearer ${company.elevatorPitch!.video.encryptionKeyUrl}",
+                            },
+                          ),
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          // Navigate to video upload screen (same as create flow)
+                          Get.to(() => VideoUploadScreen());
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color(0xFF999999),
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white,
+                          ),
+                          height: 160,
+                          width: double.infinity,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: const Color(0xFF191919),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/icons/gallery.png', // same icon used in create screen
+                                  height: 32,
+                                  width: 32,
                                   color: Colors.white70,
-                                  fontSize: 12,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Upload your company elevator pitch',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  ' Upload or view a short video',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
 
-              const SizedBox(height: 20),
-              SizedBox(height: 20),
+                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-              /// ================= COMPANY DETAILS =================
-              infoTile("About us", stripHtmlTags(company.aboutUs)),
-              SizedBox(height: 20),
-              // infoTile("Industry", company.industry),
-              // infoTile("Zip Code", company.zipcode),
-              // infoTile("Business Email", company.cemail),
-              // infoTile("Services", company.service.join(", ")),
-              // infoTile(
-              //   "Social Links",
-              //   company.sLink.isNotEmpty
-              //       ? company.sLink
-              //             .map((e) => "• ${e.label} → ${e.url}")
-              //             .join("\n")
-              //       : "No social links available",
-              // ),
+                /// ================= COMPANY DETAILS =================
+                infoTile("About us", stripHtmlTags(company.aboutUs)),
+                SizedBox(height: 20),
+                // infoTile("Industry", company.industry),
+                // infoTile("Zip Code", company.zipcode),
+                // infoTile("Business Email", company.cemail),
+                // infoTile("Services", company.service.join(", ")),
+                // infoTile(
+                //   "Social Links",
+                //   company.sLink.isNotEmpty
+                //       ? company.sLink
+                //             .map((e) => "• ${e.label} → ${e.url}")
+                //             .join("\n")
+                //       : "No social links available",
+                // ),
 
-              /// ================= Employees =================
-              sectionTitle("Internal Recruiters"),
-              const SizedBox(height: 12),
+                /// ================= Employees =================
+                sectionTitle("Internal Recruiters"),
+                const SizedBox(height: 12),
 
-              // Full-width Beautiful Table Card
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Obx(() {
-                    if (controller.isLoading.value) {
-                      return const Padding(
-                        padding: EdgeInsets.all(40),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
+                // Full-width Beautiful Table Card
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Obx(() {
+                      if (controller.isLoading.value) {
+                        return const Padding(
+                          padding: EdgeInsets.all(40),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
 
-                    final emp = controller.employee.value;
+                      final emp = controller.employee.value;
 
-                    if (emp == null || emp.employees.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.all(40),
-                        child: Center(
-                          child: Text(
-                            "No internal recruiters yet",
-                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                      if (emp == null || emp.employees.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(40),
+                          child: Center(
+                            child: Text(
+                              "No internal recruiters yet",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
-                        ),
-                      );
-                    }
+                        );
+                      }
 
-                    return SingleChildScrollView(
-                      // scrollDirection: Axis .horizontal, // Only scroll horizontally if content overflows
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth:
-                              MediaQuery.of(context).size.width -
-                              32, // Full width minus margins
-                        ),
-                        child: DataTable(
-                          headingRowHeight: 56,
-                          headingRowColor: MaterialStateProperty.all(
-                            const Color(0xFFF8F9FB),
+                      return SingleChildScrollView(
+                        // scrollDirection: Axis .horizontal, // Only scroll horizontally if content overflows
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth:
+                                MediaQuery.of(context).size.width -
+                                32, // Full width minus margins
                           ),
-                          dataRowHeight: 68,
-                          columnSpacing: 16,
-                          dividerThickness: 0,
-                          columns: const [
-                            DataColumn(
-                              label: Padding(
-                                padding: EdgeInsets.only(left: 12),
-                                child: Text(
-                                  "Recruiter Name",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ),
+                          child: DataTable(
+                            headingRowHeight: 56,
+                            headingRowColor: MaterialStateProperty.all(
+                              const Color(0xFFF8F9FB),
                             ),
-
-                            DataColumn(
-                              label: Center(
-                                child: Text(
-                                  "Role",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                "Action",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                          ],
-                          rows: emp.employees.map((e) {
-                            return DataRow(
-                              cells: [
-                                DataCell(
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                      horizontal: 12,
+                            dataRowHeight: 68,
+                            columnSpacing: 16,
+                            dividerThickness: 0,
+                            columns: const [
+                              DataColumn(
+                                label: Padding(
+                                  padding: EdgeInsets.only(left: 12),
+                                  child: Text(
+                                    "Recruiter Name",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
                                     ),
-                                    child: Row(
-                                      children: [
-                                        // CircleAvatar(
-                                        //   radius: 18,
-                                        //   backgroundColor: Colors.grey.shade200,
-                                        //   backgroundImage:
-                                        //       e.avatarUrl.isNotEmpty
-                                        //       ? NetworkImage(e.avatarUrl)
-                                        //       : null,
-                                        //   child: e.avatarUrl.isEmpty
-                                        //       ? Text(
-                                        //           e.name.isNotEmpty
-                                        //               ? e.name[0].toUpperCase()
-                                        //               : "R",
-                                        //           style: const TextStyle(
-                                        //             fontWeight: FontWeight.bold,
-                                        //             color: Colors.black54,
-                                        //           ),
-                                        //         )
-                                        //       : null,
-                                        // ),
-                                        Expanded(
-                                          child: Text(
-                                            e.name,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+
+                              DataColumn(
+                                label: Center(
+                                  child: Text(
+                                    "Role",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  "Action",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            rows: emp.employees.map((e) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                        horizontal: 12,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // CircleAvatar(
+                                          //   radius: 18,
+                                          //   backgroundColor: Colors.grey.shade200,
+                                          //   backgroundImage:
+                                          //       e.avatarUrl.isNotEmpty
+                                          //       ? NetworkImage(e.avatarUrl)
+                                          //       : null,
+                                          //   child: e.avatarUrl.isEmpty
+                                          //       ? Text(
+                                          //           e.name.isNotEmpty
+                                          //               ? e.name[0].toUpperCase()
+                                          //               : "R",
+                                          //           style: const TextStyle(
+                                          //             fontWeight: FontWeight.bold,
+                                          //             color: Colors.black54,
+                                          //           ),
+                                          //         )
+                                          //       : null,
+                                          // ),
+                                          Expanded(
+                                            child: Text(
+                                              e.name,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                DataCell(
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(
-                                        0xFFE3F2FD,
-                                      ), // Exact light-blue background
-                                      borderRadius: BorderRadius.circular(
-                                        20,
-                                      ), // Pill shape
-                                      border: Border.all(
+                                  DataCell(
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
                                         color: const Color(
-                                          0xFFBBDEFB,
-                                        ), // Slightly darker blue border
-                                        width: 1.5,
+                                          0xFFE3F2FD,
+                                        ), // Exact light-blue background
+                                        borderRadius: BorderRadius.circular(
+                                          20,
+                                        ), // Pill shape
+                                        border: Border.all(
+                                          color: const Color(
+                                            0xFFBBDEFB,
+                                          ), // Slightly darker blue border
+                                          width: 1.5,
+                                        ),
                                       ),
-                                    ),
-                                    child: Text(
-                                      e.role,
-                                      style: const TextStyle(
-                                        color: Color(
-                                          0xFF1976D2,
-                                        ), // Deep blue text (matches your design)
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.3,
+                                      child: Text(
+                                        e.role,
+                                        style: const TextStyle(
+                                          color: Color(
+                                            0xFF1976D2,
+                                          ), // Deep blue text (matches your design)
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.3,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                DataCell(
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 12),
-                                    child: GestureDetector(
-                                      onTap: () =>
-                                          controller.removeRecruiter(e.id),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red.shade50,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                  DataCell(
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 12),
+                                      child: GestureDetector(
+                                        onTap: () =>
+                                            controller.removeRecruiter(e.id),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 6,
                                           ),
-                                        ),
-                                        child: const Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.delete_outline,
-                                              color: Colors.red,
-                                              size: 20,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.shade50,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
                                             ),
-                                            SizedBox(width: 6),
-                                          ],
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.red,
+                                                size: 20,
+                                              ),
+                                              SizedBox(width: 6),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: TextButton(onPressed: () {}, child: Text("See all")),
+                // ),
+
+                // -------------------- 🏅 Honors & Achievements --------------------
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Text(
+                    "Awards and Honors",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                ),
+
+                controller.userInfo.value?.honors != null &&
+                        controller.userInfo.value!.honors.isNotEmpty
+                    ? Column(
+                        children: controller.userInfo.value!.honors.map((
+                          honor,
+                        ) {
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey.shade300),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  blurRadius: 3,
+                                  spreadRadius: 1,
+                                  color: Colors.black.withOpacity(.05),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 🏆 Honor Title
+                                Row(
+                                  children: [
+                                    // Icon(
+                                    //   Icons.workspace_premium,
+                                    //   size: 20,
+                                    //   color: Colors.amber,
+                                    // ),
+                                    // SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        honor.title,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        honor.programeName,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: 6),
+
+                                // 🔸 Issued By + Date
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_month_outlined,
+                                      size: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      _formatDate(honor.programeDate),
+                                      style: TextStyle(
+                                        color: Colors.black54,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: 6),
+                                SizedBox(width: 6),
+
+                                // 📝 Description
+                                Text(
+                                  honor.description,
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    height: 1.3,
                                   ),
                                 ),
                               ],
-                            );
-                          }).toList(),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        child: Text(
+                          "No honors awarded yet.",
+                          style: TextStyle(color: Colors.black54),
                         ),
                       ),
-                    );
-                  }),
-                ),
-              ),
 
-              const SizedBox(height: 20),
-              // Align(
-              //   alignment: Alignment.centerRight,
-              //   child: TextButton(onPressed: () {}, child: Text("See all")),
-              // ),
-
-              // -------------------- 🏅 Honors & Achievements --------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Text(
-                  "Awards and Honors",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                ),
-              ),
-
-              controller.userInfo.value?.honors != null &&
-                      controller.userInfo.value!.honors.isNotEmpty
-                  ? Column(
-                      children: controller.userInfo.value!.honors.map((honor) {
-                        return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.grey.shade300),
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 3,
-                                spreadRadius: 1,
-                                color: Colors.black.withOpacity(.05),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // 🏆 Honor Title
-                              Row(
-                                children: [
-                                  // Icon(
-                                  //   Icons.workspace_premium,
-                                  //   size: 20,
-                                  //   color: Colors.amber,
-                                  // ),
-                                  // SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      honor.title,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      honor.programeName,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              SizedBox(height: 6),
-
-                              // 🔸 Issued By + Date
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.calendar_month_outlined,
-                                    size: 14,
-                                    color: Colors.grey,
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    _formatDate(honor.programeDate),
-                                    style: TextStyle(
-                                      color: Colors.black54,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              SizedBox(height: 6),
-                              SizedBox(width: 6),
-
-                              // 📝 Description
-                              Text(
-                                honor.description,
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  height: 1.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      child: Text(
-                        "No honors awarded yet.",
-                        style: TextStyle(color: Colors.black54),
-                      ),
-                    ),
-
-              SizedBox(height: 20),
-            ],
+                SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       }),

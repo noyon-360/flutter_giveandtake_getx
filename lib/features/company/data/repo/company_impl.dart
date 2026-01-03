@@ -25,6 +25,7 @@ import 'package:karlfive/features/company/data/model/archieve_request_model.dart
 import 'package:karlfive/features/company/data/model/archieve_response_model.dart';
 import 'package:karlfive/features/company/data/model/candidate_resume_response_model.dart';
 import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
+import 'package:karlfive/features/company/data/model/job_usage_response_model.dart';
 import 'package:karlfive/features/company/data/model/manage_job_response_model.dart';
 import 'package:karlfive/features/company/data/model/rec_company_response_model.dart';
 import 'package:karlfive/features/company/data/model/recruiter_added_request_model.dart';
@@ -34,6 +35,7 @@ import 'package:karlfive/features/company/data/model/remove_recruiter_response_m
 import 'package:karlfive/features/company/data/model/resume_updated_response_model.dart';
 import 'package:karlfive/features/company/data/model/single_Company_response_model.dart';
 import 'package:karlfive/features/company/data/model/status_update_response_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/job_update_response_model.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
@@ -257,6 +259,15 @@ class CompanyRepoImplementation extends CompanyRepository {
       ApiConstants.company.updateRecCompany(recId),
       data: data, // send as JSON
       fromJsonT: (json) => RecCompanyResponseModel.fromJson(json),
+    );
+  }
+
+    @override
+  NetworkResult<JobUsageResponseModel> fetchJobUsage() {
+    return _apiClient.get(
+      ApiConstants.company.getJobUsage,
+      fromJsonT: (json) =>
+          JobUsageResponseModel.fromJson(json as Map<String, dynamic>),
     );
   }
 }
