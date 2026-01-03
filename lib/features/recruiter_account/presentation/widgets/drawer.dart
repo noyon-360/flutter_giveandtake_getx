@@ -38,7 +38,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 child: SizedBox(
                   height: 70,
                   child: DrawerHeader(
-                    decoration: const BoxDecoration(color: Colors.grey),
+                    decoration: const BoxDecoration(color: Colors.blue),
                     child: Text(
                       "Recruiter Flow",
                       style: const TextStyle(
@@ -106,7 +106,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 },
               ),
               drawerTile(
-                icon: Icons.post_add,
+                icon: Icons.next_plan_outlined,
                 title: "My Plan",
                 onTap: () {
                   Navigator.pop(context);
@@ -116,16 +116,16 @@ class _MyDrawerState extends State<MyDrawer> {
                 },
               ),
 
-              drawerTile(
-                icon: Icons.post_add,
-                title: "My Plan",
-                onTap: () {
-                  Navigator.pop(context);
-                  Future.delayed(const Duration(milliseconds: 150), () {
-                    Get.dialog(MyPlanScreen());
-                  });
-                },
-              ),
+              // drawerTile(
+              //   icon: Icons.post_add,
+              //   title: "My Plan",
+              //   onTap: () {
+              //     Navigator.pop(context);
+              //     Future.delayed(const Duration(milliseconds: 150), () {
+              //       Get.dialog(MyPlanScreen());
+              //     });
+              //   },
+              // ),
 
               drawerTile(
                 icon: Icons.lock_outline,
