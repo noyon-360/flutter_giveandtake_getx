@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
+import 'package:karlfive/features/company/data/model/single_Company_response_model.dart';
 import 'package:karlfive/features/company/presentation/screen/company_edit_profile.dart';
 import 'package:karlfive/features/company/presentation/screen/connect_company_dialog_screen.dart';
 import 'package:karlfive/features/company/presentation/screen/recruiter_request_screen.dart';
@@ -345,33 +346,34 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                       const SizedBox(height: 20),
 
                       // ----- Social Media -----
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: (company.sLink)
-                            .map(
-                              (link) => GestureDetector(
-                                onTap: () async {
-                                  final Uri url = Uri.parse(link.url ?? '');
-                                  if (await canLaunchUrl(url)) {
-                                    await launchUrl(
-                                      url,
-                                      mode: LaunchMode.externalApplication,
-                                    );
-                                  } else {
-                                    Get.snackbar(
-                                      'Error',
-                                      'Could not open ${link.url}',
-                                    );
-                                  }
-                                },
-                                child: SocialMedia(
-                                  image: _getSocialIcon(link.label),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
+                      // Wrap(
+                      //   spacing: 8,
+                      //   runSpacing: 8,
+                      //   children: (company.sLink)
+                      //       .map(
+                      //         (link) => GestureDetector(
+                      //           onTap: () async {
+                      //             final Uri url = Uri.parse(link.url ?? '');
+                      //             if (await canLaunchUrl(url)) {
+                      //               await launchUrl(
+                      //                 url,
+                      //                 mode: LaunchMode.externalApplication,
+                      //               );
+                      //             } else {
+                      //               Get.snackbar(
+                      //                 'Error',
+                      //                 'Could not open ${link.url}',
+                      //               );
+                      //             }
+                      //           },
+                      //           child: SocialMedia(
+                      //             image: _getSocialIcon(link.label),
+                      //           ),
+                      //         ),
+                      //       )
+                      //       .toList(),
+                      // ),
+                      buildSocialLinks(company),
 
                       const SizedBox(height: 20),
 
@@ -471,7 +473,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
 
                 // Check if elevator pitch exists
                 company.elevatorPitch?.video.hlsUrl != null &&
-                        company.elevatorPitch!.video.hlsUrl.isNotEmpty
+                        company.elevatorPitch!.video.hlsUrl!.isNotEmpty
                     ? Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -881,7 +883,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                     ),
                                     SizedBox(width: 4),
                                     Text(
-                                      _formatDate(honor.programeDate),
+                                      _formatDate(honor.programeDate.toIso8601String()),
                                       style: TextStyle(
                                         color: Colors.black54,
                                         fontSize: 14,
@@ -925,6 +927,52 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
       }),
     );
   }
+  // ================= SOCIAL MEDIA LINKS =================
+
+Widget buildSocialLinks(Company company) {
+  final validSocialLinks = company.sLink
+      .where((link) => link.url.trim().isNotEmpty)
+      .toList();
+
+  if (validSocialLinks.isEmpty) {
+    return const Text(
+      "No social links available",
+      style: TextStyle(
+        color: Colors.black54,
+        fontSize: 12,
+      ),
+    );
+  }
+
+  return Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: validSocialLinks.map((link) {
+      return GestureDetector(
+        onTap: () async {
+          final Uri url = Uri.parse(link.url);
+
+          if (await canLaunchUrl(url)) {
+            await launchUrl(
+              url,
+              mode: LaunchMode.externalApplication,
+            );
+          } else {
+            Get.snackbar(
+              "Error",
+              "Could not open ${link.label}",
+              snackPosition: SnackPosition.BOTTOM,
+            );
+          }
+        },
+        child: SocialMedia(
+          image: _getSocialIcon(link.label),
+        ),
+      );
+    }).toList(),
+  );
+}
+
 
   Widget sectionTitle(String title, {bool canDelete = false}) {
     return Padding(
