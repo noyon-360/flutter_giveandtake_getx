@@ -1,5 +1,6 @@
 class ApiConstants {
   /// [Base Configuration]
+  // static const String baseDomain = 'http://10.10.5.33:5004';// soykot ip
   // static const String baseDomain = 'http://10.10.5.33:5001';// soykot ip
   // static const String baseDomain = 'http://10.10.5.53:5004';// soykot ip
   static const String baseDomain = 'https://test.evpitch.com'; // noyon ip
@@ -90,6 +91,8 @@ class RecruiterAccountApi {
   final String getJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
   final String connectCompany =
       '${ApiConstants.baseUrl}/company/apply-for-company-employee';
+  final String leaveCompany =
+      '${ApiConstants.baseUrl}/company/recruiter-leave-company';
   final String follow = '${ApiConstants.baseUrl}/following/follow';
   //final String yourJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
 
