@@ -249,6 +249,9 @@ class CompanyAccountApi {
       String fetchResume(String candidateUserId) =>
       '${ApiConstants.baseUrl}/resume/user/$candidateUserId';
 
+          String updateRecCompany(String recId) =>
+      '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
+
 
       
 
