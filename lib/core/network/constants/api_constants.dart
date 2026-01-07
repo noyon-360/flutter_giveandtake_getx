@@ -90,6 +90,8 @@ class RecruiterAccountApi {
   final String getJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
   final String connectCompany =
       '${ApiConstants.baseUrl}/company/apply-for-company-employee';
+  final String leaveCompany =
+      '${ApiConstants.baseUrl}/company/recruiter-leave-company';
   final String follow = '${ApiConstants.baseUrl}/following/follow';
   //final String yourJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
 

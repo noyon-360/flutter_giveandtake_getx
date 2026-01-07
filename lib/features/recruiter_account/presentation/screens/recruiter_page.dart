@@ -7,7 +7,6 @@ import 'package:karlfive/features/recruiter_account/presentation/controller/recr
 import 'package:karlfive/features/recruiter_account/presentation/widgets/drawer.dart';
 import 'package:karlfive/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../create_job/presentation/screen/create_job_screen.dart';
 import '../widgets/social_media.dart';
 
 class RecruiterPageScreen extends StatefulWidget {

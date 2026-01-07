@@ -26,6 +26,8 @@ import '../models/job_create_request_model.dart';
 import '../models/job_create_response_model.dart';
 import '../models/job_update_request_model.dart';
 import '../models/job_update_response_model.dart';
+import '../models/leave_company_request_model.dart';
+import '../models/leave_company_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
 import '../models/your_job_response_model.dart';
 
@@ -157,6 +159,15 @@ class RepoImplementation extends Repo {
       ApiConstants.recruiter.connectCompany,
       data: request.toJson(),
       fromJsonT: (json) => ConnectCompanyResponse.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<LeaveCompanyResponseModel> leaveCompany(LeaveCompanyRequestModel request) {
+    return _apiClient.patch(
+      ApiConstants.recruiter.leaveCompany,
+      data: request.toJson(),
+      fromJsonT: (json) => LeaveCompanyResponseModel.fromJson(json),
     );
   }
 

@@ -17,14 +17,13 @@ class CreateJobScreen extends StatelessWidget {
     final controller = Get.put(JobPostingController());
 
     return Scaffold(
-      backgroundColor: Colors.white, //sets white background for Scaffold
       appBar: AppBar(
         title: const Text(
           'Create Job Posting',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
       ),
       body: Column(
