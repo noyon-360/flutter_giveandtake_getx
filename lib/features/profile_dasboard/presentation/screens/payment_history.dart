@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/models/payment_history_response_model.dart';
 import '../controller/payment_history_controller.dart';
+import '../services/receipt_pdf_service.dart';
 
 class PaymentHistoryScreen extends StatelessWidget {
   const PaymentHistoryScreen({super.key});
@@ -15,7 +17,8 @@ class PaymentHistoryScreen extends StatelessWidget {
     final ScrollController scrollController = ScrollController();
 
     scrollController.addListener(() {
-      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200) {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200) {
         authStorageService.getUserId().then((userId) {
           if (userId != null) {
             ctrl.loadMore(userId);
@@ -68,7 +71,9 @@ class PaymentHistoryScreen extends StatelessWidget {
               );
             }
 
-            if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data == null) {
               return const Center(
                 child: Padding(
                   padding: EdgeInsets.all(20.0),
@@ -117,10 +122,7 @@ class PaymentHistoryScreen extends StatelessWidget {
                     padding: EdgeInsets.all(40.0),
                     child: Text(
                       'No payment transactions found',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF595959),
-                      ),
+                      style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
                     ),
                   ),
                 );
@@ -132,7 +134,9 @@ class PaymentHistoryScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildPaymentHistoryTable(transactions),
+                    ...transactions.map(
+                      (transaction) => _buildTransactionCard(transaction),
+                    ),
                     if (ctrl.isLoadingMore.value)
                       const Padding(
                         padding: EdgeInsets.all(16.0),
@@ -161,43 +165,11 @@ class PaymentHistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentHistoryTable(List<PaymentTransaction> transactions) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 800),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE6F3FF),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Row(
-                children: const [
-                  SizedBox(width: 150, child: Center(child: Text('Transaction ID', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF212121))))),
-                  SizedBox(width: 120, child: Center(child: Text('Date', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF212121))))),
-                  SizedBox(width: 150, child: Center(child: Text('Plan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF212121))))),
-                  SizedBox(width: 100, child: Center(child: Text('Amount', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF212121))))),
-                  SizedBox(width: 100, child: Center(child: Text('Status', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF212121))))),
-                  SizedBox(width: 100, child: Center(child: Text('Receipt', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF212121))))),
-                  SizedBox(width: 80, child: Center(child: Text('Refund', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF212121))))),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...transactions.map((transaction) => _buildTransactionRow(transaction)).toList(),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildTransactionCard(PaymentTransaction transaction) {
+    final String transactionId = transaction.transactionId.isNotEmpty
+        ? transaction.transactionId
+        : 'N/A';
 
-  Widget _buildTransactionRow(PaymentTransaction transaction) {
-    final String transactionId = transaction.transactionId.isNotEmpty ? transaction.transactionId : 'N/A';
-    
     String formattedDate = 'N/A';
     try {
       final date = DateTime.parse(transaction.createdAt);
@@ -210,7 +182,9 @@ class PaymentHistoryScreen extends StatelessWidget {
     final double amount = transaction.amount;
     final String status = transaction.paymentStatus;
     final bool isRefunded = transaction.planStatus.toLowerCase() == 'refunded';
-    final bool isCompleted = status.toLowerCase() == 'complete' || status.toLowerCase() == 'completed';
+    final bool isCompleted =
+        status.toLowerCase() == 'complete' ||
+        status.toLowerCase() == 'completed';
 
     Color statusBgColor = const Color(0xFFF3F4F6);
     Color statusTextColor = const Color(0xFF374151);
@@ -231,153 +205,250 @@ class PaymentHistoryScreen extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF6FBFF),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE6F3FF), width: 1),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 150,
-            child: Center(
-              child: Text(
-                transactionId,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF212121),
+          // Top Row: Plan (left) + Status (right)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Plan',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      plan,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF212121),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'Status',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusBgColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      displayStatus,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: statusTextColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          SizedBox(
-            width: 120,
-            child: Center(
-              child: Text(
+          const SizedBox(height: 16),
+
+          // Middle Row 1: Transaction ID (left) + Amount (right)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Transaction ID',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      transactionId,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF212121),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'Amount',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '\$${amount.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF212121),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Bottom Row: Date (left) + Buttons (right)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
                 formattedDate,
-                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                   color: Color(0xFF595959),
                 ),
               ),
-            ),
-          ),
-          SizedBox(
-            width: 150,
-            child: Center(
-              child: Text(
-                plan,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF595959),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 100,
-            child: Center(
-              child: Text(
-                '\$${amount.toStringAsFixed(2)}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF212121),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 100,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusBgColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  displayStatus,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: statusTextColor,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 100,
-            child: Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Get.snackbar(
-                    'Download Receipt',
-                    'Downloading receipt for $transactionId',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.blue.shade50,
-                    duration: const Duration(seconds: 2),
-                  );
-                },
-                icon: const Icon(Icons.download, size: 14),
-                label: const Text('Download', style: TextStyle(fontSize: 10)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2B7FD0),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  minimumSize: const Size(0, 28),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 80,
-            child: Center(
-              child: ElevatedButton(
-                onPressed: isRefunded
-                    ? null
-                    : () {
+              Row(
+                children: [
+                  // Download Receipt Button
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      try {
                         Get.snackbar(
-                          'Refund Request',
-                          'Processing refund request for $transactionId',
+                          'Generating Receipt',
+                          'Creating PDF receipt for $transactionId...',
                           snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: Colors.orange.shade50,
+                          backgroundColor: Colors.blue.shade50,
+                          duration: const Duration(seconds: 1),
+                        );
+
+                        await ReceiptPdfService.generateAndDownloadReceipt(
+                          transaction,
+                        );
+
+                        Get.snackbar(
+                          'Success',
+                          'Receipt downloaded successfully!',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.green.shade50,
                           duration: const Duration(seconds: 2),
                         );
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isRefunded ? Colors.grey.shade300 : const Color(0xFFFF6B6B),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  minimumSize: const Size(0, 28),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                      } catch (e) {
+                        Get.snackbar(
+                          'Error',
+                          'Failed to generate receipt: ${e.toString()}',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red.shade50,
+                          duration: const Duration(seconds: 3),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.download, size: 14),
+                    label: const Text(
+                      'Download',
+                      style: TextStyle(fontSize: 10),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2B7FD0),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      minimumSize: const Size(0, 32),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
                   ),
-                ),
-                child: Text(
-                  isRefunded ? 'Refunded' : 'Refund',
-                  style: const TextStyle(fontSize: 10),
-                ),
+                  const SizedBox(width: 8),
+
+                  // Refund Button
+                  ElevatedButton(
+                    onPressed: isRefunded
+                        ? null
+                        : () {
+                            Get.snackbar(
+                              'Refund Request',
+                              'Processing refund request for $transactionId',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.orange.shade50,
+                              duration: const Duration(seconds: 2),
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isRefunded
+                          ? Colors.grey.shade300
+                          : const Color(0xFFFF6B6B),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      minimumSize: const Size(0, 32),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: Text(
+                      isRefunded ? 'Refunded' : 'Refund',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+            ],
           ),
         ],
       ),

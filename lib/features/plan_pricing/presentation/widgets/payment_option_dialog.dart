@@ -8,12 +8,14 @@ import 'package:karlfive/features/plan_pricing/presentation/controllers/paypal_c
 class PaymentMethodDialog extends StatefulWidget {
   final String planTitle;
   final double price;
+  final String? planId;
   final VoidCallback? onPayNow;
 
   const PaymentMethodDialog({
     super.key,
     required this.planTitle,
     required this.price,
+    this.planId,
     this.onPayNow,
   });
 
@@ -106,6 +108,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                           amount: widget.price,
                           orderId: response.orderId,
                           approveUrl: response.approveUrl,
+                          planId: widget.planId,
                         ),
                       );
                     } else {
@@ -124,6 +127,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                       PaymentScreen(
                         planTitle: widget.planTitle,
                         amount: widget.price,
+                        planId: widget.planId,
                       ),
                     );
                   }
@@ -150,6 +154,7 @@ void showPaymentMethodDialog(
   BuildContext context, {
   required String planTitle,
   required double price,
+  String? planId,
   VoidCallback? onPayNow,
 }) {
   showDialog(
@@ -158,6 +163,7 @@ void showPaymentMethodDialog(
     builder: (context) => PaymentMethodDialog(
       planTitle: planTitle,
       price: price,
+      planId: planId,
       onPayNow: onPayNow,
     ),
   );
