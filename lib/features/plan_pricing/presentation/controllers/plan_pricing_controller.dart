@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
+
 import '../../../../core/base/base_controller.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/services/get_user_profile_service.dart';
+import '../../data/models/grouped_subscription_plan.dart';
 import '../../data/models/subscription_plan_model.dart';
 
 class PlanPricingController extends BaseController {
@@ -10,10 +12,13 @@ class PlanPricingController extends BaseController {
 
   final RxList<SubscriptionPlan> _allPlans = <SubscriptionPlan>[].obs;
   final RxList<SubscriptionPlan> _filteredPlans = <SubscriptionPlan>[].obs;
+  final RxList<GroupedSubscriptionPlan> _groupedPlans =
+      <GroupedSubscriptionPlan>[].obs;
   final RxInt _currentPage = 0.obs;
 
   List<SubscriptionPlan> get allPlans => _allPlans;
   List<SubscriptionPlan> get filteredPlans => _filteredPlans;
+  List<GroupedSubscriptionPlan> get groupedPlans => _groupedPlans;
   int get currentPage => _currentPage.value;
 
   @override
@@ -96,6 +101,11 @@ class PlanPricingController extends BaseController {
               .where((plan) => plan.for_ == userRole)
               .toList();
           _filteredPlans.value = filteredPlans;
+
+          // Group plans by title
+          _groupedPlans.value = GroupedSubscriptionPlan.groupPlans(
+            filteredPlans,
+          );
 
           print('🐞 DEBUG: Total plans: ${success.data.length}');
           print(

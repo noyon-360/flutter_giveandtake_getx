@@ -90,11 +90,28 @@ class PaypalServices {
             executeUrl = item1["href"];
           }
 
+          // Extract token from approvalUrl
+          String token = "";
+          try {
+            if (approvalUrl.isNotEmpty) {
+              final uri = Uri.parse(approvalUrl);
+              token = uri.queryParameters['token'] ?? "";
+            }
+          } catch (e) {
+            print("Error extracting token: $e");
+          }
+
           print('✅ PayPal API: Payment created successfully');
           print('🔵 PayPal API: Approval URL: $approvalUrl');
           print('🔵 PayPal API: Execute URL: $executeUrl');
+          print('🔵 PayPal API: Token: $token');
 
-          return {"executeUrl": executeUrl, "approvalUrl": approvalUrl};
+          return {
+            "executeUrl": executeUrl,
+            "approvalUrl": approvalUrl,
+            "token": token,
+            "id": body["id"] ?? ""
+          };
         }
         print('⚠️ PayPal API: No links found in response');
         throw Exception('No payment links received from PayPal');

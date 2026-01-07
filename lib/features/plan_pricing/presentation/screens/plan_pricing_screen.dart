@@ -155,6 +155,7 @@ class PlanPricingScreen extends GetView<PlanPricingController> {
                                     context,
                                     planTitle: plan.title,
                                     price: plan.price,
+                                    planId: plan.id,
                                     onPayNow: () {
                                       // Handle payment processing here
                                       print(

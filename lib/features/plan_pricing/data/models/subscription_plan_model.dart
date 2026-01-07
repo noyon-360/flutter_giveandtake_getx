@@ -9,6 +9,7 @@ class SubscriptionPlan {
   final String createdAt;
   final String updatedAt;
   final int v;
+  final String? titleColor;
 
   SubscriptionPlan({
     required this.id,
@@ -21,6 +22,7 @@ class SubscriptionPlan {
     required this.createdAt,
     required this.updatedAt,
     required this.v,
+    this.titleColor,
   });
 
   factory SubscriptionPlan.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class SubscriptionPlan {
       createdAt: json['createdAt'] as String? ?? '',
       updatedAt: json['updatedAt'] as String? ?? '',
       v: json['__v'] as int? ?? 0,
+      titleColor: json['titleColor'] as String?,
     );
   }
 
