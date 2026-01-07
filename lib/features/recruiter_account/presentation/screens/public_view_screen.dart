@@ -28,7 +28,9 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        title: Text('Public view'),
+        title: Text('Public view', style: TextStyle(color: Colors.white),),
+        backgroundColor: const Color(0xFF2B7FD0),
+        elevation: 0,
       ),
       body: SafeArea(
         child: Obx(() {
@@ -48,52 +50,55 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Banner + Photo + Edit Button
-                SizedBox(
-                  height: 300,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      // Banner
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 200,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: Colors.grey.shade300,
-                            image: user.banner.isNotEmpty
-                                ? DecorationImage(
-                              image: NetworkImage(user.banner),
-                              fit: BoxFit.cover,
-                            )
-                                : null,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: SizedBox(
+                    height: 300,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Banner
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: 200,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: Colors.grey.shade300,
+                              image: user.banner.isNotEmpty
+                                  ? DecorationImage(
+                                image: NetworkImage(user.banner),
+                                fit: BoxFit.cover,
+                              )
+                                  : null,
+                            ),
                           ),
                         ),
-                      ),
 
-                      // Avatar
-                      Positioned(
-                        left: 20,
-                        bottom: 30,
-                        child: Container(
-                          height: 130,
-                          width: 130,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white, width: 2),
-                            color: Colors.grey.shade300,
-                            image: user.photo.isNotEmpty
-                                ? DecorationImage(
-                              image: NetworkImage(user.photo),
-                              fit: BoxFit.cover,
-                            )
-                                : null,
+                        // Avatar
+                        Positioned(
+                          left: 20,
+                          bottom: 30,
+                          child: Container(
+                            height: 130,
+                            width: 130,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.white, width: 2),
+                              color: Colors.grey.shade300,
+                              image: user.photo.isNotEmpty
+                                  ? DecorationImage(
+                                image: NetworkImage(user.photo),
+                                fit: BoxFit.cover,
+                              )
+                                  : null,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 

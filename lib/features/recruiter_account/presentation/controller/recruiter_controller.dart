@@ -4,7 +4,8 @@ import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:karlfive/core/network/services/auth_storage_service.dart';
 import 'package:karlfive/features/company/presentation/screen/manage_job_req_screen.dart';
-import 'package:karlfive/features/recruiter_account/data/models/archieve_job_request_model.dart' hide ApplicationRequirement, CustomQuestion;
+import 'package:karlfive/features/recruiter_account/data/models/archieve_job_request_model.dart'
+    hide ApplicationRequirement, CustomQuestion;
 import 'package:karlfive/features/recruiter_account/data/models/connect_company_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/follow_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
@@ -14,6 +15,7 @@ import 'package:karlfive/features/recruiter_account/data/models/get_single_job_r
     hide ApplicationRequirement, CustomQuestion;
 import 'package:karlfive/features/recruiter_account/data/models/job_update_request_model.dart'
     hide ApplicationRequirement, CustomQuestion;
+import 'package:karlfive/features/recruiter_account/data/models/leave_company_request_model.dart';
 import 'package:karlfive/features/recruiter_account/domain/repo/repo.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/upload_elevator_pitch.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
@@ -47,9 +49,11 @@ class RecruiterController extends BaseController {
   final RxString searchText = ''.obs;
 
   final companies = <GetCompanyResponseModel>[].obs;
+
   // In RecruiterController
   final JobFormController jobFormController = Get.put(JobFormController());
   RxString? companySearchQuery;
+
   // Add this line in RecruiterController
   final archiveLoadingMap = <String, bool>{}.obs;
 
@@ -215,12 +219,12 @@ class RecruiterController extends BaseController {
         DPrint.log("create job success result : ${fail.message}");
         setLoading(false);
       },
-          (success) async {
+      (success) async {
         DPrint.log("create job success result : ${success.message}");
         final userRole = await _authStorageService.getUserRole();
-        if(userRole == 'recruiter') {
+        if (userRole == 'recruiter') {
           Get.to(() => RecruiterPageScreen());
-        }else{
+        } else {
           Get.to(() => ManageJobPostScreen());
         }
         setLoading(false);
@@ -303,6 +307,42 @@ class RecruiterController extends BaseController {
       },
       (success) {
         DPrint.log("connect company success result : ${success.message}");
+        Get.back();
+        setLoading(false);
+      },
+    );
+  }
+
+  Future leaveCompany(String cname, String aboutUs,String industry, String country, String city, String zipcode, String cemail,
+   String clogo, String banner, String slug, List<String> employeesId, List<SocialLinkRequest> sLink, List<String> service) async {
+    setLoading(true);
+    setError("");
+
+    final request = LeaveCompanyRequestModel(
+      cname: cname,
+      aboutUs: aboutUs,
+      industry: industry,
+      country: country,
+      city: city,
+      zipcode: zipcode,
+      cemail: cemail,
+      clogo: clogo,
+      banner: banner,
+      slug: slug,
+      employeesId: employeesId,
+      sLink: sLink,
+      service: service,
+    );
+    final result = await _recruiterRepo.leaveCompany(request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("leave company success result : ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("leave company success result : ${success.message}");
         Get.back();
         setLoading(false);
       },
