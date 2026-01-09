@@ -22,15 +22,7 @@ class LocationController extends GetxController {
   Future<void> fetchCountriesWithCities() async {
     try {
       final response = await http.get(
-<<<<<<< HEAD
         Uri.parse('https://test.evpitch.com/api/v1/countries'),
-=======
-<<<<<<< HEAD
-        Uri.parse('http://10.10.5.33:5004/api/v1/countries'),
-=======
-        Uri.parse('http://10.10.5.67:5007/api/v1/countries'),
->>>>>>> 9e768a5812706f1ea121ff3fa12c82b756ef9a2a
->>>>>>> a7ee62c17f07d6201d9c8ee4b8ad254a490c02ca
       );
 
       if (response.statusCode == 200) {
