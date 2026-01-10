@@ -20,6 +20,12 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
   final RecruiterController recruiterController = Get.find<RecruiterController>();
   final ScrollController horizontalScrollController = ScrollController();
 
+  String _parseHtmlString(String htmlString) {
+    final document = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
+    return htmlString.replaceAll(document, '');
+  }
+
+
 
   @override
   void initState() {
@@ -56,6 +62,11 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
           }
 
           final user = recruiterController.userInfo.value!;
+
+          /// ✅ FILTER VALID SOCIAL LINKS
+          final socialLinks = user.sLink
+              .where((e) => e.url != null && e.url!.trim().isNotEmpty)
+              .toList();
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(0),
@@ -143,7 +154,7 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${user.firstName} ${user.sureName}",
+                      "${user.firstName.capitalizeFirst} ${user.sureName.capitalizeFirst}",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 24,
@@ -166,49 +177,54 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      user.bio,
+                      _parseHtmlString(user.bio),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF898989),
                       ),
                     ),
+
                   ],
                 ),
 
                 const SizedBox(height: 20),
 
                 // ----- Social Media -----
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: (user.sLink)
-                      .map((link) => GestureDetector(
-                    onTap: () async {
-                      final Uri url = Uri.parse(link.url ?? '');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
-                      } else {
-                        Get.snackbar('Error', 'Could not open ${link.url}');
-                      }
-                    },
-                    child: SocialMedia(image: _getSocialIcon(link.label)),
-                  ))
-                      .toList(),
-                ),
+                if (socialLinks.isNotEmpty)
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: socialLinks.map((link) {
+                      return GestureDetector(
+                        onTap: () async {
+                          final uri = Uri.parse(link.url!.trim());
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } else {
+                            Get.snackbar(
+                              "Error",
+                              "Could not open ${link.label}",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
+                        },
+                        child: Tooltip(
+                          message: link.label ?? '',
+                          child: SocialMedia(
+                            image: _getSocialIcon(link.label),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
 
                 const SizedBox(height: 20),
 
                 // ----- Buttons -----
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Try It Free — Post Your First Job at No Cost!',
-                      style: TextStyle(fontSize: 17),
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 20),
 
                 Divider(color: Color(0xFF999999),),
@@ -393,8 +409,10 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
         return 'assets/icons/tiktok.png';
       case 'instagram':
         return 'assets/icons/instagram.png';
+      case 'fiverr':
+        return 'assets/icons/Fiverr.png';
       default:
-        return 'assets/icons/link.png';
+        return 'assets/icons/world.png';
     }
   }
 

@@ -36,6 +36,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _facebookTEController = TextEditingController();
   final TextEditingController _instaTEController = TextEditingController();
   final TextEditingController _tiktokTEController = TextEditingController();
+  final TextEditingController _fiverrTEController = TextEditingController();
+  final TextEditingController _companyTEController = TextEditingController();
 
   final RecruiterController reCruiController = Get.find<RecruiterController>();
 
@@ -50,6 +52,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final FocusNode _facebookFocusNode = FocusNode();
   final FocusNode _instaFocusNode = FocusNode();
   final FocusNode _tiktokFocusNode = FocusNode();
+  final FocusNode _fiverrFocusNode = FocusNode();
+  final FocusNode _companyFocusNode = FocusNode();
 
   late LocationController controller = Get.put(LocationController());
 
@@ -89,6 +93,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
             (e) => e.label.toLowerCase() == "instagram",
         orElse: () => SocialLink(label: '', url: '')
     ).url ?? '';
+    _fiverrTEController.text = recruiter.sLink.firstWhere(
+            (e) => e.label.toLowerCase() == "fiverr",
+        orElse: () => SocialLink(label: '', url: '')
+    ).url ?? '';
+
+    _companyTEController.text = recruiter.sLink
+        .firstWhere(
+          (e) => e.label.trim().toLowerCase() == "company",
+      orElse: () => SocialLink(label: '', url: ''),
+    ).url ?? '';
+
 
     // Preload banner & logo URLs
     if (recruiter.banner.isNotEmpty) {
@@ -98,14 +113,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
       imagePickerController.existingImageUrl.value = recruiter.photo;
     }
 
-    // Country & city
-    controller.selectedCountry.value = recruiter.country;
-    controller.selectedCity.value = recruiter.city;
+    // // Country & city
+    // controller.selectedCountry.value = recruiter.country;
+    // controller.selectedCity.value = recruiter.city;
+    //
+    // // Set previously selected company
+    // if (recruiter.companyId != null) {
+    //   reCruiController.selectedCompany.value = recruiter.companyId!.id;
+    // }
 
-    // ✅ Set previously selected company
-    if (recruiter.companyId != null) {
-      reCruiController.selectedCompany.value = recruiter.companyId!.id;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Now it's 100% safe – build phase is finished
+      controller.selectedCountry.value = recruiter.country ?? '';
+      controller.selectedCity.value = recruiter.city ?? '';
+
+      if (recruiter.companyId != null && recruiter.companyId!.id.isNotEmpty) {
+        reCruiController.selectedCompany.value = recruiter.companyId!.id;
+      }
+    });
   }
 
   @override
@@ -753,6 +778,58 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       ),
                                       validator: Validators.name,
                                     ),
+
+                                    SizedBox(height: 12),
+                                    Text(
+                                      'Fiverr URL',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(height: 6),
+                                    TextFormField(
+                                      controller: _fiverrTEController,
+                                      focusNode: _fiverrFocusNode,
+                                      keyboardType: TextInputType.name,
+                                      textInputAction: TextInputAction.next,
+                                      decoration: context.primaryInputDecoration
+                                          .copyWith(
+                                        hintText: "Enter Here",
+                                        hintStyle: TextStyle(
+                                          color: Color(0xFF787878),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      validator: Validators.name,
+                                    ),
+
+                                    SizedBox(height: 12),
+                                    Text(
+                                      'Company Website URL',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(height: 6),
+                                    TextFormField(
+                                      controller: _companyTEController,
+                                      focusNode: _companyFocusNode,
+                                      keyboardType: TextInputType.name,
+                                      textInputAction: TextInputAction.next,
+                                      decoration: context.primaryInputDecoration
+                                          .copyWith(
+                                        hintText: "Enter Here",
+                                        hintStyle: TextStyle(
+                                          color: Color(0xFF787878),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      validator: Validators.name,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -789,6 +866,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           _facebookTEController.text,
                           _tiktokTEController.text,
                           _instaTEController.text,
+                          _fiverrTEController.text,
+                          _companyTEController.text
                         );
 
                         if (reCruiController.errorMessage.value.isEmpty) {

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:karlfive/features/Home/presentation/screens/my_plan_screen.dart';
+
 import 'package:karlfive/features/recruiter_account/presentation/screens/all_jobs_screen.dart';
+import 'package:karlfive/features/recruiter_account/presentation/screens/change_password_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/company_info_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/create_job_screen.dart';
-import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
+import '../../../company_pricing/presentation/screens/plan_pricing_screen.dart';
 import '../controller/recruiter_controller.dart';
 import '../screens/edit_profile_page.dart';
 import '../screens/public_view_screen.dart';
@@ -124,7 +126,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 onTap: () {
                   Navigator.pop(context);
                   Future.delayed(const Duration(milliseconds: 150), () {
-                    Get.dialog(MyPlanScreen());
+                    Get.dialog(PlanPricingScreen());
                   });
                 },
               ),
@@ -146,7 +148,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 onTap: () {
                   Navigator.pop(context);
                   Future.delayed(const Duration(milliseconds: 150), () {
-                    Get.to(() => ChangePasswordScreen());
+                    Get.to(() => ChangePassword());
                   });
                 },
               ),

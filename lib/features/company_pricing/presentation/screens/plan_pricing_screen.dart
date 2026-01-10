@@ -229,8 +229,8 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: AppColors.textBlack),
+        backgroundColor: const Color(0xFF2B7FD0),
+        //iconTheme: const IconThemeData(color: AppColors.textBlack),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -239,7 +239,7 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textBlack,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 8),
@@ -247,8 +247,8 @@ class _PlanPricingScreenState extends State<PlanPricingScreen> {
               'Choose the Plan That Fits You Best',
               style: TextStyle(
                 fontSize: 10,
-                color: Color(0xff8593A3),
-                fontWeight: FontWeight.w400,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],

@@ -26,6 +26,9 @@ class CreateRecruiterAccount extends StatefulWidget {
 }
 
 class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+
   final TextEditingController _descriptionTController = TextEditingController();
   final TextEditingController _firstNameTEController = TextEditingController();
   final TextEditingController _surNameTEController = TextEditingController();
@@ -39,6 +42,8 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
   final TextEditingController _facebookTEController = TextEditingController();
   final TextEditingController _instaTEController = TextEditingController();
   final TextEditingController _tiktokTEController = TextEditingController();
+  final TextEditingController _fiverrTEController = TextEditingController();
+  final TextEditingController _companyTEController = TextEditingController();
 
   final recruiterController = Get.find<RecruiterController>();
 
@@ -60,6 +65,8 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
   final FocusNode _facebookFocusNode = FocusNode();
   final FocusNode _instaFocusNode = FocusNode();
   final FocusNode _tiktokFocusNode = FocusNode();
+  final FocusNode _fiverrFocusNode = FocusNode();
+  final FocusNode _companyFocusNode = FocusNode();
 
   final LocationController controller = Get.put(LocationController());
 
@@ -88,7 +95,7 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
         _upworkTEController.text,
         _facebookTEController.text,
         _tiktokTEController.text,
-        _instaTEController.text);
+        _instaTEController.text,_fiverrTEController.text, _companyTEController.text);
   }
 
   @override
@@ -108,391 +115,422 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ElevatedButton(onPressed: (){Get.find<RecruiterController>().logout();} , child: Text('Logout')),
-                const Text(
-                  'Upload Your Elevator Speech (Optional)',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4D4D4D),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ElevatedButton(onPressed: (){Get.find<RecruiterController>().logout();} , child: Text('Logout')),
+                  const Text(
+                    'Upload Your Elevator Speech (Optional)',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF4D4D4D),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 5),
+                  const SizedBox(height: 5),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Upload a 60-second elevator video''pitch introducing your agency and what'
-                            'makes you stand out from the rest!',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF4D4D4D),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Upload a 60-second elevator video''pitch introducing your agency and what'
+                              'makes you stand out from the rest!',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF4D4D4D),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () {
-                    Get.to(VideoUploadScreen());
-                  },
-                  child: Obx(() {
-                    if (recruiterController.successVideoUploaded.value &&
-                        recruiterController.uploadedVideoPath.value
-                            .isNotEmpty) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: const Color(0xFF191919),
-                        ),
-                        height: 200,
-                        width: double.infinity,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: VideoPlayerWidget(
-                            videoPath: recruiterController.uploadedVideoPath
-                                .value,
-                          ),
-                        ),
-                      );
-                    } else {
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: const Color(0xFF191919),
-                        ),
-                        height: 150,
-                        width: double.infinity,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: Image(image: AssetImage(
-                                  'assets/icons/gallery.png')),
-                            ),
-                            const SizedBox(height: 7),
-                            const Text(
-                              'Drop your files here',
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.white),
-                            ),
-                            const SizedBox(height: 9.5),
-                            const Text(
-                              'Choose file',
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  }),
-                ),
-
-                SizedBox(height: 16),
-
-                Text(
-                  'Company Banner',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 1, color: Color(0xFF999999)),
+                    ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: GestureDetector(
-                      onTap: bannerPickerController.showPickerOptions,
-                      child: Obx(() {
+
+                  SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () {
+                      Get.to(VideoUploadScreen());
+                    },
+                    child: Obx(() {
+                      if (recruiterController.successVideoUploaded.value &&
+                          recruiterController.uploadedVideoPath.value
+                              .isNotEmpty) {
                         return Container(
-                          height: 150,
-                          width: double.infinity,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Color(0xFFD9D9D9),
+                            borderRadius: BorderRadius.circular(4),
+                            color: const Color(0xFF191919),
                           ),
-                          child: Center(
-                            child:
-                            bannerPickerController.selectedImage.value !=
-                                null
-                                ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              // same as container
-                              child: Image.file(
-                                bannerPickerController
-                                    .selectedImage
-                                    .value!,
-                                width: double.infinity,
-                                height: 150,
-                                fit: BoxFit
-                                    .cover, // makes image fill the container
-                              ),
-                            )
-                                : const Text(
-                              'company banner',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
+                          height: 200,
+                          width: double.infinity,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: VideoPlayerWidget(
+                              videoPath: recruiterController.uploadedVideoPath
+                                  .value,
                             ),
                           ),
                         );
-                      }),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 10),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      children: [
-                        SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: imagePickerController.showPickerOptions,
-                          child: Obx(() {
-                            return Container(
-                              height: 130,
-                              width: 130,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Color(0xFFD9D9D9),
+                      } else {
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: const Color(0xFF191919),
+                          ),
+                          height: 150,
+                          width: double.infinity,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: Image(image: AssetImage(
+                                    'assets/icons/gallery.png')),
                               ),
-                              child: Center(
-                                child:
-                                imagePickerController.selectedImage.value !=
-                                    null
-                                    ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  // same as container
-                                  child: Image.file(
-                                    imagePickerController
-                                        .selectedImage
-                                        .value!,
-                                    height: 130,
-                                    width: 130,
-                                    fit: BoxFit
-                                        .cover, // makes image fill the container
-                                  ),
-                                )
-                                    : const Text(
-                                  'photo/recruiter logo',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
+                              const SizedBox(height: 7),
+                              const Text(
+                                'Drop your files here',
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.white),
+                              ),
+                              const SizedBox(height: 9.5),
+                              const Text(
+                                'Choose file',
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    }),
+                  ),
+
+                  SizedBox(height: 16),
+
+                  Text(
+                    'Company Banner',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(width: 1, color: Color(0xFF999999)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: GestureDetector(
+                        onTap: bannerPickerController.showPickerOptions,
+                        child: Obx(() {
+                          return Container(
+                            height: 150,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Color(0xFFD9D9D9),
+                            ),
+                            child: Center(
+                              child:
+                              bannerPickerController.selectedImage.value !=
+                                  null
+                                  ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                // same as container
+                                child: Image.file(
+                                  bannerPickerController
+                                      .selectedImage
+                                      .value!,
+                                  width: double.infinity,
+                                  height: 150,
+                                  fit: BoxFit
+                                      .cover, // makes image fill the container
+                                ),
+                              )
+                                  : const Text(
+                                'company banner',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
                                 ),
                               ),
-                            );
-                          }),
-                        ),
-
-                        SizedBox(height: 10),
-                      ],
-                    ),
-
-                    SizedBox(width: 15),
-
-                    Bio(descriptionTController: _descriptionTController, descriptionController: descriptionController),
-                  ],
-                ),
-
-                SizedBox(height: 14),
-
-                Name(firstNameTEController: _firstNameTEController, firstNameFocusNode: _firstNameFocusNode, surNameTEController: _surNameTEController, surNameFocusNode: _surNameFocusNode),
-
-                SizedBox(height: 9),
-
-                PhoneNumberAndEmail(emailTEController: _emailTEController, emailFocusNode: _emailFocusNode),
-
-                SizedBox(height: 9),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Current Position*',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
                             ),
-                          ),
-                          SizedBox(height: 6),
-                          TextFormField(
-                            controller: _currentPositionTEController,
-                            focusNode: _currentPositionFocusNode,
-                            keyboardType: TextInputType.text,
-                            textInputAction: TextInputAction.next,
-                            decoration: context.primaryInputDecoration.copyWith(
-                              hintText: "Enter current position",
-                              hintStyle: TextStyle(
-                                color: Color(0xFF787878),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(width: 19),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Phone Number*',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          TextFormField(
-                            controller: _phoneNumberTEController,
-                            keyboardType: TextInputType.phone,
-                            focusNode: _phoneNumberFocusNode,
-                            textInputAction: TextInputAction.next,
-                            decoration: context.primaryInputDecoration.copyWith(
-                              hintText: "+49 97 25917 3740",
-                              hintStyle: TextStyle(
-                                color: Color(0xFF787878),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            validator: Validators.phone,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 9),
-
-                CountryCitySearchableDropdown(controller: controller),
-
-                SizedBox(height: 10),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Zip/Postal Code (Optional)',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          TextFormField(
-                            controller: _postalCodeTEController,
-                            focusNode: _postalCodeFocusNode,
-                            keyboardType: TextInputType.number,
-                            textInputAction: TextInputAction.next,
-                            decoration: context.primaryInputDecoration.copyWith(
-                              hintText: "Enter Zip/Postal Code",
-                              hintStyle: TextStyle(
-                                color: Color(0xFF787878),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 10),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Select Company',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          CompanyDropdown(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                SocialLink(linkedINTEController: _linkedINTEController,
-                    linkedINFocusNode: _linkedINFocusNode,
-                    twitterTEController: _twitterTEController,
-                    twitterFocusNode: _twitterFocusNode,
-                    upworkTEController: _upworkTEController,
-                    upworkFocusNode: _upworkFocusNode,
-                    facebookTEController: _facebookTEController,
-                    facebookFocusNode: _facebookFocusNode,
-                    tiktokTEController: _tiktokTEController,
-                    tiktokFocusNode: _tiktokFocusNode,
-                    instaTEController: _instaTEController,
-                    instaFocusNode: _instaFocusNode),
-
-                SizedBox(height: 15),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _submit();
-                      // if(recruiterController.successVideoUploaded.value){
-                      //   _submit();
-
-                      // }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                    ),
-                    child: const Text(
-                      'Save',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                          );
+                        }),
                       ),
                     ),
                   ),
-                ),
-              ],
+
+                  SizedBox(height: 10),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        children: [
+                          SizedBox(height: 10),
+                          GestureDetector(
+                            onTap: imagePickerController.showPickerOptions,
+                            child: Obx(() {
+                              return Container(
+                                height: 130,
+                                width: 130,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Color(0xFFD9D9D9),
+                                ),
+                                child: Center(
+                                  child:
+                                  imagePickerController.selectedImage.value !=
+                                      null
+                                      ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    // same as container
+                                    child: Image.file(
+                                      imagePickerController
+                                          .selectedImage
+                                          .value!,
+                                      height: 130,
+                                      width: 130,
+                                      fit: BoxFit
+                                          .cover, // makes image fill the container
+                                    ),
+                                  )
+                                      : const Text(
+                                    'photo/recruiter logo',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+
+                          SizedBox(height: 10),
+                        ],
+                      ),
+
+                      SizedBox(width: 15),
+
+                      Bio(descriptionTController: _descriptionTController, descriptionController: descriptionController),
+                    ],
+                  ),
+
+                  SizedBox(height: 14),
+
+                  Name(firstNameTEController: _firstNameTEController, firstNameFocusNode: _firstNameFocusNode, surNameTEController: _surNameTEController, surNameFocusNode: _surNameFocusNode),
+
+                  SizedBox(height: 9),
+
+                  PhoneNumberAndEmail(emailTEController: _emailTEController, emailFocusNode: _emailFocusNode),
+
+                  SizedBox(height: 9),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Current Position*',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            TextFormField(
+                              controller: _currentPositionTEController,
+                              focusNode: _currentPositionFocusNode,
+                              keyboardType: TextInputType.text,
+                              textInputAction: TextInputAction.next,
+                              decoration: context.primaryInputDecoration.copyWith(
+                                hintText: "Enter current position",
+                                hintStyle: TextStyle(
+                                  color: Color(0xFF787878),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Current position is required';
+                                }
+                                return null;
+                              },
+
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(width: 19),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Phone Number*',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            TextFormField(
+                              controller: _phoneNumberTEController,
+                              keyboardType: TextInputType.phone,
+                              focusNode: _phoneNumberFocusNode,
+                              textInputAction: TextInputAction.next,
+                              decoration: context.primaryInputDecoration.copyWith(
+                                hintText: "+49 97 25917 3740",
+                                hintStyle: TextStyle(
+                                  color: Color(0xFF787878),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              validator: Validators.phone,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 9),
+
+
+                  CountryCitySearchableDropdown(controller: controller),
+
+                  SizedBox(height: 10),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Zip/Postal Code (Optional)',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            TextFormField(
+                              controller: _postalCodeTEController,
+                              focusNode: _postalCodeFocusNode,
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.next,
+                              decoration: context.primaryInputDecoration.copyWith(
+                                hintText: "Enter Zip/Postal Code",
+                                hintStyle: TextStyle(
+                                  color: Color(0xFF787878),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 10),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Select Company',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            CompanyDropdown(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SocialLink(linkedINTEController: _linkedINTEController,
+                      linkedINFocusNode: _linkedINFocusNode,
+                      twitterTEController: _twitterTEController,
+                      twitterFocusNode: _twitterFocusNode,
+                      upworkTEController: _upworkTEController,
+                      upworkFocusNode: _upworkFocusNode,
+                      facebookTEController: _facebookTEController,
+                      facebookFocusNode: _facebookFocusNode,
+                      tiktokTEController: _tiktokTEController,
+                      tiktokFocusNode: _tiktokFocusNode,
+                      instaTEController: _instaTEController,
+                      instaFocusNode: _instaFocusNode,
+                    fiverrTEController: _fiverrTEController,
+                    fiverrFocusNode: _fiverrFocusNode,
+                    companyTEController: _companyTEController,
+                    companyFocusNode: _companyFocusNode,),
+
+                  SizedBox(height: 15),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (!_formKey.currentState!.validate()) return;
+
+                        if (bannerPickerController.selectedImage.value == null) {
+                          Get.snackbar('Error', 'Company banner is required');
+                          return;
+                        }
+
+                        if (imagePickerController.selectedImage.value == null) {
+                          Get.snackbar('Error', 'Profile image is required');
+                          return;
+                        }
+
+                        _submit();
+                      },
+
+                      // onPressed: () {
+                      //   _submit();
+                      //   // if(recruiterController.successVideoUploaded.value){
+                      //   //   _submit();
+                      //
+                      //   // }
+                      // },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                      ),
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -517,7 +555,11 @@ class SocialLink extends StatelessWidget {
     required FocusNode tiktokFocusNode,
     required TextEditingController instaTEController,
     required FocusNode instaFocusNode,
-  }) : _linkedINTEController = linkedINTEController, _linkedINFocusNode = linkedINFocusNode, _twitterTEController = twitterTEController, _twitterFocusNode = twitterFocusNode, _upworkTEController = upworkTEController, _upworkFocusNode = upworkFocusNode, _facebookTEController = facebookTEController, _facebookFocusNode = facebookFocusNode, _tiktokTEController = tiktokTEController, _tiktokFocusNode = tiktokFocusNode, _instaTEController = instaTEController, _instaFocusNode = instaFocusNode;
+    required TextEditingController fiverrTEController,
+    required FocusNode fiverrFocusNode,
+    required TextEditingController companyTEController,
+    required FocusNode companyFocusNode,
+  }) : _linkedINTEController = linkedINTEController, _linkedINFocusNode = linkedINFocusNode, _twitterTEController = twitterTEController, _twitterFocusNode = twitterFocusNode, _upworkTEController = upworkTEController, _upworkFocusNode = upworkFocusNode, _facebookTEController = facebookTEController, _facebookFocusNode = facebookFocusNode, _tiktokTEController = tiktokTEController, _tiktokFocusNode = tiktokFocusNode, _instaTEController = instaTEController, _instaFocusNode = instaFocusNode, _fiverrTEController = fiverrTEController, _fiverrFocusNode = fiverrFocusNode, _companyTEController= companyTEController, _companyFocusNode = companyFocusNode;
 
   final TextEditingController _linkedINTEController;
   final FocusNode _linkedINFocusNode;
@@ -531,6 +573,10 @@ class SocialLink extends StatelessWidget {
   final FocusNode _tiktokFocusNode;
   final TextEditingController _instaTEController;
   final FocusNode _instaFocusNode;
+  final TextEditingController _fiverrTEController;
+  final FocusNode _fiverrFocusNode;
+  final TextEditingController _companyTEController;
+  final FocusNode _companyFocusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -568,7 +614,7 @@ class SocialLink extends StatelessWidget {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Add URLs for your social and professional profiles (optional)',
+                        'Professional Social Media and Website Links',
                         style: TextStyle(
                           fontSize: 14,
                           color: Color(0xFF999999),
@@ -716,6 +762,58 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _instaTEController,
                         focusNode: _instaFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration
+                            .copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+
+                      SizedBox(height: 12),
+                      Text(
+                        'Fiverr URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _fiverrTEController,
+                        focusNode: _fiverrFocusNode,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        decoration: context.primaryInputDecoration
+                            .copyWith(
+                          hintText: "Enter Here",
+                          hintStyle: TextStyle(
+                            color: Color(0xFF787878),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        validator: Validators.name,
+                      ),
+
+                      SizedBox(height: 12),
+                      Text(
+                        'Instagram URL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      TextFormField(
+                        controller: _companyTEController,
+                        focusNode: _companyFocusNode,
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration

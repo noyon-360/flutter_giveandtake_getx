@@ -53,8 +53,12 @@ class JobStepper extends StatelessWidget {
                       child: Column(
                         children: [
                           GestureDetector(
-                            onTap: () =>
-                            controller.currentStep.value = stepNumber,
+                            onTap: () {
+                              // Only allow going back to previous/completed steps or current
+                              if (stepNumber <= controller.currentStep.value) {
+                                controller.currentStep.value = stepNumber;
+                              }
+                            },
                             child: CircleAvatar(
                               radius: 25,
                               backgroundColor: circleColor,

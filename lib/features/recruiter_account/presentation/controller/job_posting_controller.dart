@@ -1,12 +1,31 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:karlfive/features/recruiter_account/data/models/job_create_request_model.dart';
 
-
+import 'country_city_controller.dart';
+import 'job_controller/career_stage_controller.dart';
+import 'job_controller/employment_type_controller.dart';
+import 'job_controller/experience_level_controller.dart';
+import 'job_controller/job_posting_expiration_controller.dart';
+import 'job_controller/location_type_controller.dart';
 
 class JobPostingController extends GetxController {
+  final LocationController locationController = Get.find<LocationController>();
+  final EmploymentTypeController employmentTypeController =
+      Get.find<EmploymentTypeController>();
+  final ExperienceLevelController experienceController =
+      Get.find<ExperienceLevelController>();
+  final LocationTypeController locationTypeController =
+      Get.find<LocationTypeController>();
+  final CareerStageController careerStageController =
+      Get.find<CareerStageController>();
+  final JobPostingExpirationController jobPostingExpirationController =
+  Get.put(JobPostingExpirationController());
+
+
   final recruiterController = Get.find<RecruiterController>();
 
   // Reactive step tracker
@@ -17,19 +36,16 @@ class JobPostingController extends GetxController {
   RxString selectedCategory = ''.obs;
   RxString selectedRole = ''.obs;
 
-
   RxString jobTitle = ''.obs;
   RxString department = ''.obs;
 
   RxString vacancies = ''.obs;
   late int vacanciesInt = int.tryParse(vacancies.value) ?? 0;
 
-
   // Add these setter methods for cleaner updates (optional)
   void setJobTitle(String value) => jobTitle.value = value;
+
   void setDepartment(String value) => department.value = value;
-
-
 
   // Data sources
   List<Category> get categories => recruiterController.category;
@@ -39,7 +55,6 @@ class JobPostingController extends GetxController {
   var selectedCurrency = Rxn<GetCurrencyResponseModel>();
   RxString compensation = ''.obs;
 
-
   // add these near the other application requirements state variables
   RxString resumeStatus = ''.obs;
   String resume = 'Resume';
@@ -48,8 +63,6 @@ class JobPostingController extends GetxController {
   RxString visaStatus = ''.obs;
   String visa = 'Valid visa for this job location?';
   RxBool visaVisible = true.obs; // <-- controls whether the row is shown
-
-
 
   // Job Description (HTML) & Publish
 
@@ -66,17 +79,15 @@ class JobPostingController extends GetxController {
   RxBool publishNow = true.obs;
   Rx<DateTime> selectedDate = DateTime.now().obs;
 
-  RxString companyWebsite= ''.obs;
+  RxString companyWebsite = ''.obs;
 
-  RxList<String> customQuestion= <String>[].obs;
-
+  RxList<String> customQuestion = <String>[].obs;
 
   // -----------------------------
   // Single Job Fetching
   // -----------------------------
   RxBool isLoading = false.obs;
   RxString error = ''.obs;
-
 
   void populateFieldsFromSingleJob() {
     final job = recruiterController.singleJob.value;
@@ -99,7 +110,8 @@ class JobPostingController extends GetxController {
     updateJobDescriptionHtml(job.description ?? '');
 
     // Publish Date & Flag
-    publishNow.value = job.publishDate == null || job.publishDate!.isBefore(DateTime.now());
+    publishNow.value =
+        job.publishDate == null || job.publishDate!.isBefore(DateTime.now());
     selectedDate.value = job.publishDate ?? DateTime.now();
 
     // --- Application Requirements ---
@@ -117,13 +129,103 @@ class JobPostingController extends GetxController {
 
     // --- Custom Questions ---
     if (job.customQuestion != null) {
-      customQuestion.value = job.customQuestion!.map((q) => q.question ?? '').toList();
+      customQuestion.value = job.customQuestion!
+          .map((q) => q.question ?? '')
+          .toList();
     }
-
   }
 
+  bool validateCurrentStep() {
+    switch (currentStep.value) {
+      case 1: // Job Details
+        if (jobTitle.value.trim().isEmpty) return false;
+        if (selectedCategory.value.isEmpty) return false;
+        if (selectedRole.value.isEmpty) return false;
 
+        final vac = vacancies.value.trim();
+        if (vac.isEmpty) return false;
+        final vacInt = int.tryParse(vac);
+        if (vacInt == null || vacInt <= 0) return false;
 
+        return true;
+
+      case 2: // Job Description
+        // Require at least some meaningful description
+        final plain = jobDescriptionPlain.value.trim();
+        if (plain.isEmpty || plain.length < 50) return false;
+        return true;
+
+      case 3: // Application Requirements
+        // Optional step – always valid
+        return true;
+
+      case 4: // Custom Questions
+        // Optional step – always valid
+        return true;
+
+      case 5: // Finish
+        return true;
+
+      default:
+        return false;
+    }
+  }
+
+  /// Show a friendly error message when validation fails
+  void _showValidationError(String message) {
+    Get.snackbar(
+      'Incomplete Information',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red.shade700,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 4),
+      margin: const EdgeInsets.all(12),
+    );
+  }
+
+  // -----------------------------
+  // Step Navigation (with validation)
+  // -----------------------------
+
+  void nextStep() {
+    if (validateCurrentStep()) {
+      if (currentStep.value < 5) {
+        currentStep.value++;
+      }
+    } else {
+      // Specific messages per step
+      switch (currentStep.value) {
+        case 1:
+          _showValidationError(
+            'Please enter at least 20 words in the job description.',
+          );
+          break;
+        case 2:
+          _showValidationError(
+            'Job description exceeds 2000 characters. Please shorten it.',
+          );
+          break;
+        default:
+          _showValidationError('Please complete all required fields.');
+      }
+    }
+  }
+
+  void previousStep() {
+    if (currentStep.value > 1) {
+      currentStep.value--;
+    }
+  }
+
+  /// Optional: Allow going back to previous steps by tapping, but never forward to unvalidated steps
+  void goToStep(int step) {
+    if (step < currentStep.value || step == currentStep.value) {
+      // Allow going back or staying on current
+      currentStep.value = step;
+    }
+    // Going forward is blocked unless validation passes (handled by nextStep())
+  }
 
   // -----------------------------
   // Lifecycle
@@ -145,9 +247,7 @@ class JobPostingController extends GetxController {
     loadCurrenciesIfEmpty();
   }
 
-
-
-// add a remove method
+  // add a remove method
   void removeRequirement(String key) {
     switch (key) {
       case 'resume':
@@ -169,27 +269,31 @@ class JobPostingController extends GetxController {
   List<CustomQuestion> get customQuestions =>
       customQuestion.map((q) => CustomQuestion(question: q)).toList();
 
-
-
   // -----------------------------
   // Step Navigation
   // -----------------------------
-  void nextStep() {
-    if (currentStep.value < 5) currentStep.value++;
-
-  }
-
-  void previousStep() {
-    if (currentStep.value > 1) currentStep.value--;
-  }
+  // void nextStep() {
+  //   if (currentStep.value < 5) currentStep.value++;
+  //
+  // }
+  //
+  // void previousStep() {
+  //   if (currentStep.value > 1) currentStep.value--;
+  // }
 
   // -----------------------------
   // Role update based on category
   // -----------------------------
   void updateRoles(String categoryName) {
     selectedCategory.value = categoryName;
+
     final category = categories.firstWhereOrNull((c) => c.name == categoryName);
-    roles.value = category?.role ?? [];
+
+    // VERY IMPORTANT: Create a NEW list (copy)
+    roles.value = List<String>.from(category?.role ?? []);
+    // or if role is List<Role> model:
+    // roles.value = [...?category?.role?.map((r) => r.name)];
+
     selectedRole.value = '';
   }
 
@@ -246,5 +350,115 @@ class JobPostingController extends GetxController {
   void onClose() {
     super.onClose();
   }
-}
 
+  void clearAllFields() {
+    // Step tracker
+    currentStep.value = 1;
+
+    // Optionally reset other related controllers if needed
+    // locationController.selectedCity.value = '';
+    // locationController.selectedCountry.value = '';
+
+    // Basic info
+    jobTitle.value = '';
+    department.value = '';
+    vacancies.value = '';
+    vacanciesInt = 0;
+
+    // Category & Role
+    selectedCategory.value = '';
+    selectedRole.value = '';
+    roles.clear();
+
+    // Compensation
+    compensation.value = '';
+    selectedCurrency.value = null;
+
+    // Job Description
+    jobDescriptionHtml.value = '';
+    jobDescriptionPlain.value = '';
+    characterCount.value = 0;
+    wordCount.value = 0;
+
+    // Application Requirements
+    resumeStatus.value = ''; // or 'Required' if default
+    visaStatus.value = '';
+    resumeVisible.value = true;
+    visaVisible.value = true;
+    resume = 'Resume'; // reset text if modified
+    visa = 'Valid visa for this job location?';
+
+    // Custom Questions
+    customQuestion.clear();
+
+    // Publish settings
+    publishNow.value = true;
+    selectedDate.value = DateTime.now();
+
+    // Company website
+    companyWebsite.value = '';
+
+    // Loading/Error states
+    isLoading.value = false;
+    error.value = '';
+  }
+
+
+  void clearAllFieldsPreview() {
+    // Step tracker
+    currentStep.value = 1;
+
+    // Optionally reset other related controllers if needed
+    locationController.selectedCity.value = '';
+    locationController.selectedCountry.value = '';
+
+    employmentTypeController.selectedEmploymentType.value = '';
+    experienceController.selectedExperienceLevel.value = '';
+    locationTypeController.selectedLocationType.value = '';
+    careerStageController.selectedCareerStage.value = '';
+    jobPostingExpirationController.selectedJobPostingExpiration.value = '';
+
+    // Basic info
+    jobTitle.value = '';
+    department.value = '';
+    vacancies.value = '';
+    vacanciesInt = 0;
+
+    // Category & Role
+    selectedCategory.value = '';
+    selectedRole.value = '';
+    roles.clear();
+
+    // Compensation
+    compensation.value = '';
+    selectedCurrency.value = null;
+
+    // Job Description
+    jobDescriptionHtml.value = '';
+    jobDescriptionPlain.value = '';
+    characterCount.value = 0;
+    wordCount.value = 0;
+
+    // Application Requirements
+    resumeStatus.value = ''; // or 'Required' if default
+    visaStatus.value = '';
+    resumeVisible.value = true;
+    visaVisible.value = true;
+    resume = 'Resume'; // reset text if modified
+    visa = 'Valid visa for this job location?';
+
+    // Custom Questions
+    customQuestion.clear();
+
+    // Publish settings
+    publishNow.value = true;
+    selectedDate.value = DateTime.now();
+
+    // Company website
+    companyWebsite.value = '';
+
+    // Loading/Error states
+    isLoading.value = false;
+    error.value = '';
+  }
+}
