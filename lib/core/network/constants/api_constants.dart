@@ -1,8 +1,10 @@
 class ApiConstants {
   /// [Base Configuration]
+  // static const String baseDomain = 'http://10.10.5.33:5004';// soykot ip
   // static const String baseDomain = 'http://10.10.5.33:5001';// soykot ip
   // static const String baseDomain = 'http://10.10.5.53:5004';// soykot ip
-  static const String baseDomain = 'http://10.10.5.48:5004'; // noyon ip
+  static const String baseDomain = 'https://test.evpitch.com'; // noyon ip
+  // static const String baseDomain = 'http://10.10.5.48:5004'; // noyon ip
   // static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
 
@@ -65,6 +67,7 @@ class ApiConstants {
 class ResumeEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/create-resume';
   final String getResume = '$_base/get-resume';
+  final String createResume = '$_base/create-resume';
 }
 
 class JobEndpoints {
@@ -89,6 +92,8 @@ class RecruiterAccountApi {
   final String getJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
   final String connectCompany =
       '${ApiConstants.baseUrl}/company/apply-for-company-employee';
+  final String leaveCompany =
+      '${ApiConstants.baseUrl}/company/recruiter-leave-company';
   final String follow = '${ApiConstants.baseUrl}/following/follow';
   //final String yourJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
 
@@ -190,11 +195,14 @@ class ContentEndpoints {
 
 // New payment endpoints
 class PaymentEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/payment';
+  static const String _base = '${ApiConstants.baseUrl}/payments';
 
   final String createPayment = '$_base/create-payment';
 
   final String confirmPayment = '$_base/confirm-payment';
+  
+  String getUserPayments(String userId, int page, int limit) =>
+      '$_base/user/$userId?page=$page&limit=$limit';
 }
 
 // PayPal endpoints
@@ -250,4 +258,6 @@ class CompanyAccountApi {
 
   String updateRecCompany(String recId) =>
       '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
+
+  final String getJobUsage = '${ApiConstants.baseUrl}/jobs/posting/usage';
 }

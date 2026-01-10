@@ -197,7 +197,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
           'issuer': TextEditingController(
             text: award.programeName ?? '',
           ), // ← Use programeName
-          'date': TextEditingController(text: award.programeDate ?? ''),
+          'date': TextEditingController(text: award.programeDate != null ? '${award.programeDate!.month.toString().padLeft(2, '0')}${award.programeDate!.year}' : ''),
           'description': TextEditingController(text: award.description ?? ''),
         });
       }

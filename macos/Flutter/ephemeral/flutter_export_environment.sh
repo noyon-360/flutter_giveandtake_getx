@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/Users/betopia/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/betopia/Documents/flutterProjects/flutter_giveandtake_getx"
+export "FLUTTER_ROOT=/Users/noyon/development/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/noyon/Documents/Eshita/document/flutter_giveandtake_getx"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

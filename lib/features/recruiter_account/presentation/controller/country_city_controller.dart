@@ -22,15 +22,18 @@ class LocationController extends GetxController {
   Future<void> fetchCountriesWithCities() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.10.5.59:8001/api/v1/countries'),
+        Uri.parse('https://test.evpitch.com/api/v1/countries'),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
         for (var country in data['data']) {
-          if (country['cities'] != null && (country['cities'] as List).isNotEmpty) {
-            countryCityMap[country['country']] = List<String>.from(country['cities']);
+          if (country['cities'] != null &&
+              (country['cities'] as List).isNotEmpty) {
+            countryCityMap[country['country']] = List<String>.from(
+              country['cities'],
+            );
           }
         }
 

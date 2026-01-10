@@ -87,36 +87,76 @@ class SocialLink {
 
 class Company {
   final String id;
+  final String userId;
+  final String clogo;
+  final String banner;
+  final String aboutUs;
+  final String slug;
   final String cname;
   final String country;
   final String city;
+  final String zipcode;
   final String cemail;
   final List<SocialLink> sLink;
+  final String industry;
+  final List<dynamic> service;
+  final List<String> employeesId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Company({
     required this.id,
+    required this.userId,
+    required this.clogo,
+    required this.banner,
+    required this.aboutUs,
+    required this.slug,
     required this.cname,
     required this.country,
     required this.city,
+    required this.zipcode,
     required this.cemail,
     required this.sLink,
+    required this.industry,
+    required this.service,
+    required this.employeesId,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Company.fromJson(Map<String, dynamic> json) {
     return Company(
       id: json["_id"] ?? '',
+      userId: json["userId"] ?? '',
+      clogo: json["clogo"] ?? '',
+      banner: json["banner"] ?? '',
+      aboutUs: json["aboutUs"] ?? '',
+      slug: json["slug"] ?? '',
       cname: json["cname"] ?? '',
       country: json["country"] ?? '',
       city: json["city"] ?? '',
+      zipcode: json["zipcode"] ?? '',
       cemail: json["cemail"] ?? '',
       sLink: (json["sLink"] is List)
           ? List<SocialLink>.from(
         json["sLink"].map((x) => SocialLink.fromJson(x)),
       )
           : [],
+      industry: json["industry"] ?? '',
+      service: json["service"] is List ? json["service"] : [],
+      employeesId: (json["employeesId"] is List)
+          ? List<String>.from(json["employeesId"])
+          : [],
+      createdAt: json["createdAt"] != null
+          ? DateTime.tryParse(json["createdAt"])
+          : null,
+      updatedAt: json["updatedAt"] != null
+          ? DateTime.tryParse(json["updatedAt"])
+          : null,
     );
   }
 }
+
 
 class ElevatorPitch {
   final ElevatorVideo video;

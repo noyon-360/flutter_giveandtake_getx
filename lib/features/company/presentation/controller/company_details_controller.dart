@@ -7,6 +7,7 @@ import 'package:karlfive/features/company/data/model/archieve_response_model.dar
 import 'package:karlfive/features/company/data/model/candidate_resume_response_model.dart';
 import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
 import 'package:karlfive/features/company/data/model/employee_fetch_single_model.dart';
+
 import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_response_model.dart';
 import 'package:karlfive/features/company/data/model/resume_updated_response_model.dart';
@@ -14,6 +15,7 @@ import 'package:karlfive/features/company/data/model/status_update_response_mode
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/model/all_user_response_model.dart';
 import '../../data/model/company_details_model.dart';
+import '../../data/model/job_usage_response_model.dart';
 import '../../data/model/rec_company_request_model.dart';
 import '../../data/model/single_Company_response_model.dart';
 import '../../domain/repo/company_repo.dart';
@@ -29,11 +31,14 @@ class CompanyDetailsController extends BaseController {
   // Change from Rxn (problematic) to Rx with explicit null
   final userInfo = Rx<SingleCompanyResponseModel?>(null);
   final employee = Rx<EmployeeFetchSingleModel?>(null);
+  final usage = Rx<JobUsageResponseModel?>(null);
+
   var resume = <ResumeUpdatedResponseModel>[].obs;
   final remove = Rx<RemoveRecruiterResponseModel?>(
     null,
   ); // <AllUserResponseModel>
   var recruiters = <AllUserResponseModel>[].obs;
+  final isJobUsageLoading = false.obs;
 
   Rx<ArchieveResponseModel?> jobData = Rx<ArchieveResponseModel?>(null);
 
@@ -405,5 +410,23 @@ class CompanyDetailsController extends BaseController {
     );
 
     setLoading(false);
+  }
+
+  Future<void> fetchJobUsage() async {
+    isJobUsageLoading.value = true;
+    setError("");
+
+    final result = await _companyRepo.fetchJobUsage();
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+      },
+      (success) {
+        usage.value = success.data;
+      },
+    );
+
+    isJobUsageLoading.value = false;
   }
 }

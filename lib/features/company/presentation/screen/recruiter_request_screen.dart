@@ -7,9 +7,14 @@ import 'package:get/get.dart';
 import '../../data/model/employee_fetch_single_model.dart';
 import '../controller/company_details_controller.dart';
 
-class RecruiterRequestsScreen extends StatelessWidget {
+class RecruiterRequestsScreen extends StatefulWidget {
   RecruiterRequestsScreen({super.key});
 
+  @override
+  State<RecruiterRequestsScreen> createState() => _RecruiterRequestsScreenState();
+}
+
+class _RecruiterRequestsScreenState extends State<RecruiterRequestsScreen> {
   final CompanyDetailsController controller =
       Get.find<CompanyDetailsController>();
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
+import 'package:karlfive/core/services/get_user_profile_service.dart';
+import 'package:karlfive/features/Home/presentation/screen/candidate_dashboard_screen.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/change_pass_screen.dart';
 import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
@@ -12,6 +14,8 @@ class ProfileDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GetUserProfileService profileService = Get.find<GetUserProfileService>();
+    
     return AppScaffold(
       // backgroundColor: Colors.white,
       appBar: AppBar(
@@ -32,42 +36,55 @@ class ProfileDashboardScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _menuTile(
-                  "assets/icons/personalinfo.png",
-                  "Personal Information",
-                  () {
-                    Get.to(() => const PersonalInfoScreen());
-                  },
-                ),
-                _menuTile("assets/icons/changepass.png", "Change Password", () {
-                  Get.to(() => ChangePasswordScreen());
-                }),
-                _menuTile("assets/icons/jobhistory.png", "Job History", () {
-                  Get.to(() => const JobHistoryScreen());
-                }),
-                _menuTile(
-                  "assets/icons/paymenthistory.png",
-                  "Payment History",
-                  () {
-                    Get.to(() => const PaymentHistoryScreen());
-                  },
-                ),
-                _menuTile(
-                    "assets/icons/logout.png", "Log out", () {
-                  Get.find<AuthController>().logout();
-                }
-                ),
+            child: Obx(() {
+              final user = profileService.userInfoRx.value;
+              final isCandidate = user != null && user.role == 'candidate';
 
-                // _menuTile(
-                //     "assets/icons/profile_contactus.png", "Contact Us", () {
-                //   Get.to(() =>  ContactUsScreen(member: EditProfileModel()));
-                // }
-                // ),
+              return Column(
+                children: [
+                  // View My Profile - only for candidates
+                  if (isCandidate)
+                    _menuTile(
+                      "assets/icons/personalinfo.png",
+                      "View My Profile",
+                      () {
+                        Get.to(() => const CandidateDashboardScreen());
+                      },
+                    ),
+                  
+                  _menuTile(
+                    "assets/icons/personalinfo.png",
+                    "Personal Information",
+                    () {
+                      Get.to(() => const PersonalInfoScreen());
+                    },
+                  ),
+                  _menuTile("assets/icons/changepass.png", "Change Password", () {
+                    Get.to(() => ChangePasswordScreen());
+                  }),
+                  _menuTile("assets/icons/jobhistory.png", "Job History", () {
+                    Get.to(() => const JobHistoryScreen());
+                  }),
+                  _menuTile(
+                    "assets/icons/paymenthistory.png",
+                    "Payment History",
+                    () {
+                      Get.to(() => const PaymentHistoryScreen());
+                    },
+                  ),
+                  _menuTile(
+                      "assets/icons/logout.png", "Log out", () {
+                    Get.find<AuthController>().logout();
+                  }),
 
-              ],
-            ),
+                  // _menuTile(
+                  //     "assets/icons/profile_contactus.png", "Contact Us", () {
+                  //   Get.to(() =>  ContactUsScreen(member: EditProfileModel()));
+                  // }
+                  // ),
+                ],
+              );
+            }),
           ),
         ),
       ),

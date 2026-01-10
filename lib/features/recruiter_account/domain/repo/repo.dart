@@ -13,6 +13,8 @@ import 'package:karlfive/features/recruiter_account/data/models/job_create_reque
 import 'package:karlfive/features/recruiter_account/data/models/job_create_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/job_update_request_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/job_update_response_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/leave_company_request_model.dart';
+import 'package:karlfive/features/recruiter_account/data/models/leave_company_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/your_job_response_model.dart';
 import '../../../../core/network/network_result.dart';
 import '../../data/models/current_password_update_request_model.dart';
@@ -25,6 +27,7 @@ abstract class Repo{
   NetworkResult<List<GetCompanyResponseModel>> fetchCompany();
   NetworkResult<GetCategoryResponseModel> fetchCategory();
   NetworkResult<ConnectCompanyResponse> connectCompany(ConnectCompanyRequest request);
+  NetworkResult<LeaveCompanyResponseModel> leaveCompany(LeaveCompanyRequestModel request);
   NetworkResult<FollowResponseModel> follow(FollowRequestModel request);
   NetworkResult<List<YourJobResponseModel>>yourJob();
   NetworkResult<GetSingleJobResponseModel>singleJob(String jobId);

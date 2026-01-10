@@ -156,42 +156,36 @@ class _CompanyApplicantsListScreenState
 
                               const Spacer(),
 
-                              /// View Answer(s)
-                              applicant.answer.isEmpty
-                                  ? const Text(
-                                      "No Answer",
-                                      style: TextStyle(color: Colors.black54),
-                                    )
-                                  : InkWell(
-                                      onTap: () {
-                                        _showCustomQuestionDialog(
-                                          context: context,
-                                          answers: applicant.answer,
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade400,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          applicant.answer.length == 1
-                                              ? "View Answer"
-                                              : "View Answers (${applicant.answer.length})",
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
+                              /// View Answer(s) — ONLY if backend has questions
+                              if (applicant.answer.isNotEmpty)
+                                InkWell(
+                                  onTap: () {
+                                    _showCustomQuestionDialog(
+                                      context: context,
+                                      answers: applicant.answer,
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.grey.shade400,
                                       ),
                                     ),
+                                    child: Text(
+                                      applicant.answer.length == 1
+                                          ? "View Answer"
+                                          : "View Answers (${applicant.answer.length})",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
 
@@ -255,7 +249,7 @@ class _CompanyApplicantsListScreenState
                                     ? () {
                                         controller.statusUpdated(
                                           applicantId: applicant.id,
-                                          status: "unsuccessful",
+                                          status: "rejected",
                                         );
                                       }
                                     : null,

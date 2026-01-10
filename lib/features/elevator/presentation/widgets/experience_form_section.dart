@@ -18,9 +18,7 @@ class ExperienceFormSection extends StatelessWidget {
         InputDecoration(
           labelText: label,
           hintText: hint,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -29,8 +27,10 @@ class ExperienceFormSection extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(8)),
             borderSide: BorderSide(color: Color(0xFF2563EB)),
           ),
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
         );
 
     return Obx(() {
@@ -44,8 +44,7 @@ class ExperienceFormSection extends StatelessWidget {
         children: [
           // Job Title
           TextFormField(
-            decoration:
-            _inputDecoration('Job Title', 'e.g. Software Engineer'),
+            decoration: _inputDecoration('Job Title', 'e.g. Software Engineer'),
             onChanged: (v) => exp['jobTitle'] = v,
           ),
           const SizedBox(height: 12),
@@ -123,7 +122,11 @@ class ExperienceFormSection extends StatelessWidget {
                           : Colors.black,
                     ),
                   ),
-                  const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
                 ],
               ),
             ),
@@ -134,12 +137,16 @@ class ExperienceFormSection extends StatelessWidget {
           const Text('End Date'),
           const SizedBox(height: 6),
           GestureDetector(
-            onTap: currentlyWorking ? null : () => _selectDate(context, exp, 'endDate'),
+            onTap: currentlyWorking
+                ? null
+                : () => _selectDate(context, exp, 'endDate'),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: currentlyWorking ? Colors.grey.shade200 : Colors.grey.shade300,
+                  color: currentlyWorking
+                      ? Colors.grey.shade200
+                      : Colors.grey.shade300,
                 ),
                 borderRadius: BorderRadius.circular(8),
                 color: currentlyWorking ? Colors.grey.shade50 : Colors.white,
@@ -155,14 +162,16 @@ class ExperienceFormSection extends StatelessWidget {
                       color: currentlyWorking
                           ? Colors.grey.shade400
                           : (exp['endDate']?.toString().isEmpty ?? true
-                              ? Colors.grey
-                              : Colors.black),
+                                ? Colors.grey
+                                : Colors.black),
                     ),
                   ),
                   Icon(
                     Icons.calendar_today,
                     size: 18,
-                    color: currentlyWorking ? Colors.grey.shade300 : Colors.grey,
+                    color: currentlyWorking
+                        ? Colors.grey.shade300
+                        : Colors.grey,
                   ),
                 ],
               ),
@@ -171,17 +180,13 @@ class ExperienceFormSection extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Job Description
-          Text(
-            'Job Description',
-            style: theme.textTheme.bodyMedium,
-          ),
+          Text('Job Description', style: theme.textTheme.bodyMedium),
           const SizedBox(height: 6),
           TextFormField(
             maxLines: 4,
             minLines: 4,
             decoration: InputDecoration(
-              hintText:
-              'Describe your responsibilities and achievements',
+              hintText: 'Describe your responsibilities and achievements',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -226,7 +231,7 @@ class ExperienceFormSection extends StatelessWidget {
     });
   }
 
-  /// Date picker for MM/YYYY format
+  /// Date picker for YYYY-MM-DD format (API requirement)
   Future<void> _selectDate(
     BuildContext context,
     Map<String, dynamic> exp,
@@ -240,10 +245,11 @@ class ExperienceFormSection extends StatelessWidget {
     );
 
     if (picked != null) {
-      // Format as MM/YYYY
-      final month = picked.month.toString().padLeft(2, '0');
+      // Format as YYYY-MM-DD (ISO 8601 date format required by API)
       final year = picked.year.toString();
-      final formattedDate = '$month/$year';
+      final month = picked.month.toString().padLeft(2, '0');
+      final day = picked.day.toString().padLeft(2, '0');
+      final formattedDate = '$year-$month-$day';
 
       exp[dateField] = formattedDate;
       Get.find<ElevatorResumeController>().experienceList.refresh();

@@ -310,12 +310,11 @@
 //                     );
 //                   }).toList(),
 //                 ),
-              
+
 //               ],
 //             ),
 //           ),
 
-   
 //         );
 //       }),
 //     );
@@ -374,6 +373,12 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
   void initState() {
     super.initState();
     companyAccountController.manageJobs();
+    companyDetailsController.fetchJobUsage();
+  }
+
+  Future<void> _onRefresh() async {
+    await companyAccountController.manageJobs();
+    await companyDetailsController.fetchJobUsage();
   }
 
   @override
@@ -411,132 +416,145 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
         }
 
         /// ✅ MOBILE CARD LIST
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: jobs.length,
-          itemBuilder: (context, index) {
-            final job = jobs[index];
-            final RxBool isArchived = job.arcrivedJob.obs;
+        return RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: Colors.blue,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _jobSummarySection(
+                  companyDetailsController,
+                  totalJobs: jobs.length,
+                ),
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 14),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.10),
-                    blurRadius: 8,
-                    spreadRadius: 6,
-                    offset: const Offset(0, 0),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// Job Title
-                  Text(
-                    job.title ?? "",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                const SizedBox(height: 22),
 
-                  const SizedBox(height: 6),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: jobs.length,
+                  itemBuilder: (context, index) {
+                    final job = jobs[index];
+                    final RxBool isArchived = job.arcrivedJob.obs;
 
-                  _infoRow("Category", job.name),
-                  _infoRow("Location", job.location),
-                  _infoRow("Experience", job.experience),
-                  _infoRow("Deadline", formatDate(job.deadline)),
-                  _infoRow("Status", job.derivedStatus),
-                  _infoRow("Vacancy", "${job.vacancy}"),
-
-                  const SizedBox(height: 10),
-
-                  /// Applicants
-                  GestureDetector(
-                    onTap: () {
-                      final controller =
-                          Get.find<CompanyDetailsController>();
-                      controller.jobId.value = job.id;
-                      controller.fetchApplicantList();
-
-                      Get.to(
-                        () => CompanyApplicantsListScreen(
-                          jobId: job.id,
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "View Applicants (${job.applicantCount})",
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-
-                  const Divider(height: 24),
-
-                  /// Actions
-                  Row(
-                    children: [
-                      IconButton(
-                        icon:
-                            const Icon(Icons.remove_red_eye_outlined),
-                        onPressed: () => Get.to(
-                          () => JobDetailEditScreen(jobId: job.id),
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      Obx(() {
-                        return ElevatedButton(
-                          onPressed: () async {
-                            await companyDetailsController
-                                .archiveJobs(job.id);
-
-                            if (companyDetailsController
-                                    .jobData.value !=
-                                null) {
-                              isArchived.value =
-                                  companyDetailsController
-                                      .jobData
-                                      .value!
-                                      .arcrivedJob;
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isArchived.value
-                                ? Colors.red.shade100
-                                : Colors.green.shade100,
-                            foregroundColor: isArchived.value
-                                ? Colors.red.shade800
-                                : Colors.green.shade800,
-                            minimumSize:
-                                const Size(100, 38),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.10),
+                            blurRadius: 8,
+                            spreadRadius: 6,
                           ),
-                          child: Text(
-                            isArchived.value
-                                ? "Unarchive"
-                                : "Archive",
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            job.title ?? "",
                             style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        );
-                      }),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
+
+                          const SizedBox(height: 6),
+                          _infoRow("Category", job.name),
+                          _infoRow("Location", job.location),
+                          _infoRow(
+                            "Experience",
+                            capitalizeFirst(job.experience),
+                          ),
+
+                          _infoRow("Deadline", formatDate(job.deadline)),
+                          _infoRow("Status", job.derivedStatus),
+                          _infoRow("Vacancy", "${job.vacancy}"),
+
+                          const SizedBox(height: 10),
+
+                          GestureDetector(
+                            onTap: () {
+                              final controller =
+                                  Get.find<CompanyDetailsController>();
+                              controller.jobId.value = job.id;
+                              controller.fetchApplicantList();
+
+                              Get.to(
+                                () =>
+                                    CompanyApplicantsListScreen(jobId: job.id),
+                              );
+                            },
+                            child: Text(
+                              "View Applicants (${job.applicantCount})",
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+
+                          const Divider(height: 24),
+
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove_red_eye_outlined),
+                                onPressed: () => Get.to(
+                                  () => JobDetailEditScreen(jobId: job.id),
+                                ),
+                              ),
+                              const Spacer(),
+                              Obx(() {
+                                return ElevatedButton(
+                                  onPressed: () async {
+                                    await companyDetailsController.archiveJobs(
+                                      job.id,
+                                    );
+
+                                    if (companyDetailsController
+                                            .jobData
+                                            .value !=
+                                        null) {
+                                      isArchived.value =
+                                          companyDetailsController
+                                              .jobData
+                                              .value!
+                                              .arcrivedJob;
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isArchived.value
+                                        ? Colors.red.shade100
+                                        : Colors.green.shade100,
+                                    foregroundColor: isArchived.value
+                                        ? Colors.red.shade800
+                                        : Colors.green.shade800,
+                                    minimumSize: const Size(100, 38),
+                                  ),
+                                  child: Text(
+                                    isArchived.value ? "Unarchive" : "Archive",
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
         );
       }),
     );
@@ -562,9 +580,7 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
           Expanded(
             child: Text(
               value ?? "",
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -584,4 +600,115 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
       return date.toString();
     }
   }
+}
+
+Widget _jobSummarySection(
+  CompanyDetailsController controller, {
+  required int totalJobs,
+}) {
+  return Obx(() {
+    final usage = controller.usage.value;
+
+    if (usage == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Column(
+      children: [
+        /// Row 1 — Plan & Total Jobs
+        Row(
+          children: [
+            Expanded(
+              child: _summaryTile(
+                title: "Plan",
+                value: "Current Plan", // ✅ dynamic
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _summaryTile(title: "Total Jobs", value: "$totalJobs"),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        /// Row 2 — Monthly & Yearly usage
+        Row(
+          children: [
+            Expanded(
+              child: _summaryTile(
+                title: "Posted (month)",
+                value: "${usage.usage.monthlyUsed}/auto",
+                subValue: "Remaining: auto",
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _summaryTile(
+                title: "Posted (year)",
+                value: "${usage.usage.annualUsed}/auto",
+                subValue: "Remaining: auto",
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  });
+}
+
+Widget _summaryTile({
+  required String title,
+  required String value,
+  String? subValue,
+}) {
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.12),
+          blurRadius: 8,
+          spreadRadius: 2,
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.black54,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
+        if (subValue != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            subValue,
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+String capitalizeFirst(String? text) {
+  if (text == null || text.isEmpty) return '';
+  return text[0].toUpperCase() + text.substring(1);
 }

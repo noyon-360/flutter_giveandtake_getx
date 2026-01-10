@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../controller/elevator_resume_controller.dart';
 import '../screens/elevator_resume_screen.dart';
 
@@ -10,11 +11,11 @@ class EducationFormSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ElevatorResumeController>();
-    
+
     // Helper to access the specific education map from the list
     // keys: institution, city, state, degree, fieldOfStudy, gradMonth, gradYear, presentlyAttendHere, startDate?
     // The screenshot introduces: Qualification (degree), Country, Start Date, Graduation Date (MM/YYYY)
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -29,71 +30,84 @@ class EducationFormSection extends StatelessWidget {
           const SizedBox(height: 8),
           _buildTextField(
             hint: 'Type your University/College/High School',
-            onChanged: (val) => controller.updateEducationField(index, 'institution', val),
-            // Need to ensure controller has this method or similar 
+            onChanged: (val) =>
+                controller.updateEducationField(index, 'institution', val),
+            // Need to ensure controller has this method or similar
           ),
 
           const SizedBox(height: 16),
           _buildLabel('Qualification'),
-           const SizedBox(height: 8),
-          Obx(() => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: controller.educationList[index]['degree'],
-                hint: const Text('Select a qualification', style: TextStyle(color: Colors.grey)),
-                items: controller.degrees.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (val) => controller.updateEducationField(index, 'degree', val),
+          const SizedBox(height: 8),
+          Obx(
+            () => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: controller.educationList[index]['degree'],
+                  hint: const Text(
+                    'Select a qualification',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  items: controller.degrees.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (val) =>
+                      controller.updateEducationField(index, 'degree', val),
+                ),
               ),
             ),
-          )),
+          ),
 
           const SizedBox(height: 16),
           _buildLabel('Field Of Study'),
           const SizedBox(height: 8),
           _buildTextField(
             hint: 'e.g. Computer Science/Medicine/Civil Engineering',
-            onChanged: (val) => controller.updateEducationField(index, 'fieldOfStudy', val),
+            onChanged: (val) =>
+                controller.updateEducationField(index, 'fieldOfStudy', val),
           ),
 
           const SizedBox(height: 16),
           _buildLabel('Country'),
           const SizedBox(height: 8),
-          Obx(() => SearchableDropdown(
-            hint: 'Select Country',
-            items: controller.countries.toList(),
-            value: controller.educationList[index]['country'],
-            onChanged: (val) {
-              controller.updateEducationField(index, 'country', val);
-              controller.updateEducationField(index, 'city', null);
-            },
-          )),
+          Obx(
+            () => SearchableDropdown(
+              hint: 'Select Country',
+              items: controller.countries.toList(),
+              value: controller.educationList[index]['country'],
+              onChanged: (val) {
+                controller.updateEducationField(index, 'country', val);
+                controller.updateEducationField(index, 'city', null);
+              },
+            ),
+          ),
 
           const SizedBox(height: 16),
           _buildLabel('City'),
           const SizedBox(height: 8),
-          Obx(() => SearchableDropdown(
-            hint: 'Select City',
-            items: controller.cities.toList(),
-            value: controller.educationList[index]['city'],
-            onChanged: (val) {
-              controller.updateEducationField(index, 'city', val);
-            },
-          )),
+          Obx(
+            () => SearchableDropdown(
+              hint: 'Select City',
+              items: controller.cities.toList(),
+              value: controller.educationList[index]['city'],
+              onChanged: (val) {
+                controller.updateEducationField(index, 'city', val);
+              },
+            ),
+          ),
 
           const SizedBox(height: 16),
           Obx(() {
-            final isChecked = controller.educationList[index]['presentlyAttendHere'] == true;
+            final isChecked =
+                controller.educationList[index]['presentlyAttendHere'] == true;
             return Row(
               children: [
                 SizedBox(
@@ -101,12 +115,21 @@ class EducationFormSection extends StatelessWidget {
                   height: 24,
                   child: Checkbox(
                     value: isChecked,
-                    onChanged: (val) => controller.updateEducationField(index, 'presentlyAttendHere', val),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    onChanged: (val) => controller.updateEducationField(
+                      index,
+                      'presentlyAttendHere',
+                      val,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text('Currently Studying', style: TextStyle(fontSize: 14)),
+                const Text(
+                  'Currently Studying',
+                  style: TextStyle(fontSize: 14),
+                ),
               ],
             );
           }),
@@ -126,16 +149,27 @@ class EducationFormSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    controller.educationList[index]['startDate']?.toString().isEmpty ?? true
+                    controller.educationList[index]['startDate']
+                                ?.toString()
+                                .isEmpty ??
+                            true
                         ? 'MM/YYYY'
                         : controller.educationList[index]['startDate'],
                     style: TextStyle(
-                      color: controller.educationList[index]['startDate']?.toString().isEmpty ?? true
+                      color:
+                          controller.educationList[index]['startDate']
+                                  ?.toString()
+                                  .isEmpty ??
+                              true
                           ? Colors.grey
                           : Colors.black,
                     ),
                   ),
-                  const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
                 ],
               ),
             ),
@@ -145,14 +179,22 @@ class EducationFormSection extends StatelessWidget {
           _buildLabel('Graduation Date'),
           const SizedBox(height: 8),
           Obx(() {
-            final isChecked = controller.educationList[index]['presentlyAttendHere'] == true;
+            final isChecked =
+                controller.educationList[index]['presentlyAttendHere'] == true;
             return GestureDetector(
-              onTap: isChecked ? null : () => _selectDate(context, index, 'graduationDate'),
+              onTap: isChecked
+                  ? null
+                  : () => _selectDate(context, index, 'graduationDate'),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: isChecked ? Colors.grey.shade200 : Colors.grey.shade300,
+                    color: isChecked
+                        ? Colors.grey.shade200
+                        : Colors.grey.shade300,
                   ),
                   borderRadius: BorderRadius.circular(8),
                   color: isChecked ? Colors.grey.shade50 : Colors.white,
@@ -161,15 +203,21 @@ class EducationFormSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      controller.educationList[index]['graduationDate']?.toString().isEmpty ?? true
+                      controller.educationList[index]['graduationDate']
+                                  ?.toString()
+                                  .isEmpty ??
+                              true
                           ? 'MM/YYYY'
                           : controller.educationList[index]['graduationDate'],
                       style: TextStyle(
                         color: isChecked
                             ? Colors.grey.shade400
-                            : (controller.educationList[index]['graduationDate']?.toString().isEmpty ?? true
-                                ? Colors.grey
-                                : Colors.black),
+                            : (controller.educationList[index]['graduationDate']
+                                          ?.toString()
+                                          .isEmpty ??
+                                      true
+                                  ? Colors.grey
+                                  : Colors.black),
                       ),
                     ),
                     Icon(
@@ -182,14 +230,17 @@ class EducationFormSection extends StatelessWidget {
               ),
             );
           }),
-          
+
           if (index > 0) ...[
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                 onPressed: () => controller.removeEducation(index),
-                child: const Text('Remove', style: TextStyle(color: Colors.red)),
+                onPressed: () => controller.removeEducation(index),
+                child: const Text(
+                  'Remove',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ),
           ],
@@ -209,12 +260,18 @@ class EducationFormSection extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField({required String hint, required Function(String) onChanged}) {
+  Widget _buildTextField({
+    required String hint,
+    required Function(String) onChanged,
+  }) {
     return TextField(
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -228,7 +285,7 @@ class EducationFormSection extends StatelessWidget {
     );
   }
 
-  /// Date picker for MM/YYYY format
+  /// Date picker for YYYY-MM-DD format (API requirement)
   Future<void> _selectDate(
     BuildContext context,
     int index,
@@ -242,10 +299,11 @@ class EducationFormSection extends StatelessWidget {
     );
 
     if (picked != null) {
-      // Format as MM/YYYY
-      final month = picked.month.toString().padLeft(2, '0');
+      // Format as YYYY-MM-DD (ISO 8601 date format required by API)
       final year = picked.year.toString();
-      final formattedDate = '$month/$year';
+      final month = picked.month.toString().padLeft(2, '0');
+      final day = picked.day.toString().padLeft(2, '0');
+      final formattedDate = '$year-$month-$day';
 
       Get.find<ElevatorResumeController>().updateEducationField(
         index,
