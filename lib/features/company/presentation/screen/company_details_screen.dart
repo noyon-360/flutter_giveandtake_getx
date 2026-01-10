@@ -124,7 +124,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
 
             ListTile(
               leading: const Icon(Icons.add),
-              title: const Text('Connect with Recruiter'),
+              title: const Text('Add Company Recruiters'),
               onTap: () {
                 Navigator.pop(context);
                 final company = controller.userInfo.value!.companies.first;
@@ -154,7 +154,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
             ),
             ListTile(
               leading: const Icon(Icons.edit_calendar_sharp),
-              title: const Text('Recruiter Request'),
+              title: const Text('Recruiter Requests'),
               onTap: () {
                 Get.back();
                 Get.to(() => RecruiterRequestsScreen()); // or your profile page
