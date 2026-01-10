@@ -42,3 +42,11 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    val media3Version = "1.3.1" // Or the latest version available on the Media3 website
+    
+    implementation("androidx.media3:media3-exoplayer:$media3Version")
+    implementation("androidx.media3:media3-exoplayer-dash:$media3Version") // For DASH playback
+    implementation("androidx.media3:media3-ui:$media3Version")             // For UI components like PlayerView
+}
