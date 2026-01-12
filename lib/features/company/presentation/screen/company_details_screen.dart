@@ -8,6 +8,7 @@ import 'package:karlfive/features/company/presentation/screen/recruiter_request_
 import 'package:karlfive/features/company_pricing/presentation/screens/plan_pricing_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/network/constants/api_constants.dart';
 import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
@@ -436,125 +437,124 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                 ),
 
                 /// ================= Elevator Pitch =================
-                // sectionTitle("Elevator Pitch", canDelete: true),
+                sectionTitle("Elevator Pitch", canDelete: true),
 
-                // SizedBox(height: 20),
-                // Container(
-                //   decoration: BoxDecoration(
-                //     color: Colors.white,
-                //     border: Border.all(color: const Color(0xFF999999), width: 1),
-                //     borderRadius: BorderRadius.circular(12),
-                //   ),
+                SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: const Color(0xFF999999), width: 1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
 
-                //   //fetch elevated pitch e
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       borderRadius: BorderRadius.circular(4),
-                //       color: const Color(0xFF191919),
-                //     ),
-                //     height: 160,
-                //     width: double.infinity,
-                //     child: ElevatorPitchCompanySection(
-                //       videoUrl: company.elevatorPitch?.video.hlsUrl,
-                //       httpHeaders: {
-                //         'Accept': '*/*',
-                //         'Accept-Encoding': 'identity',
-
-                //         "Authorization":
-                //             "Bearer ${company.elevatorPitch?.video.encryptionKeyUrl}",
-                //         "Custom-Header": "value",
-                //       },
-                //     ),
-                //   ),
-                // ),
+                  //fetch elevated pitch e
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: const Color(0xFF191919),
+                    ),
+                    height: 160,
+                    width: double.infinity,
+                    child: ElevatorPitchCompanySection(
+                      videoUrl:
+                              "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
+                          // httpHeaders: {
+                          //   "Custom-Header": "value",
+                          //   if (_accessToken != null) ...{
+                          //     "Authorization": "Bearer $_accessToken",
+                          //   },
+                          // },
+                    ),
+                  ),
+                ),
                 /// ================= Elevator Pitch =================
-                sectionTitle("Elevator Video Pitch"),
-                const SizedBox(height: 20),
+                // sectionTitle("Elevator Video Pitch"),
+                // const SizedBox(height: 20),
 
-                // Check if elevator pitch exists
-                company.elevatorPitch?.video.hlsUrl != null &&
-                        company.elevatorPitch!.video.hlsUrl!.isNotEmpty
-                    ? Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: const Color(0xFF999999),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: const Color(0xFF191919),
-                          ),
-                          height: 160,
-                          width: double.infinity,
-                          child: ElevatorPitchCompanySection(
-                            videoUrl: company.elevatorPitch!.video.hlsUrl,
-                            httpHeaders: {
-                              'Accept': '*/*',
-                              'Accept-Encoding': 'identity',
-                              "Authorization":
-                                  "Bearer ${company.elevatorPitch!.video.encryptionKeyUrl}",
-                            },
-                          ),
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: () {
-                          // Navigate to video upload screen (same as create flow)
-                          Get.to(() => VideoUploadScreen());
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xFF999999),
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.white,
-                          ),
-                          height: 160,
-                          width: double.infinity,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                              color: const Color(0xFF191919),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/icons/gallery.png', // same icon used in create screen
-                                  height: 32,
-                                  width: 32,
-                                  color: Colors.white70,
-                                ),
-                                const SizedBox(height: 12),
-                                const Text(
-                                  'Upload your company elevator pitch',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  ' Upload or view a short video',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                // // Check if elevator pitch exists
+                // company.elevatorPitch?.video.hlsUrl != null &&
+                //         company.elevatorPitch!.video.hlsUrl!.isNotEmpty
+                //     ? Container(
+                //         decoration: BoxDecoration(
+                //           color: Colors.white,
+                //           border: Border.all(
+                //             color: const Color(0xFF999999),
+                //             width: 1,
+                //           ),
+                //           borderRadius: BorderRadius.circular(12),
+                //         ),
+                //         child: Container(
+                //           decoration: BoxDecoration(
+                //             borderRadius: BorderRadius.circular(4),
+                //             color: const Color(0xFF191919),
+                //           ),
+                //           height: 160,
+                //           width: double.infinity,
+                //           child: ElevatorPitchCompanySection(
+                //             videoUrl: company.elevatorPitch!.video.hlsUrl,
+                //             httpHeaders: {
+                //               'Accept': '*/*',
+                //               'Accept-Encoding': 'identity',
+                //               "Authorization":
+                //                   "Bearer ${company.elevatorPitch!.video.encryptionKeyUrl}",
+                //             },
+                //           ),
+                //         ),
+                //       )
+                //     : GestureDetector(
+                //         onTap: () {
+                //           // Navigate to video upload screen (same as create flow)
+                //           Get.to(() => VideoUploadScreen());
+                //         },
+                //         child: Container(
+                //           decoration: BoxDecoration(
+                //             border: Border.all(
+                //               color: const Color(0xFF999999),
+                //               width: 1,
+                //             ),
+                //             borderRadius: BorderRadius.circular(12),
+                //             color: Colors.white,
+                //           ),
+                //           height: 160,
+                //           width: double.infinity,
+                //           child: Container(
+                //             decoration: BoxDecoration(
+                //               borderRadius: BorderRadius.circular(4),
+                //               color: const Color(0xFF191919),
+                //             ),
+                //             child: Column(
+                //               mainAxisAlignment: MainAxisAlignment.center,
+                //               children: [
+                //                 Image.asset(
+                //                   'assets/icons/gallery.png', // same icon used in create screen
+                //                   height: 32,
+                //                   width: 32,
+                //                   color: Colors.white70,
+                //                 ),
+                //                 const SizedBox(height: 12),
+                //                 const Text(
+                //                   'Upload your company elevator pitch',
+                //                   style: TextStyle(
+                //                     color: Colors.white,
+                //                     fontSize: 14,
+                //                     fontWeight: FontWeight.w500,
+                //                   ),
+                //                   textAlign: TextAlign.center,
+                //                 ),
+                //                 const SizedBox(height: 8),
+                //                 const Text(
+                //                   ' Upload or view a short video',
+                //                   style: TextStyle(
+                //                     color: Colors.white70,
+                //                     fontSize: 12,
+                //                   ),
+                //                   textAlign: TextAlign.center,
+                //                 ),
+                //               ],
+                //             ),
+                //           ),
+                //         ),
+                //       ),
 
                 const SizedBox(height: 20),
                 SizedBox(height: 20),
