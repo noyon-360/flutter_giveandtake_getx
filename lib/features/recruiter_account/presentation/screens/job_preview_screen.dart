@@ -43,7 +43,7 @@ class JobPreviewScreen extends StatelessWidget {
 
 
 
-  _submit() {
+  Future<void> _submit() async {
     recruiterController.createJobPost(
         controller.jobTitle.value,
         controller.jobDescriptionPlain.value,
@@ -193,10 +193,11 @@ class JobPreviewScreen extends StatelessWidget {
               // ---------- PUBLISH BUTTON ----------
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    _submit();
+                  onPressed: () async {
+
+                   await _submit();
                     controller.clearAllFieldsPreview();
-                    Get.back();
+                    // Get.back();
                     Get.snackbar(
                       "Post Published",
                       "Your job post has been successfully published!",

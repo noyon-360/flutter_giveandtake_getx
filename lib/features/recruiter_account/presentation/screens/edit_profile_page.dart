@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/validation/validators.dart';
 import 'package:get/get.dart';
+import 'package:html/parser.dart' as html_parser;
+import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:karlfive/core/theme/input_decoration_extensions.dart';
 import 'package:karlfive/features/recruiter_account/data/models/get_recruiter_response_model.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/company_image_controller.dart';
@@ -60,13 +62,39 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final DescriptionController descriptionController = Get.put(DescriptionController());
   final ElevatorPitchController elevatorPitchController = Get.put(ElevatorPitchController());
 
+  String htmlToPlainText(String? htmlString) {
+    if (htmlString == null || htmlString.isEmpty) return '';
+
+    final document = html_parser.parse(htmlString);
+
+    // Most common & clean way
+    String text = document.body?.text ?? '';
+
+    // Remove excessive newlines/spaces (optional but recommended)
+    text = text
+        .replaceAll(RegExp(r'\s*\n\s*'), '\n') // Keep single newlines
+        .replaceAll(RegExp(r'\n{3,}'), '\n\n') // Max 2 newlines
+        .trim();
+
+    return text;
+  }
+
+  HtmlEditorController _htmlEditorController = HtmlEditorController();
+
   @override
   void initState() {
     super.initState();
     final recruiter = widget.recruiterResponseModel;
 
     // Text fields
-    _biocontroller.text = recruiter.bio;
+    final plainBio = htmlToPlainText(recruiter.bio);
+
+    // Set text
+    _biocontroller.text = plainBio;
+
+    // ← IMPORTANT: Initialize word count immediately
+    descriptionController.wordCount.value =
+        descriptionController.countWords(plainBio);
     _firstNameTEController.text = recruiter.firstName;
     _surNameTEController.text = recruiter.sureName ?? '';
     _linkedINTEController.text = recruiter.sLink.firstWhere(
@@ -122,7 +150,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
     //   reCruiController.selectedCompany.value = recruiter.companyId!.id;
     // }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Now it's 100% safe – build phase is finished
       controller.selectedCountry.value = recruiter.country ?? '';
       controller.selectedCity.value = recruiter.city ?? '';
@@ -130,7 +161,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (recruiter.companyId != null && recruiter.companyId!.id.isNotEmpty) {
         reCruiController.selectedCompany.value = recruiter.companyId!.id;
       }
+
+      final htmlContent = widget.recruiterResponseModel.bio ?? '';
+
+      // Set HTML content (package expects HTML string)
+      _htmlEditorController.setText(htmlContent);
+
+      // Optional: Initialize approximate word count
+      final plainText = await _htmlEditorController.getText();
     });
+
+      Future<String> _getCurrentHtml() async {
+        return await _htmlEditorController.getText() ?? '';
+      }
   }
 
   @override
@@ -366,66 +409,51 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                             SizedBox(height: 4),
                             Container(
+                              height: 250,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  width: 1,
-                                  color: Color(0xFF999999)
-                                )
+                                border: Border.all(color: Color(0xFF999999), width: 1),
                               ),
-                              child: TextField(
-                                controller: _biocontroller,
-                                maxLines: 8,
-                                minLines: 3,
-                                onChanged: (value) {
-                                  int currentWords = descriptionController
-                                      .countWords(value);
-
-                                  if (currentWords >
-                                      descriptionController.maxWords) {
-                                    final words = value
-                                        .trim()
-                                        .split(RegExp(r'\s+'))
-                                        .take(descriptionController.maxWords);
-                                    _biocontroller.text = words.join(' ');
-                                    _biocontroller
-                                        .selection = TextSelection.fromPosition(
-                                      TextPosition(offset: _biocontroller.text.length),
-                                    );
-                                    descriptionController.wordCount.value =
-                                        descriptionController.maxWords;
-                                  } else {
-                                    descriptionController.wordCount.value =
-                                        currentWords;
-                                  }
-                                },
-
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: const Color(0xFFFAFAFA),
-                                  hintText:
-                                  'Write your description (max 400 words)',
-                                  hintStyle: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFF787878),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: HtmlEditor(
+                                  controller: _htmlEditorController,
+                                  htmlEditorOptions: HtmlEditorOptions(
+                                    hint: "Write your company description...",
+                                    shouldEnsureVisible: true,
+                                    autoAdjustHeight: false,
+                                    initialText: widget.recruiterResponseModel.bio,
                                   ),
-
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    //  Makes it circular
-                                    borderSide:
-                                    BorderSide.none, // Removes border line
+                                  htmlToolbarOptions: HtmlToolbarOptions(
+                                    toolbarPosition: ToolbarPosition.aboveEditor,
+                                    toolbarType: ToolbarType.nativeExpandable,
+                                    defaultToolbarButtons: [
+                                      StyleButtons(),
+                                      FontSettingButtons(fontSizeUnit: true),
+                                      ListButtons(listStyles: true),
+                                      ParagraphButtons(),
+                                      InsertButtons(link: true, picture: true, video: true),
+                                      OtherButtons(
+                                        codeview: true,
+                                        undo: true,
+                                        redo: true,
+                                        fullscreen: true,
+                                      ),
+                                    ],
+                                    customToolbarButtons: [], // you can add more if needed
                                   ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    //Circular when enabled
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    // Circular when focused
-                                    borderSide: BorderSide.none,
+                                  callbacks: Callbacks(
+                                    onChangeContent: (String? content) {
+                                      // Live word count (approximate)
+                                      if (content != null) {
+                                        final plain = content
+                                            .replaceAll(RegExp(r'<[^>]*>'), ' ')
+                                            .replaceAll(RegExp(r'\s+'), ' ')
+                                            .trim();
+                                        final words = plain.split(' ').where((w) => w.isNotEmpty).length;
+                                        descriptionController.wordCount.value = words;
+                                      }
+                                    },
                                   ),
                                 ),
                               ),
@@ -435,10 +463,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   () => Text(
                                 '${descriptionController.wordCount.value} / ${descriptionController.maxWords} words',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color:
-                                  descriptionController.wordCount.value >
-                                      descriptionController.maxWords
+                                  color: descriptionController.wordCount.value > descriptionController.maxWords
                                       ? Colors.red
                                       : Colors.grey,
                                 ),

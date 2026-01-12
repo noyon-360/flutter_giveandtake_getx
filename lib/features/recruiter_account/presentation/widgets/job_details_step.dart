@@ -11,9 +11,14 @@ import '../controller/job_controller/experience_level_controller.dart';
 import '../controller/job_posting_controller.dart';
 import 'country_city_searchable_dropdown.dart';
 
-class JobDetailsStep extends StatelessWidget {
-  JobDetailsStep({super.key});
+class JobDetailsStep extends StatefulWidget {
+  const JobDetailsStep({super.key});
 
+  @override
+  State<JobDetailsStep> createState() => _JobDetailsStepState();
+}
+
+class _JobDetailsStepState extends State<JobDetailsStep> {
   final controller = Get.find<JobPostingController>();
 
   @override
@@ -29,6 +34,7 @@ class JobDetailsStep extends StatelessWidget {
     TextEditingController _jobTitleTEController = TextEditingController(
       text: controller.selectedRole.value,
     );
+
     final FocusNode _jobTitleFocusNode = FocusNode();
 
     TextEditingController _departmentTEController = TextEditingController(
@@ -870,12 +876,26 @@ class JobDetailsStep extends StatelessWidget {
                   value: jobPostingExpirationController.selectedJobPostingExpiration.value.isEmpty
                       ? null
                       : jobPostingExpirationController.selectedJobPostingExpiration.value,
-                  decoration: context.primaryInputDecoration.copyWith(
+                  decoration: InputDecoration(
                     hintText: jobPostingExpirationController.jobPostingExpiration[2],
                     hintStyle: const TextStyle(
                       color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0,
+                      vertical: 14,
+                    ),
+                    // Invisible prefix space for better text/cursor alignment
+                    prefix: const SizedBox(width: 8),
+                    // Better error message styling
+                    errorStyle: const TextStyle(
+                      height: 1.5,
+                      color: Color(0xFFC12222),
                     ),
                   ),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
@@ -896,6 +916,13 @@ class JobDetailsStep extends StatelessWidget {
                       .toList(),
                   onChanged: (value) {
                     jobPostingExpirationController.selectedJobPostingExpiration.value = value ?? '';
+                  },
+                  // ← Added required validation
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Job posting expiration is required';
+                    }
+                    return null;
                   },
                 ),
               ),

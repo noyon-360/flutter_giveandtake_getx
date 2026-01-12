@@ -41,7 +41,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 child: SizedBox(
                   height: 70,
                   child: DrawerHeader(
-                    decoration: const BoxDecoration(color: Colors.blue),
+                    decoration: const BoxDecoration(color: Color(0xFF2B7FD0)),
                     child: Text(
                       "Recruiter Flow",
                       style: const TextStyle(
@@ -77,7 +77,7 @@ class _MyDrawerState extends State<MyDrawer> {
               ),
 
               drawerTile(
-                icon: Icons.lock_outline,
+                icon: Icons.business_center,
                 title: "All Jobs",
                 onTap: () {
                   Navigator.pop(context);
