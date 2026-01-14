@@ -7,16 +7,37 @@ import 'package:get/get.dart';
 import '../../data/model/employee_fetch_single_model.dart';
 import '../controller/company_details_controller.dart';
 
-class RecruiterRequestsScreen extends StatelessWidget {
+class RecruiterRequestsScreen extends StatefulWidget {
   RecruiterRequestsScreen({super.key});
 
+  @override
+  State<RecruiterRequestsScreen> createState() =>
+      _RecruiterRequestsScreenState();
+}
+
+class _RecruiterRequestsScreenState extends State<RecruiterRequestsScreen> {
   final CompanyDetailsController controller =
       Get.find<CompanyDetailsController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Recruiter Requests')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new, // ✅ new iOS back icon
+            color: Colors.white,
+          ),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          'Recruiter Requests',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF2B7FD0),
+        elevation: 0,
+      ),
+
       body: Obx(() {
         // Loading state
         if (controller.isLoading.value) {

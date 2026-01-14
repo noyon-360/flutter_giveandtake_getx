@@ -1,3 +1,51 @@
+class UserPlan {
+  final String id;
+  final String title;
+  final String description;
+  final double price;
+  final List<String> features;
+  final String forRole;
+  final String valid;
+
+  UserPlan({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.price,
+    required this.features,
+    required this.forRole,
+    required this.valid,
+  });
+
+  factory UserPlan.fromJson(Map<String, dynamic> json) {
+    return UserPlan(
+      id: json['_id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      features:
+          (json['features'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      forRole: json['for'] as String? ?? '',
+      valid: json['valid'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'title': title,
+      'description': description,
+      'price': price,
+      'features': features,
+      'for': forRole,
+      'valid': valid,
+    };
+  }
+}
+
 class UserModel {
   final String? otp;
   final String? otpExpiry;
@@ -15,6 +63,7 @@ class UserModel {
   final String createdAt;
   final String updatedAt;
   final int v;
+  final UserPlan? plan;
 
   UserModel({
     this.otp,
@@ -33,6 +82,7 @@ class UserModel {
     required this.createdAt,
     required this.updatedAt,
     required this.v,
+    this.plan,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +103,9 @@ class UserModel {
       createdAt: json['createdAt'] as String? ?? '',
       updatedAt: json['updatedAt'] as String? ?? '',
       v: json['__v'] as int? ?? 0,
+      plan: json['plan'] != null
+          ? UserPlan.fromJson(json['plan'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -74,6 +127,7 @@ class UserModel {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       '__v': v,
+      'plan': plan?.toJson(),
     };
   }
 }

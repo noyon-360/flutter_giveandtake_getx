@@ -162,15 +162,18 @@ class ElevatorPitch {
   final ElevatorVideo video;
   final ElevatorMetadata metadata;
   final ElevatorProcessing processing;
+  final String id;
 
   ElevatorPitch({
     required this.video,
     required this.metadata,
     required this.processing,
+    required this.id,
   });
 
   factory ElevatorPitch.fromJson(Map<String, dynamic> json) {
     return ElevatorPitch(
+      id: json["_id"] ?? '',
       video: ElevatorVideo.fromJson(json["video"] ?? {}),
       metadata: ElevatorMetadata.fromJson(json["metadata"] ?? {}),
       processing: ElevatorProcessing.fromJson(json["processing"] ?? {}),
