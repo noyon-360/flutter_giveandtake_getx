@@ -286,7 +286,7 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                       borderRadius: BorderRadius.circular(4),
                       color: const Color(0xFF191919),
                     ),
-                    height: 270,
+                    height: 280,
                     width: double.infinity,
                     child: Builder(
                       builder: (context) {
