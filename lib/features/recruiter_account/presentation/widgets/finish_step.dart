@@ -40,13 +40,38 @@ class FinishStep extends StatelessWidget {
     // Extract category ID (or empty if null)
     final categoryId = selectedCategoryModel?.id ?? '';
 
-    submit() {
-      recruiterController.createJobPost(
+    // submit() {
+    //   recruiterController.createJobPost(
+    //       controller.jobTitle.value,
+    //       controller.jobDescriptionPlain.value,
+    //       '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
+    //       controller.vacanciesInt,
+    //       // 5. Experience Level → backend expects: "Entry Level", "Senior Level", etc.
+    //       experienceController.selectedExperienceLevel.value.isNotEmpty
+    //           ? experienceController.selectedExperienceLevel.value
+    //           : '',
+    //       '${jobPostingExpirationController.finalDeadlineDate.value}',
+    //       categoryId,
+    //       controller.selectedCategory.value,
+    //       controller.selectedRole.value,
+    //       controller.compensation.value,
+    //       controller.applicationRequirement,
+    //       controller.customQuestions,
+    //       employmentTypeController.getBackendValue(
+    //         employmentTypeController.selectedEmploymentType.value,
+    //       ),
+    //       controller.companyWebsite.value,
+    //       controller.selectedDate.value.toString(),
+    //       careerStageController.getBackendValue(careerStageController.selectedCareerStage.value),
+    //       locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value), controller.companyWebsite.value);
+    // }
+
+    void submit() async {
+        await recruiterController.createJobPost(
           controller.jobTitle.value,
           controller.jobDescriptionPlain.value,
           '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
           controller.vacanciesInt,
-          // 5. Experience Level → backend expects: "Entry Level", "Senior Level", etc.
           experienceController.selectedExperienceLevel.value.isNotEmpty
               ? experienceController.selectedExperienceLevel.value
               : '',
@@ -55,15 +80,30 @@ class FinishStep extends StatelessWidget {
           controller.selectedCategory.value,
           controller.selectedRole.value,
           controller.compensation.value,
-          controller.applicationRequirement,
-          controller.customQuestions,
+          controller.applicationRequirement,  // This now correctly reflects current state
+          controller.customQuestions,        // This now correctly reflects current questions
           employmentTypeController.getBackendValue(
             employmentTypeController.selectedEmploymentType.value,
           ),
           controller.companyWebsite.value,
           controller.selectedDate.value.toString(),
           careerStageController.getBackendValue(careerStageController.selectedCareerStage.value),
-          locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value), controller.companyWebsite.value);
+          locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value),
+          controller.companyWebsite.value,
+        );
+
+        // Success: Clear all fields using the centralized method
+        controller.clearAllFields();
+
+        // Optionally reset other related controllers if needed
+        locationController.selectedCity.value = '';
+        locationController.selectedCountry.value = '';
+
+        employmentTypeController.selectedEmploymentType.value = '';
+        experienceController.selectedExperienceLevel.value = '';
+        locationTypeController.selectedLocationType.value = '';
+        careerStageController.selectedCareerStage.value = '';
+        jobPostingExpirationController.selectedJobPostingExpiration.value = '';
     }
 
 

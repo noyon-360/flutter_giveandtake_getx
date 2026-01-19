@@ -46,7 +46,12 @@ class Name extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                validator: Validators.name,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'This field is required';
+                  }
+                  return null;
+                },
               ),
             ],
           ),
@@ -78,7 +83,12 @@ class Name extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                validator: Validators.name,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'This field is required';
+                  }
+                  return null;
+                },
               ),
             ],
           ),

@@ -3,11 +3,13 @@ import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:karlfive/core/common/widgets/app_scaffold.dart';
+import 'package:karlfive/core/network/constants/api_constants.dart';
 import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:karlfive/features/recruiter_account/presentation/widgets/drawer.dart';
 import 'package:karlfive/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/social_media.dart';
+import 'package:karlfive/core/network/services/auth_storage_service.dart';
 
 class RecruiterPageScreen extends StatefulWidget {
   const RecruiterPageScreen({super.key});
@@ -17,16 +19,30 @@ class RecruiterPageScreen extends StatefulWidget {
 }
 
 class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
-  final RecruiterController recruiterController = Get.find<RecruiterController>();
+  final RecruiterController recruiterController =
+      Get.find<RecruiterController>();
   final ScrollController horizontalScrollController = ScrollController();
 
+  String _parseHtmlString(String htmlString) {
+    final document = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
+    return htmlString.replaceAll(document, '');
+  }
+
+
+  String? _accessToken;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      if (mounted) {
+        setState(() {
+          _accessToken = token;
+        });
+      }
       await recruiterController.fetchProfile();
-      await recruiterController.getJob();   // <-- ADD THIS LINE
+      await recruiterController.getJob(); // <-- ADD THIS LINE
     });
   }
 
@@ -43,7 +59,9 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
         backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
 
-        iconTheme: const IconThemeData(color: Colors.white), // <-- Drawer icon visible
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // <-- Drawer icon visible
       ),
       body: SafeArea(
         child: Obx(() {
@@ -57,12 +75,17 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
 
           final user = recruiterController.userInfo.value!;
 
+          /// ✅ FILTER VALID SOCIAL LINKS
+          final socialLinks = user.sLink
+              .where((e) => e.url != null && e.url!.trim().isNotEmpty)
+              .toList();
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 10,),
+                SizedBox(height: 10),
                 // Banner + Photo + Edit Button
                 SizedBox(
                   height: 300,
@@ -81,9 +104,9 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                             color: Colors.grey.shade300,
                             image: user.banner.isNotEmpty
                                 ? DecorationImage(
-                              image: NetworkImage(user.banner),
-                              fit: BoxFit.cover,
-                            )
+                                    image: NetworkImage(user.banner),
+                                    fit: BoxFit.cover,
+                                  )
                                 : null,
                           ),
                         ),
@@ -102,9 +125,9 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                             color: Colors.grey.shade300,
                             image: user.photo.isNotEmpty
                                 ? DecorationImage(
-                              image: NetworkImage(user.photo),
-                              fit: BoxFit.cover,
-                            )
+                                    image: NetworkImage(user.photo),
+                                    fit: BoxFit.cover,
+                                  )
                                 : null,
                           ),
                         ),
@@ -143,7 +166,7 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${user.firstName} ${user.sureName}",
+                      "${user.firstName.capitalizeFirst} ${user.sureName.capitalizeFirst}",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 24,
@@ -153,7 +176,10 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                     const SizedBox(height: 6),
                     Text(
                       user.title,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -166,54 +192,84 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      user.bio,
+                      _parseHtmlString(user.bio),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF898989),
                       ),
                     ),
+
                   ],
                 ),
 
                 const SizedBox(height: 20),
 
                 // ----- Social Media -----
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: (user.sLink)
-                      .map((link) => GestureDetector(
-                    onTap: () async {
-                      final Uri url = Uri.parse(link.url ?? '');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
-                      } else {
-                        Get.snackbar('Error', 'Could not open ${link.url}');
-                      }
-                    },
-                    child: SocialMedia(image: _getSocialIcon(link.label)),
-                  ))
-                      .toList(),
-                ),
+                if (socialLinks.isNotEmpty)
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: socialLinks.map((link) {
+                      return GestureDetector(
+                        onTap: () async {
+                          final uri = Uri.parse(link.url!.trim());
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } else {
+                            Get.snackbar(
+                              "Error",
+                              "Could not open ${link.label}",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
+                        },
+                        child: Tooltip(
+                          message: link.label ?? '',
+                          child: SocialMedia(
+                            image: _getSocialIcon(link.label),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                // Wrap(
+                //   spacing: 8,
+                //   runSpacing: 8,
+                //   children: (user.sLink)
+                //       .map(
+                //         (link) => GestureDetector(
+                //           onTap: () async {
+                //             final Uri url = Uri.parse(link.url ?? '');
+                //             if (await canLaunchUrl(url)) {
+                //               await launchUrl(
+                //                 url,
+                //                 mode: LaunchMode.externalApplication,
+                //               );
+                //             } else {
+                //               Get.snackbar(
+                //                 'Error',
+                //                 'Could not open ${link.url}',
+                //               );
+                //             }
+                //           },
+                //           child: SocialMedia(image: _getSocialIcon(link.label)),
+                //         ),
+                //       )
+                //       .toList(),
+                // ),
 
                 const SizedBox(height: 20),
 
                 // ----- Buttons -----
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Try It Free — Post Your First Job at No Cost!',
-                      style: TextStyle(fontSize: 17),
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 20),
 
-                Divider(color: Color(0xFF999999),),
+                Divider(color: Color(0xFF999999)),
 
-                SizedBox(height: 20,),
+                SizedBox(height: 20),
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -230,16 +286,25 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                       borderRadius: BorderRadius.circular(4),
                       color: const Color(0xFF191919),
                     ),
-                    height: 160,
+                    height: 280,
                     width: double.infinity,
-                    child: ElevatorPitchSection(
-                      videoUrl: user.elevatorPitch?.video.hlsUrl,
-                      httpHeaders: {
-                        'Accept': '*/*',
-                        'Accept-Encoding': 'identity',
+                    child: Builder(
+                      builder: (context) {
+                        DPrint.log("DEBUG: VIDEO INFO CLEAN TEST");
+                        DPrint.log(
+                          "Video URL: ${ApiConstants.baseUrl}/elevator-pitch/stream/${user.elevatorPitch?.id ?? ''}",
+                        );
 
-                        "Authorization": "Bearer ${user.elevatorPitch?.video.encryptionKeyUrl}",
-                        "Custom-Header": "value",
+                        return ElevatorPitchSection(
+                          videoUrl:
+                              "${ApiConstants.baseUrl}/elevator-pitch/stream/${user.elevatorPitch?.id ?? ''}",
+                          httpHeaders: {
+                            "Custom-Header": "value",
+                            if (_accessToken != null) ...{
+                              "Authorization": "Bearer $_accessToken",
+                            },
+                          },
+                        );
                       },
                     ),
                   ),
@@ -370,7 +435,6 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                 //
                 //
                 // }),
-
               ],
             ),
           );
@@ -393,11 +457,12 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
         return 'assets/icons/tiktok.png';
       case 'instagram':
         return 'assets/icons/instagram.png';
+      case 'fiverr':
+        return 'assets/icons/Fiverr.png';
       default:
-        return 'assets/icons/link.png';
+        return 'assets/icons/world.png';
     }
   }
-
 
   // /// Safe date formatter — accepts String or DateTime (or null)
   // String formatDate(dynamic date) {
@@ -417,5 +482,4 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
   //     return date.toString();
   //   }
   // }
-
 }

@@ -213,20 +213,22 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+     backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Colors.white,
             size: 20,
           ),
           onPressed: () => Get.back(),
         ),
+        
+        
         title: const Text(
           "Edit Company Account",
           style: TextStyle(
-            color: Colors.black,
+            color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),

@@ -118,16 +118,17 @@ class _CompanyEmployeesScreenState extends State<CompanyEmployeesScreen> {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Colors.white,
             size: 20,
           ),
           onPressed: () => Get.back(),
         ),
+        backgroundColor: const Color(0xFF2B7FD0),
         title: const Text(
           "Internal Recruiters",
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
       ),

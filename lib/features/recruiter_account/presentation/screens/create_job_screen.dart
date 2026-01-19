@@ -36,7 +36,7 @@ class CreateJobScreen extends StatelessWidget {
               Widget stepWidget;
               switch (controller.currentStep.value) {
                 case 1:
-                  stepWidget = JobDetailsStep();
+                  stepWidget = const JobDetailsStep();
                   break;
                 case 2:
                   stepWidget = const JobDescriptionStep();

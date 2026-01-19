@@ -547,6 +547,8 @@ class RecruiterController extends BaseController {
     String facebook,
     String tiktok,
     String instagram,
+    String fiverr,
+    String company,
   ) async {
     setLoading(true);
     setError('');
@@ -568,9 +570,10 @@ class RecruiterController extends BaseController {
     if (upwork.isNotEmpty) sLinks.add({"label": "Upwork", "url": upwork});
     if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
     if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
-    if (instagram.isNotEmpty) {
-      sLinks.add({"label": "Instagram", "url": instagram});
-    }
+    if (instagram.isNotEmpty) sLinks.add({"label": "Instagram", "url": instagram});
+    if (fiverr.isNotEmpty) sLinks.add({"label": "Fiverr", "url": fiverr});
+    if (company.isNotEmpty) sLinks.add({"label": "Company", "url": company});
+
 
     // Add all text + file fields
     _multiFormDataManager.addImageFile(key: "banner", banner);
@@ -674,6 +677,8 @@ class RecruiterController extends BaseController {
     String facebook,
     String tiktok,
     String instagram,
+    String fiverr,
+    String company,
   ) async {
     setLoading(true);
     setError("");
@@ -698,6 +703,12 @@ class RecruiterController extends BaseController {
     if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
     if (instagram.isNotEmpty) {
       sLinks.add({"label": "Instagram", "url": instagram});
+    }
+    if (fiverr.isNotEmpty) {
+      sLinks.add({"label": "Fiverr", "url": fiverr});
+    }
+    if (company.isNotEmpty) {
+      sLinks.add({"label": "Company", "url": company});
     }
 
     // Add images only if selected

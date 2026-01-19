@@ -43,7 +43,7 @@ class JobPreviewScreen extends StatelessWidget {
 
 
 
-  _submit() {
+  Future<void> _submit() async {
     recruiterController.createJobPost(
         controller.jobTitle.value,
         controller.jobDescriptionPlain.value,
@@ -104,10 +104,7 @@ class JobPreviewScreen extends StatelessWidget {
               _previewBox("Role", controller.selectedRole.value),
               _previewBox("Job Title", controller.jobTitle.value),
               _previewBox("Department", controller.department.value),
-              _previewBox(
-                "Country",
-                locationController.selectedCountry.toString(),
-              ),
+              _previewBox("Country", locationController.selectedCountry.toString(),),
               _previewBox("City", locationController.selectedCity.toString()),
               _previewBox('Number of Vacancies', controller.vacancies.value),
               _previewBox(
@@ -196,15 +193,19 @@ class JobPreviewScreen extends StatelessWidget {
               // ---------- PUBLISH BUTTON ----------
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    _submit();
+                  onPressed: () async {
+
+                   await _submit();
+                    controller.clearAllFieldsPreview();
                     // Get.back();
-                    // Get.snackbar(
-                    //   "Post Published",
-                    //   "Your job post has been successfully published!",
-                    //   snackPosition: SnackPosition.BOTTOM,
-                    // );
+                    Get.snackbar(
+                      "Post Published",
+                      "Your job post has been successfully published!",
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2B7FD0),
                     minimumSize: const Size(200, 50),

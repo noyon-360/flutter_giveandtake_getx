@@ -34,14 +34,14 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            size: 20,
-            color: Colors.white,
-          ),
-          onPressed: () => Get.back(),
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(
+        //     Icons.arrow_back_ios_new,
+        //     size: 20,
+        //     color: Colors.white,
+        //   ),
+        //   onPressed: () => Get.back(),
+        // ),
         title: const Text(
           "All Jobs List",
           style: TextStyle(

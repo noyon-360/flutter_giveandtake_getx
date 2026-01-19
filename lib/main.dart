@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/init/app_initializer.dart';
 import 'package:karlfive/core/theme/app_theme.dart';
+import 'package:karlfive/features/Home/presentation/screen/home_screen.dart';
 import 'package:karlfive/features/auth/presentation/screens/splash_screen.dart';
 
 void main() async {
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'GiveAndTake',
       theme: AppTheme.light,
-      home: SplashScreen(),
+      home: HomeScreen(),
     );
   }
 }
