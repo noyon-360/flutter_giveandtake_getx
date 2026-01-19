@@ -13,7 +13,6 @@ dependencies:
         sdk: flutter
     draggable_home: ^1.0.5
     cupertino_icons: ^1.0.8
-    flutter_stripe: ^12.0.2
     webview_flutter: ^4.13.0
     http: ^1.1.0
     http_auth: ^1.0.4
