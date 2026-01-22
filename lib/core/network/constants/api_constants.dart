@@ -210,6 +210,7 @@ class PaypalEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/payments/paypal';
 
   final String createOrder = '$_base/create-order';
+  final String captureOrder = '$_base/capture-order';
 }
 
 // Subscription endpoints

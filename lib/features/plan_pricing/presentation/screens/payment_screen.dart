@@ -1,14 +1,18 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:karlfive/core/network/services/auth_storage_service.dart';
 import 'package:karlfive/core/services/get_user_profile_service.dart';
 import 'package:karlfive/features/plan_pricing/presentation/screens/paypal_webview_screen.dart';
 import 'package:karlfive/features/plan_pricing/presentation/screens/paypal_webview_screen.dart';
 import 'package:karlfive/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
 import 'package:karlfive/features/Home/presentation/screen/home_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:karlfive/core/network/constants/api_constants.dart';
+import '../controllers/paypal_controller.dart';
 import '../services/paypal_services.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -38,6 +42,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool _showCardFieldsWebView = false;
   bool _isCapturing = false;
   String? _currentPayPalOrderId;
+  String? _backendOrderId; // Store the orderId from backend create-order endpoint
   String? _cardFieldsUrl;
   WebViewController? _cardFieldsController;
 
@@ -315,21 +320,93 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _isProcessing = true;
     });
 
-    // Navigate to PayPal WebView for payment
-    Get.to(
-      () => PaypalWebViewScreen(
-        planTitle: widget.planTitle,
-        amount: widget.amount,
-        orderId: widget.orderId,
-        onFinish: (transactionId) {
-          _onPaymentSuccess(transactionId);
-        },
-      ),
-    )?.then((_) {
+    try {
+      // Step 1: Call backend create-order endpoint first
+      final paypalController = Get.find<PaypalController>();
+      print('🔵 PayPal Payment: Creating order via backend...');
+      final orderResponse = await paypalController.createOrder(widget.amount);
+      
+      if (orderResponse == null || orderResponse.orderId.isEmpty) {
+        throw Exception('Failed to create order from backend');
+      }
+      
+      // Store the backend orderId
+      _backendOrderId = orderResponse.orderId;
+      print('✅ PayPal Payment: Backend order created with OrderId: $_backendOrderId');
+
+      // Step 2: Continue with the existing PayPal flow
+      if (Platform.isAndroid) {
+        final userProfileService = Get.find<GetUserProfileService>();
+        final userId = userProfileService.userInfo?.id ?? '';
+        
+        await paypalController.startNativePayment(
+          amount: widget.amount,
+          userId: userId,
+          planId: widget.planId ?? '',
+          seasonId: null, // Optional: Add seasonId if available
+          onSuccess: (orderId) {
+            setState(() {
+              _isProcessing = false;
+            });
+            
+            // Show success snackbar
+            Get.snackbar(
+              'Success',
+              'Payment completed successfully!',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.green,
+              colorText: Colors.white,
+              duration: const Duration(seconds: 2),
+            );
+            
+            // Navigate to Home Screen
+            Future.delayed(const Duration(seconds: 2), () {
+              Get.offAll(() => const HomeScreen());
+            });
+          },
+          onError: (error) {
+            setState(() {
+              _isProcessing = false;
+            });
+            Get.snackbar(
+              'PayPal Error',
+              error,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          },
+        );
+      } else {
+        // Navigate to PayPal WebView for payment (iOS / Web fallback)
+        Get.to(
+          () => PaypalWebViewScreen(
+            planTitle: widget.planTitle,
+            amount: widget.amount,
+            orderId: widget.orderId,
+            onFinish: (transactionId) {
+              _onPaymentSuccess(transactionId);
+            },
+          ),
+        )?.then((_) {
+          setState(() {
+            _isProcessing = false;
+          });
+        });
+      }
+    } catch (e) {
+      print('❌ PayPal Payment Error: $e');
       setState(() {
         _isProcessing = false;
       });
-    });
+      Get.snackbar(
+        'Error',
+        'Failed to start PayPal payment: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   Future<void> _capturePayment(String orderId) async {
@@ -338,28 +415,79 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _showCardFieldsWebView = false; // Hide webview to show loading
     });
 
-    final userProfileService = Get.find<GetUserProfileService>();
-    final userId = userProfileService.userInfo?.id ?? '';
-    final token = userProfileService.userInfo?.refreshToken ?? '';
+    // Try multiple ways to get userId
+    String userId = '';
+    String token = '';
+    
+    // Method 1: Try GetUserProfileService first
+    try {
+      final userProfileService = Get.find<GetUserProfileService>();
+      userId = userProfileService.userInfo?.id ?? '';
+      token = userProfileService.userInfo?.refreshToken ?? '';
+      print('🔵 Method 1 - GetUserProfileService: userId=$userId');
+    } catch (e) {
+      print('⚠️ Method 1 failed: $e');
+    }
+    
+    // Method 2: If userId is still empty, try AuthStorageService
+    if (userId.isEmpty) {
+      try {
+        final authStorageService = Get.find<AuthStorageService>();
+        userId = await authStorageService.getUserId() ?? '';
+        token = await authStorageService.getRefreshToken() ?? '';
+        print('🔵 Method 2 - AuthStorageService: userId=$userId');
+      } catch (e) {
+        print('⚠️ Method 2 failed: $e');
+      }
+    }
+    
+    // Method 3: If still empty, try direct SecureStorage access
+    if (userId.isEmpty) {
+      try {
+        final authService = AuthStorageService();
+        userId = await authService.getUserId() ?? '';
+        token = await authService.getRefreshToken() ?? '';
+        print('🔵 Method 3 - Direct AuthStorageService: userId=$userId');
+      } catch (e) {
+        print('⚠️ Method 3 failed: $e');
+      }
+    }
 
-    print('🔵 Capturing Payment: OrderID: $orderId, UserID: $userId, PlanID: ${widget.planId}');
+    // Use the backend orderId that was stored when create-order was called
+    final captureOrderId = _backendOrderId ?? orderId;
+    
+    print('═════════════════════════════════════════════════════════');
+    print('🔵 API Endpoint: {{base_url}}/payments/paypal/capture-order');
+    print('═════════════════════════════════════════════════════════');
+    print('🔵 Request Model:');
+    print('   OrderId: $captureOrderId');
+    print('   UserId: $userId');
+    print('   PlanId: ${widget.planId}');
+    print('   Full Request: ${json.encode({
+      "orderId": captureOrderId,
+      "userId": userId,
+      "planId": widget.planId,
+    })}');
+    print('─────────────────────────────────────────────────────────');
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.10.5.67:5007/api/v1/payments/paypal/capture-order'),
+        Uri.parse(ApiConstants.paypal.captureOrder),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
         body: json.encode({
-          "orderId": orderId,
+          "orderId": captureOrderId,
           "userId": userId,
-          "planId": widget.planId
+          "planId": widget.planId,
         }),
       );
 
-      print('🔵 Capture Response Status: ${response.statusCode}');
-      print('🔵 Capture Response Body: ${response.body}');
+      print('✅ API Response - Capture Payment:');
+      print('   Status Code: ${response.statusCode}');
+      print('   Response Body: ${response.body}');
+      print('═════════════════════════════════════════════════════════');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('✅ Payment Captured Successfully');
@@ -381,7 +509,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
         throw Exception('Failed to capture payment: ${response.statusCode}');
       }
     } catch (e) {
-      print('❌ Capture Error: $e');
+      print('❌ API Response - Exception:');
+      print('   Error: $e');
+      print('═════════════════════════════════════════════════════════');
       setState(() {
         _isCapturing = false;
       });
@@ -455,6 +585,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
     });
 
     try {
+      // Step 1: Call backend create-order endpoint first
+      final paypalController = Get.find<PaypalController>();
+      print('🔵 Card Payment: Creating order via backend...');
+      final orderResponse = await paypalController.createOrder(widget.amount);
+      
+      if (orderResponse == null || orderResponse.orderId.isEmpty) {
+        throw Exception('Failed to create order from backend');
+      }
+      
+      // Store the backend orderId
+      _backendOrderId = orderResponse.orderId;
+      print('✅ Card Payment: Backend order created with OrderId: $_backendOrderId');
+      
+      // Step 2: Continue with existing PayPal card payment flow
       final services = PaypalServices();
       print('🔵 Card Payment: Getting access token...');
       final accessToken = await services.getAccessToken();
@@ -462,13 +606,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (accessToken != null) {
         print('✅ Card Payment: Access token received');
         final transactions = _getOrderParams();
-        print('🔵 Card Payment: Creating payment...');
+        print('🔵 Card Payment: Creating PayPal payment...');
         final res = await services.createPaypalPayment(transactions, accessToken);
         
         if (res != null && res['token'] != null && res['token']!.isNotEmpty) {
            String token = res['token']!;
-           _currentPayPalOrderId = token; // Store for capture
-           print('✅ Card Payment: Token received: $token');
+           _currentPayPalOrderId = token; // Store PayPal token
+           print('✅ Card Payment: PayPal token received: $token');
             
            // Generate session IDs
            final timestamp = DateTime.now().millisecondsSinceEpoch;
