@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/features/company/presentation/controller/company_details_controller.dart';
-import 'package:karlfive/features/company/presentation/widget/elevator-pitch_company_widget.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
+import 'package:giveandtake/features/company/presentation/widget/elevator-pitch_company_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';

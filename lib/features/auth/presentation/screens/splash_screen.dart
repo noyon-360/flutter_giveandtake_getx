@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:karlfive/features/auth/presentation/controller/splash_screen_controller.dart';
+import 'package:giveandtake/features/auth/presentation/controller/splash_screen_controller.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
@@ -12,8 +12,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-     {
+class _SplashScreenState extends State<SplashScreen> {
   // late final AnimationController _ctrl;
   // late final Animation<double> _bgAnimation; // background bubbles
   // late final Animation<double> _fgAnimation; // foreground logo
@@ -81,43 +80,43 @@ class _SplashScreenState extends State<SplashScreen>
               clipBehavior: Clip.none,
               children: [
                 // keep exact Positioned values, but animate opacity/scale
-              //   Positioned(
-              //     right: -screenWidth * 0.25,
-              //     bottom: -screenHeight * 0.25,
-              //     child: FadeTransition(
-              //       opacity: _bgAnimation,
-              //       child: ScaleTransition(
-              //         scale: Tween<double>(
-              //           begin: 0.96,
-              //           end: 1.0,
-              //         ).animate(_bgAnimation),
-              //         child: AppLogo(
-              //           images: AppImages.splashBubbles,
-              //           height: 300,
-              //           width: 300,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
+                //   Positioned(
+                //     right: -screenWidth * 0.25,
+                //     bottom: -screenHeight * 0.25,
+                //     child: FadeTransition(
+                //       opacity: _bgAnimation,
+                //       child: ScaleTransition(
+                //         scale: Tween<double>(
+                //           begin: 0.96,
+                //           end: 1.0,
+                //         ).animate(_bgAnimation),
+                //         child: AppLogo(
+                //           images: AppImages.splashBubbles,
+                //           height: 300,
+                //           width: 300,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
 
-              //   // foreground logo stays in same place; animate in place
-              //   FadeTransition(
-              //     opacity: _fgAnimation,
-              //     child: ScaleTransition(
-              //       scale: Tween<double>(
-              //         begin: 0.8,
-              //         end: 1.0,
-              //       ).animate(_fgAnimation),
-              //       child: Hero(
-              //         tag: 'app_logo_transition',
-              //         child: AppLogo(
-              //           images: AppImages.appLogoWhite,
-              //           height: 180,
-              //           width: 220,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
+                //   // foreground logo stays in same place; animate in place
+                //   FadeTransition(
+                //     opacity: _fgAnimation,
+                //     child: ScaleTransition(
+                //       scale: Tween<double>(
+                //         begin: 0.8,
+                //         end: 1.0,
+                //       ).animate(_fgAnimation),
+                //       child: Hero(
+                //         tag: 'app_logo_transition',
+                //         child: AppLogo(
+                //           images: AppImages.appLogoWhite,
+                //           height: 180,
+                //           width: 220,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
               ],
             ),
           ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/career_stage_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/job_posting_expiration_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/location_type_controller.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_currency_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_controller/career_stage_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_controller/job_posting_expiration_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_controller/location_type_controller.dart';
 import '../controller/country_city_controller.dart';
 import '../controller/job_controller/employment_type_controller.dart';
 import '../controller/job_controller/experience_level_controller.dart';
@@ -57,9 +57,11 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
     );
     final FocusNode _compensationFocusNode = FocusNode();
 
-    TextEditingController _companyWebTEController = TextEditingController(text: controller.companyWebsite.value.isNotEmpty
-        ? controller.companyWebsite.value
-        : '',);
+    TextEditingController _companyWebTEController = TextEditingController(
+      text: controller.companyWebsite.value.isNotEmpty
+          ? controller.companyWebsite.value
+          : '',
+    );
     final FocusNode _companyWebFocusNode = FocusNode();
 
     final LocationController countryCityController = Get.put(
@@ -114,73 +116,94 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               //   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
               // ),
               // const SizedBox(height: 6),
-
-              Obx(() => _buildValidatedDropdown(
-                label: 'Job Category',
-                currentValue: controller.selectedCategory.value,
-                //errorText: 'Category is required',
-                child: GestureDetector(
-                  onTap: () {
-                    _showSearchableBottomSheet(
-                      context,
-                      title: 'Select Job Category',
-                      items: controller.categories.map((c) => c.name).toList(),
-                      onSelect: (value) {
-                        controller.updateRoles(value);
-                      },
-                    );
-                  },
-                  child: AbsorbPointer(
-                    child: DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      value: controller.selectedCategory.value.isEmpty
-                          ? null
-                          : controller.selectedCategory.value,
-                      hint: const Text('  Select category', style: TextStyle(color: Colors.grey)),
-                      // Use custom decoration with error-aware borders
-                      decoration: _dropdownDecoration().copyWith(
-                        // Normal border (when no error)
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.grey),
+              Obx(
+                () => _buildValidatedDropdown(
+                  label: 'Job Category',
+                  currentValue: controller.selectedCategory.value,
+                  //errorText: 'Category is required',
+                  child: GestureDetector(
+                    onTap: () {
+                      _showSearchableBottomSheet(
+                        context,
+                        title: 'Select Job Category',
+                        items: controller.categories
+                            .map((c) => c.name)
+                            .toList(),
+                        onSelect: (value) {
+                          controller.updateRoles(value);
+                        },
+                      );
+                    },
+                    child: AbsorbPointer(
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        value: controller.selectedCategory.value.isEmpty
+                            ? null
+                            : controller.selectedCategory.value,
+                        hint: const Text(
+                          '  Select category',
+                          style: TextStyle(color: Colors.grey),
                         ),
-                        // Red border when there's an error
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFC12222), width: 1.5),
+                        // Use custom decoration with error-aware borders
+                        decoration: _dropdownDecoration().copyWith(
+                          // Normal border (when no error)
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
+                          // Red border when there's an error
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFC12222),
+                              width: 1.5,
+                            ),
+                          ),
+                          // Red border when focused and error
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFC12222),
+                              width: 2,
+                            ),
+                          ),
+                          // Optional: also style focused border normally
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(
+                              color: Colors.grey,
+                              width: 2,
+                            ), // or your app's primary color
+                          ),
                         ),
-                        // Red border when focused and error
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFC12222), width: 2),
-                        ),
-                        // Optional: also style focused border normally
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.grey, width: 2), // or your app's primary color
-                        ),
+                        items: controller.categories
+                            .map(
+                              (cat) => DropdownMenuItem(
+                                value: cat.name,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    cat.name,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (_) {}, // Disabled due to AbsorbPointer
+                        // Important: Add validator so Form knows when to show error state
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Category is required';
+                          }
+                          return null;
+                        },
                       ),
-                      items: controller.categories
-                          .map((cat) => DropdownMenuItem(
-                        value: cat.name,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Text(cat.name, overflow: TextOverflow.ellipsis),
-                        ),
-                      ))
-                          .toList(),
-                      onChanged: (_) {}, // Disabled due to AbsorbPointer
-                      // Important: Add validator so Form knows when to show error state
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Category is required';
-                        }
-                        return null;
-                      },
                     ),
                   ),
                 ),
-              )),
+              ),
+
               //const SizedBox(height: 20),
 
               //const SizedBox(height: 10),
@@ -191,83 +214,105 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               //   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
               // ),
               // const SizedBox(height: 6),
-
-              Obx(() => _buildValidatedDropdown(
-                label: 'Role',
-                currentValue: controller.selectedRole.value,
-                // This will show below the field on error
-                child: GestureDetector(
-                  onTap: () {
-                    if (controller.roles.isEmpty) {
-                      Get.snackbar('Select Category First', 'Please select a job category to see roles.');
-                      return;
-                    }
-                    _showSearchableBottomSheet(
-                      context,
-                      title: 'Select Role',
-                      items: controller.roles,
-                      onSelect: (value) {
-                        controller.selectedRole.value = value;
-                        if (controller.jobTitle.value.isEmpty ||
-                            controller.jobTitle.value == controller.selectedRole.value) {
-                          controller.jobTitle.value = value;
-                          _jobTitleTEController.text = value;
-                        }
-                      },
-                    );
-                  },
-                  child: AbsorbPointer(
-                    child: DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      value: controller.selectedRole.value.isEmpty
-                          ? null
-                          : controller.selectedRole.value,
-                      hint: const Text('  Select role', style: TextStyle(color: Colors.grey)),
-                      decoration: _dropdownDecoration().copyWith(
-                        // Normal borders
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.grey),
+              Obx(
+                () => _buildValidatedDropdown(
+                  label: 'Role',
+                  currentValue: controller.selectedRole.value,
+                  // This will show below the field on error
+                  child: GestureDetector(
+                    onTap: () {
+                      if (controller.roles.isEmpty) {
+                        Get.snackbar(
+                          'Select Category First',
+                          'Please select a job category to see roles.',
+                        );
+                        return;
+                      }
+                      _showSearchableBottomSheet(
+                        context,
+                        title: 'Select Role',
+                        items: controller.roles,
+                        onSelect: (value) {
+                          controller.selectedRole.value = value;
+                          if (controller.jobTitle.value.isEmpty ||
+                              controller.jobTitle.value ==
+                                  controller.selectedRole.value) {
+                            controller.jobTitle.value = value;
+                            _jobTitleTEController.text = value;
+                          }
+                        },
+                      );
+                    },
+                    child: AbsorbPointer(
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        value: controller.selectedRole.value.isEmpty
+                            ? null
+                            : controller.selectedRole.value,
+                        hint: const Text(
+                          '  Select role',
+                          style: TextStyle(color: Colors.grey),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.grey),
+                        decoration: _dropdownDecoration().copyWith(
+                          // Normal borders
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(
+                              color: Colors.blue,
+                              width: 2,
+                            ), // or your primary color
+                          ),
+                          // Red borders for error state
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFC12222),
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFC12222),
+                              width: 2,
+                            ),
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.blue, width: 2), // or your primary color
-                        ),
-                        // Red borders for error state
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFC12222), width: 1.5),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFC12222), width: 2),
-                        ),
+                        items: controller.roles
+                            .map(
+                              (role) => DropdownMenuItem(
+                                value: role,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    role,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (_) {}, // Blocked by AbsorbPointer anyway
+                        // Validation: triggers red border and errorText from _buildValidatedDropdown
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Role is required';
+                          }
+                          return null;
+                        },
                       ),
-                      items: controller.roles
-                          .map((role) => DropdownMenuItem(
-                        value: role,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Text(role, overflow: TextOverflow.ellipsis),
-                        ),
-                      ))
-                          .toList(),
-                      onChanged: (_) {}, // Blocked by AbsorbPointer anyway
-                      // Validation: triggers red border and errorText from _buildValidatedDropdown
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Role is required';
-                        }
-                        return null;
-                      },
                     ),
                   ),
                 ),
-              )),
+              ),
 
               //const SizedBox(height: 10),
 
@@ -278,14 +323,14 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               ),
               const SizedBox(height: 6),
 
-
               TextFormField(
                 controller: _jobTitleTEController,
                 focusNode: _jobTitleFocusNode,
                 onChanged: (value) => controller.jobTitle.value = value,
                 textInputAction: TextInputAction.next,
                 decoration: context.primaryInputDecoration.copyWith(
-                  hintText: "Enter job title", // Keep your leading spaces in hint if desired
+                  hintText:
+                      "Enter job title", // Keep your leading spaces in hint if desired
                   hintStyle: const TextStyle(
                     color: Color(0xFF787878),
                     fontSize: 16,
@@ -297,7 +342,9 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                     vertical: 14,
                   ),
                   // Add invisible prefix space for the input text/cursor indent
-                  prefix: const SizedBox(width: 8), // Adjust this value as needed (e.g., 16-24 for more space)
+                  prefix: const SizedBox(
+                    width: 8,
+                  ), // Adjust this value as needed (e.g., 16-24 for more space)
                   errorStyle: const TextStyle(
                     height: 1.5,
                     color: Color(0xFFC12222),
@@ -330,15 +377,17 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
-                    // Set horizontal content padding to 0 (or minimal) for the text area
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 0,
-                      vertical: 14,
-                    ),
-                    // Add invisible prefix space for the input text/cursor indent
-                    prefix: const SizedBox(width: 8),
-                  errorStyle: const TextStyle(height: 1.5, color: Color(
-                      0xFFC12222)),
+                  // Set horizontal content padding to 0 (or minimal) for the text area
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 0,
+                    vertical: 14,
+                  ),
+                  // Add invisible prefix space for the input text/cursor indent
+                  prefix: const SizedBox(width: 8),
+                  errorStyle: const TextStyle(
+                    height: 1.5,
+                    color: Color(0xFFC12222),
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -361,13 +410,18 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CountryCitySearchableDropdown(controller: countryCityController),
+                      CountryCitySearchableDropdown(
+                        controller: countryCityController,
+                      ),
                       if (state.hasError)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             state.errorText!,
-                            style: TextStyle(color: Color(0xFFC12222), fontSize: 12),
+                            style: TextStyle(
+                              color: Color(0xFFC12222),
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                     ],
@@ -495,7 +549,7 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               SizedBox(height: 6),
 
               Obx(
-                    () => DropdownButtonFormField<String>(
+                () => DropdownButtonFormField<String>(
                   isExpanded: true,
                   value: employeeController.selectedEmploymentType.value.isEmpty
                       ? null
@@ -507,34 +561,37 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
                     ),
-                      // Set horizontal content padding to 0 (or minimal) for the text area
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 0,
-                        vertical: 14,
-                      ),
-                      // Add invisible prefix space for the input text/cursor indent
-                      prefix: const SizedBox(width: 8),
+                    // Set horizontal content padding to 0 (or minimal) for the text area
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0,
+                      vertical: 14,
+                    ),
+                    // Add invisible prefix space for the input text/cursor indent
+                    prefix: const SizedBox(width: 8),
                     // Optional: also tighten error spacing if needed
-                    errorStyle: const TextStyle(height: 1.5, color: Color(
-                        0xFFC12222)),
+                    errorStyle: const TextStyle(
+                      height: 1.5,
+                      color: Color(0xFFC12222),
+                    ),
                   ),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   items: employeeController.employmentTypes
                       .map(
                         (type) => DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(
-                        type,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
+                          value: type,
+                          child: Text(
+                            type,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  )
+                      )
                       .toList(),
                   onChanged: (value) {
-                    employeeController.selectedEmploymentType.value = value ?? '';
+                    employeeController.selectedEmploymentType.value =
+                        value ?? '';
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -553,9 +610,13 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               ),
               SizedBox(height: 6),
               Obx(
-                    () => DropdownButtonFormField<String>(
+                () => DropdownButtonFormField<String>(
                   isExpanded: true,
-                  value: experienceLevelController.selectedExperienceLevel.value.isEmpty
+                  value:
+                      experienceLevelController
+                          .selectedExperienceLevel
+                          .value
+                          .isEmpty
                       ? null
                       : experienceLevelController.selectedExperienceLevel.value,
                   decoration: InputDecoration(
@@ -563,34 +624,37 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                      // Set horizontal content padding to 0 (or minimal) for the text area
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 0,
-                        vertical: 14,
-                      ),
-                      // Add invisible prefix space for the input text/cursor indent
-                      prefix: const SizedBox(width: 8),
+                    // Set horizontal content padding to 0 (or minimal) for the text area
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0,
+                      vertical: 14,
+                    ),
+                    // Add invisible prefix space for the input text/cursor indent
+                    prefix: const SizedBox(width: 8),
                     // Optional: also tighten error spacing if needed
-                    errorStyle: const TextStyle(height: 1.5, color: Color(
-                        0xFFC12222)),
+                    errorStyle: const TextStyle(
+                      height: 1.5,
+                      color: Color(0xFFC12222),
+                    ),
                   ),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   items: experienceLevelController.experienceLevels
                       .map(
                         (type) => DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(
-                        type,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
+                          value: type,
+                          child: Text(
+                            type,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  )
+                      )
                       .toList(),
                   onChanged: (value) {
-                    experienceLevelController.selectedExperienceLevel.value = value ?? '';
+                    experienceLevelController.selectedExperienceLevel.value =
+                        value ?? '';
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -610,9 +674,10 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               SizedBox(height: 6),
 
               Obx(
-                    () => DropdownButtonFormField<String>(
+                () => DropdownButtonFormField<String>(
                   isExpanded: true,
-                  value: locationTypeController.selectedLocationType.value.isEmpty
+                  value:
+                      locationTypeController.selectedLocationType.value.isEmpty
                       ? null
                       : locationTypeController.selectedLocationType.value,
                   decoration: InputDecoration(
@@ -621,34 +686,37 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                       borderRadius: BorderRadius.circular(8),
                     ),
 
-                      // Set horizontal content padding to 0 (or minimal) for the text area
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 0,
-                        vertical: 14,
-                      ),
-                      // Add invisible prefix space for the input text/cursor indent
-                      prefix: const SizedBox(width: 8),
+                    // Set horizontal content padding to 0 (or minimal) for the text area
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0,
+                      vertical: 14,
+                    ),
+                    // Add invisible prefix space for the input text/cursor indent
+                    prefix: const SizedBox(width: 8),
                     // Optional: also tighten error spacing if needed
-                    errorStyle: const TextStyle(height: 1.5, color: Color(
-                        0xFFC12222)),
+                    errorStyle: const TextStyle(
+                      height: 1.5,
+                      color: Color(0xFFC12222),
+                    ),
                   ),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   items: locationTypeController.locationTypes
                       .map(
                         (type) => DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(
-                        type,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
+                          value: type,
+                          child: Text(
+                            type,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  )
+                      )
                       .toList(),
                   onChanged: (value) {
-                    locationTypeController.selectedLocationType.value = value ?? '';
+                    locationTypeController.selectedLocationType.value =
+                        value ?? '';
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -668,7 +736,7 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               SizedBox(height: 6),
 
               Obx(
-                    () => DropdownButtonFormField<String>(
+                () => DropdownButtonFormField<String>(
                   isExpanded: true,
                   value: careerStageController.selectedCareerStage.value.isEmpty
                       ? null
@@ -685,26 +753,29 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                     // Add invisible prefix space for the input text/cursor indent
                     prefix: const SizedBox(width: 8),
                     // Optional: also tighten error spacing if needed
-                    errorStyle: const TextStyle(height: 1.5, color: Color(
-                        0xFFC12222)),
+                    errorStyle: const TextStyle(
+                      height: 1.5,
+                      color: Color(0xFFC12222),
+                    ),
                   ),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   items: careerStageController.careerStages
                       .map(
                         (type) => DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(
-                        type,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
+                          value: type,
+                          child: Text(
+                            type,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  )
+                      )
                       .toList(),
                   onChanged: (value) {
-                    careerStageController.selectedCareerStage.value = value ?? '';
+                    careerStageController.selectedCareerStage.value =
+                        value ?? '';
                   },
                   // Added validation
                   validator: (value) {
@@ -735,7 +806,8 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                       return;
                     }
 
-                    final selected = await showModalBottomSheet<GetCurrencyResponseModel>(
+                    final selected =
+                        await showModalBottomSheet<GetCurrencyResponseModel>(
                           context: context,
                           isScrollControlled: true,
                           builder: (ctx) {
@@ -767,9 +839,11 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                                                       .contains(
                                                         value.toLowerCase(),
                                                       ) ||
-                                                  c.symbol.toLowerCase().contains(
-                                                    value.toLowerCase(),
-                                                  ) ||
+                                                  c.symbol
+                                                      .toLowerCase()
+                                                      .contains(
+                                                        value.toLowerCase(),
+                                                      ) ||
                                                   c.code.toLowerCase().contains(
                                                     value.toLowerCase(),
                                                   ),
@@ -813,7 +887,12 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                       value: controller.selectedCurrency.value,
                       hint: const Text('Select currency'),
                       decoration: _dropdownDecoration().copyWith(
-                        contentPadding: const EdgeInsets.fromLTRB(8, 16, 12, 16),
+                        contentPadding: const EdgeInsets.fromLTRB(
+                          8,
+                          16,
+                          12,
+                          16,
+                        ),
                       ),
                       items: controller.currencies.map((currency) {
                         return DropdownMenuItem(
@@ -871,13 +950,20 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               SizedBox(height: 6),
 
               Obx(
-                    () => DropdownButtonFormField<String>(
+                () => DropdownButtonFormField<String>(
                   isExpanded: true,
-                  value: jobPostingExpirationController.selectedJobPostingExpiration.value.isEmpty
+                  value:
+                      jobPostingExpirationController
+                          .selectedJobPostingExpiration
+                          .value
+                          .isEmpty
                       ? null
-                      : jobPostingExpirationController.selectedJobPostingExpiration.value,
+                      : jobPostingExpirationController
+                            .selectedJobPostingExpiration
+                            .value,
                   decoration: InputDecoration(
-                    hintText: jobPostingExpirationController.jobPostingExpiration[2],
+                    hintText:
+                        jobPostingExpirationController.jobPostingExpiration[2],
                     hintStyle: const TextStyle(
                       color: Colors.black,
                       fontSize: 16,
@@ -902,20 +988,23 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                   items: jobPostingExpirationController.jobPostingExpiration
                       .map(
                         (type) => DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(
-                        type,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black,
+                          value: type,
+                          child: Text(
+                            type,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  )
+                      )
                       .toList(),
                   onChanged: (value) {
-                    jobPostingExpirationController.selectedJobPostingExpiration.value = value ?? '';
+                    jobPostingExpirationController
+                            .selectedJobPostingExpiration
+                            .value =
+                        value ?? '';
                   },
                   // ← Added required validation
                   validator: (value) {
@@ -961,7 +1050,9 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: ElevatedButton(
-                      onPressed: () {Get.back();},
+                      onPressed: () {
+                        Get.back();
+                      },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -997,8 +1088,13 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                         }
                         // Optional: Scroll to first error
                         else {
-                          Get.snackbar('Validation Error', 'Please fill all required fields',
-                              snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+                          Get.snackbar(
+                            'Validation Error',
+                            'Please fill all required fields',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -1050,12 +1146,11 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
       //   borderSide: const BorderSide(color: Color(0xFF787878), width: 1),
       // ),
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: 0,  // Reduce this value (default is often 16–20)
+        horizontal: 0, // Reduce this value (default is often 16–20)
         vertical: 14,
       ),
       // Optional: also tighten error spacing if needed
-      errorStyle: const TextStyle(height: 1.5, color: Color(
-          0xFFC12222)),
+      errorStyle: const TextStyle(height: 1.5, color: Color(0xFFC12222)),
     );
   }
 
@@ -1195,10 +1290,7 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               errorBorder: InputBorder.none,
               focusedErrorBorder: InputBorder.none,
             ),
-            style: const TextStyle(
-              height: 0,
-              color: Colors.transparent,
-            ),
+            style: const TextStyle(height: 0, color: Colors.transparent),
           ),
         ),
       ],

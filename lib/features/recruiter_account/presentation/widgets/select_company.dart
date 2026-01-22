@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 import '../../data/models/get_company_response_model.dart';
 import '../controller/recruiter_controller.dart';
 

@@ -1,11 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-<<<<<<< HEAD
-FLUTTER_ROOT=/Users/betopia/development/flutter
-FLUTTER_APPLICATION_PATH=/Users/betopia/Documents/flutter_giveandtake_getx
-=======
-FLUTTER_ROOT=/Users/noyon/development/flutter
-FLUTTER_APPLICATION_PATH=/Users/noyon/Documents/Eshita/document/flutter_giveandtake_getx
->>>>>>> 9c9cd3c5153b85bf91ad46295e79fc4d27f0cbdb
+FLUTTER_ROOT=C:\flutter
+FLUTTER_APPLICATION_PATH=G:\ScaleUP\Flutter\flutter_giveandtake_getx
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0

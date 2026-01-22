@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/recruiter_account/presentation/widgets/searchable_bottom_sheet.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/widgets/searchable_bottom_sheet.dart';
 
 class SearchableRoleDropdown extends StatelessWidget {
   final String title;
@@ -40,27 +40,26 @@ class SearchableRoleDropdown extends StatelessWidget {
         );
       },
       child: AbsorbPointer(
-        child: Obx(() => DropdownButtonFormField<String>(
-          isExpanded: true,
-          value: selectedValue.value.isEmpty ? null : selectedValue.value,
-          hint: Text(
-            'Select $title',
-            style: const TextStyle(color: Colors.grey),
-          ),
-          decoration: decoration,
-          items: items
-              .map(
-                (item) => DropdownMenuItem(
-              value: item,
-              child: Text(
-                item,
-                overflow: TextOverflow.ellipsis,
-              ),
+        child: Obx(
+          () => DropdownButtonFormField<String>(
+            isExpanded: true,
+            value: selectedValue.value.isEmpty ? null : selectedValue.value,
+            hint: Text(
+              'Select $title',
+              style: const TextStyle(color: Colors.grey),
             ),
-          )
-              .toList(),
-          onChanged: (_) {},
-        )),
+            decoration: decoration,
+            items: items
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(item, overflow: TextOverflow.ellipsis),
+                  ),
+                )
+                .toList(),
+            onChanged: (_) {},
+          ),
+        ),
       ),
     );
   }

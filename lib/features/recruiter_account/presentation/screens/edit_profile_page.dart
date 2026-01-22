@@ -5,11 +5,11 @@ import 'package:flutx_core/core/validation/validators.dart';
 import 'package:get/get.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:html_editor_enhanced/html_editor.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_recruiter_response_model.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/company_image_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/video_upload_screen.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_recruiter_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/company_image_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/video_upload_screen.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../controller/country_city_controller.dart';
 import '../controller/description_controller.dart';
@@ -488,7 +488,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     adjustHeightForKeyboard: false,
                                     initialText:
                                         widget.recruiterResponseModel.bio,
-
                                   ),
                                   htmlToolbarOptions: HtmlToolbarOptions(
                                     toolbarPosition:
@@ -954,13 +953,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         width: 150,
                         child: ElevatedButton(
                           onPressed: () async {
-                            final String currentBioHtml = await _htmlEditorController.getText();
+                            final String currentBioHtml =
+                                await _htmlEditorController.getText();
                             await reCruiController.updateRecruiter(
                               companyImageController.selectedImage.value,
                               // nullable banner
                               imagePickerController.selectedImage.value,
                               // nullable photo
-                              currentBioHtml,    // ← This gets current HTML content,
+                              currentBioHtml, // ← This gets current HTML content,
                               _firstNameTEController.text,
                               _surNameTEController.text,
                               widget.recruiterResponseModel.title,

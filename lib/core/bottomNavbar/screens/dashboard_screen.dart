@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/Home/presentation/screen/home_screen.dart';
+import 'package:giveandtake/features/Home/presentation/screen/home_screen.dart';
 
 import '../../../features/profile_dasboard/presentation/screens/profile_dashboard_screen.dart';
 import '../controllers/bottom_nav_controller.dart';

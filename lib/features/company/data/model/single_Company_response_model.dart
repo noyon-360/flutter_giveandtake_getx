@@ -1,4 +1,4 @@
-// import 'package:karlfive/features/company/data/model/meta_response_model.dart';
+// import 'package:giveandtake/features/company/data/model/meta_response_model.dart';
 
 // class SingleCompanyResponseModel {
 //   final Meta meta;
@@ -390,7 +390,6 @@
 //   };
 // }
 
-
 class SingleCompanyResponseModel {
   final Meta meta;
   final List<Company> companies;
@@ -408,18 +407,17 @@ class SingleCompanyResponseModel {
       companies: (json['companies'] as List)
           .map((e) => Company.fromJson(e))
           .toList(),
-      honors: (json['honors'] as List)
-          .map((e) => Honor.fromJson(e))
-          .toList(),
+      honors: (json['honors'] as List).map((e) => Honor.fromJson(e)).toList(),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'meta': meta.toJson(),
-        'companies': companies.map((e) => e.toJson()).toList(),
-        'honors': honors.map((e) => e.toJson()).toList(),
-      };
+    'meta': meta.toJson(),
+    'companies': companies.map((e) => e.toJson()).toList(),
+    'honors': honors.map((e) => e.toJson()).toList(),
+  };
 }
+
 class Meta {
   final int currentPage;
   final int totalPages;
@@ -434,19 +432,20 @@ class Meta {
   });
 
   factory Meta.fromJson(Map<String, dynamic> json) => Meta(
-        currentPage: json['currentPage'],
-        totalPages: json['totalPages'],
-        totalItems: json['totalItems'],
-        itemsPerPage: json['itemsPerPage'],
-      );
+    currentPage: json['currentPage'],
+    totalPages: json['totalPages'],
+    totalItems: json['totalItems'],
+    itemsPerPage: json['itemsPerPage'],
+  );
 
   Map<String, dynamic> toJson() => {
-        'currentPage': currentPage,
-        'totalPages': totalPages,
-        'totalItems': totalItems,
-        'itemsPerPage': itemsPerPage,
-      };
+    'currentPage': currentPage,
+    'totalPages': totalPages,
+    'totalItems': totalItems,
+    'itemsPerPage': itemsPerPage,
+  };
 }
+
 class Company {
   final String id;
   final String userId;
@@ -489,72 +488,61 @@ class Company {
   });
 
   factory Company.fromJson(Map<String, dynamic> json) => Company(
-        id: json['_id'],
-        userId: json['userId'],
-        clogo: json['clogo'],
-        banner: json['banner'],
-        aboutUs: json['aboutUs'],
-        slug: json['slug'],
-        cname: json['cname'],
-        country: json['country'],
-        city: json['city'],
-        zipcode: json['zipcode'],
-        cemail: json['cemail'],
-        sLink: (json['sLink'] as List)
-            .map((e) => SocialLink.fromJson(e))
-            .toList(),
-        industry: json['industry'],
-        service: json['service'] ?? [],
-        employeesId: List<String>.from(json['employeesId']),
-        createdAt: DateTime.parse(json['createdAt']),
-        updatedAt: DateTime.parse(json['updatedAt']),
-        elevatorPitch: ElevatorPitch.fromJson(json['elevatorPitch']),
-      );
+    id: json['_id'],
+    userId: json['userId'],
+    clogo: json['clogo'],
+    banner: json['banner'],
+    aboutUs: json['aboutUs'],
+    slug: json['slug'],
+    cname: json['cname'],
+    country: json['country'],
+    city: json['city'],
+    zipcode: json['zipcode'],
+    cemail: json['cemail'],
+    sLink: (json['sLink'] as List).map((e) => SocialLink.fromJson(e)).toList(),
+    industry: json['industry'],
+    service: json['service'] ?? [],
+    employeesId: List<String>.from(json['employeesId']),
+    createdAt: DateTime.parse(json['createdAt']),
+    updatedAt: DateTime.parse(json['updatedAt']),
+    elevatorPitch: ElevatorPitch.fromJson(json['elevatorPitch']),
+  );
 
   Map<String, dynamic> toJson() => {
-        '_id': id,
-        'userId': userId,
-        'clogo': clogo,
-        'banner': banner,
-        'aboutUs': aboutUs,
-        'slug': slug,
-        'cname': cname,
-        'country': country,
-        'city': city,
-        'zipcode': zipcode,
-        'cemail': cemail,
-        'sLink': sLink.map((e) => e.toJson()).toList(),
-        'industry': industry,
-        'service': service,
-        'employeesId': employeesId,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-        'elevatorPitch': elevatorPitch.toJson(),
-      };
+    '_id': id,
+    'userId': userId,
+    'clogo': clogo,
+    'banner': banner,
+    'aboutUs': aboutUs,
+    'slug': slug,
+    'cname': cname,
+    'country': country,
+    'city': city,
+    'zipcode': zipcode,
+    'cemail': cemail,
+    'sLink': sLink.map((e) => e.toJson()).toList(),
+    'industry': industry,
+    'service': service,
+    'employeesId': employeesId,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    'elevatorPitch': elevatorPitch.toJson(),
+  };
 }
+
 class SocialLink {
   final String label;
   final String url;
   final String id;
 
-  SocialLink({
-    required this.label,
-    required this.url,
-    required this.id,
-  });
+  SocialLink({required this.label, required this.url, required this.id});
 
-  factory SocialLink.fromJson(Map<String, dynamic> json) => SocialLink(
-        label: json['label'],
-        url: json['url'],
-        id: json['_id'],
-      );
+  factory SocialLink.fromJson(Map<String, dynamic> json) =>
+      SocialLink(label: json['label'], url: json['url'], id: json['_id']);
 
-  Map<String, dynamic> toJson() => {
-        'label': label,
-        'url': url,
-        '_id': id,
-      };
+  Map<String, dynamic> toJson() => {'label': label, 'url': url, '_id': id};
 }
+
 class ElevatorPitch {
   final Video video;
   final VideoMetadata metadata;
@@ -577,49 +565,46 @@ class ElevatorPitch {
   });
 
   factory ElevatorPitch.fromJson(Map<String, dynamic> json) => ElevatorPitch(
-        video: Video.fromJson(json['video']),
-        metadata: VideoMetadata.fromJson(json['metadata']),
-        processing: Processing.fromJson(json['processing']),
-        id: json['_id'],
-        userId: json['userId'],
-        status: json['status'],
-        createdAt: DateTime.parse(json['createdAt']),
-        updatedAt: DateTime.parse(json['updatedAt']),
-      );
+    video: Video.fromJson(json['video']),
+    metadata: VideoMetadata.fromJson(json['metadata']),
+    processing: Processing.fromJson(json['processing']),
+    id: json['_id'],
+    userId: json['userId'],
+    status: json['status'],
+    createdAt: DateTime.parse(json['createdAt']),
+    updatedAt: DateTime.parse(json['updatedAt']),
+  );
 
   Map<String, dynamic> toJson() => {
-        'video': video.toJson(),
-        'metadata': metadata.toJson(),
-        'processing': processing.toJson(),
-        '_id': id,
-        'userId': userId,
-        'status': status,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+    'video': video.toJson(),
+    'metadata': metadata.toJson(),
+    'processing': processing.toJson(),
+    '_id': id,
+    'userId': userId,
+    'status': status,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 }
+
 class Video {
   final String? url;
   final String? hlsUrl;
   final String? encryptionKeyUrl;
 
-  Video({
-    this.url,
-    this.hlsUrl,
-    this.encryptionKeyUrl,
-  });
+  Video({this.url, this.hlsUrl, this.encryptionKeyUrl});
 
   factory Video.fromJson(Map<String, dynamic> json) => Video(
-        url: json['url'],
-        hlsUrl: json['hlsUrl'],
-        encryptionKeyUrl: json['encryptionKeyUrl'],
-      );
+    url: json['url'],
+    hlsUrl: json['hlsUrl'],
+    encryptionKeyUrl: json['encryptionKeyUrl'],
+  );
 
   Map<String, dynamic> toJson() => {
-        'url': url,
-        'hlsUrl': hlsUrl,
-        'encryptionKeyUrl': encryptionKeyUrl,
-      };
+    'url': url,
+    'hlsUrl': hlsUrl,
+    'encryptionKeyUrl': encryptionKeyUrl,
+  };
 }
 
 class VideoMetadata {
@@ -638,20 +623,20 @@ class VideoMetadata {
   });
 
   factory VideoMetadata.fromJson(Map<String, dynamic> json) => VideoMetadata(
-        duration: json['duration'],
-        format: json['format'],
-        vcodec: json['vcodec'],
-        width: json['width'],
-        height: json['height'],
-      );
+    duration: json['duration'],
+    format: json['format'],
+    vcodec: json['vcodec'],
+    width: json['width'],
+    height: json['height'],
+  );
 
   Map<String, dynamic> toJson() => {
-        'duration': duration,
-        'format': format,
-        'vcodec': vcodec,
-        'width': width,
-        'height': height,
-      };
+    'duration': duration,
+    'format': format,
+    'vcodec': vcodec,
+    'width': width,
+    'height': height,
+  };
 }
 
 class Processing {
@@ -666,17 +651,18 @@ class Processing {
   });
 
   factory Processing.fromJson(Map<String, dynamic> json) => Processing(
-        state: json['state'],
-        fileSize: json['fileSize'],
-        fileName: json['fileName'],
-      );
+    state: json['state'],
+    fileSize: json['fileSize'],
+    fileName: json['fileName'],
+  );
 
   Map<String, dynamic> toJson() => {
-        'state': state,
-        'fileSize': fileSize,
-        'fileName': fileName,
-      };
+    'state': state,
+    'fileSize': fileSize,
+    'fileName': fileName,
+  };
 }
+
 class Honor {
   final String id;
   final String userId;
@@ -699,24 +685,24 @@ class Honor {
   });
 
   factory Honor.fromJson(Map<String, dynamic> json) => Honor(
-        id: json['_id'],
-        userId: json['userId'],
-        title: json['title'],
-        programeName: json['programeName'],
-        programeDate: DateTime.parse(json['programeDate']),
-        description: json['description'],
-        createdAt: DateTime.parse(json['createdAt']),
-        updatedAt: DateTime.parse(json['updatedAt']),
-      );
+    id: json['_id'],
+    userId: json['userId'],
+    title: json['title'],
+    programeName: json['programeName'],
+    programeDate: DateTime.parse(json['programeDate']),
+    description: json['description'],
+    createdAt: DateTime.parse(json['createdAt']),
+    updatedAt: DateTime.parse(json['updatedAt']),
+  );
 
   Map<String, dynamic> toJson() => {
-        '_id': id,
-        'userId': userId,
-        'title': title,
-        'programeName': programeName,
-        'programeDate': programeDate.toIso8601String(),
-        'description': description,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+    '_id': id,
+    'userId': userId,
+    'title': title,
+    'programeName': programeName,
+    'programeDate': programeDate.toIso8601String(),
+    'description': description,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 }

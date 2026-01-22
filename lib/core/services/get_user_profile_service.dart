@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:get/get.dart';
-import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/core/network/services/auth_storage_service.dart';
-import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
+import 'package:giveandtake/core/base/base_controller.dart';
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/features/auth/domain/repo/auth_repo.dart';
 
 import '../../features/auth/data/models/user_model.dart';
 

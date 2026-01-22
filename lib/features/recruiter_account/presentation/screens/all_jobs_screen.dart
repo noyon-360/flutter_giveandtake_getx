@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/single_job_details_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/single_job_details_screen.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../company/presentation/screen/applicant_lists_screen.dart';
@@ -19,7 +19,7 @@ class AllJobsScreen extends StatefulWidget {
 
 class _AllJobsScreenState extends State<AllJobsScreen> {
   final RecruiterController recruiterController =
-  Get.find<RecruiterController>();
+      Get.find<RecruiterController>();
 
   @override
   void initState() {
@@ -108,7 +108,7 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
                   /// Applicants
                   GestureDetector(
                     onTap: () => Get.to(
-                          () => CompanyApplicantsListScreen(jobId: job.id),
+                      () => CompanyApplicantsListScreen(jobId: job.id),
                     ),
                     child: Text(
                       "View Applicants (${job.applicantCount})",
@@ -127,17 +127,16 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
                       /// Preview
                       IconButton(
                         icon: const Icon(Icons.remove_red_eye_outlined),
-                        onPressed: () => Get.to(
-                              () => JobDetailEditScreen(jobId: job.id),
-                        ),
+                        onPressed: () =>
+                            Get.to(() => JobDetailEditScreen(jobId: job.id)),
                       ),
 
                       const Spacer(),
 
                       /// Archive / Unarchive
                       Obx(() {
-                        final isLoading = recruiterController
-                            .archiveLoadingMap[job.id] ??
+                        final isLoading =
+                            recruiterController.archiveLoadingMap[job.id] ??
                             false;
                         final isArchived = job.arcrivedJob ?? false;
 
@@ -145,33 +144,33 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
                           onPressed: isLoading
                               ? null
                               : () async {
-                            recruiterController
-                                .archiveLoadingMap[job.id] = true;
+                                  recruiterController.archiveLoadingMap[job
+                                          .id] =
+                                      true;
 
-                            try {
-                              final request =
-                              ArchieveJobRequestModel(
-                                id: job.id,
-                                arcrivedJob: !isArchived,
-                              );
+                                  try {
+                                    final request = ArchieveJobRequestModel(
+                                      id: job.id,
+                                      arcrivedJob: !isArchived,
+                                    );
 
-                              await recruiterController
-                                  .updateArchieveJob(
-                                request: request,
-                                jobId: job.id,
-                              );
-                            } catch (_) {
-                              Get.snackbar(
-                                "Failed",
-                                "Could not update archive status",
-                                backgroundColor: Colors.red.shade600,
-                                colorText: Colors.white,
-                              );
-                            } finally {
-                              recruiterController
-                                  .archiveLoadingMap[job.id] = false;
-                            }
-                          },
+                                    await recruiterController.updateArchieveJob(
+                                      request: request,
+                                      jobId: job.id,
+                                    );
+                                  } catch (_) {
+                                    Get.snackbar(
+                                      "Failed",
+                                      "Could not update archive status",
+                                      backgroundColor: Colors.red.shade600,
+                                      colorText: Colors.white,
+                                    );
+                                  } finally {
+                                    recruiterController.archiveLoadingMap[job
+                                            .id] =
+                                        false;
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isArchived
                                 ? Colors.red.shade100
@@ -183,22 +182,20 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
                           ),
                           child: isLoading
                               ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : Text(
-                            isArchived
-                                ? "Unarchive"
-                                : "Archive",
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                                  isArchived ? "Unarchive" : "Archive",
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         );
                       }),
                     ],
@@ -232,9 +229,7 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
           Expanded(
             child: Text(
               value ?? "",
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -246,8 +241,9 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
   String formatDate(dynamic date) {
     if (date == null) return '';
     try {
-      final DateTime dt =
-      date is DateTime ? date : DateTime.parse(date.toString());
+      final DateTime dt = date is DateTime
+          ? date
+          : DateTime.parse(date.toString());
       return DateFormat('dd MMM, yyyy').format(dt);
     } catch (_) {
       return date.toString();

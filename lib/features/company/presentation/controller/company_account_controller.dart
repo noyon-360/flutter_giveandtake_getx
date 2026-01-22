@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/features/company/data/model/manage_job_response_model.dart';
-import 'package:karlfive/features/company/data/model/recruiter_added_response_model.dart';
-import 'package:karlfive/features/company/data/model/single_Company_response_model.dart';
-import 'package:karlfive/features/company/domain/repo/company_repo.dart';
+import 'package:giveandtake/core/base/base_controller.dart';
+import 'package:giveandtake/features/company/data/model/manage_job_response_model.dart';
+import 'package:giveandtake/features/company/data/model/recruiter_added_response_model.dart';
+import 'package:giveandtake/features/company/data/model/single_Company_response_model.dart';
+import 'package:giveandtake/features/company/domain/repo/company_repo.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/multiple_form_data_manager.dart';
@@ -117,27 +117,33 @@ class CompanyAccountController extends BaseController {
   }
 
   List<Map<String, String>> getAwards() {
-  return awardFields.map((fields) {
-    final rawDate = fields['date']?.text.trim() ?? "";
+    return awardFields
+        .map((fields) {
+          final rawDate = fields['date']?.text.trim() ?? "";
 
-    String isoDate = "";
-    if (rawDate.length == 6) {
-      final month = rawDate.substring(0, 2);
-      final year = rawDate.substring(2);
-      isoDate = "$year-$month-01T00:00:00.000Z"; // e.g., 202512 → 2025-12-01T00:00:00.000Z
-    }
+          String isoDate = "";
+          if (rawDate.length == 6) {
+            final month = rawDate.substring(0, 2);
+            final year = rawDate.substring(2);
+            isoDate =
+                "$year-$month-01T00:00:00.000Z"; // e.g., 202512 → 2025-12-01T00:00:00.000Z
+          }
 
-    return {
-      "title": fields['title']?.text.trim() ?? "",
-      "programeName": fields['issuer']?.text.trim() ?? "",     // ← programeName (not programName)
-      "programeDate": isoDate,
-      "description": fields['description']?.text.trim() ?? "",
-    };
-  }).where((award) =>
-      award["title"]!.isNotEmpty || 
-      award["description"]!.isNotEmpty
-  ).toList();
-}
+          return {
+            "title": fields['title']?.text.trim() ?? "",
+            "programeName":
+                fields['issuer']?.text.trim() ??
+                "", // ← programeName (not programName)
+            "programeDate": isoDate,
+            "description": fields['description']?.text.trim() ?? "",
+          };
+        })
+        .where(
+          (award) =>
+              award["title"]!.isNotEmpty || award["description"]!.isNotEmpty,
+        )
+        .toList();
+  }
 
   // --- Employees ---
   void addEmployee() {
@@ -459,7 +465,6 @@ class CompanyAccountController extends BaseController {
     String companyWebsite,
     String services, // comma-separated
     String recruiters, // emails only, comma-separated
-  
   ) async {
     setLoading(true);
     setError('');
@@ -810,8 +815,6 @@ class CompanyAccountController extends BaseController {
         employeeIdMap.clear();
         employeeControllers.add(TextEditingController()); // keep one empty
 
-
-
         // Get.back(); // close dialog
         setLoading(false);
       },
@@ -827,5 +830,4 @@ class CompanyAccountController extends BaseController {
         ) // valid ObjectId length
         .toList();
   }
-  
 }

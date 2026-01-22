@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../create_job/presentation/controller/create_job_controller.dart';
@@ -197,7 +197,11 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
           'issuer': TextEditingController(
             text: award.programeName ?? '',
           ), // ← Use programeName
-          'date': TextEditingController(text: award.programeDate != null ? '${award.programeDate!.month.toString().padLeft(2, '0')}${award.programeDate!.year}' : ''),
+          'date': TextEditingController(
+            text: award.programeDate != null
+                ? '${award.programeDate!.month.toString().padLeft(2, '0')}${award.programeDate!.year}'
+                : '',
+          ),
           'description': TextEditingController(text: award.description ?? ''),
         });
       }
@@ -213,7 +217,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-     backgroundColor: const Color(0xFF2B7FD0),
+        backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -223,8 +227,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
           ),
           onPressed: () => Get.back(),
         ),
-        
-        
+
         title: const Text(
           "Edit Company Account",
           style: TextStyle(

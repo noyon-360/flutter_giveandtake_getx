@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
-import 'package:karlfive/features/recruiter_account/data/models/job_create_request_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_category_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_currency_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/job_create_request_model.dart';
 
 import 'country_city_controller.dart';
 import 'job_controller/career_stage_controller.dart';
@@ -22,9 +22,9 @@ class JobPostingController extends GetxController {
       Get.find<LocationTypeController>();
   final CareerStageController careerStageController =
       Get.find<CareerStageController>();
-  final JobPostingExpirationController jobPostingExpirationController =
-  Get.put(JobPostingExpirationController());
-
+  final JobPostingExpirationController jobPostingExpirationController = Get.put(
+    JobPostingExpirationController(),
+  );
 
   final recruiterController = Get.find<RecruiterController>();
 
@@ -402,7 +402,6 @@ class JobPostingController extends GetxController {
     isLoading.value = false;
     error.value = '';
   }
-
 
   void clearAllFieldsPreview() {
     // Step tracker

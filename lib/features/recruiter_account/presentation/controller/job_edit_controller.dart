@@ -1,11 +1,11 @@
 // features/recruiter_account/presentation/controller/job_edit_controller.dart
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_single_job_response_model.dart'
+import 'package:giveandtake/features/recruiter_account/data/models/get_single_job_response_model.dart'
     hide ApplicationRequirement, CustomQuestion;
-import 'package:karlfive/features/recruiter_account/data/models/job_update_request_model.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/country_city_controller.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/job_update_request_model.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
 import '../../data/models/get_currency_response_model.dart';
 import 'job_controller/career_stage_controller.dart';
 import 'job_controller/employment_type_controller.dart';
@@ -64,7 +64,8 @@ class JobEditController extends GetxController {
   List<ApplicationRequirement> get applicationRequirement => [
     if (resumeVisible.value)
       ApplicationRequirement(requirement: resume, status: resumeStatus.value),
-    if (visaVisible.value) ApplicationRequirement(requirement: visa, status: visaStatus.value),
+    if (visaVisible.value)
+      ApplicationRequirement(requirement: visa, status: visaStatus.value),
   ];
 
   List<CustomQuestion> get customQuestionsList => customQuestions
@@ -121,7 +122,10 @@ class JobEditController extends GetxController {
 
       if (parts.length >= 2) {
         city = parts[0];
-        country = parts.sublist(1).join(', ').trim(); // handles "New York, NY, USA"
+        country = parts
+            .sublist(1)
+            .join(', ')
+            .trim(); // handles "New York, NY, USA"
       } else if (parts.length == 1) {
         country = parts[0];
       }
@@ -152,20 +156,21 @@ class JobEditController extends GetxController {
     selectedRole.value = j.role ?? '';
 
     // Other dropdowns - convert backend values to display names
-    employeeController.selectedEmploymentType.value =
-        employeeController.getDisplayName(j.employementType ?? '');
+    employeeController.selectedEmploymentType.value = employeeController
+        .getDisplayName(j.employementType ?? '');
 
-    locationTypeController.selectedLocationType.value =
-        locationTypeController.getDisplayName(j.locationType ?? '');
+    locationTypeController.selectedLocationType.value = locationTypeController
+        .getDisplayName(j.locationType ?? '');
 
     experienceLevelController.selectedExperienceLevel.value =
         experienceLevelController.getDisplayName(j.experience ?? '');
 
-    careerStageController.selectedCareerStage.value =
-        careerStageController.getDisplayName(j.careerStage ?? '');
+    careerStageController.selectedCareerStage.value = careerStageController
+        .getDisplayName(j.careerStage ?? '');
 
     // Publish settings
-    publishNow.value = j.publishDate == null || j.publishDate!.isBefore(DateTime.now());
+    publishNow.value =
+        j.publishDate == null || j.publishDate!.isBefore(DateTime.now());
     selectedPublishDate.value = j.publishDate;
 
     // Requirements
@@ -189,8 +194,9 @@ class JobEditController extends GetxController {
   }
 
   void _updateRolesForCategory(String categoryName) {
-    final cat = recruiterController.category
-        .firstWhereOrNull((c) => c.name == categoryName);
+    final cat = recruiterController.category.firstWhereOrNull(
+      (c) => c.name == categoryName,
+    );
     roles.assignAll(cat?.role ?? []);
   }
 
@@ -216,7 +222,11 @@ class JobEditController extends GetxController {
   }
 
   DateTime get safeInitialDate {
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
     final selected = selectedPublishDate.value;
     if (selected == null) return today.add(const Duration(days: 1));
     final sel = DateTime(selected.year, selected.month, selected.day);
@@ -250,13 +260,17 @@ class JobEditController extends GetxController {
 
       // 🔥 FIX: Use backend values instead of display names
       employementType: employeeController.getBackendValue(
-          employeeController.selectedEmploymentType.value),
+        employeeController.selectedEmploymentType.value,
+      ),
       locationType: locationTypeController.getBackendValue(
-          locationTypeController.selectedLocationType.value),
+        locationTypeController.selectedLocationType.value,
+      ),
       experience: experienceLevelController.getBackendValue(
-          experienceLevelController.selectedExperienceLevel.value),
+        experienceLevelController.selectedExperienceLevel.value,
+      ),
       careerStage: careerStageController.getBackendValue(
-          careerStageController.selectedCareerStage.value),
+        careerStageController.selectedCareerStage.value,
+      ),
 
       name: selectedCategory.value,
       role: selectedRole.value,
@@ -289,11 +303,11 @@ class JobEditController extends GetxController {
 // // features/recruiter_account/presentation/controller/job_edit_controller.dart
 // import 'package:get/get.dart';
 // import 'package:intl/intl.dart';
-// import 'package:karlfive/features/recruiter_account/data/models/get_single_job_response_model.dart'
+// import 'package:giveandtake/features/recruiter_account/data/models/get_single_job_response_model.dart'
 //     hide ApplicationRequirement, CustomQuestion;
-// import 'package:karlfive/features/recruiter_account/data/models/job_update_request_model.dart';
-// import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
-// import 'package:karlfive/features/recruiter_account/presentation/controller/country_city_controller.dart';
+// import 'package:giveandtake/features/recruiter_account/data/models/job_update_request_model.dart';
+// import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+// import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
 // import '../../data/models/get_currency_response_model.dart';
 //
 // class JobEditController extends GetxController {

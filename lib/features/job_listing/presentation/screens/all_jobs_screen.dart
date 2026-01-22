@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/network/api_client.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
 
 import '../../data/repo/job_listing_repository_impl.dart';
 import '../../domain/repo/job_listing_repository.dart';
@@ -19,20 +19,23 @@ class AllJobsScreen extends GetView<AllJobsController> {
     // Dependency Injection
     if (!Get.isRegistered<AllJobsController>()) {
       if (!Get.isRegistered<JobListingRepository>()) {
-         try {
-           final apiClient = Get.find<ApiClient>();
-           Get.put<JobListingRepository>(JobListingRepositoryImpl(apiClient: apiClient));
-         } catch (e) {
-            // Fallback strategy if needed
-         }
+        try {
+          final apiClient = Get.find<ApiClient>();
+          Get.put<JobListingRepository>(
+            JobListingRepositoryImpl(apiClient: apiClient),
+          );
+        } catch (e) {
+          // Fallback strategy if needed
+        }
       }
-      
-      if (Get.isRegistered<JobListingRepository>() && !Get.isRegistered<GetJobsUseCase>()) {
+
+      if (Get.isRegistered<JobListingRepository>() &&
+          !Get.isRegistered<GetJobsUseCase>()) {
         Get.put(GetJobsUseCase(Get.find<JobListingRepository>()));
       }
-      
+
       if (Get.isRegistered<GetJobsUseCase>()) {
-         Get.put(AllJobsController(Get.find<GetJobsUseCase>()));
+        Get.put(AllJobsController(Get.find<GetJobsUseCase>()));
       }
     }
 
@@ -51,7 +54,8 @@ class AllJobsScreen extends GetView<AllJobsController> {
       body: NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
           if (scrollInfo.metrics.pixels >=
-                  scrollInfo.metrics.maxScrollExtent - 200 && // Trigger slightly before bottom
+                  scrollInfo.metrics.maxScrollExtent -
+                      200 && // Trigger slightly before bottom
               !controller.isMoreLoading.value &&
               !controller.isLoading.value) {
             controller.loadMore();
@@ -66,57 +70,67 @@ class AllJobsScreen extends GetView<AllJobsController> {
             slivers: [
               // Header Sliver
               SliverToBoxAdapter(
-                 child: Container(
-                   width: double.infinity,
-                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                   decoration: const BoxDecoration(
-                     image: DecorationImage(
-                       image: AssetImage("assets/images/allJobs.jpeg"),
-                       fit: BoxFit.cover,
-                     ),
-                   ),
-                   child: Column(
-                     crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                       const Text(
-                         "Browse Jobs",
-                         style: TextStyle(
-                           color: Colors.white,
-                           fontSize: 28,
-                           fontWeight: FontWeight.bold,
-                         ),
-                       ),
-                       const SizedBox(height: 8),
-                       const Text(
-                         "Browse our curated job openings across industries and locations. Use smart filters to find roles that match your skills, experience, and career goals—your next opportunity starts here.",
-                         style: TextStyle(
-                           color: Colors.white,
-                           fontSize: 14,
-                           height: 1.5,
-                         ),
-                       ),
-                       const SizedBox(height: 20),
-                       // Breadcrumb
-                       Row(
-                         children: const [
-                           Text(
-                             "Home",
-                             style: TextStyle(color: Colors.white70, fontSize: 14),
-                           ),
-                           SizedBox(width: 8),
-                           Icon(Icons.arrow_forward_ios, size: 12, color: Colors.white70),
-                           SizedBox(width: 8),
-                           Text(
-                             "Browse Jobs",
-                             style: TextStyle(color: Colors.white, fontSize: 14),
-                           ),
-                         ],
-                       ),
-                     ],
-                   ),
-                 ),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/images/allJobs.jpeg"),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Browse Jobs",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Browse our curated job openings across industries and locations. Use smart filters to find roles that match your skills, experience, and career goals—your next opportunity starts here.",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Breadcrumb
+                      Row(
+                        children: const [
+                          Text(
+                            "Home",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 12,
+                            color: Colors.white70,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            "Browse Jobs",
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              
+
               // Search Sliver
               SliverToBoxAdapter(
                 child: Padding(
@@ -141,7 +155,10 @@ class AllJobsScreen extends GetView<AllJobsController> {
                             ),
                             filled: true,
                             fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: 16,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -150,7 +167,7 @@ class AllJobsScreen extends GetView<AllJobsController> {
                           height: 48,
                           child: ElevatedButton(
                             onPressed: () {
-                               controller.fetchJobs(isRefresh: true);
+                              controller.fetchJobs(isRefresh: true);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2E86DE),
@@ -158,7 +175,13 @@ class AllJobsScreen extends GetView<AllJobsController> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text("Search", style: TextStyle(color: Colors.white, fontSize: 16)),
+                            child: const Text(
+                              "Search",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -181,74 +204,86 @@ class AllJobsScreen extends GetView<AllJobsController> {
                   ),
                 ),
               ),
-              
+
               const SliverToBoxAdapter(child: SizedBox(height: 10)),
 
               // Job List Sliver
               Obx(() {
-                 if (controller.isLoading.value) {
-                   return const SliverToBoxAdapter(
-                     child: Center(child: Padding(
-                       padding: EdgeInsets.all(20.0),
-                       child: CircularProgressIndicator(),
-                     )),
-                   );
-                 }
+                if (controller.isLoading.value) {
+                  return const SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  );
+                }
 
-                   if (controller.jobList.isEmpty) {
-                     return SliverToBoxAdapter(
-                       child: Center(child: Padding(
-                         padding: const EdgeInsets.all(30.0),
-                         child: Text(controller.searchText.value.isNotEmpty
-                             ? "No item available for this search"
-                             : "No jobs found"),
-                       )),
-                     );
-                   }
+                if (controller.jobList.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(30.0),
+                        child: Text(
+                          controller.searchText.value.isNotEmpty
+                              ? "No item available for this search"
+                              : "No jobs found",
+                        ),
+                      ),
+                    ),
+                  );
+                }
 
-                 return SliverList(
-                   delegate: SliverChildBuilderDelegate(
-                     (context, index) {
-                       final job = controller.jobList[index];
-                       return JobCard(
-                         title: job.title,
-                         company: job.companyId?.cname ?? "Unknown",
-                         location: job.location,
-                         duration: job.employementType,
-                         salary: job.salaryRange,
-                         timePosted: job.timePostedFormatted,
-                         logoUrl: job.companyId?.clogo,
-                         onTap: () {
-                            Get.to(() => JobDetailsScreen(jobData: job.toDisplayMap()));
-                         },
-                         onEasyApply: () {
-                            // Initialize JobDetailsController
-                            final jobDetailsController = Get.put(JobDetailsController());
-                            
-                            // Prepare complete job data for JobApplicationScreen
-                            final jobId = job.id;
-                            final companyName = job.companyId?.cname ?? 
-                                               job.recruiterId?.fullName ?? 
-                                               "Unknown Company";
-                            
-                            final applicationData = {
-                              '_id': jobId,
-                              'id': jobId,
-                              'jobTitle': job.title,
-                              'companyName': companyName,
-                              'location': job.location,
-                              'customQuestion': job.customQuestion.map((e) => e.toJson()).toList(),
-                              'raw': job.toJson(),
-                            };
-                            
-                            // Call the same method used by Job Details screen
-                            jobDetailsController.checkResumeAndApply(applicationData);
-                          },
-                       );
-                     },
-                     childCount: controller.jobList.length,
-                   ),
-                 );
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final job = controller.jobList[index];
+                    return JobCard(
+                      title: job.title,
+                      company: job.companyId?.cname ?? "Unknown",
+                      location: job.location,
+                      duration: job.employementType,
+                      salary: job.salaryRange,
+                      timePosted: job.timePostedFormatted,
+                      logoUrl: job.companyId?.clogo,
+                      onTap: () {
+                        Get.to(
+                          () => JobDetailsScreen(jobData: job.toDisplayMap()),
+                        );
+                      },
+                      onEasyApply: () {
+                        // Initialize JobDetailsController
+                        final jobDetailsController = Get.put(
+                          JobDetailsController(),
+                        );
+
+                        // Prepare complete job data for JobApplicationScreen
+                        final jobId = job.id;
+                        final companyName =
+                            job.companyId?.cname ??
+                            job.recruiterId?.fullName ??
+                            "Unknown Company";
+
+                        final applicationData = {
+                          '_id': jobId,
+                          'id': jobId,
+                          'jobTitle': job.title,
+                          'companyName': companyName,
+                          'location': job.location,
+                          'customQuestion': job.customQuestion
+                              .map((e) => e.toJson())
+                              .toList(),
+                          'raw': job.toJson(),
+                        };
+
+                        // Call the same method used by Job Details screen
+                        jobDetailsController.checkResumeAndApply(
+                          applicationData,
+                        );
+                      },
+                    );
+                  }, childCount: controller.jobList.length),
+                );
               }),
 
               // Load More Indicator Sliver

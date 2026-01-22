@@ -1,15 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/input_decoration_extensions.dart';
 import '../../../auth/presentation/controller/auth_controller.dart';
 import '../../../profile_dasboard/controller/change_pass_controller.dart';
-
 
 class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
@@ -47,10 +45,10 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-      title: Text('Change Password', style: TextStyle(color: Colors.white),),
-    backgroundColor: const Color(0xFF2B7FD0),
-    elevation: 0,
-    ),
+        title: Text('Change Password', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF2B7FD0),
+        elevation: 0,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -94,7 +92,7 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
 
               /// Fields
               Obx(
-                    () => _passwordField(
+                () => _passwordField(
                   hint: "Enter Current Password",
                   controller: currentCtrl,
                   onChanged: (val) => controller.currentPassword.value = val,
@@ -104,7 +102,7 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
               const SizedBox(height: 20),
 
               Obx(
-                    () => _passwordField(
+                () => _passwordField(
                   hint: "New Password",
                   controller: newCtrl,
                   onChanged: (val) => controller.newPassword.value = val,
@@ -114,7 +112,7 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
               const SizedBox(height: 20),
 
               Obx(
-                    () => _passwordField(
+                () => _passwordField(
                   hint: "Confirm Password",
                   controller: confirmCtrl,
                   onChanged: (val) => controller.confirmPassword.value = val,
@@ -126,21 +124,21 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
               /// Error message
               /// Error message
               Obx(
-                    () => controller.hasError.value
+                () => controller.hasError.value
                     ? const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 0),
-                    child: Text(
-                      "Passphrase must be at least 12 characters and \n include one uppercase, one lowercase, one number, \n and one special character.",
-                      style: TextStyle(
-                        color: Color(0xFFB90000),
-                        fontSize: 10,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                )
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 0),
+                          child: Text(
+                            "Passphrase must be at least 12 characters and \n include one uppercase, one lowercase, one number, \n and one special character.",
+                            style: TextStyle(
+                              color: Color(0xFFB90000),
+                              fontSize: 10,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      )
                     : SizedBox.shrink(),
               ),
 
@@ -151,12 +149,12 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
                 width: double.infinity,
                 height: 48,
                 child: Obx(
-                      () => ElevatedButton(
+                  () => ElevatedButton(
                     onPressed: controller.isLoading.value
                         ? null
                         : () {
-                      controller.validateAndSubmit();
-                    },
+                            controller.validateAndSubmit();
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2B7FD0),
                       shape: RoundedRectangleBorder(
@@ -165,21 +163,21 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
                     ),
                     child: controller.isLoading.value
                         ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
                         : const Text(
-                      "Save",
-                      style: TextStyle(
-                        color: Color(0xFFF4F4F4),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),
-                    ),
+                            "Save",
+                            style: TextStyle(
+                              color: Color(0xFFF4F4F4),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -221,7 +219,7 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Obx(
-            () => SizedBox(
+        () => SizedBox(
           height: height,
           child: TextFormField(
             controller: controller,

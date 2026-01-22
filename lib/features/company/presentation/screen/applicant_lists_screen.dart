@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:karlfive/features/company/presentation/controller/company_details_controller.dart';
-import 'package:karlfive/features/company/presentation/screen/candidate_details_screen.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
+import 'package:giveandtake/features/company/presentation/screen/candidate_details_screen.dart';
 import '../../data/model/company_applicant_list_response_model.dart';
 
 class CompanyApplicantsListScreen extends StatefulWidget {

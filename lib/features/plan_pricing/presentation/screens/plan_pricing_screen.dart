@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
 import '../controllers/plan_pricing_controller.dart';
 import '../widgets/plan_pricing_card.dart';
 import '../widgets/payment_option_dialog.dart';

@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/network/constants/key_constants.dart';
-import 'package:karlfive/core/network/services/secure_store_services.dart';
-import 'package:karlfive/features/job_listing/data/models/job_application_request.dart';
-import 'package:karlfive/features/job_listing/data/models/user_profile_model.dart';
-import 'package:karlfive/features/job_listing/domain/usecases/get_job_details_usecase.dart';
-import 'package:karlfive/features/job_listing/domain/usecases/get_user_profile_usecase.dart';
-import 'package:karlfive/features/job_listing/domain/usecases/submit_job_application_usecase.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
+import 'package:giveandtake/core/network/constants/key_constants.dart';
+import 'package:giveandtake/core/network/services/secure_store_services.dart';
+import 'package:giveandtake/features/job_listing/data/models/job_application_request.dart';
+import 'package:giveandtake/features/job_listing/data/models/user_profile_model.dart';
+import 'package:giveandtake/features/job_listing/domain/usecases/get_job_details_usecase.dart';
+import 'package:giveandtake/features/job_listing/domain/usecases/get_user_profile_usecase.dart';
+import 'package:giveandtake/features/job_listing/domain/usecases/submit_job_application_usecase.dart';
+import 'package:giveandtake/features/profile_dasboard/presentation/screens/job_history.dart';
 import 'package:path_provider/path_provider.dart';
 
 class JobApplicationController extends GetxController {

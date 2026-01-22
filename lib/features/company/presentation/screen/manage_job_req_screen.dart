@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import 'package:karlfive/features/company/presentation/controller/company_account_controller.dart';
-import 'package:karlfive/features/company/presentation/controller/company_details_controller.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
+import 'package:giveandtake/features/job_listing/presentation/screens/job_details_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../recruiter_account/presentation/screens/single_job_details_screen.dart';

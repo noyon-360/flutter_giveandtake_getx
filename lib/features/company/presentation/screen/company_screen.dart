@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -96,7 +96,6 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-     
       // appBar: AppBar(
       //   backgroundColor: Colors.white,
 
@@ -729,8 +728,11 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 ),
               ),
 
-            const SizedBox(height: 25),
-              const Text("Award Description*", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 25),
+              const Text(
+                "Award Description*",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 12),
 
               Container(
@@ -743,122 +745,203 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Award & Honors", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-                    const Text("Highlight your achievements and recognitions.", style: TextStyle(fontSize: 12, color: AppColors.textGrey)),
+                    const Text(
+                      "Award & Honors",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Text(
+                      "Highlight your achievements and recognitions.",
+                      style: TextStyle(fontSize: 12, color: AppColors.textGrey),
+                    ),
 
                     const SizedBox(height: 20),
 
                     // Dynamic Award Cards
-                    Obx(() => Column(
-                      children: List.generate(controller.awardFields.length, (index) {
-                        final fields = controller.awardFields[index];
+                    Obx(
+                      () => Column(
+                        children: List.generate(controller.awardFields.length, (
+                          index,
+                        ) {
+                          final fields = controller.awardFields[index];
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                            boxShadow: [
-                              BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 3)),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Header: Award Title + Remove Button
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Award ${index + 1}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                                  IconButton(
-                                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                                    onPressed: () => controller.removeAwardField(index),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                  ),
-                                ],
-                              ),
-                              const Divider(),
-
-                              CustomTextField(label: "Award Title", hintText: "e.g. Employee of the Year", controller: fields['title'], isRequired: true),
-                              const SizedBox(height: 12),
-
-                              CustomTextField(label: "Program Name", hintText: "e.g. Company Recognition Program", controller: fields['issuer'], isRequired: true),
-                              const SizedBox(height: 12),
-
-                              // Program Date - Month/Year Picker
-                              const Text("Program Date", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () async {
-                                  int? initMonth, initYear;
-                                  final text = fields['date']!.text;
-                                  if (text.length == 6) {
-                                    initMonth = int.tryParse(text.substring(0, 2));
-                                    initYear = int.tryParse(text.substring(2));
-                                  }
-
-                                  final result = await showDialog<Map<String, int>>(
-                                    context: context,
-                                    builder: (_) => MonthYearPickerDialog(initialMonth: initMonth, initialYear: initYear),
-                                  );
-
-                                  if (result != null) {
-                                    final month = result['month']!.toString().padLeft(2, '0');
-                                    final year = result['year'].toString();
-                                    // fields['date']?.text = "$month/$year";
-                                    fields['date']?.text = month+year; // e.g. 122025
-                                  }
-                                },
-                                child: AbsorbPointer(
-                                  child: TextFormField(
-                                    controller: fields['date'],
-                                    decoration: InputDecoration(
-                                      hintText: "MMYYYY",
-                                      suffixIcon: const Icon(Icons.calendar_today_outlined, size: 20),
-                                      filled: true,
-                                      fillColor: Colors.grey[50],
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade300),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Header: Award Title + Remove Button
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Award ${index + 1}",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                    validator: (val) {
-                                      if (val == null || val.isEmpty) return "Required";
-                                      if (!RegExp(r'^\d{6}$').hasMatch(val)) return "Format: MMYYYY";
-                                      final m = int.tryParse(val.substring(0, 2));
-                                      if (m == null || m < 1 || m > 12) return "Invalid month";
-                                      return null;
-                                    },
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                      onPressed: () =>
+                                          controller.removeAwardField(index),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(),
+
+                                CustomTextField(
+                                  label: "Award Title",
+                                  hintText: "e.g. Employee of the Year",
+                                  controller: fields['title'],
+                                  isRequired: true,
+                                ),
+                                const SizedBox(height: 12),
+
+                                CustomTextField(
+                                  label: "Program Name",
+                                  hintText: "e.g. Company Recognition Program",
+                                  controller: fields['issuer'],
+                                  isRequired: true,
+                                ),
+                                const SizedBox(height: 12),
+
+                                // Program Date - Month/Year Picker
+                                const Text(
+                                  "Program Date",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
+                                const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () async {
+                                    int? initMonth, initYear;
+                                    final text = fields['date']!.text;
+                                    if (text.length == 6) {
+                                      initMonth = int.tryParse(
+                                        text.substring(0, 2),
+                                      );
+                                      initYear = int.tryParse(
+                                        text.substring(2),
+                                      );
+                                    }
 
-                              CustomTextField(
-                                label: "Award Short Description",
-                                hintText: "Briefly describe the award and what you achieved",
-                                controller: fields['description'],
-                                isRequired: true,
-                                maxLines: 4,
-                              ),
-                              const SizedBox(height: 16),
+                                    final result =
+                                        await showDialog<Map<String, int>>(
+                                          context: context,
+                                          builder: (_) => MonthYearPickerDialog(
+                                            initialMonth: initMonth,
+                                            initialYear: initYear,
+                                          ),
+                                        );
 
-                              // Add Another Award Button
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton.icon(
-                                  onPressed: controller.addAwardField,
-                                  icon: const Icon(Icons.add_circle_outline, size: 18),
-                                  label: const Text("Add Another Award"),
-                                  style: TextButton.styleFrom(foregroundColor: AppColors.primaryWhite),
+                                    if (result != null) {
+                                      final month = result['month']!
+                                          .toString()
+                                          .padLeft(2, '0');
+                                      final year = result['year'].toString();
+                                      // fields['date']?.text = "$month/$year";
+                                      fields['date']?.text =
+                                          month + year; // e.g. 122025
+                                    }
+                                  },
+                                  child: AbsorbPointer(
+                                    child: TextFormField(
+                                      controller: fields['date'],
+                                      decoration: InputDecoration(
+                                        hintText: "MMYYYY",
+                                        suffixIcon: const Icon(
+                                          Icons.calendar_today_outlined,
+                                          size: 20,
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.grey[50],
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.grey.shade400,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                      validator: (val) {
+                                        if (val == null || val.isEmpty)
+                                          return "Required";
+                                        if (!RegExp(r'^\d{6}$').hasMatch(val))
+                                          return "Format: MMYYYY";
+                                        final m = int.tryParse(
+                                          val.substring(0, 2),
+                                        );
+                                        if (m == null || m < 1 || m > 12)
+                                          return "Invalid month";
+                                        return null;
+                                      },
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    )),
+                                const SizedBox(height: 12),
+
+                                CustomTextField(
+                                  label: "Award Short Description",
+                                  hintText:
+                                      "Briefly describe the award and what you achieved",
+                                  controller: fields['description'],
+                                  isRequired: true,
+                                  maxLines: 4,
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Add Another Award Button
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton.icon(
+                                    onPressed: controller.addAwardField,
+                                    icon: const Icon(
+                                      Icons.add_circle_outline,
+                                      size: 18,
+                                    ),
+                                    label: const Text("Add Another Award"),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.primaryWhite,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
 
                     const SizedBox(height: 12),
 
@@ -872,8 +955,13 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                         foregroundColor: Colors.black,
                         elevation: 0,
                         side: BorderSide(color: Colors.grey.shade400),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -912,7 +1000,9 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                       final cleanRecruiterIds = recruiterEmails.join(",");
 
                       // Safe awards JSON
-                      final awardsJson = jsonEncode(controller.getAwards()); // always valid JSON
+                      final awardsJson = jsonEncode(
+                        controller.getAwards(),
+                      ); // always valid JSON
 
                       // Debug print (optional - remove later)
                       debugPrint("Recruiters being sent → $cleanRecruiterIds");
@@ -968,7 +1058,6 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                         _comapanyTEController.text.trim(),
                         services.join(", "),
                         cleanRecruiterIds, // ← NOW ONLY EMAILS: eshitta@example.com,john@doe.com
-                        
                       );
 
                       // Success navigation (only if API succeeds — already handled inside controller)

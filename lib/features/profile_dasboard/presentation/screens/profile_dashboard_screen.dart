@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/core/services/get_user_profile_service.dart';
-import 'package:karlfive/features/Home/presentation/screen/candidate_dashboard_screen.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/change_pass_screen.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/job_history.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/payment_history.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/core/services/get_user_profile_service.dart';
+import 'package:giveandtake/features/Home/presentation/screen/candidate_dashboard_screen.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/profile_dasboard/presentation/screens/change_pass_screen.dart';
+import 'package:giveandtake/features/profile_dasboard/presentation/screens/job_history.dart';
+import 'package:giveandtake/features/profile_dasboard/presentation/screens/payment_history.dart';
+import 'package:giveandtake/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
 
 class ProfileDashboardScreen extends StatelessWidget {
   const ProfileDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final GetUserProfileService profileService = Get.find<GetUserProfileService>();
-    
+    final GetUserProfileService profileService =
+        Get.find<GetUserProfileService>();
+
     return AppScaffold(
       // backgroundColor: Colors.white,
       appBar: AppBar(
@@ -51,7 +52,7 @@ class ProfileDashboardScreen extends StatelessWidget {
                         Get.to(() => const CandidateDashboardScreen());
                       },
                     ),
-                  
+
                   _menuTile(
                     "assets/icons/personalinfo.png",
                     "Personal Information",
@@ -59,9 +60,13 @@ class ProfileDashboardScreen extends StatelessWidget {
                       Get.to(() => const PersonalInfoScreen());
                     },
                   ),
-                  _menuTile("assets/icons/changepass.png", "Change Password", () {
-                    Get.to(() => ChangePasswordScreen());
-                  }),
+                  _menuTile(
+                    "assets/icons/changepass.png",
+                    "Change Password",
+                    () {
+                      Get.to(() => ChangePasswordScreen());
+                    },
+                  ),
                   _menuTile("assets/icons/jobhistory.png", "Job History", () {
                     Get.to(() => const JobHistoryScreen());
                   }),
@@ -72,8 +77,7 @@ class ProfileDashboardScreen extends StatelessWidget {
                       Get.to(() => const PaymentHistoryScreen());
                     },
                   ),
-                  _menuTile(
-                      "assets/icons/logout.png", "Log out", () {
+                  _menuTile("assets/icons/logout.png", "Log out", () {
                     Get.find<AuthController>().logout();
                   }),
 
@@ -94,7 +98,12 @@ class ProfileDashboardScreen extends StatelessWidget {
   Widget _menuTile(String iconPath, String title, VoidCallback onTap) {
     return ListTile(
       onTap: onTap,
-      leading: Image.asset(iconPath, width: 22, height: 24, color: Colors.black,),
+      leading: Image.asset(
+        iconPath,
+        width: 22,
+        height: 24,
+        color: Colors.black,
+      ),
       title: Text(
         title,
         style: const TextStyle(

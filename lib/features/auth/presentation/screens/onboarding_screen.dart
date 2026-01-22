@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/signup_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/signup_screen.dart';
 
 import '../../../../core/common/constants/app_images.dart';
 import '../../../../core/common/widgets/app_logo.dart';

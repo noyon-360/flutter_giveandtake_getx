@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
-import 'package:karlfive/core/network/constants/api_constants.dart';
-import 'package:karlfive/core/network/models/network_success.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/core/network/models/network_success.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/models/network_failure.dart';
 import '../../../../core/network/network_result.dart';
@@ -21,8 +21,8 @@ class AboutRepositoryImpl implements AboutRepository {
     );
 
     return response.fold(
-          (failure) => Left(failure),
-          (success) => Right(success.data as NetworkSuccess<AboutContentModel>),
+      (failure) => Left(failure),
+      (success) => Right(success.data as NetworkSuccess<AboutContentModel>),
     );
   }
 }

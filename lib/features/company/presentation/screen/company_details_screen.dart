@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/features/company/data/model/single_Company_response_model.dart';
-import 'package:karlfive/features/company/presentation/screen/company_edit_profile.dart';
-import 'package:karlfive/features/company/presentation/screen/connect_company_dialog_screen.dart';
-import 'package:karlfive/features/company/presentation/screen/recruiter_request_screen.dart';
-import 'package:karlfive/features/company_pricing/presentation/screens/plan_pricing_screen.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/features/company/data/model/single_Company_response_model.dart';
+import 'package:giveandtake/features/company/presentation/screen/company_edit_profile.dart';
+import 'package:giveandtake/features/company/presentation/screen/connect_company_dialog_screen.dart';
+import 'package:giveandtake/features/company/presentation/screen/recruiter_request_screen.dart';
+import 'package:giveandtake/features/company_pricing/presentation/screens/plan_pricing_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/network/constants/api_constants.dart';
@@ -443,7 +443,10 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    border: Border.all(color: const Color(0xFF999999), width: 1),
+                    border: Border.all(
+                      color: const Color(0xFF999999),
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
 
@@ -457,16 +460,17 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                     width: double.infinity,
                     child: ElevatorPitchCompanySection(
                       videoUrl:
-                              "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
-                          // httpHeaders: {
-                          //   "Custom-Header": "value",
-                          //   if (_accessToken != null) ...{
-                          //     "Authorization": "Bearer $_accessToken",
-                          //   },
-                          // },
+                          "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
+                      // httpHeaders: {
+                      //   "Custom-Header": "value",
+                      //   if (_accessToken != null) ...{
+                      //     "Authorization": "Bearer $_accessToken",
+                      //   },
+                      // },
                     ),
                   ),
                 ),
+
                 /// ================= Elevator Pitch =================
                 // sectionTitle("Elevator Video Pitch"),
                 // const SizedBox(height: 20),
@@ -555,7 +559,6 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                 //           ),
                 //         ),
                 //       ),
-
                 const SizedBox(height: 20),
                 SizedBox(height: 20),
 
@@ -883,7 +886,9 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                     ),
                                     SizedBox(width: 4),
                                     Text(
-                                      _formatDate(honor.programeDate.toIso8601String()),
+                                      _formatDate(
+                                        honor.programeDate.toIso8601String(),
+                                      ),
                                       style: TextStyle(
                                         color: Colors.black54,
                                         fontSize: 14,
@@ -929,50 +934,41 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
   }
   // ================= SOCIAL MEDIA LINKS =================
 
-Widget buildSocialLinks(Company company) {
-  final validSocialLinks = company.sLink
-      .where((link) => link.url.trim().isNotEmpty)
-      .toList();
+  Widget buildSocialLinks(Company company) {
+    final validSocialLinks = company.sLink
+        .where((link) => link.url.trim().isNotEmpty)
+        .toList();
 
-  if (validSocialLinks.isEmpty) {
-    return const Text(
-      "No social links available",
-      style: TextStyle(
-        color: Colors.black54,
-        fontSize: 12,
-      ),
+    if (validSocialLinks.isEmpty) {
+      return const Text(
+        "No social links available",
+        style: TextStyle(color: Colors.black54, fontSize: 12),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: validSocialLinks.map((link) {
+        return GestureDetector(
+          onTap: () async {
+            final Uri url = Uri.parse(link.url);
+
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url, mode: LaunchMode.externalApplication);
+            } else {
+              Get.snackbar(
+                "Error",
+                "Could not open ${link.label}",
+                snackPosition: SnackPosition.BOTTOM,
+              );
+            }
+          },
+          child: SocialMedia(image: _getSocialIcon(link.label)),
+        );
+      }).toList(),
     );
   }
-
-  return Wrap(
-    spacing: 8,
-    runSpacing: 8,
-    children: validSocialLinks.map((link) {
-      return GestureDetector(
-        onTap: () async {
-          final Uri url = Uri.parse(link.url);
-
-          if (await canLaunchUrl(url)) {
-            await launchUrl(
-              url,
-              mode: LaunchMode.externalApplication,
-            );
-          } else {
-            Get.snackbar(
-              "Error",
-              "Could not open ${link.label}",
-              snackPosition: SnackPosition.BOTTOM,
-            );
-          }
-        },
-        child: SocialMedia(
-          image: _getSocialIcon(link.label),
-        ),
-      );
-    }).toList(),
-  );
-}
-
 
   Widget sectionTitle(String title, {bool canDelete = false}) {
     return Padding(

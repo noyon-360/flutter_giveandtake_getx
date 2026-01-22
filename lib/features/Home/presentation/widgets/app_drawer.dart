@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/elevator/presentation/screens/elevator_resume_screen.dart';
-import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
-import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
+import 'package:giveandtake/features/home_static_screens/data/models/contactus_model.dart';
+import 'package:giveandtake/features/home_static_screens/presentation/screen/contact_us_screen.dart';
+import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
 
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
 import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';

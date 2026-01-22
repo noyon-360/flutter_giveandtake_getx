@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:karlfive/features/job_listing/domain/usecases/get_jobs_usecase.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
+import 'package:giveandtake/features/job_listing/domain/usecases/get_jobs_usecase.dart';
+import 'package:giveandtake/features/job_listing/presentation/screens/job_details_screen.dart';
 
 class JobListingController extends GetxController {
   final GetJobsUseCase _getJobsUseCase;

@@ -1,11 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/constants/app_images.dart';
-import 'package:karlfive/core/common/widgets/app_logo.dart';
-import 'package:karlfive/core/theme/app_buttoms.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/auth/presentation/widgets/otp_code_field.dart';
+import 'package:giveandtake/core/common/constants/app_images.dart';
+import 'package:giveandtake/core/common/widgets/app_logo.dart';
+import 'package:giveandtake/core/theme/app_buttoms.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/auth/presentation/widgets/otp_code_field.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/common/widgets/form_error_message.dart';

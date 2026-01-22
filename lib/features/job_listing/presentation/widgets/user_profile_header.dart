@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:karlfive/features/job_listing/data/models/user_profile_model.dart';
+import 'package:giveandtake/features/job_listing/data/models/user_profile_model.dart';
 
 class UserProfileHeader extends StatelessWidget {
   final UserProfileModel? userProfile;
@@ -14,9 +14,7 @@ class UserProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (userProfile == null) {
@@ -41,20 +39,20 @@ class UserProfileHeader extends StatelessWidget {
         children: [
           // Avatar and name
           CircleAvatar(
-                radius: 50,
-                backgroundImage: userProfile!.avatarUrl != null
-                    ? NetworkImage(userProfile!.avatarUrl!)
-                    : null,
-                child: userProfile!.avatarUrl == null
-                    ? Text(
-                        userProfile!.name.isNotEmpty
-                            ? userProfile!.name[0].toUpperCase()
-                            : '',
-                        style: const TextStyle(fontSize: 32),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 16),
+            radius: 50,
+            backgroundImage: userProfile!.avatarUrl != null
+                ? NetworkImage(userProfile!.avatarUrl!)
+                : null,
+            child: userProfile!.avatarUrl == null
+                ? Text(
+                    userProfile!.name.isNotEmpty
+                        ? userProfile!.name[0].toUpperCase()
+                        : '',
+                    style: const TextStyle(fontSize: 32),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -68,10 +66,7 @@ class UserProfileHeader extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 userProfile!.title ?? userProfile!.role,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -83,21 +78,14 @@ class UserProfileHeader extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 20,
-                      color: Colors.grey[600],
-                    ),
+                    Icon(Icons.location_on, size: 20, color: Colors.grey[600]),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         userProfile!.address.isNotEmpty
                             ? userProfile!.address
                             : 'No address',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -110,19 +98,12 @@ class UserProfileHeader extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.email,
-                      size: 20,
-                      color: Colors.grey[600],
-                    ),
+                    Icon(Icons.email, size: 20, color: Colors.grey[600]),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         userProfile!.email,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

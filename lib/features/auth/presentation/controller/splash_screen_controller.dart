@@ -1,10 +1,10 @@
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
-import 'package:karlfive/core/network/services/auth_storage_service.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/company/presentation/screen/company_details_screen.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
+import 'package:giveandtake/core/bottomNavbar/screens/dashboard_screen.dart';
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/company/presentation/screen/company_details_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
 
 import '../../../company/presentation/screen/company_screen.dart';
 import '../screens/login_screen.dart';
@@ -29,14 +29,11 @@ class SplashController extends GetxController {
 
       if (userRole == 'candidate') {
         Get.offAll(() => DashboardScreen());
-      } 
-      else if (userRole == 'recruiter') {
+      } else if (userRole == 'recruiter') {
         Get.offAll(() => RecruiterPageScreen());
-      } 
-      else if (userRole == 'company') {
+      } else if (userRole == 'company') {
         Get.offAll(() => CompanyDetailsPage());
-      } 
-      else {
+      } else {
         // Unknown role, go to login
         Get.offAll(() => LoginScreen());
       }

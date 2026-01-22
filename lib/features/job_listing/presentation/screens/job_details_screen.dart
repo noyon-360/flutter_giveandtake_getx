@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
 
 import '../controllers/bookmark_controller.dart';
 import '../controllers/job_details_controller.dart';
@@ -80,7 +80,10 @@ class JobDetailsScreen extends StatelessWidget {
               ),
               child: Container(
                 color: Colors.black.withOpacity(0.6), // Dark overlay
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 40,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -111,7 +114,10 @@ class JobDetailsScreen extends StatelessWidget {
 
             // ================== MAIN CONTENT ==================
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 24.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -136,7 +142,9 @@ class JobDetailsScreen extends StatelessWidget {
                               width: 60,
                               height: 60,
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30), // Circular logo
+                                borderRadius: BorderRadius.circular(
+                                  30,
+                                ), // Circular logo
                                 border: Border.all(color: Colors.grey.shade300),
                               ),
                               child: ClipRRect(
@@ -146,11 +154,14 @@ class JobDetailsScreen extends StatelessWidget {
                                         logoUrl,
                                         fit: BoxFit.cover,
                                         errorBuilder: (c, e, s) => const Icon(
-                                            Icons.business,
-                                            color: AppColors.primaryBlue),
+                                          Icons.business,
+                                          color: AppColors.primaryBlue,
+                                        ),
                                       )
-                                    : const Icon(Icons.business,
-                                        color: AppColors.primaryBlue),
+                                    : const Icon(
+                                        Icons.business,
+                                        color: AppColors.primaryBlue,
+                                      ),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -181,10 +192,13 @@ class JobDetailsScreen extends StatelessWidget {
                                           location.isNotEmpty) ...[
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 8.0),
-                                          child: Icon(Icons.location_on,
-                                              size: 14,
-                                              color: Colors.blue.shade700),
+                                            horizontal: 8.0,
+                                          ),
+                                          child: Icon(
+                                            Icons.location_on,
+                                            size: 14,
+                                            color: Colors.blue.shade700,
+                                          ),
                                         ),
                                         Expanded(
                                           child: Text(
@@ -213,9 +227,13 @@ class JobDetailsScreen extends StatelessWidget {
                             if (employmentType != null)
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFE0E7FF), // Light blue bg
+                                  color: const Color(
+                                    0xFFE0E7FF,
+                                  ), // Light blue bg
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
@@ -285,22 +303,33 @@ class JobDetailsScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                         SizedBox(
+                        SizedBox(
                           width: double.infinity,
                           height: 48,
                           child: OutlinedButton(
                             onPressed: () async {
-                              final bookmarkCtl = Get.isRegistered<BookmarkController>()
+                              final bookmarkCtl =
+                                  Get.isRegistered<BookmarkController>()
                                   ? Get.find<BookmarkController>()
-                                  : Get.put(BookmarkController(), permanent: true);
+                                  : Get.put(
+                                      BookmarkController(),
+                                      permanent: true,
+                                    );
 
-                              Get.dialog(const Center(child: CircularProgressIndicator()),
-                                  barrierDismissible: false);
+                              Get.dialog(
+                                const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                barrierDismissible: false,
+                              );
                               final success = await bookmarkCtl.addJob(jobData);
                               Get.back();
 
                               if (success) {
-                                Get.snackbar('Saved', 'Job bookmarked successfully');
+                                Get.snackbar(
+                                  'Saved',
+                                  'Job bookmarked successfully',
+                                );
                                 Get.to(() => BookmarkJobsScreen());
                               } else {
                                 Get.snackbar('Failed', 'Could not save job');
@@ -328,25 +357,37 @@ class JobDetailsScreen extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () {
                               // Initialize controller
-                              final controller = Get.put(JobDetailsController());
-                              
+                              final controller = Get.put(
+                                JobDetailsController(),
+                              );
+
                               // Prepare data for JobApplicationScreen which expects specific keys
-                              final jobId = raw['_id'] ?? jobData['_id'] ?? jobData['id'] ?? '';
+                              final jobId =
+                                  raw['_id'] ??
+                                  jobData['_id'] ??
+                                  jobData['id'] ??
+                                  '';
                               final applicationData = {
-                                '_id': jobId,  // Use _id as the primary key
-                                'id': jobId,   // Also include id for backward compatibility
+                                '_id': jobId, // Use _id as the primary key
+                                'id':
+                                    jobId, // Also include id for backward compatibility
                                 'jobTitle': title,
                                 'companyName': company,
                                 'location': location,
-                                'customQuestion': raw['customQuestion'] ?? [],  // Include custom questions
-                                'raw': raw,  // Include raw data for complete job info
+                                'customQuestion':
+                                    raw['customQuestion'] ??
+                                    [], // Include custom questions
+                                'raw':
+                                    raw, // Include raw data for complete job info
                                 ...jobData, // Include original data as fallback
                               };
-                              
+
                               controller.checkResumeAndApply(applicationData);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2563EB), // Primary Blue
+                              backgroundColor: const Color(
+                                0xFF2563EB,
+                              ), // Primary Blue
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -391,13 +432,16 @@ class JobDetailsScreen extends StatelessWidget {
                         _buildOverviewRow('Experience', experience),
                         _buildOverviewRow('Positions', positions),
                         _buildOverviewRow('Application Published', posted),
-                        _buildOverviewRow('Location Type', raw['location_Type'] as String?), // Assuming field exists or generic
+                        _buildOverviewRow(
+                          'Location Type',
+                          raw['location_Type'] as String?,
+                        ), // Assuming field exists or generic
                         _buildOverviewRow('Status', status, isStatus: true),
                       ],
                     ),
                   ),
 
-                   const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Application Requirements
                   Container(
@@ -421,7 +465,10 @@ class JobDetailsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         if (applicationRequirements.isEmpty)
-                         const Text("No specific requirements.", style: TextStyle(color: Colors.grey)),
+                          const Text(
+                            "No specific requirements.",
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         ...applicationRequirements.map(
                           (req) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6),
@@ -430,7 +477,11 @@ class JobDetailsScreen extends StatelessWidget {
                               children: [
                                 const Padding(
                                   padding: EdgeInsets.only(top: 6.0),
-                                  child: Icon(Icons.circle, size: 6, color: Colors.red),
+                                  child: Icon(
+                                    Icons.circle,
+                                    size: 6,
+                                    color: Colors.red,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -449,7 +500,7 @@ class JobDetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 40),
                 ],
               ),
@@ -460,7 +511,11 @@ class JobDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOverviewRow(String label, String? value, {bool isStatus = false}) {
+  Widget _buildOverviewRow(
+    String label,
+    String? value, {
+    bool isStatus = false,
+  }) {
     // If value is null, use placeholder or skip? Screenshot shows labels always.
     final displayValue = value ?? '-';
 

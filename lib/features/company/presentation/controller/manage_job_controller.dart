@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:karlfive/core/base/base_controller.dart';
+import 'package:giveandtake/core/base/base_controller.dart';
 
 class ManageJobPostController extends BaseController {
   var jobRequests = List.generate(

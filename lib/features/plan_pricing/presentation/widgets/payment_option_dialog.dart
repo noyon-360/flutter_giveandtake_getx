@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/constants/app_images.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/core/services/get_user_profile_service.dart';
-import 'package:karlfive/features/plan_pricing/presentation/screens/payment_screen.dart';
-import 'package:karlfive/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
-import 'package:karlfive/features/plan_pricing/presentation/controllers/paypal_controller.dart';
+import 'package:giveandtake/core/common/constants/app_images.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/core/services/get_user_profile_service.dart';
+import 'package:giveandtake/features/plan_pricing/presentation/screens/payment_screen.dart';
+import 'package:giveandtake/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
+import 'package:giveandtake/features/plan_pricing/presentation/controllers/paypal_controller.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final String planTitle;
@@ -97,13 +97,14 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                   if (_selectedMethod == 'PayPal') {
                     // Close dialog first
                     if (mounted) Navigator.of(context).pop();
-                    
+
                     // Check if platform is Android for native SDK
                     if (Platform.isAndroid) {
                       // Get userId from user profile service
-                      final userProfileService = Get.find<GetUserProfileService>();
+                      final userProfileService =
+                          Get.find<GetUserProfileService>();
                       final userId = userProfileService.userInfo?.id ?? '';
-                      
+
                       if (userId.isEmpty) {
                         Get.snackbar(
                           'Error',
@@ -114,7 +115,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                         );
                         return;
                       }
-                      
+
                       if (widget.planId == null || widget.planId!.isEmpty) {
                         Get.snackbar(
                           'Error',
@@ -125,15 +126,13 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                         );
                         return;
                       }
-                      
+
                       // Show loading indicator
                       Get.dialog(
-                        Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        Center(child: CircularProgressIndicator()),
                         barrierDismissible: false,
                       );
-                      
+
                       // Directly call native PayPal flow for Android
                       final paypalController = Get.find<PaypalController>();
                       await paypalController.startNativePayment(
@@ -144,7 +143,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                         onSuccess: (orderId) {
                           // Close loading dialog
                           if (Get.isDialogOpen == true) Get.back();
-                          
+
                           // Show success snackbar
                           Get.snackbar(
                             'Success',
@@ -154,7 +153,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                             colorText: Colors.white,
                             duration: const Duration(seconds: 2),
                           );
-                          
+
                           // Navigate to Plan Pricing screen as user requested
                           Future.delayed(const Duration(seconds: 2), () {
                             Get.offAll(() => PlanPricingScreen());
@@ -163,7 +162,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                         onError: (error) {
                           // Close loading dialog
                           if (Get.isDialogOpen == true) Get.back();
-                          
+
                           // Show error snackbar
                           Get.snackbar(
                             'Payment Error',

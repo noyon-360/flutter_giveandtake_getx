@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/core/bottomNavbar/controllers/bottom_nav_controller.dart';
-import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
-import 'package:karlfive/core/services/get_user_profile_service.dart';
-import 'package:karlfive/features/auth/data/models/login_request_model.dart';
-import 'package:karlfive/features/auth/data/models/otp_request_model.dart';
-import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
-import 'package:karlfive/features/auth/data/models/refresh_token_request_model.dart';
-import 'package:karlfive/features/auth/data/models/register_request_model.dart';
-import 'package:karlfive/features/auth/data/models/reset_password_request_model.dart';
-import 'package:karlfive/features/auth/data/models/reset_password_with_token_request_model.dart';
-import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
-import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
-import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
-import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/otp_verification_for_password_reset_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
-import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
-import 'package:karlfive/features/company/presentation/screen/company_screen.dart';
-import 'package:karlfive/features/create_job/presentation/screen/create_job_screen.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
-import 'package:karlfive/features/company/presentation/screen/company_details_screen.dart';
+import 'package:giveandtake/core/base/base_controller.dart';
+import 'package:giveandtake/core/bottomNavbar/controllers/bottom_nav_controller.dart';
+import 'package:giveandtake/core/bottomNavbar/screens/dashboard_screen.dart';
+import 'package:giveandtake/core/services/get_user_profile_service.dart';
+import 'package:giveandtake/features/auth/data/models/login_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/otp_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/otp_request_model_register.dart';
+import 'package:giveandtake/features/auth/data/models/refresh_token_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/register_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/reset_password_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/reset_password_with_token_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/security_questions_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/verify_security_answers_request_model.dart';
+import 'package:giveandtake/features/auth/domain/repo/auth_repo.dart';
+import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/otp_verification_for_password_reset_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
+import 'package:giveandtake/features/auth/presentation/screens/security_questions_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/set_new_password_screen.dart';
+import 'package:giveandtake/features/company/presentation/screen/company_screen.dart';
+import 'package:giveandtake/features/create_job/presentation/screen/create_job_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
+import 'package:giveandtake/features/company/presentation/screen/company_details_screen.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
@@ -108,13 +108,12 @@ class AuthController extends BaseController {
             secureStore.storeData('password', password);
           }
           setLoading(false);
-          
-          if (user.email.isNotEmpty) {
-             Get.offAll(() => const RecruiterPageScreen());
-          } else {
-             Get.offAll(() => CreateRecruiterAccount());
-          }
 
+          if (user.email.isNotEmpty) {
+            Get.offAll(() => const RecruiterPageScreen());
+          } else {
+            Get.offAll(() => CreateRecruiterAccount());
+          }
         } else if (user.role == 'company') {
           await _authStorageService.storeAuthData(
             accessToken: success.data.accessToken,
@@ -122,7 +121,7 @@ class AuthController extends BaseController {
             userId: success.data.user.id,
             userRole: user.role,
           );
-          
+
           if (rememberMeController!.rememberMe.value) {
             final secureStore = SecureStoreServices();
             secureStore.storeData('email', email);
@@ -131,11 +130,10 @@ class AuthController extends BaseController {
           setLoading(false);
 
           if (user.email.isNotEmpty) {
-             Get.offAll(() => CompanyDetailsPage());
+            Get.offAll(() => CompanyDetailsPage());
           } else {
-             Get.offAll(() => CreateCompanyAccountPage());
+            Get.offAll(() => CreateCompanyAccountPage());
           }
-          
         } else {
           setError("You are not authorized to login as candidate");
           setLoading(false);

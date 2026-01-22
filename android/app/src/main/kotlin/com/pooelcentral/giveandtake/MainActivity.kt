@@ -1,4 +1,4 @@
-package com.pooelcentral.karlfive
+package com.pooelcentral.giveandtake
 
 import android.os.Bundle
 import android.util.Log
@@ -55,21 +55,6 @@ class MainActivity : FlutterFragmentActivity() {
                              resultCallback?.error("PAYPAL_CANCELED", "User canceled payment", null)
                         }
 
-                        override fun onPayPalCheckoutShippingMethods(
-                            shippingMethods: List<PayPalNativeShippingMethod>,
-                            paysheetActions: PayPalNativePaysheetActions
-                        ) {
-                             // Not needed for digital goods usually, but required to be implemented
-                             paysheetActions.reject()
-                        }
-
-                        override fun onPayPalCheckoutShippingChange(
-                            shippingAddress: PayPalNativeShippingAddress,
-                            paysheetActions: PayPalNativePaysheetActions
-                        ) {
-                             // Not needed for digital goods
-                             paysheetActions.reject()
-                        }
                     }
                     result.success("PayPal Initialized")
                 } else {

@@ -2,24 +2,24 @@ import 'dart:developer' as DPrint;
 import 'dart:io';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
-import 'package:karlfive/core/network/services/auth_storage_service.dart';
-import 'package:karlfive/features/company/presentation/screen/manage_job_req_screen.dart';
-import 'package:karlfive/features/recruiter_account/data/models/archieve_job_request_model.dart'
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/features/company/presentation/screen/manage_job_req_screen.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/archieve_job_request_model.dart'
     hide ApplicationRequirement, CustomQuestion;
-import 'package:karlfive/features/recruiter_account/data/models/connect_company_request_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/follow_request_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_category_response_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_company_response_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_single_job_response_model.dart'
+import 'package:giveandtake/features/recruiter_account/data/models/connect_company_request_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/follow_request_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_category_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_company_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_currency_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_single_job_response_model.dart'
     hide ApplicationRequirement, CustomQuestion;
-import 'package:karlfive/features/recruiter_account/data/models/job_update_request_model.dart'
+import 'package:giveandtake/features/recruiter_account/data/models/job_update_request_model.dart'
     hide ApplicationRequirement, CustomQuestion;
-import 'package:karlfive/features/recruiter_account/data/models/leave_company_request_model.dart';
-import 'package:karlfive/features/recruiter_account/domain/repo/repo.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/upload_elevator_pitch.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/recruiter_page.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/leave_company_request_model.dart';
+import 'package:giveandtake/features/recruiter_account/domain/repo/repo.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/upload_elevator_pitch.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
 import '../../../../core/base/base_controller.dart';
 import '../../../../core/network/services/multiple_form_data_manager.dart';
 import '../../../../core/network/services/secure_store_services.dart';
@@ -313,8 +313,21 @@ class RecruiterController extends BaseController {
     );
   }
 
-  Future leaveCompany(String cname, String aboutUs,String industry, String country, String city, String zipcode, String cemail,
-   String clogo, String banner, String slug, List<String> employeesId, List<SocialLinkRequest> sLink, List<String> service) async {
+  Future leaveCompany(
+    String cname,
+    String aboutUs,
+    String industry,
+    String country,
+    String city,
+    String zipcode,
+    String cemail,
+    String clogo,
+    String banner,
+    String slug,
+    List<String> employeesId,
+    List<SocialLinkRequest> sLink,
+    List<String> service,
+  ) async {
     setLoading(true);
     setError("");
 
@@ -570,10 +583,10 @@ class RecruiterController extends BaseController {
     if (upwork.isNotEmpty) sLinks.add({"label": "Upwork", "url": upwork});
     if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
     if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
-    if (instagram.isNotEmpty) sLinks.add({"label": "Instagram", "url": instagram});
+    if (instagram.isNotEmpty)
+      sLinks.add({"label": "Instagram", "url": instagram});
     if (fiverr.isNotEmpty) sLinks.add({"label": "Fiverr", "url": fiverr});
     if (company.isNotEmpty) sLinks.add({"label": "Company", "url": company});
-
 
     // Add all text + file fields
     _multiFormDataManager.addImageFile(key: "banner", banner);

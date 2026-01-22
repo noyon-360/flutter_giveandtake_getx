@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/core/network/constants/api_constants.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/widgets/drawer.dart';
-import 'package:karlfive/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/widgets/drawer.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/social_media.dart';
-import 'package:karlfive/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 
 class RecruiterPageScreen extends StatefulWidget {
   const RecruiterPageScreen({super.key});
@@ -27,7 +27,6 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
     final document = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
     return htmlString.replaceAll(document, '');
   }
-
 
   String? _accessToken;
 
@@ -199,7 +198,6 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                         color: Color(0xFF898989),
                       ),
                     ),
-
                   ],
                 ),
 
@@ -229,13 +227,12 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                         },
                         child: Tooltip(
                           message: link.label ?? '',
-                          child: SocialMedia(
-                            image: _getSocialIcon(link.label),
-                          ),
+                          child: SocialMedia(image: _getSocialIcon(link.label)),
                         ),
                       );
                     }).toList(),
                   ),
+
                 // Wrap(
                 //   spacing: 8,
                 //   runSpacing: 8,
@@ -261,7 +258,6 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                 //       )
                 //       .toList(),
                 // ),
-
                 const SizedBox(height: 20),
 
                 // ----- Buttons -----

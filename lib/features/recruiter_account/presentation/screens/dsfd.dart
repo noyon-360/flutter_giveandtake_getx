@@ -1,9 +1,9 @@
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:intl/intl.dart';
-// import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
-// import 'package:karlfive/features/recruiter_account/presentation/screens/job_update_screen.dart';
-// import 'package:karlfive/features/recruiter_account/presentation/screens/single_job_details_screen.dart';
+// import 'package:giveandtake/features/job_listing/presentation/screens/job_details_screen.dart';
+// import 'package:giveandtake/features/recruiter_account/presentation/screens/job_update_screen.dart';
+// import 'package:giveandtake/features/recruiter_account/presentation/screens/single_job_details_screen.dart';
 // import '../../../../core/common/widgets/app_scaffold.dart';
 // import '../../../../core/utils/debug_print.dart';
 // import '../controller/recruiter_controller.dart';

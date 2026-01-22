@@ -1,6 +1,6 @@
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:karlfive/core/common/widgets/app_scaffold.dart';
+// import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 // import '../controller/company_details_controller.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 // import '../widget/falcon_button_widget.dart';
@@ -149,7 +149,6 @@
 //                       ),
 //                     ),
 
-                    
 //                     Container(
 //                       width: double.infinity,
 //                       padding: const EdgeInsets.all(8),

@@ -27,7 +27,7 @@ class PaypalController extends BaseController {
       print('═════════════════════════════════════════════════════════');
       print('🔵 API Endpoint: {{base_url}}/payments/paypal/create-order');
       print('═════════════════════════════════════════════════════════');
-      
+
       // Print request model
       print('🔵 Request Model:');
       print('   Amount: ${request.toJson()['amount']}');
@@ -84,20 +84,22 @@ class PaypalController extends BaseController {
   }) async {
     try {
       setLoading(true);
-      
+
       print('🔵 PayPal Native: Starting payment flow...');
-      print('🔵 PayPal Native: Amount: $amount, UserId: $userId, PlanId: $planId');
-      
+      print(
+        '🔵 PayPal Native: Amount: $amount, UserId: $userId, PlanId: $planId',
+      );
+
       // 1. Create Order via Backend
       print('🔵 PayPal Native: Creating order via backend...');
       final request = PaypalCreateOrderRequest(
         amount: amount.toStringAsFixed(2),
       );
-      
+
       print('🔵 PayPal Native: Request payload: ${request.toJson()}');
-      
+
       final result = await _paypalRepository.createOrder(request);
-      
+
       String? orderId;
       await result.fold(
         (failure) {
@@ -111,7 +113,7 @@ class PaypalController extends BaseController {
           print('🔵 PayPal Native: Response: ${success.data.toJson()}');
         },
       );
-      
+
       if (orderId == null || orderId!.isEmpty) {
         throw Exception("Failed to get orderId from backend");
       }
@@ -120,38 +122,40 @@ class PaypalController extends BaseController {
       print('🔵 PayPal Native: Initializing Native SDK...');
       await _paypalNativeService.initPayPal(
         clientId: _paypalServices.clientId,
-        returnUrl: "com.pooelcentral.karlfive://paypalpay",
+        returnUrl: "com.pooelcentral.giveandtake://paypalpay",
       );
       print('✅ PayPal Native: SDK initialized');
 
       // 3. Start Payment with the orderId from backend
       print('🔵 PayPal Native: Starting payment with orderId: $orderId');
-      final paymentResult = await _paypalNativeService.startPayment(orderId: orderId!);
-      
+      final paymentResult = await _paypalNativeService.startPayment(
+        orderId: orderId!,
+      );
+
       print('🔵 PayPal Native: Payment result: $paymentResult');
-      
+
       if (paymentResult != null && paymentResult['orderId'] != null) {
-          print('✅ PayPal Native: Payment approved');
-          
-          // 4. Capture Order via Backend
-          print('🔵 PayPal Native: Capturing order via backend...');
-          final captured = await _paypalServices.captureOrderBackend(
-            orderId: paymentResult['orderId'],
-            userId: userId,
-            planId: planId,
-            seasonId: seasonId,
-          );
-          
-          if (captured) {
-            print('✅ PayPal Native: Payment captured successfully');
-            onSuccess(paymentResult['orderId']);
-          } else {
-            print('❌ PayPal Native: Failed to capture payment');
-            onError("Failed to capture payment");
-          }
+        print('✅ PayPal Native: Payment approved');
+
+        // 4. Capture Order via Backend
+        print('🔵 PayPal Native: Capturing order via backend...');
+        final captured = await _paypalServices.captureOrderBackend(
+          orderId: paymentResult['orderId'],
+          userId: userId,
+          planId: planId,
+          seasonId: seasonId,
+        );
+
+        if (captured) {
+          print('✅ PayPal Native: Payment captured successfully');
+          onSuccess(paymentResult['orderId']);
+        } else {
+          print('❌ PayPal Native: Failed to capture payment');
+          onError("Failed to capture payment");
+        }
       } else {
-         print('❌ PayPal Native: Payment process incomplete');
-         onError("Payment process incomplete");
+        print('❌ PayPal Native: Payment process incomplete');
+        onError("Payment process incomplete");
       }
     } catch (e) {
       print('❌ PayPal Native: Exception - $e');

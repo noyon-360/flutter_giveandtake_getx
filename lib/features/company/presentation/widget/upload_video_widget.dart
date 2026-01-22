@@ -2,7 +2,7 @@
 
 // import 'package:flutter/material.dart';
 // import 'package:image_picker/image_picker.dart';
-// import 'package:karlfive/core/theme/app_colors.dart';
+// import 'package:giveandtake/core/theme/app_colors.dart';
 // import 'package:video_player/video_player.dart';
 
 // class VideoUploadCardWidget extends StatefulWidget {
@@ -153,7 +153,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoUploadCardWidget extends StatefulWidget {
@@ -185,8 +185,9 @@ class _VideoUploadCardWidgetState extends State<VideoUploadCardWidget> {
   File? _videoFile;
 
   Future<void> _pickVideo() async {
-    final XFile? pickedFile =
-        await _picker.pickVideo(source: ImageSource.gallery);
+    final XFile? pickedFile = await _picker.pickVideo(
+      source: ImageSource.gallery,
+    );
 
     if (pickedFile != null) {
       _videoFile = File(pickedFile.path);
@@ -231,10 +232,7 @@ class _VideoUploadCardWidgetState extends State<VideoUploadCardWidget> {
           // Title
           Text(
             widget.title,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           if (widget.subtitle.isNotEmpty) ...[
             const SizedBox(height: 4),
@@ -256,7 +254,8 @@ class _VideoUploadCardWidgetState extends State<VideoUploadCardWidget> {
                 borderRadius: BorderRadius.circular(8),
                 color: Colors.black,
               ),
-              child: _isVideoUploaded &&
+              child:
+                  _isVideoUploaded &&
                       _controller != null &&
                       _controller!.value.isInitialized
                   ? AspectRatio(

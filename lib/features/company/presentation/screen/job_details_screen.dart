@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:karlfive/features/company/presentation/widget/custom_text_field.dart';
+import 'package:giveandtake/features/company/presentation/widget/custom_text_field.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../controller/job_details_controller.dart';

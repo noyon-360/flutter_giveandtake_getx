@@ -1,8 +1,8 @@
 // lib/features/recruiter_account/presentation/controller/job_form_controller.dart
 
 import 'package:get/get.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_single_job_response_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_currency_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_single_job_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_currency_response_model.dart';
 
 import '../../../create_job/data/model/category_model.dart';
 
@@ -38,7 +38,8 @@ class JobFormController extends GetxController {
   final RxString resumeStatus = 'optional'.obs;
   final RxString visaStatus = 'optional'.obs;
 
-  final Rxn<GetCurrencyResponseModel> selectedCurrency = Rxn<GetCurrencyResponseModel>();
+  final Rxn<GetCurrencyResponseModel> selectedCurrency =
+      Rxn<GetCurrencyResponseModel>();
 
   // List of categories & roles (shared from RecruiterController or fetched here)
   final categories = <Category>[].obs;
@@ -72,7 +73,9 @@ class JobFormController extends GetxController {
     // Publish date logic
     final now = DateTime.now();
     final publishDate = job.publishDate;
-    publishNow.value = publishDate == null || publishDate.isBefore(now.add(const Duration(days: 1)));
+    publishNow.value =
+        publishDate == null ||
+        publishDate.isBefore(now.add(const Duration(days: 1)));
 
     if (!publishNow.value && publishDate != null) {
       selectedDate.value = publishDate;
@@ -83,16 +86,29 @@ class JobFormController extends GetxController {
     // Custom Questions
     customQuestion.clear();
     customQuestion.addAll(
-      job.customQuestion?.map((q) => q.question ?? '').where((q) => q.isNotEmpty) ?? [],
+      job.customQuestion
+              ?.map((q) => q.question ?? '')
+              .where((q) => q.isNotEmpty) ??
+          [],
     );
 
     // Application Requirements
     final reqs = job.applicationRequirement ?? [];
     resumeVisible.value = reqs.any((r) => r.requirement == 'Resume');
-    visaVisible.value = reqs.any((r) => r.requirement == 'Valid visa for this job location?');
+    visaVisible.value = reqs.any(
+      (r) => r.requirement == 'Valid visa for this job location?',
+    );
 
-    resumeStatus.value = reqs.firstWhereOrNull((r) => r.requirement == 'Resume')?.status ?? 'optional';
-    visaStatus.value = reqs.firstWhereOrNull((r) => r.requirement == 'Valid visa for this job location?')?.status ?? 'optional';
+    resumeStatus.value =
+        reqs.firstWhereOrNull((r) => r.requirement == 'Resume')?.status ??
+        'optional';
+    visaStatus.value =
+        reqs
+            .firstWhereOrNull(
+              (r) => r.requirement == 'Valid visa for this job location?',
+            )
+            ?.status ??
+        'optional';
 
     print("JobFormController: populateForEdit completed for ${job.title}");
   }

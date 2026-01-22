@@ -4,11 +4,11 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controller/profile_controller.dart';
 import '../../data/models/user_model.dart';
-import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
-import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
-import 'package:karlfive/core/network/api_client.dart';
-import 'package:karlfive/core/network/constants/api_constants.dart';
-import 'package:karlfive/features/elevator/presentation/screens/elevator_resume_screen.dart';
+import 'package:giveandtake/features/auth/domain/repo/auth_repo.dart';
+import 'package:giveandtake/features/auth/data/models/verify_security_answers_request_model.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -63,7 +63,7 @@ class _EditProfileState extends State<EditProfile> {
     _surnameCtrl.text = lastName;
     _emailCtrl.text = user.email;
     _addressCtrl.text = user.address ?? '';
-    
+
     // Set selected country if user has an address
     if (user.address != null && user.address!.isNotEmpty) {
       _ctrl.selectedCountry.value = user.address;
@@ -369,9 +369,11 @@ class _EditProfileState extends State<EditProfile> {
                               : (user != null &&
                                         user.avatarUrl != null &&
                                         user.avatarUrl!.isNotEmpty
-                                    ? NetworkImage(user.avatarUrl!.startsWith('http')
-                                        ? user.avatarUrl!
-                                        : '${ApiConstants.baseDomain}/${user.avatarUrl!}')
+                                    ? NetworkImage(
+                                        user.avatarUrl!.startsWith('http')
+                                            ? user.avatarUrl!
+                                            : '${ApiConstants.baseDomain}/${user.avatarUrl!}',
+                                      )
                                     : const AssetImage(
                                         "assets/images/profile.jpg",
                                       )),
@@ -509,8 +511,6 @@ class _EditProfileState extends State<EditProfile> {
                   ],
                 ),
               ),
-
-        
 
               const SizedBox(height: 8),
 

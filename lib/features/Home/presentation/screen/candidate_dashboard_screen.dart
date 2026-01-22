@@ -2,11 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
-import 'package:karlfive/features/company/presentation/widget/elevator-pitch_company_widget.dart';
-import 'package:karlfive/features/elevator/presentation/screens/elevator_resume_screen.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/video_upload_screen.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
+import 'package:giveandtake/features/company/presentation/widget/elevator-pitch_company_widget.dart';
+import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/video_upload_screen.dart';
 
 class CandidateDashboardScreen extends StatefulWidget {
   const CandidateDashboardScreen({super.key});

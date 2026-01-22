@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

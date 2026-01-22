@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:html/parser.dart' as html_parser;
 
 import '../../data/models/leave_company_request_model.dart';
@@ -18,7 +18,6 @@ class _CompanyInformationState extends State<CompanyInformation> {
       Get.find<RecruiterController>();
   final ScrollController horizontalScrollController = ScrollController();
 
-
   @override
   void initState() {
     super.initState();
@@ -27,6 +26,7 @@ class _CompanyInformationState extends State<CompanyInformation> {
       await recruiterController.getJob(); // <-- ADD THIS LINE
     });
   }
+
   String htmlToPlainText(String htmlString) {
     final document = html_parser.parse(htmlString);
     return document.body?.text ?? '';
@@ -47,16 +47,12 @@ class _CompanyInformationState extends State<CompanyInformation> {
       List<String>.from(company.employeesId ?? []),
       (company.sLink ?? [])
           .map<SocialLinkRequest>(
-            (e) => SocialLinkRequest(
-          label: e.label,
-          url: e.url,
-        ),
-      )
+            (e) => SocialLinkRequest(label: e.label, url: e.url),
+          )
           .toList(),
       List<String>.from(company.service ?? []),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +100,10 @@ class _CompanyInformationState extends State<CompanyInformation> {
                           width: 115,
                           height: 115,
                           color: Colors.green.shade100,
-                          child: Image.network(company.clogo, fit: BoxFit.cover),
+                          child: Image.network(
+                            company.clogo,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
@@ -183,13 +182,13 @@ class _CompanyInformationState extends State<CompanyInformation> {
                             height: 1.6,
                             color: Colors.black87,
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 20,),
+              SizedBox(height: 20),
 
               Align(
                 alignment: Alignment.bottomRight,
@@ -204,86 +203,108 @@ class _CompanyInformationState extends State<CompanyInformation> {
                           color: Color.fromARGB(255, 227, 130, 24),
                         ),
                       ),
-                      child: Obx(() => GestureDetector(
-                        onTap: recruiterController.isLoading.value
-                            ? null
-                            : () {
-                          Get.defaultDialog(
-                            title: "Leave Company?",
-                            titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-                            content: const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Text(
-                                "You will be disconnected from this company and your future job posts will no longer link to it.",
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            actions: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  /// CANCEL BUTTON
-                                  OutlinedButton(
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(color: Colors.grey),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8), // 👈 circular
+                      child: Obx(
+                        () => GestureDetector(
+                          onTap: recruiterController.isLoading.value
+                              ? null
+                              : () {
+                                  Get.defaultDialog(
+                                    title: "Leave Company?",
+                                    titleStyle: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    content: const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 8.0,
+                                      ),
+                                      child: Text(
+                                        "You will be disconnected from this company and your future job posts will no longer link to it.",
+                                        textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    onPressed: () => Get.back(),
-                                    child: const Text(
-                                      "Cancel",
-                                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
-                                    ),
-                                  ),
+                                    actions: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          /// CANCEL BUTTON
+                                          OutlinedButton(
+                                            style: OutlinedButton.styleFrom(
+                                              side: const BorderSide(
+                                                color: Colors.grey,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      8,
+                                                    ), // 👈 circular
+                                              ),
+                                            ),
+                                            onPressed: () => Get.back(),
+                                            child: const Text(
+                                              "Cancel",
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
 
-                                  const SizedBox(width: 12),
+                                          const SizedBox(width: 12),
 
-                                  /// LEAVE BUTTON
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8), // 👈 circular
+                                          /// LEAVE BUTTON
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      8,
+                                                    ), // 👈 circular
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              Get.back();
+                                              _leaveCompany(company);
+                                            },
+                                            child: const Text(
+                                              "Leave Company",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                    ],
+                                  );
+                                },
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: recruiterController.isLoading.value
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
                                     ),
-                                    onPressed: () {
-                                      Get.back();
-                                      _leaveCompany(company);
-                                    },
-                                    child: const Text(
-                                      "Leave Company",
-                                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                                  )
+                                : const Text(
+                                    'Leave Company',
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 170, 29, 29),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ],
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: recruiterController.isLoading.value
-                              ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                              : const Text(
-                            'Leave Company',
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 170, 29, 29),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
                           ),
                         ),
-                      ))
-                      ,
+                      ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
 
 import '../controllers/bookmark_controller.dart';
 import 'job_details_screen.dart';
@@ -46,15 +46,15 @@ class _BookmarkJobsScreenState extends State<BookmarkJobsScreen> {
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
-      
+
       // Call the unsaveJob method which hits the API
       final success = await controller.unsaveJob(job);
-      
+
       // Close loading dialog first
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-      
+
       // Then show success/error snackbar
       if (success) {
         Get.snackbar(

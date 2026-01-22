@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_logo.dart';
-import 'package:karlfive/core/common/widgets/form_error_message.dart';
-import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/core/common/widgets/app_logo.dart';
+import 'package:giveandtake/core/common/widgets/form_error_message.dart';
+import 'package:giveandtake/features/auth/data/models/security_questions_request_model.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 
 import '../../../../core/common/constants/app_images.dart';
 import '../../../../core/theme/app_colors.dart';
