@@ -2,17 +2,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class PaypalNativeService {
-  static const MethodChannel _channel = MethodChannel('com.betopia.giveandtake/paypal');
+  static const MethodChannel _channel = MethodChannel(
+    'com.betopia.giveandtake/paypal',
+  );
 
   /// Initialize the PayPal Native SDK
   Future<void> initPayPal({
     required String clientId,
     required String returnUrl,
+    bool isSandbox = true,
   }) async {
     try {
       await _channel.invokeMethod('initPayPal', {
         'clientId': clientId,
         'returnUrl': returnUrl,
+        'isSandbox': isSandbox,
       });
     } on PlatformException catch (e) {
       debugPrint("Failed to init PayPal: '${e.message}'.");

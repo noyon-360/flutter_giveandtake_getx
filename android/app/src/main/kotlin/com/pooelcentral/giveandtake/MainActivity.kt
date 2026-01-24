@@ -28,8 +28,10 @@ class MainActivity : FlutterFragmentActivity() {
             if (call.method == "initPayPal") {
                 val clientId = call.argument<String>("clientId")
                 val returnUrl = call.argument<String>("returnUrl")
+                val isSandbox = call.argument<Boolean>("isSandbox") ?: true
                 if (clientId != null && returnUrl != null) {
-                    val config = CoreConfig(clientId, environment = Environment.SANDBOX)
+                    val environment = if (isSandbox) Environment.SANDBOX else Environment.LIVE
+                    val config = CoreConfig(clientId, environment = environment)
                     payPalNativeCheckoutClient = PayPalNativeCheckoutClient(
                         application = application,
                         coreConfig = config,

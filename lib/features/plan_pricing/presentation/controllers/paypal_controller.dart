@@ -123,8 +123,11 @@ class PaypalController extends BaseController {
       await _paypalNativeService.initPayPal(
         clientId: _paypalServices.clientId,
         returnUrl: "com.pooelcentral.giveandtake://paypalpay",
+        isSandbox: _paypalServices.domain.contains("sandbox"),
       );
-      print('✅ PayPal Native: SDK initialized');
+      print(
+        '✅ PayPal Native: SDK initialized (Sandbox: ${_paypalServices.domain.contains("sandbox")})',
+      );
 
       // 3. Start Payment with the orderId from backend
       print('🔵 PayPal Native: Starting payment with orderId: $orderId');
