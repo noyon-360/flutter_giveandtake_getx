@@ -40,7 +40,16 @@ class GetUserProfileService extends BaseController {
   Future<void> _storeUserDataToStorage(UserModel user) async {
     try {
       final userJson = json.encode(user.toJson());
-      await _authStorageService.storeUserData(userJson);
+      
+      // Store both the full user data JSON and the individual userId
+      await Future.wait([
+        _authStorageService.storeUserData(userJson),
+        _authStorageService.storeUserId(user.id), // Store userId separately for easy access
+      ]);
+      
+      print('✅ Stored user data to secure storage:');
+      print('   userId: ${user.id}');
+      print('   userData: ${userJson.substring(0, 50)}...');
     } catch (e) {
       print('Error storing user data: $e');
     }

@@ -1,19 +1,19 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:giveandtake/core/network/services/auth_storage_service.dart';
-import 'package:giveandtake/core/services/get_user_profile_service.dart';
-import 'package:giveandtake/features/plan_pricing/presentation/screens/paypal_webview_screen.dart';
-import 'package:giveandtake/features/plan_pricing/presentation/screens/paypal_webview_screen.dart';
-import 'package:giveandtake/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
-import 'package:giveandtake/features/Home/presentation/screen/home_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:giveandtake/core/network/constants/api_constants.dart';
+
+import '../../../../core/network/constants/api_constants.dart';
+import '../../../../core/network/services/auth_storage_service.dart';
+import '../../../../core/services/get_user_profile_service.dart';
+import '../../../Home/presentation/screen/home_screen.dart';
+import '../../data/models/paypal_confirm_payment_response.dart';
 import '../controllers/paypal_controller.dart';
 import '../services/paypal_services.dart';
+import 'paypal_webview_screen.dart';
+import 'plan_pricing_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
   final String planTitle;
@@ -41,11 +41,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool _isCardPaymentProcessing = false;
   bool _showCardFieldsWebView = false;
   bool _isCapturing = false;
-  String? _currentPayPalOrderId;
   String?
   _backendOrderId; // Store the orderId from backend create-order endpoint
-  String? _cardFieldsUrl;
   WebViewController? _cardFieldsController;
+
+  // Cache userId and token during initState to avoid retrieval issues later
+  String? _cachedUserId;
+  String? _cachedToken;
 
   // Form controllers
   final _cardNumberController = TextEditingController();
@@ -67,12 +69,69 @@ class _PaymentScreenState extends State<PaymentScreen> {
   // Countries and Counties lists
   List<Map<String, String>> _countries = [];
   List<String> _counties = [];
-  bool _isLoadingCountries = false;
 
   @override
   void initState() {
     super.initState();
     _loadCountries();
+    // Load user credentials asynchronously - don't await to avoid blocking init
+    _loadUserCredentials().then((_) {
+      print('✅ User credentials loaded and cached');
+    });
+  }
+
+  // Load and cache user credentials during init
+  Future<void> _loadUserCredentials() async {
+    print('🔍 DEBUG: _loadUserCredentials called');
+
+    // IMPORTANT: Always try secure storage first as it's the source of truth
+    try {
+      final authStorageService = AuthStorageService();
+      final storedUserId = await authStorageService.getUserId();
+      final storedToken = await authStorageService.getRefreshToken();
+
+      print('🔍 DEBUG: Retrieved from SecureStorage:');
+      print('   userId: $storedUserId');
+      print(
+        '   token: ${storedToken != null ? "exists (${storedToken.length} chars)" : "null"}',
+      );
+
+      if (storedUserId != null && storedUserId.isNotEmpty) {
+        _cachedUserId = storedUserId;
+      }
+      if (storedToken != null && storedToken.isNotEmpty) {
+        _cachedToken = storedToken;
+      }
+
+      if (_cachedUserId != null && _cachedUserId!.isNotEmpty) {
+        print('✅ Cached credentials from SecureStorage:');
+        print('   userId: $_cachedUserId');
+        print('   token length: ${_cachedToken?.length}');
+        return;
+      }
+    } catch (e) {
+      print('❌ Failed to load from SecureStorage: $e');
+    }
+
+    // Fallback: Try GetUserProfileService (in-memory cache)
+    try {
+      print('🔍 DEBUG: Attempting fallback to GetUserProfileService');
+      final userProfileService = Get.find<GetUserProfileService>();
+      if (userProfileService.userInfo != null) {
+        _cachedUserId = userProfileService.userInfo!.id;
+        _cachedToken = userProfileService.userInfo!.refreshToken;
+        print('✅ Cached credentials from GetUserProfileService:');
+        print('   userId: $_cachedUserId');
+        print('   token length: ${_cachedToken?.length}');
+        return;
+      } else {
+        print('⚠️ GetUserProfileService.userInfo is null');
+      }
+    } catch (e) {
+      print('⚠️ GetUserProfileService not available: $e');
+    }
+
+    print('❌ WARNING: Could not load user credentials from any source!');
   }
 
   @override
@@ -92,10 +151,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> _loadCountries() async {
-    setState(() {
-      _isLoadingCountries = true;
-    });
-
     try {
       // Call PayPal GraphQL API to get checkout details including countries
       final response = await http.post(
@@ -136,7 +191,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
               final flag = _getCountryFlag(code);
               return {'code': code, 'name': name, 'flag': flag};
             }).toList();
-            _isLoadingCountries = false;
           });
 
           _loadCountiesForCountry(_selectedCountry);
@@ -180,7 +234,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
         {'code': 'NL', 'name': 'Netherlands', 'flag': '🇳🇱'},
         {'code': 'SE', 'name': 'Sweden', 'flag': '🇸🇪'},
       ];
-      _isLoadingCountries = false;
       _loadCountiesForCountry(_selectedCountry);
     });
   }
@@ -337,66 +390,35 @@ class _PaymentScreenState extends State<PaymentScreen> {
         '✅ PayPal Payment: Backend order created with OrderId: $_backendOrderId',
       );
 
-      // Step 2: Continue with the existing PayPal flow
-      if (Platform.isAndroid) {
-        final userProfileService = Get.find<GetUserProfileService>();
-        final userId = userProfileService.userInfo?.id ?? '';
+      // Step 2: Get the approve URL from the response
+      final approveUrl = orderResponse.approveUrl;
 
-        await paypalController.startNativePayment(
-          amount: widget.amount,
-          userId: userId,
-          planId: widget.planId ?? '',
-          seasonId: null, // Optional: Add seasonId if available
-          onSuccess: (orderId) {
-            setState(() {
-              _isProcessing = false;
-            });
-
-            // Show success snackbar
-            Get.snackbar(
-              'Success',
-              'Payment completed successfully!',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.green,
-              colorText: Colors.white,
-              duration: const Duration(seconds: 2),
-            );
-
-            // Navigate to Home Screen
-            Future.delayed(const Duration(seconds: 2), () {
-              Get.offAll(() => const HomeScreen());
-            });
-          },
-          onError: (error) {
-            setState(() {
-              _isProcessing = false;
-            });
-            Get.snackbar(
-              'PayPal Error',
-              error,
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-            );
-          },
-        );
-      } else {
-        // Navigate to PayPal WebView for payment (iOS / Web fallback)
-        Get.to(
-          () => PaypalWebViewScreen(
-            planTitle: widget.planTitle,
-            amount: widget.amount,
-            orderId: widget.orderId,
-            onFinish: (transactionId) {
-              _onPaymentSuccess(transactionId);
-            },
-          ),
-        )?.then((_) {
-          setState(() {
-            _isProcessing = false;
-          });
-        });
+      if (approveUrl == null || approveUrl.isEmpty) {
+        throw Exception('No approve URL found in order response');
       }
+
+      print('✅ PayPal Payment: Approve URL: $approveUrl');
+
+      // Step 3: Navigate to PayPal WebView with the approve URL
+      setState(() {
+        _isProcessing = false;
+      });
+
+      Get.to(
+        () => PaypalWebViewScreen(
+          planTitle: widget.planTitle,
+          amount: widget.amount,
+          orderId: _backendOrderId,
+          approveUrl: approveUrl,
+          onFinish: (transactionId) {
+            _onPaymentSuccess(transactionId);
+          },
+        ),
+      )?.then((_) {
+        setState(() {
+          _isProcessing = false;
+        });
+      });
     } catch (e) {
       print('❌ PayPal Payment Error: $e');
       setState(() {
@@ -418,58 +440,167 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _showCardFieldsWebView = false; // Hide webview to show loading
     });
 
-    // Try multiple ways to get userId
+    print('🔍 DEBUG: Starting _capturePayment method');
+
+    // Try multiple ways to get userId and token
     String userId = '';
     String token = '';
 
-    // Method 1: Try GetUserProfileService first
-    try {
-      final userProfileService = Get.find<GetUserProfileService>();
-      userId = userProfileService.userInfo?.id ?? '';
-      token = userProfileService.userInfo?.refreshToken ?? '';
-      print('🔵 Method 1 - GetUserProfileService: userId=$userId');
-    } catch (e) {
-      print('⚠️ Method 1 failed: $e');
+    // Method 0: Try cached credentials first (loaded during initState)
+    if (_cachedUserId != null && _cachedUserId!.isNotEmpty) {
+      userId = _cachedUserId!;
+      token = _cachedToken ?? '';
+      print('✅ Method 0 - Using CACHED credentials:');
+      print('   userId: $userId');
+      print('   token length: ${token.length}');
     }
 
-    // Method 2: If userId is still empty, try AuthStorageService
+    // Method 1: Try GetUserProfileService if cache is empty
     if (userId.isEmpty) {
       try {
-        final authStorageService = Get.find<AuthStorageService>();
-        userId = await authStorageService.getUserId() ?? '';
-        token = await authStorageService.getRefreshToken() ?? '';
-        print('🔵 Method 2 - AuthStorageService: userId=$userId');
+        print('🔍 DEBUG: Attempting Method 1 - GetUserProfileService');
+        final userProfileService = Get.find<GetUserProfileService>();
+        print('🔍 DEBUG: GetUserProfileService retrieved');
+        print('🔍 DEBUG: userInfo: ${userProfileService.userInfo}');
+
+        if (userProfileService.userInfo != null) {
+          userId = userProfileService.userInfo!.id;
+          token = userProfileService.userInfo!.refreshToken;
+          print('✅ Method 1 - GetUserProfileService SUCCESS:');
+          print('   userId: $userId');
+          print('   token length: ${token.length}');
+        } else {
+          print('⚠️ Method 1: userInfo is null');
+        }
       } catch (e) {
-        print('⚠️ Method 2 failed: $e');
+        print('❌ Method 1 failed with exception: $e');
+      }
+    }
+
+    // Method 2: If userId is still empty, try AuthStorageService from Get
+    if (userId.isEmpty) {
+      try {
+        print(
+          '🔍 DEBUG: Attempting Method 2 - AuthStorageService via Get.find',
+        );
+        final authStorageService = Get.find<AuthStorageService>();
+        print('🔍 DEBUG: AuthStorageService retrieved');
+
+        final storedUserId = await authStorageService.getUserId();
+        final storedToken = await authStorageService.getRefreshToken();
+
+        print('🔍 DEBUG: Retrieved from storage:');
+        print('   userId: $storedUserId');
+        print(
+          '   token: ${storedToken != null ? "exists (${storedToken.length} chars)" : "null"}',
+        );
+
+        if (storedUserId != null && storedUserId.isNotEmpty) {
+          userId = storedUserId;
+        }
+        if (storedToken != null && storedToken.isNotEmpty) {
+          token = storedToken;
+        }
+
+        if (userId.isNotEmpty) {
+          print('✅ Method 2 - AuthStorageService (Get.find) SUCCESS:');
+          print('   userId: $userId');
+          print('   token length: ${token.length}');
+        } else {
+          print('⚠️ Method 2: userId is still empty after retrieval');
+        }
+      } catch (e) {
+        print('❌ Method 2 failed with exception: $e');
       }
     }
 
     // Method 3: If still empty, try direct SecureStorage access
     if (userId.isEmpty) {
       try {
+        print(
+          '🔍 DEBUG: Attempting Method 3 - Direct AuthStorageService instance',
+        );
         final authService = AuthStorageService();
-        userId = await authService.getUserId() ?? '';
-        token = await authService.getRefreshToken() ?? '';
-        print('🔵 Method 3 - Direct AuthStorageService: userId=$userId');
+
+        final storedUserId = await authService.getUserId();
+        final storedToken = await authService.getRefreshToken();
+
+        print('🔍 DEBUG: Retrieved from direct storage:');
+        print('   userId: $storedUserId');
+        print(
+          '   token: ${storedToken != null ? "exists (${storedToken.length} chars)" : "null"}',
+        );
+
+        if (storedUserId != null && storedUserId.isNotEmpty) {
+          userId = storedUserId;
+        }
+        if (storedToken != null && storedToken.isNotEmpty) {
+          token = storedToken;
+        }
+
+        if (userId.isNotEmpty) {
+          print('✅ Method 3 - Direct AuthStorageService SUCCESS:');
+          print('   userId: $userId');
+          print('   token length: ${token.length}');
+        } else {
+          print('⚠️ Method 3: userId is still empty after retrieval');
+        }
       } catch (e) {
-        print('⚠️ Method 3 failed: $e');
+        print('❌ Method 3 failed with exception: $e');
       }
+    }
+
+    // Final validation
+    if (userId.isEmpty) {
+      print('❌ CRITICAL: Unable to retrieve userId from any method');
+      print('🔍 DEBUG: All methods exhausted. Current state:');
+      print('   userId: "$userId" (empty: ${userId.isEmpty})');
+      print(
+        '   token: "${token.isEmpty ? "empty" : "exists (${token.length} chars)"}"',
+      );
+
+      setState(() {
+        _isCapturing = false;
+      });
+      Get.snackbar(
+        'Error',
+        'Unable to retrieve user information. Please login again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
     }
 
     // Use the backend orderId that was stored when create-order was called
     final captureOrderId = _backendOrderId ?? orderId;
 
+    print('');
     print('═════════════════════════════════════════════════════════');
-    print('🔵 API Endpoint: {{base_url}}/payments/paypal/capture-order');
+    print('� CAPTURE PAYMENT REQUEST');
     print('═════════════════════════════════════════════════════════');
-    print('🔵 Request Model:');
+    print('🔵 API Endpoint: ${ApiConstants.paypal.captureOrder}');
+    print('🔵 Method: POST');
+    print('─────────────────────────────────────────────────────────');
+    print('🔵 Headers:');
+    print('   Content-Type: application/json');
+    print(
+      '   Authorization: Bearer ${token.isNotEmpty ? "${token.substring(0, 20)}..." : "EMPTY"}',
+    );
+    print('─────────────────────────────────────────────────────────');
+    print('🔵 Request Body:');
     print('   OrderId: $captureOrderId');
     print('   UserId: $userId');
     print('   PlanId: ${widget.planId}');
-    print(
-      '   Full Request: ${json.encode({"orderId": captureOrderId, "userId": userId, "planId": widget.planId})}',
-    );
     print('─────────────────────────────────────────────────────────');
+    final requestBody = {
+      "orderId": captureOrderId,
+      "userId": userId,
+      "planId": widget.planId,
+    };
+    print('🔵 Full JSON Request:');
+    print(JsonEncoder.withIndent('  ').convert(requestBody));
+    print('═════════════════════════════════════════════════════════');
 
     try {
       final response = await http.post(
@@ -478,17 +609,31 @@ class _PaymentScreenState extends State<PaymentScreen> {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: json.encode({
-          "orderId": captureOrderId,
-          "userId": userId,
-          "planId": widget.planId,
-        }),
+        body: json.encode(requestBody),
       );
 
-      print('✅ API Response - Capture Payment:');
-      print('   Status Code: ${response.statusCode}');
-      print('   Response Body: ${response.body}');
+      print('');
       print('═════════════════════════════════════════════════════════');
+      print('📥 CAPTURE PAYMENT RESPONSE');
+      print('═════════════════════════════════════════════════════════');
+      print('✅ Status Code: ${response.statusCode}');
+      print('─────────────────────────────────────────────────────────');
+      print('✅ Response Headers:');
+      response.headers.forEach((key, value) {
+        print('   $key: $value');
+      });
+      print('─────────────────────────────────────────────────────────');
+      print('✅ Response Body:');
+      try {
+        // Try to parse and pretty print JSON
+        final responseJson = json.decode(response.body);
+        print(JsonEncoder.withIndent('  ').convert(responseJson));
+      } catch (_) {
+        // If not valid JSON, print as is
+        print(response.body);
+      }
+      print('═════════════════════════════════════════════════════════');
+      print('');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('✅ Payment Captured Successfully');
@@ -507,18 +652,38 @@ class _PaymentScreenState extends State<PaymentScreen> {
           Get.offAll(() => const HomeScreen());
         });
       } else {
-        throw Exception('Failed to capture payment: ${response.statusCode}');
+        print('');
+        print('═════════════════════════════════════════════════════════');
+        print('❌ CAPTURE PAYMENT FAILED');
+        print('═════════════════════════════════════════════════════════');
+        print('❌ Status Code: ${response.statusCode}');
+        print('❌ Reason: ${response.reasonPhrase ?? "Unknown"}');
+        print('❌ Response Body: ${response.body}');
+        print('═════════════════════════════════════════════════════════');
+        print('');
+        throw Exception(
+          'Failed to capture payment: ${response.statusCode} - ${response.reasonPhrase}',
+        );
       }
-    } catch (e) {
-      print('❌ API Response - Exception:');
-      print('   Error: $e');
+    } catch (e, stackTrace) {
+      print('');
       print('═════════════════════════════════════════════════════════');
+      print('❌ CAPTURE PAYMENT EXCEPTION');
+      print('═════════════════════════════════════════════════════════');
+      print('❌ Error Type: ${e.runtimeType}');
+      print('❌ Error Message: $e');
+      print('─────────────────────────────────────────────────────────');
+      print('❌ Stack Trace:');
+      print(stackTrace.toString());
+      print('═════════════════════════════════════════════════════════');
+      print('');
+
       setState(() {
         _isCapturing = false;
       });
       Get.snackbar(
         'Error',
-        'Failed to capture payment. Please contact support.',
+        'Failed to capture payment: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -526,56 +691,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  Map<String, dynamic> _getOrderParams() {
-    String totalAmount = widget.amount.toStringAsFixed(2);
-    String subTotalAmount = widget.amount.toStringAsFixed(2);
-    String shippingCost = '0';
-
-    List items = [
-      {
-        "name": widget.planTitle,
-        "quantity": 1,
-        "price": widget.amount.toStringAsFixed(2),
-        "currency": "USD",
-      },
-    ];
-
-    Map<String, dynamic> temp = {
-      "intent": "sale",
-      "payer": {"payment_method": "paypal"},
-      "transactions": [
-        {
-          "amount": {
-            "total": totalAmount,
-            "currency": "USD",
-            "details": {
-              "subtotal": subTotalAmount,
-              "shipping": shippingCost,
-              "shipping_discount": "0",
-            },
-          },
-          "description": "Payment for ${widget.planTitle} subscription",
-          "payment_options": {
-            "allowed_payment_method": "INSTANT_FUNDING_SOURCE",
-          },
-          "item_list": {"items": items},
-        },
-      ],
-      "note_to_payer": "Contact us for any questions on your order.",
-      "redirect_urls": {
-        "return_url": "return.example.com",
-        "cancel_url": "cancel.example.com",
-      },
-    };
-    return temp;
-  }
-
   Future<void> _handleDebitCardPayment() async {
     if (_showCardFieldsWebView) {
       // If already showing, hide it
       setState(() {
         _showCardFieldsWebView = false;
-        _cardFieldsUrl = null;
         _cardFieldsController = null;
       });
       return;
@@ -601,193 +721,161 @@ class _PaymentScreenState extends State<PaymentScreen> {
         '✅ Card Payment: Backend order created with OrderId: $_backendOrderId',
       );
 
-      // Step 2: Continue with existing PayPal card payment flow
+      // Step 2: Get access token for PayPal Sandbox
       final services = PaypalServices();
       print('🔵 Card Payment: Getting access token...');
       final accessToken = await services.getAccessToken();
 
-      if (accessToken != null) {
-        print('✅ Card Payment: Access token received');
-        final transactions = _getOrderParams();
-        print('🔵 Card Payment: Creating PayPal payment...');
-        final res = await services.createPaypalPayment(
-          transactions,
-          accessToken,
-        );
-
-        if (res != null && res['token'] != null && res['token']!.isNotEmpty) {
-          String token = res['token']!;
-          _currentPayPalOrderId = token; // Store PayPal token
-          print('✅ Card Payment: PayPal token received: $token');
-
-          // Generate session IDs
-          final timestamp = DateTime.now().millisecondsSinceEpoch;
-          final sessionID = 'uid_${timestamp}_session';
-          final buttonSessionID = 'uid_${timestamp}_button';
-
-          // Construct the URL with the exact parameters from requirements
-          final cardFieldsUrl =
-              'https://www.sandbox.paypal.com/smart/card-fields'
-              '?token=$token'
-              '&sessionID=$sessionID'
-              '&buttonSessionID=$buttonSessionID'
-              '&locale.x=en_GB'
-              '&commit=true'
-              '&style.submitButton.display=true'
-              '&hasShippingCallback=false'
-              '&env=sandbox'
-              '&country.x=GB'
-              '&sdkMeta=eyJ1cmwiOiJodHRwczovL3d3dy5wYXlwYWwuY29tL3Nkay9qcz9jbGllbnQtaWQ9QVhtd0wtbW50S0dxVEFiNl9EYVk1bzZxaDVSMFVUeHVNa3dESnNnVWxIVzcyVy14NXQ0U1pzZ1NOaTlYT2ZiR1lveGxBSGlYbFNzam5CX0wmY3VycmVuY3k9VVNEJmludGVudD1jYXB0dXJlJmRpc2FibGUtZnVuZGluZz1wYXlsYXRlcix2ZW5tbyIsImF0dHJzIjp7ImRhdGEtc2RrLWludGVncmF0aW9uLXNvdXJjZSI6ImJ1dHRvbi1mYWN0b3J5IiwiZGF0YS11aWQiOiJ1aWRfYWViamZudXNpdXhmbXNhZ3FtbGpodGNtdWd3YWRoIn19'
-              '&disable-card=';
-
-          print('🔵 Loading card fields URL: $cardFieldsUrl');
-
-          // Initialize WebView controller
-          final controller = WebViewController();
-
-          controller
-            ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..setBackgroundColor(Colors.white)
-            ..addJavaScriptChannel(
-              'PayPalPayment',
-              onMessageReceived: (JavaScriptMessage message) {
-                print('✅ PayPalPayment Channel Message: ${message.message}');
-                // We received a success signal from our injected JS
-                // Navigate to capture payment
-                // Use the stored token/orderId
-                if (_currentPayPalOrderId != null) {
-                  _capturePayment(_currentPayPalOrderId!);
-                }
-              },
-            )
-            ..addJavaScriptChannel(
-              'PayPalClose',
-              onMessageReceived: (JavaScriptMessage message) {
-                // Handle close button click from WebView
-                setState(() {
-                  _showCardFieldsWebView = false;
-                  _cardFieldsUrl = null;
-                  _cardFieldsController = null;
-                });
-              },
-            )
-            ..setNavigationDelegate(
-              NavigationDelegate(
-                onPageStarted: (String url) {
-                  print('🔵 Card Fields: Page started loading: $url');
-                },
-                onPageFinished: (String url) {
-                  print('✅ Card Fields: Page finished loading: $url');
-
-                  // Inject JavaScript to intercept GraphQL requests
-                  controller.runJavaScript('''
-                    (function() {
-                        var origFetch = window.fetch;
-                        window.fetch = function(url, options) {
-                            return origFetch.apply(this, arguments).then(function(response) {
-                                if (url.toString().includes('graphql?fetch_credit_form_submit')) {
-                                     response.clone().json().then(function(data) {
-                                        // Check for successful payment mutation
-                                        if (data && data.data && data.data.approveGuestPaymentWithCreditCard) {
-                                            // Send whole data or just a success signal
-                                            window.PayPalPayment.postMessage(JSON.stringify(data));
-                                        }
-                                     }).catch(function(e) { /* ignore json parse error */ });
-                                }
-                                return response;
-                            });
-                        };
-                        
-                        // Also try to hide the close button if possible to force flow completion
-                        var style = document.createElement('style');
-                        style.innerHTML = '.close-button { display: none !important; }'; 
-                        document.head.appendChild(style);
-                    })();
-                  ''');
-
-                  // Inject JavaScript to detect close button clicks
-                  controller.runJavaScript('''
-                    // Try to find and intercept close/cancel button clicks
-                    setTimeout(function() {
-                      var observer = new MutationObserver(function(mutations) {
-                        var closeButtons = document.querySelectorAll('[aria-label*="close"], [aria-label*="Close"], button[class*="close"], a[class*="close"], .close-button, #close-button');
-                        closeButtons.forEach(function(btn) {
-                          btn.addEventListener('click', function(e) {
-                            window.PayPalClose.postMessage('close');
-                          });
-                        });
-                      });
-                      observer.observe(document.body, { childList: true, subtree: true });
-                      
-                      // Initial check
-                      var closeButtons = document.querySelectorAll('[aria-label*="close"], [aria-label*="Close"], button[class*="close"], a[class*="close"], .close-button, #close-button');
-                      closeButtons.forEach(function(btn) {
-                        btn.addEventListener('click', function(e) {
-                          window.PayPalClose.postMessage('close');
-                        });
-                      });
-                    }, 1000);
-                  ''');
-                },
-                onWebResourceError: (WebResourceError error) {
-                  print('❌ Card Fields Error: ${error.description}');
-                },
-                onNavigationRequest: (NavigationRequest request) {
-                  print('🔵 Navigation request: ${request.url}');
-
-                  // Check for success/cancel URLs logic (similar to PaypalWebViewScreen)
-                  if (request.url.contains('return.example.com')) {
-                    // Handle success!
-                    // The token/orderId was used to create the session.
-                    // In the web flow, we often capture using the OrderID we created initially.
-                    // The token passed to the URL is the OrderID (or related to it).
-                    // We extracted 'token' in _handleDebitCardPayment which was used as the OrderID in create-order response.
-                    // We should pass THAT orderId (token) to capture.
-                    // IMPORTANT: We need access to the 'token' variable from the outer scope here.
-                    // Since we can't easily access local variable 'token' here without modifying structure,
-                    // We will rely on extracting it from the URL if present, or better:
-                    // Store the 'currentOrderId' in the class state when we create it.
-
-                    // For now, let's assume we need to store it.
-                    // But wait, allow me to just call _capturePayment with the token we have.
-                    // Ah, I cannot access 'token' from inside this callback easily if it's local.
-                    // I will update the state to store _currentPayPalOrderId.
-                    _capturePayment(_currentPayPalOrderId ?? '');
-                    return NavigationDecision.prevent;
-                  }
-
-                  if (request.url.contains('cancel.example.com')) {
-                    setState(() {
-                      _showCardFieldsWebView = false;
-                      _cardFieldsUrl = null;
-                      _cardFieldsController = null;
-                    });
-                    Get.snackbar(
-                      'Cancelled',
-                      'Payment was cancelled',
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                    return NavigationDecision.prevent;
-                  }
-
-                  return NavigationDecision.navigate;
-                },
-              ),
-            )
-            ..loadRequest(Uri.parse(cardFieldsUrl));
-
-          setState(() {
-            _cardFieldsUrl = cardFieldsUrl;
-            _cardFieldsController = controller;
-            _showCardFieldsWebView = true;
-            _isProcessing = false;
-          });
-        } else {
-          throw Exception('Failed to get payment token from PayPal');
-        }
-      } else {
+      if (accessToken == null) {
         throw Exception('Failed to get Access Token');
       }
+
+      print('✅ Card Payment: Access token received');
+
+      // Store access token for later use
+      final String paypalAccessToken = accessToken;
+
+      // Step 3: Load the PayPal card fields webview with the orderId
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final sessionID = 'uid_${timestamp}_session';
+      final buttonSessionID = 'uid_${timestamp}_button';
+
+      // Construct the URL using the backend orderId
+      final cardFieldsUrl =
+          'https://www.sandbox.paypal.com/smart/card-fields'
+          '?token=$_backendOrderId'
+          '&sessionID=$sessionID'
+          '&buttonSessionID=$buttonSessionID'
+          '&locale.x=en_GB'
+          '&commit=true'
+          '&style.submitButton.display=true'
+          '&hasShippingCallback=false'
+          '&env=sandbox'
+          '&country.x=US'
+          '&sdkMeta=eyJ1cmwiOiJodHRwczovL3d3dy5wYXlwYWwuY29tL3Nkay9qcz9jbGllbnQtaWQ9QVhtd0wtbW50S0dxVEFiNl9EYVk1bzZxaDVSMFVUeHVNa3dESnNnVWxIVzcyVy14NXQ0U1pzZ1NOaTlYT2ZiR1lveGxBSGlYbFNzam5CX0wmY3VycmVuY3k9VVNEJmludGVudD1jYXB0dXJlJmRpc2FibGUtZnVuZGluZz1wYXlsYXRlcix2ZW5tbyIsImF0dHJzIjp7ImRhdGEtc2RrLWludGVncmF0aW9uLXNvdXJjZSI6ImJ1dHRvbi1mYWN0b3J5IiwiZGF0YS11aWQiOiJ1aWRfYWViamZudXNpdXhmbXNhZ3FtbGpodGNtdWd3YWRoIn19'
+          '&disable-card=';
+
+      print('🔵 Loading card fields URL: $cardFieldsUrl');
+
+      // Initialize WebView controller
+      final controller = WebViewController();
+
+      controller
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(Colors.white)
+        ..addJavaScriptChannel(
+          'PayPalPayment',
+          onMessageReceived: (JavaScriptMessage message) async {
+            print('✅ PayPalPayment Channel Message: ${message.message}');
+            // User has submitted payment in the webview
+            // Now we need to call confirm-payment-source endpoint
+            await _confirmPaymentSource(_backendOrderId!, paypalAccessToken);
+          },
+        )
+        ..addJavaScriptChannel(
+          'PayPalClose',
+          onMessageReceived: (JavaScriptMessage message) {
+            // Handle close button click from WebView
+            setState(() {
+              _showCardFieldsWebView = false;
+              _cardFieldsController = null;
+            });
+          },
+        )
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageStarted: (String url) {
+              print('🔵 Card Fields: Page started loading: $url');
+            },
+            onPageFinished: (String url) {
+              print('✅ Card Fields: Page finished loading: $url');
+
+              // Inject JavaScript to intercept form submission
+              controller.runJavaScript('''
+                (function() {
+                    // Intercept fetch requests for payment submission
+                    var origFetch = window.fetch;
+                    window.fetch = function(url, options) {
+                        return origFetch.apply(this, arguments).then(function(response) {
+                            if (url.toString().includes('graphql?fetch_credit_form_submit')) {
+                                response.clone().json().then(function(data) {
+                                    // Check for successful payment mutation
+                                    if (data && data.data && data.data.approveGuestPaymentWithCreditCard) {
+                                        // Send signal to Flutter
+                                        window.PayPalPayment.postMessage(JSON.stringify(data));
+                                    }
+                                }).catch(function(e) { /* ignore json parse error */ });
+                            }
+                            return response;
+                        });
+                    };
+                    
+                    // Hide close button if exists
+                    var style = document.createElement('style');
+                    style.innerHTML = '.close-button { display: none !important; }'; 
+                    document.head.appendChild(style);
+                })();
+              ''');
+
+              // Inject JavaScript to detect close button clicks
+              controller.runJavaScript('''
+                setTimeout(function() {
+                  var observer = new MutationObserver(function(mutations) {
+                    var closeButtons = document.querySelectorAll('[aria-label*="close"], [aria-label*="Close"], button[class*="close"], a[class*="close"], .close-button, #close-button');
+                    closeButtons.forEach(function(btn) {
+                      btn.addEventListener('click', function(e) {
+                        window.PayPalClose.postMessage('close');
+                      });
+                    });
+                  });
+                  observer.observe(document.body, { childList: true, subtree: true });
+                  
+                  // Initial check
+                  var closeButtons = document.querySelectorAll('[aria-label*="close"], [aria-label*="Close"], button[class*="close"], a[class*="close"], .close-button, #close-button');
+                  closeButtons.forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                      window.PayPalClose.postMessage('close');
+                    });
+                  });
+                }, 1000);
+              ''');
+            },
+            onWebResourceError: (WebResourceError error) {
+              print('❌ Card Fields Error: ${error.description}');
+            },
+            onNavigationRequest: (NavigationRequest request) {
+              print('🔵 Navigation request: ${request.url}');
+
+              // Check for success/cancel URLs
+              if (request.url.contains('return.example.com')) {
+                // Payment flow completed, will be handled by JS channel
+                return NavigationDecision.prevent;
+              }
+
+              if (request.url.contains('cancel.example.com')) {
+                setState(() {
+                  _showCardFieldsWebView = false;
+                  _cardFieldsController = null;
+                });
+                Get.snackbar(
+                  'Cancelled',
+                  'Payment was cancelled',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+                return NavigationDecision.prevent;
+              }
+
+              return NavigationDecision.navigate;
+            },
+          ),
+        )
+        ..loadRequest(Uri.parse(cardFieldsUrl));
+
+      setState(() {
+        _cardFieldsController = controller;
+        _showCardFieldsWebView = true;
+        _isProcessing = false;
+      });
     } catch (e) {
       setState(() {
         _isProcessing = false;
@@ -801,6 +889,161 @@ class _PaymentScreenState extends State<PaymentScreen> {
         colorText: Colors.white,
       );
     }
+  }
+
+  Future<void> _confirmPaymentSource(String orderId, String accessToken) async {
+    setState(() {
+      _isCapturing = true;
+      _showCardFieldsWebView = false; // Hide webview to show loading
+    });
+
+    try {
+      print('🔵 Confirming payment source for order: $orderId');
+
+      // Prepare payment source data (with sample card data for testing)
+      final paymentSourceData = {
+        "card": {
+          "number": "4032037064388131",
+          "expiry": "2035-12",
+          "name": "John Doe",
+          "billing_address": {
+            "address_line_1": "2211 N First Street",
+            "address_line_2": "17.3.160",
+            "admin_area_1": "CA",
+            "admin_area_2": "San Jose",
+            "postal_code": "95131",
+            "country_code": "US",
+          },
+          "attributes": {
+            "verification": {"method": "SCA_WHEN_REQUIRED"},
+          },
+        },
+      };
+
+      final services = PaypalServices();
+      final response = await services.confirmPaymentSource(
+        orderId: orderId,
+        accessToken: accessToken,
+        paymentSource: paymentSourceData,
+      );
+
+      if (response == null) {
+        throw Exception('Failed to confirm payment source');
+      }
+
+      print('✅ Payment source confirmed successfully');
+      print('🔵 Response: ${json.encode(response)}');
+
+      // Parse the response
+      final confirmResponse = PaypalConfirmPaymentResponse.fromJson(response);
+
+      // Check if status requires payer action (3D Secure)
+      if (confirmResponse.status == 'PAYER_ACTION_REQUIRED') {
+        print('🔵 Payer action required - opening 3D Secure verification');
+
+        // Find the payer-action link
+        final payerActionLink = confirmResponse.links.firstWhere(
+          (link) => link.rel == 'payer-action',
+          orElse: () => PaypalLink(href: '', rel: '', method: ''),
+        );
+
+        if (payerActionLink.href.isNotEmpty) {
+          // Open 3D Secure verification in webview
+          await _handle3DSecure(payerActionLink.href, orderId, accessToken);
+        } else {
+          throw Exception('Payer action link not found');
+        }
+      } else {
+        // Payment confirmed, proceed to capture
+        await _capturePayment(orderId);
+      }
+    } catch (e) {
+      print('❌ Error confirming payment source: $e');
+      setState(() {
+        _isCapturing = false;
+      });
+      Get.snackbar(
+        'Error',
+        'Failed to confirm payment. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> _handle3DSecure(
+    String verificationUrl,
+    String orderId,
+    String accessToken,
+  ) async {
+    print('🔵 Loading 3D Secure verification URL: $verificationUrl');
+
+    // Create a new webview for 3D Secure
+    final controller = WebViewController();
+
+    controller
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.white)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (String url) {
+            print('🔵 3D Secure: Page started loading: $url');
+          },
+          onPageFinished: (String url) {
+            print('✅ 3D Secure: Page finished loading: $url');
+
+            // Check if verification is complete
+            if (url.contains('success') || url.contains('complete')) {
+              print('✅ 3D Secure verification completed');
+              // Proceed to capture payment
+              _capturePayment(orderId);
+            }
+          },
+          onWebResourceError: (WebResourceError error) {
+            print('❌ 3D Secure Error: ${error.description}');
+          },
+          onNavigationRequest: (NavigationRequest request) {
+            print('🔵 3D Secure navigation: ${request.url}');
+
+            // Check for completion signals
+            if (request.url.contains('success') ||
+                request.url.contains('complete') ||
+                request.url.contains('return.example.com')) {
+              // Verification complete, proceed to capture
+              Future.delayed(const Duration(milliseconds: 500), () {
+                _capturePayment(orderId);
+              });
+              return NavigationDecision.prevent;
+            }
+
+            if (request.url.contains('cancel') ||
+                request.url.contains('error')) {
+              setState(() {
+                _isCapturing = false;
+                _showCardFieldsWebView = false;
+              });
+              Get.snackbar(
+                'Cancelled',
+                '3D Secure verification was cancelled',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+              );
+              return NavigationDecision.prevent;
+            }
+
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(verificationUrl));
+
+    // Show the 3D Secure webview
+    setState(() {
+      _cardFieldsController = controller;
+      _showCardFieldsWebView = true;
+    });
   }
 
   void _onPaymentSuccess(String transactionId) {

@@ -1,10 +1,11 @@
-import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert' as convert;
-import 'package:http_auth/http_auth.dart';
-import 'package:get/get.dart';
-import 'package:giveandtake/core/network/constants/api_constants.dart';
 
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_auth/http_auth.dart';
+
+import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/services/get_user_profile_service.dart';
 
 class PaypalServices {
@@ -35,7 +36,7 @@ class PaypalServices {
 
       print('✅ API Response - Get Access Token:');
       print('   Status Code: ${response.statusCode}');
-
+      
       if (response.statusCode == 200) {
         final body = convert.jsonDecode(response.body);
         print('   Response: ${convert.jsonEncode(body)}');
@@ -65,22 +66,20 @@ class PaypalServices {
     String accessToken,
   ) async {
     try {
-      print('═════════════════════════════════════════════════════════');
-      print(
-        '🔵 API Endpoint: https://api.sandbox.paypal.com/v1/payments/payment',
-      );
-      print('═════════════════════════════════════════════════════════');
-      print('🔵 Request Model:');
-      print('   Method: POST');
-      print('   Full Request: ${convert.jsonEncode(transactions)}');
-      print('─────────────────────────────────────────────────────────');
+      // print('═════════════════════════════════════════════════════════');
+      // print('🔵 API Endpoint: https://api.sandbox.paypal.com/v1/payments/payment');
+      // print('═════════════════════════════════════════════════════════');
+      // print('🔵 Request Model:');
+      // print('   Method: POST');
+      // print('   Full Request: ${convert.jsonEncode(transactions)}');
+      // print('─────────────────────────────────────────────────────────');
 
       var response = await http.post(
-        Uri.parse("$domain/v1/payments/payment"),
+        Uri.parse(ApiConstants.payment.createPayment),
         body: convert.jsonEncode(transactions),
         headers: {
           "content-type": "application/json",
-          'Authorization': 'Bearer $accessToken',
+          // 'Authorization': 'Bearer $accessToken',
         },
       );
 
@@ -132,7 +131,7 @@ class PaypalServices {
             "executeUrl": executeUrl,
             "approvalUrl": approvalUrl,
             "token": token,
-            "id": body["id"] ?? "",
+            "id": body["id"] ?? ""
           };
         }
         print('⚠️ No links found in response');
@@ -194,16 +193,16 @@ class PaypalServices {
       rethrow;
     }
   }
-
   // Create Order (v2) for Native Checkout
-  Future<String?> createOrderV2(double amount, String accessToken) async {
+  Future<String?> createOrderV2(
+    double amount,
+    String accessToken,
+  ) async {
     try {
       print('═════════════════════════════════════════════════════════');
-      print(
-        '🔵 API Endpoint: https://api.sandbox.paypal.com/v2/checkout/orders',
-      );
+      print('🔵 API Endpoint: https://api.sandbox.paypal.com/v2/checkout/orders');
       print('═════════════════════════════════════════════════════════');
-
+      
       final requestBody = {
         "intent": "CAPTURE",
         "purchase_units": [
@@ -211,9 +210,9 @@ class PaypalServices {
             "amount": {
               "currency_code": "USD",
               "value": amount.toStringAsFixed(2),
-            },
-          },
-        ],
+            }
+          }
+        ]
       };
 
       print('🔵 Request Model:');
@@ -233,7 +232,7 @@ class PaypalServices {
       print('✅ API Response - Create Order V2:');
       print('   Status Code: ${response.statusCode}');
       print('   Response Body: ${response.body}');
-
+      
       if (response.statusCode == 201 || response.statusCode == 200) {
         final body = convert.jsonDecode(response.body);
         print('═════════════════════════════════════════════════════════');
@@ -255,12 +254,13 @@ class PaypalServices {
   }
 
   // Capture Order (v2)
-  Future<bool> captureOrder(String orderId, String accessToken) async {
+  Future<bool> captureOrder(
+    String orderId,
+    String accessToken,
+  ) async {
     try {
       print('═════════════════════════════════════════════════════════');
-      print(
-        '🔵 API Endpoint: https://api.sandbox.paypal.com/v2/checkout/orders/$orderId/capture',
-      );
+      print('🔵 API Endpoint: https://api.sandbox.paypal.com/v2/checkout/orders/$orderId/capture');
       print('═════════════════════════════════════════════════════════');
       print('🔵 Request Model:');
       print('   OrderId: $orderId');
@@ -277,22 +277,22 @@ class PaypalServices {
       print('✅ API Response - Capture Order V2:');
       print('   Status Code: ${response.statusCode}');
       print('   Response Body: ${response.body}');
-
+      
       if (response.statusCode == 201 || response.statusCode == 200) {
         print('═════════════════════════════════════════════════════════');
         return true;
       } else {
-        try {
-          final body = convert.jsonDecode(response.body);
-          print('❌ API Response - Error:');
-          print('   Status: FAILED');
-          print('   Error: ${body.toString()}');
-        } catch (_) {
-          print('❌ API Response - Error:');
-          print('   Status: FAILED');
-          print('   Error: ${response.body}');
-        }
-        print('═════════════════════════════════════════════════════════');
+         try {
+             final body = convert.jsonDecode(response.body);
+             print('❌ API Response - Error:');
+             print('   Status: FAILED');
+             print('   Error: ${body.toString()}');
+         } catch (_) {
+             print('❌ API Response - Error:');
+             print('   Status: FAILED');
+             print('   Error: ${response.body}');
+         }
+         print('═════════════════════════════════════════════════════════');
         // throw Exception('Failed to capture PayPal order');
         return false;
       }
@@ -303,7 +303,6 @@ class PaypalServices {
       rethrow;
     }
   }
-
   // Capture Order via Backend API
   Future<bool> captureOrderBackend({
     required String orderId,
@@ -335,21 +334,77 @@ class PaypalServices {
       );
 
       print('🔵 Backend API: Capture response status: ${response.statusCode}');
-
+      
       if (response.statusCode == 201 || response.statusCode == 200) {
         print('✅ Backend API: Order captured successfully.');
         return true;
       } else {
-        try {
-          final body = convert.jsonDecode(response.body);
-          print('❌ Backend API: Failed to capture - ${body.toString()}');
-        } catch (_) {
-          print('❌ Backend API: Failed to capture - ${response.body}');
-        }
+         try {
+             final body = convert.jsonDecode(response.body);
+             print('❌ Backend API: Failed to capture - ${body.toString()}');
+         } catch (_) {
+             print('❌ Backend API: Failed to capture - ${response.body}');
+         }
         return false;
       }
     } catch (e) {
       print('❌ Backend API: Exception capturing order: $e');
+      rethrow;
+    }
+  }
+
+  // Confirm Payment Source (v2) - for card payments
+  Future<Map<String, dynamic>?> confirmPaymentSource({
+    required String orderId,
+    required String accessToken,
+    required Map<String, dynamic> paymentSource,
+  }) async {
+    try {
+      print('═════════════════════════════════════════════════════════');
+      print('🔵 API Endpoint: https://api.sandbox.paypal.com/v2/checkout/orders/$orderId/confirm-payment-source');
+      print('═════════════════════════════════════════════════════════');
+      print('🔵 Request Model:');
+      print('   OrderId: $orderId');
+      print('   Payment Source: ${convert.jsonEncode(paymentSource)}');
+      print('─────────────────────────────────────────────────────────');
+
+      var response = await http.post(
+        Uri.parse("$domain/v2/checkout/orders/$orderId/confirm-payment-source"),
+        headers: {
+          "content-type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: convert.jsonEncode({
+          "payment_source": paymentSource,
+        }),
+      );
+
+      print('✅ API Response - Confirm Payment Source:');
+      print('   Status Code: ${response.statusCode}');
+      print('   Response Body: ${response.body}');
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final body = convert.jsonDecode(response.body);
+        print('═════════════════════════════════════════════════════════');
+        return body;
+      } else {
+        try {
+          final body = convert.jsonDecode(response.body);
+          print('❌ API Response - Error:');
+          print('   Status: FAILED');
+          print('   Error: ${body.toString()}');
+        } catch (_) {
+          print('❌ API Response - Error:');
+          print('   Status: FAILED');
+          print('   Error: ${response.body}');
+        }
+        print('═════════════════════════════════════════════════════════');
+        return null;
+      }
+    } catch (e) {
+      print('❌ API Response - Exception:');
+      print('   Error: $e');
+      print('═════════════════════════════════════════════════════════');
       rethrow;
     }
   }
