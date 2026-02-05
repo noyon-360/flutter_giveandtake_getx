@@ -261,6 +261,12 @@ class CompanyAccountApi {
 
   final String getJobUsage = '${ApiConstants.baseUrl}/jobs/posting/usage';
   final String getAllSearchUser = '${ApiConstants.baseUrl}/fetch/all/users';
-  final String getPublicView = '${ApiConstants.baseUrl}/company/companies/slug';
+  //  String getPublicView(String slug) = '${ApiConstants.baseUrl}/company/companies/slug/$slug';
+
+     String getPublicView(String slug) =>
+      '${ApiConstants.baseUrl}/company/companies/slug/$slug';
+
+       String getPulicJobs(String companyId) =>
+      '${ApiConstants.baseUrl}/all-jobs/company/$companyId';
 
 }

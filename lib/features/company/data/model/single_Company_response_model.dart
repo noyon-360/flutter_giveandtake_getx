@@ -1,6 +1,4 @@
 
-
-
 import 'package:flutter/material.dart';
 
 class SingleCompanyResponseModel {
@@ -26,11 +24,7 @@ class SingleCompanyResponseModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'meta': meta.toJson(),
-        'companies': companies.map((e) => e.toJson()).toList(),
-        'honors': honors.map((e) => e.toJson()).toList(),
-      };
+ 
 }
 class Meta {
   final int currentPage;
@@ -123,26 +117,7 @@ class Company {
         elevatorPitch: ElevatorPitch.fromJson(json['elevatorPitch']),
       );
 
-  Map<String, dynamic> toJson() => {
-        '_id': id,
-        'userId': userId,
-        'clogo': clogo,
-        'banner': banner,
-        'aboutUs': aboutUs,
-        'slug': slug,
-        'cname': cname,
-        'country': country,
-        'city': city,
-        'zipcode': zipcode,
-        'cemail': cemail,
-        'sLink': sLink.map((e) => e.toJson()).toList(),
-        'industry': industry,
-        'service': service,
-        'employeesId': employeesId,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-        'elevatorPitch': elevatorPitch.toJson(),
-      };
+ 
 }
 class SocialLink {
   final String label;
@@ -200,45 +175,38 @@ class ElevatorPitch {
         updatedAt: DateTime.parse(json['updatedAt']),
       );
 
-  Map<String, dynamic> toJson() => {
-        'video': video.toJson(),
-        'metadata': metadata.toJson(),
-        'processing': processing.toJson(),
-        '_id': id,
-        'userId': userId,
-        'status': status,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+ 
 }
+
 class Video {
   final String? url;
   final String? hlsUrl;
   final String? encryptionKeyUrl;
+  final dynamic rawKey;
+  final dynamic rawBucket;
 
   Video({
     this.url,
     this.hlsUrl,
     this.encryptionKeyUrl,
+    this.rawKey,
+    this.rawBucket,
   });
 
   factory Video.fromJson(Map<String, dynamic> json) => Video(
         url: json['url'],
         hlsUrl: json['hlsUrl'],
         encryptionKeyUrl: json['encryptionKeyUrl'],
+        rawKey: json['rawKey'],
+        rawBucket: json['rawBucket'],
       );
-
-  Map<String, dynamic> toJson() => {
-        'url': url,
-        'hlsUrl': hlsUrl,
-        'encryptionKeyUrl': encryptionKeyUrl,
-      };
 }
 
 class VideoMetadata {
-  final int duration;
+  final double duration;
   final String format;
   final String vcodec;
+  final int rotation;
   final int width;
   final int height;
 
@@ -246,49 +214,58 @@ class VideoMetadata {
     required this.duration,
     required this.format,
     required this.vcodec,
+    required this.rotation,
     required this.width,
     required this.height,
   });
 
   factory VideoMetadata.fromJson(Map<String, dynamic> json) => VideoMetadata(
-        duration: json['duration'],
+        duration: (json['duration'] as num).toDouble(),
         format: json['format'],
         vcodec: json['vcodec'],
+        rotation: json['rotation'] ?? 0,
         width: json['width'],
         height: json['height'],
       );
-
-  Map<String, dynamic> toJson() => {
-        'duration': duration,
-        'format': format,
-        'vcodec': vcodec,
-        'width': width,
-        'height': height,
-      };
 }
 
 class Processing {
   final String state;
+  final DateTime? startedAt;
+  final DateTime? updatedAt;
+  final DateTime? completedAt;
+  final int retries;
+  final dynamic error;
   final int fileSize;
   final String fileName;
 
   Processing({
     required this.state,
+    this.startedAt,
+    this.updatedAt,
+    this.completedAt,
+    required this.retries,
+    this.error,
     required this.fileSize,
     required this.fileName,
   });
 
   factory Processing.fromJson(Map<String, dynamic> json) => Processing(
         state: json['state'],
+        startedAt: json['startedAt'] != null
+            ? DateTime.parse(json['startedAt'])
+            : null,
+        updatedAt: json['updatedAt'] != null
+            ? DateTime.parse(json['updatedAt'])
+            : null,
+        completedAt: json['completedAt'] != null
+            ? DateTime.parse(json['completedAt'])
+            : null,
+        retries: json['retries'] ?? 0,
+        error: json['error'],
         fileSize: json['fileSize'],
         fileName: json['fileName'],
       );
-
-  Map<String, dynamic> toJson() => {
-        'state': state,
-        'fileSize': fileSize,
-        'fileName': fileName,
-      };
 }
 class Honor {
   final String id;

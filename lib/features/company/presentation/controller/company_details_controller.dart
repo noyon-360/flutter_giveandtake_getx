@@ -7,6 +7,7 @@ import 'package:karlfive/features/company/data/model/archieve_response_model.dar
 import 'package:karlfive/features/company/data/model/candidate_resume_response_model.dart';
 import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
 import 'package:karlfive/features/company/data/model/employee_fetch_single_model.dart';
+import 'package:karlfive/features/company/data/model/public_view_jobs_response_model.dart';
 import 'package:karlfive/features/company/data/model/public_view_search_response_model.dart';
 
 import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
@@ -41,10 +42,11 @@ class CompanyDetailsController extends BaseController {
   final searchQuery = ''.obs;
 
   final employee = Rx<EmployeeFetchSingleModel?>(null);
-   final publicView = Rx<PublicViewSearchResponseModel?>(null);
+  final publicView = Rx<PublicViewSearchResponseModel?>(null);
   final usage = Rx<JobUsageResponseModel?>(null);
 
   var resume = <ResumeUpdatedResponseModel>[].obs;
+  final pubJobs = <PublicViewJobsResponseModel>[].obs;
   final remove = Rx<RemoveRecruiterResponseModel?>(
     null,
   ); // <AllUserResponseModel>
@@ -66,6 +68,8 @@ class CompanyDetailsController extends BaseController {
   var isCompanyLoading = true.obs;
   var isEmployeeLoading = true.obs;
   final Rx<CandidateResumeResponseModel?> candidate = Rx(null);
+  // Follow state for public company view
+  final RxBool isFollowing = false.obs;
 
   Future<void> fetchCompanyProfile() async {
     setLoading(true);
@@ -466,12 +470,13 @@ class CompanyDetailsController extends BaseController {
   }
 
   void searchUsers(String query) {
-  if (query.trim().isEmpty) {
-    filteredSearchInfo.assignAll(searchInfo);   // show all when empty
-  } else {
-    filteredSearchInfo.value = filterUsers(searchInfo, query);
+    if (query.trim().isEmpty) {
+      filteredSearchInfo.assignAll(searchInfo); // show all when empty
+    } else {
+      filteredSearchInfo.value = filterUsers(searchInfo, query);
+    }
   }
-}
+
   List<SeachAllUserResponseModel> filterUsers(
     List<SeachAllUserResponseModel> users,
     String query,
@@ -492,31 +497,92 @@ class CompanyDetailsController extends BaseController {
     searchQuery.value = '';
     filteredSearchInfo.clear();
   }
-  Future<void> getpublicView() async {
+  // Future<void> getpublicView(String slug) async {
+  //   setLoading(true);
+  //   // isEmployeeLoading.value = true;
+  //   setError("");
+
+  //   final result = await _companyRepo.getpublicView(slug);
+
+  //   result.fold(
+  //     (fail) {
+  //       setError(fail.message);
+  //       DPrint.log('data fetch failed: ${fail.message}');
+  //       setLoading(false);
+  //       // isEmployeeLoading.value = false;
+  //     },
+  //     (success) {
+  //       DPrint.log('data fetch successfully: ${success.message}');
+  //       // success is NetworkSuccess<SingleCompanyResponseModel>
+  //       // → extract the actual model using .data
+  //       publicView.value = success.data;
+  //       publicView.refresh(); // ← THIS IS THE CORRECT WAY
+
+  //       setLoading(false);
+  //       // isEmployeeLoading.value = false;
+  //     },
+  //   );
+  // }
+  Future<void> getpublicView(String slug) async {
     setLoading(true);
-    // isEmployeeLoading.value = true;
     setError("");
 
-    
-    final result = await _companyRepo.getpublicView();
+    final result = await _companyRepo.getpublicView(slug);
 
     result.fold(
       (fail) {
         setError(fail.message);
         DPrint.log('data fetch failed: ${fail.message}');
         setLoading(false);
-        // isEmployeeLoading.value = false;
       },
       (success) {
         DPrint.log('data fetch successfully: ${success.message}');
-        // success is NetworkSuccess<SingleCompanyResponseModel>
-        // → extract the actual model using .data
         publicView.value = success.data;
-        publicView.refresh(); // ← THIS IS THE CORRECT WAY
-
+        publicView.refresh();
         setLoading(false);
-        // isEmployeeLoading.value = false;
       },
+    );
+  }
+
+  Future<void> fetchPublicJobs(String companyId) async {
+    setLoading(true);
+    setError("");
+
+    if (companyId.isEmpty) {
+      setError('Invalid candidate ID');
+      setLoading(false);
+      return;
+    }
+
+    final result = await _companyRepo.getPublicJobs(companyId);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log('data fetch successfully: ${success.message}');
+        pubJobs.value = success.data;
+        setLoading(false);
+      },
+    );
+  }
+
+  void toggleFollow() async {
+    // Optimistic UI update
+    isFollowing.value = !isFollowing.value;
+
+    // 🔁 OPTIONAL: Call API here
+    // await _companyRepo.followCompany(companyId);
+
+    Get.snackbar(
+      isFollowing.value ? 'Followed' : 'Unfollowed',
+      isFollowing.value
+          ? 'You are now following this company'
+          : 'You unfollowed this company',
+      snackPosition: SnackPosition.BOTTOM,
     );
   }
 }

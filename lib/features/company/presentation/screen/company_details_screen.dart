@@ -9,9 +9,11 @@ import 'package:karlfive/features/company_pricing/presentation/screens/plan_pric
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/network/constants/api_constants.dart';
+import '../../../../core/utils/debug_print.dart';
 import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
+import '../../../recruiter_account/presentation/widgets/elevator_pitch.dart';
 import '../../../recruiter_account/presentation/widgets/social_media.dart';
 import '../controller/company_details_controller.dart';
 import '../widget/elevator-pitch_company_widget.dart';
@@ -44,6 +46,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
     await controller.fetchCompanyProfile();
     await controller.fetchEmployee();
   }
+
   String? _accessToken;
 
   @override
@@ -379,60 +382,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
 
                       const SizedBox(height: 20),
 
-                      /// 🔹 Buttons in one row
-                      Row(
-                        children: [
-                          // ElevatedButton(
-                          //   onPressed: () => Get.to(() => ManageJobPostScreen()),
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Color(0xFF2B7FD0),
-                          //     foregroundColor: Colors.white,
-                          //     padding: EdgeInsets.symmetric(horizontal: 14),
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(10),
-                          //     ),
-                          //   ),
-                          //   child: Text("Manage Jobs"),
-                          // ),
-
-                          // const SizedBox(width: 10),
-
-                          // ElevatedButton(
-                          //   onPressed: () {},
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Color(0xFF2B7FD0),
-                          //     foregroundColor: Colors.white,
-                          //     padding: EdgeInsets.symmetric(horizontal: 14),
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(10),
-                          //     ),
-                          //   ),
-                          //   child: Text(
-                          //     "Post A Job",
-                          //   ), // ⬅ added beside Manage Job
-                          // ),
-
-                          // const SizedBox(width: 10),
-                          // ElevatedButton(
-                          //   onPressed: () {
-                          //     Get.to(
-                          //       () => CompanyEditAccountPage(
-                          //         companyData: controller.userInfo.value!,
-                          //       ),
-                          //     );
-                          //   },
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Color(0xFF2B7FD0),
-                          //     foregroundColor: Colors.white,
-                          //     padding: EdgeInsets.symmetric(horizontal: 14),
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(10),
-                          //     ),
-                          //   ),
-                          //   child: Text("Edit Profile"),
-                          // ),
-                        ],
-                      ),
+                  
+                     
                     ],
                   ),
                 ),
@@ -444,11 +395,16 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    border: Border.all(color: const Color(0xFF999999), width: 1),
+                    border: Border.all(
+                      color: const Color(0xFF999999),
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
 
                   //fetch elevated pitch e
+             
+
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
@@ -468,113 +424,14 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                     ),
                   ),
                 ),
-                /// ================= Elevator Pitch =================
-                // sectionTitle("Elevator Video Pitch"),
-                // const SizedBox(height: 20),
-
-                // // Check if elevator pitch exists
-                // company.elevatorPitch?.video.hlsUrl != null &&
-                //         company.elevatorPitch!.video.hlsUrl!.isNotEmpty
-                //     ? Container(
-                //         decoration: BoxDecoration(
-                //           color: Colors.white,
-                //           border: Border.all(
-                //             color: const Color(0xFF999999),
-                //             width: 1,
-                //           ),
-                //           borderRadius: BorderRadius.circular(12),
-                //         ),
-                //         child: Container(
-                //           decoration: BoxDecoration(
-                //             borderRadius: BorderRadius.circular(4),
-                //             color: const Color(0xFF191919),
-                //           ),
-                //           height: 160,
-                //           width: double.infinity,
-                //           child: ElevatorPitchCompanySection(
-                //             videoUrl: company.elevatorPitch!.video.hlsUrl,
-                //             httpHeaders: {
-                //               'Accept': '*/*',
-                //               'Accept-Encoding': 'identity',
-                //               "Authorization":
-                //                   "Bearer ${company.elevatorPitch!.video.encryptionKeyUrl}",
-                //             },
-                //           ),
-                //         ),
-                //       )
-                //     : GestureDetector(
-                //         onTap: () {
-                //           // Navigate to video upload screen (same as create flow)
-                //           Get.to(() => VideoUploadScreen());
-                //         },
-                //         child: Container(
-                //           decoration: BoxDecoration(
-                //             border: Border.all(
-                //               color: const Color(0xFF999999),
-                //               width: 1,
-                //             ),
-                //             borderRadius: BorderRadius.circular(12),
-                //             color: Colors.white,
-                //           ),
-                //           height: 160,
-                //           width: double.infinity,
-                //           child: Container(
-                //             decoration: BoxDecoration(
-                //               borderRadius: BorderRadius.circular(4),
-                //               color: const Color(0xFF191919),
-                //             ),
-                //             child: Column(
-                //               mainAxisAlignment: MainAxisAlignment.center,
-                //               children: [
-                //                 Image.asset(
-                //                   'assets/icons/gallery.png', // same icon used in create screen
-                //                   height: 32,
-                //                   width: 32,
-                //                   color: Colors.white70,
-                //                 ),
-                //                 const SizedBox(height: 12),
-                //                 const Text(
-                //                   'Upload your company elevator pitch',
-                //                   style: TextStyle(
-                //                     color: Colors.white,
-                //                     fontSize: 14,
-                //                     fontWeight: FontWeight.w500,
-                //                   ),
-                //                   textAlign: TextAlign.center,
-                //                 ),
-                //              const SizedBox(height: 8),
-                //                 const Text(
-                //                   ' Upload or view a short video',
-                //                   style: TextStyle(
-                //                     color: Colors.white70,
-                //                     fontSize: 12,
-                //                   ),
-                //                   textAlign: TextAlign.center,
-                //                 ),
-                //               ],
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-
+              
                 const SizedBox(height: 20),
                 SizedBox(height: 20),
 
                 /// ================= COMPANY DETAILS =================
                 infoTile("About us", stripHtmlTags(company.aboutUs)),
                 SizedBox(height: 20),
-                // infoTile("Industry", company.industry),
-                // infoTile("Zip Code", company.zipcode),
-                // infoTile("Business Email", company.cemail),
-                // infoTile("Services", company.service.join(", ")),
-                // infoTile(
-                //   "Social Links",
-                //   company.sLink.isNotEmpty
-                //       ? company.sLink
-                //             .map((e) => "• ${e.label} → ${e.url}")
-                //             .join("\n")
-                //       : "No social links available",
-                // ),
+              
 
                 /// ================= Employees =================
                 sectionTitle("Internal Recruiters"),
@@ -884,7 +741,9 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                     ),
                                     SizedBox(width: 4),
                                     Text(
-                                      _formatDate(honor.programeDate.toIso8601String()),
+                                      _formatDate(
+                                        honor.programeDate.toIso8601String(),
+                                      ),
                                       style: TextStyle(
                                         color: Colors.black54,
                                         fontSize: 14,
@@ -930,50 +789,41 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
   }
   // ================= SOCIAL MEDIA LINKS =================
 
-Widget buildSocialLinks(Company company) {
-  final validSocialLinks = company.sLink
-      .where((link) => link.url.trim().isNotEmpty)
-      .toList();
+  Widget buildSocialLinks(Company company) {
+    final validSocialLinks = company.sLink
+        .where((link) => link.url.trim().isNotEmpty)
+        .toList();
 
-  if (validSocialLinks.isEmpty) {
-    return const Text(
-      "No social links available",
-      style: TextStyle(
-        color: Colors.black54,
-        fontSize: 12,
-      ),
+    if (validSocialLinks.isEmpty) {
+      return const Text(
+        "No social links available",
+        style: TextStyle(color: Colors.black54, fontSize: 12),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: validSocialLinks.map((link) {
+        return GestureDetector(
+          onTap: () async {
+            final Uri url = Uri.parse(link.url);
+
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url, mode: LaunchMode.externalApplication);
+            } else {
+              Get.snackbar(
+                "Error",
+                "Could not open ${link.label}",
+                snackPosition: SnackPosition.BOTTOM,
+              );
+            }
+          },
+          child: SocialMedia(image: _getSocialIcon(link.label)),
+        );
+      }).toList(),
     );
   }
-
-  return Wrap(
-    spacing: 8,
-    runSpacing: 8,
-    children: validSocialLinks.map((link) {
-      return GestureDetector(
-        onTap: () async {
-          final Uri url = Uri.parse(link.url);
-
-          if (await canLaunchUrl(url)) {
-            await launchUrl(
-              url,
-              mode: LaunchMode.externalApplication,
-            );
-          } else {
-            Get.snackbar(
-              "Error",
-              "Could not open ${link.label}",
-              snackPosition: SnackPosition.BOTTOM,
-            );
-          }
-        },
-        child: SocialMedia(
-          image: _getSocialIcon(link.label),
-        ),
-      );
-    }).toList(),
-  );
-}
-
 
   Widget sectionTitle(String title, {bool canDelete = false}) {
     return Padding(

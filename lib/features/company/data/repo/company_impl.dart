@@ -27,6 +27,7 @@ import 'package:karlfive/features/company/data/model/candidate_resume_response_m
 import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
 import 'package:karlfive/features/company/data/model/job_usage_response_model.dart';
 import 'package:karlfive/features/company/data/model/manage_job_response_model.dart';
+import 'package:karlfive/features/company/data/model/public_view_jobs_response_model.dart';
 import 'package:karlfive/features/company/data/model/public_view_search_response_model.dart';
 import 'package:karlfive/features/company/data/model/rec_company_response_model.dart';
 import 'package:karlfive/features/company/data/model/recruiter_added_request_model.dart';
@@ -275,7 +276,6 @@ class CompanyRepoImplementation extends CompanyRepository {
   }
 
   @override
-
   NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser() {
     return _apiClient.get(
       ApiConstants.company.getAllSearchUser,
@@ -287,16 +287,30 @@ class CompanyRepoImplementation extends CompanyRepository {
             ),
           )
           .toList(),
-    
+    );
+  }
+
+  @override
+  NetworkResult<PublicViewSearchResponseModel> getpublicView(String slug) {
+    return _apiClient.get(
+      ApiConstants.company.getPublicView(slug),
+      fromJsonT: (json) =>
+          PublicViewSearchResponseModel.fromJson(json as Map<String, dynamic>),
     );
   }
 
     @override
-  NetworkResult<PublicViewSearchResponseModel> getpublicView() {
+  NetworkResult<List<PublicViewJobsResponseModel>> getPublicJobs(String companyId) {
     return _apiClient.get(
-      ApiConstants.company.getPublicView,
-      fromJsonT: (json) =>
-          PublicViewSearchResponseModel.fromJson(json as Map<String, dynamic>),
+      ApiConstants.company.getPulicJobs(companyId),
+      fromJsonT: (json) => (json as List<dynamic>? ?? [])
+          .where((item) => item != null) // ← remove nulls
+          .map(
+            (item) => PublicViewJobsResponseModel.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
     );
   }
 }

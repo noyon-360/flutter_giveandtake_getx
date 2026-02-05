@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/theme/app_colors.dart';
 import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:karlfive/features/company/presentation/screen/public_view_seach_screen.dart';
 import 'package:karlfive/features/elevator/presentation/screens/elevator_resume_screen.dart';
 import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
@@ -167,10 +168,18 @@ class _AppDrawerState extends State<AppDrawer> {
                                   subtitle: Text(user.address ?? ''),
                                   trailing: const Icon(Icons.person_outline),
                                   onTap: () {
-                                    Get.back();
-                                    Get.snackbar(
-                                      'Selected',
-                                      user.name ?? 'User',
+                                    final slug = user.slug;
+
+                                    if (slug == null || slug.isEmpty) {
+                                      Get.snackbar(
+                                        'Error',
+                                        'This user has no public profile',
+                                      );
+                                      return;
+                                    }
+
+                                    Get.to(
+                                      () => PublicViewSeachScreen(slug: slug),
                                     );
                                   },
                                 );

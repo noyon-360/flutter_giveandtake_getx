@@ -1,134 +1,154 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:karlfive/features/job_listing/presentation/controllers/job_details_controller.dart';
+import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/network/constants/api_constants.dart';
+import '../../../recruiter_account/presentation/widgets/social_media.dart';
+import '../../data/model/public_view_search_response_model.dart';
 import '../controller/company_details_controller.dart';
-import '../controller/public_view_controller.dart';
 import '../widget/elevator-pitch_company_widget.dart';
 import '../widget/search_job_card.dart';
 
-class PublicViewSeachScreen extends StatelessWidget {
-  PublicViewSeachScreen({super.key});
+class PublicViewSeachScreen extends StatefulWidget {
+  final String slug;
+  const PublicViewSeachScreen({super.key, required this.slug});
 
-  final PublicViewController controller = Get.put(PublicViewController());
-  final CompanyDetailsController Ccontroller = Get.find();
-  final CompanyDetailsController Comcontroller = Get.find();
+  @override
+  State<PublicViewSeachScreen> createState() => _PublicViewSeachScreenState();
+}
+
+class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
+  final CompanyDetailsController controller =
+      Get.find<CompanyDetailsController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await controller.getpublicView(widget.slug);
+
+      // fetch company jobs after getting company info
+      if (controller.publicView.value != null &&
+          controller.publicView.value!.companies.isNotEmpty) {
+        final companyId = controller.publicView.value!.companies.first.id;
+        await controller.fetchPublicJobs(companyId);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Cover Image
-            Stack(
-              clipBehavior: Clip.none, // 🔥 THIS FIXES IT
-              alignment: Alignment.bottomLeft,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 200,
-                  child: Image.network(
-                    'https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final data = controller.publicView.value;
+        if (data == null || data.companies.isEmpty) {
+          return const Center(child: Text("No company data found"));
+        }
+
+        final company = data.companies.first;
+        final honors = data.honors;
+        final jobs = controller
+            .pubJobs; // this should be RxList<PublicViewJobsResponseModel>
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ---------------- COVER IMAGE ----------------
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.bottomLeft,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 200,
+                    child: Image.network(
+                      company.banner,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
                         color: Colors.grey.shade300,
                         alignment: Alignment.center,
                         child: const Icon(Icons.image_not_supported, size: 40),
-                      );
-                    },
-                  ),
-                ),
-
-                Positioned(
-                  bottom: -40,
-                  left: 16,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.white, // border background
-                      borderRadius: BorderRadius.circular(
-                        8,
-                      ), // remove if you want sharp corners
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      ),
                     ),
-                    padding: const EdgeInsets.all(3),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image.network(
-                        'https://i.pravatar.cc/150?img=3',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
+                  ),
+                  Positioned(
+                    bottom: -40,
+                    left: 16,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(.15),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.network(
+                          company.clogo,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
                             color: Colors.grey.shade300,
                             alignment: Alignment.center,
-                            child: const Icon(Icons.person, size: 32),
-                          );
-                        },
+                            child: const Icon(Icons.business, size: 32),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            const SizedBox(height: 50), // Space for profile overlap
-            // Company Name
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Tech System',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: const [
-                      Icon(Icons.location_on, size: 16, color: Colors.grey),
-                      SizedBox(width: 4),
-                      Text(
-                        'Herat, Afghanistan',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: const [
-                      Icon(Icons.business, size: 16, color: Colors.grey),
-                      SizedBox(width: 4),
-                      Text(
-                        'Social Enterprise',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+              const SizedBox(height: 50),
 
-                  // Buttons Row
-                  Row(
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          // TODO: Open LinkedIn
-                        },
-                        icon: const Icon(Icons.link),
-                        label: const Text('LinkedIn'),
+              // ---------------- COMPANY INFO ----------------
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      company.cname,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, size: 16),
+                        const SizedBox(width: 4),
+                        Text("${company.city}, ${company.country}"),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.business, size: 16),
+                        const SizedBox(width: 4),
+                        Text(company.industry),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    buildSocialLinks(company),
+
+                    const SizedBox(height: 20),
+                 
                   Row(
                     children: [
                       Obx(
@@ -166,38 +186,21 @@ class PublicViewSeachScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 24),
-                  Divider(
-                    color: Colors.grey.shade300,
-                    thickness: 1,
-                    indent: 0,
-                    endIndent: 0,
-                  ),
-                  const Text(
-                    'About',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'This company is for testing purposes',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-
-                  sectionTitle("Elevator Pitch", canDelete: true),
-
-                  SizedBox(height: 20),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: const Color(0xFF999999),
-                        width: 1,
+                   
+                    const Text(
+                      "About",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      borderRadius: BorderRadius.circular(12),
                     ),
-
-                    //fetch elevated pitch e
-                    child: Container(
+                     const Divider(),
+                    const SizedBox(height: 8),
+                    Text(company.aboutUs),
+                    const SizedBox(height: 34),
+                    sectionTitle("Elevator Pitch"),
+                    const SizedBox(height: 12),
+                    Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
                         color: const Color(0xFF191919),
@@ -205,55 +208,126 @@ class PublicViewSeachScreen extends StatelessWidget {
                       height: 160,
                       width: double.infinity,
                       child: ElevatorPitchCompanySection(
-                        videoUrl: '',
-                        // "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
-                        // httpHeaders: {
-                        //   "Custom-Header": "value",
-                        //   if (_accessToken != null) ...{
-                        //     "Authorization": "Bearer $_accessToken",
-                        //   },
-                        // },
+                        videoUrl:
+                            "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch?.id ?? ""}",
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 34),
+                    sectionTitle("Company Jobs"),
+                    const SizedBox(height: 12),
 
-                  sectionTitle("Company Jobs"),
+                    // ---------------- JOB LIST ----------------
+                    Obx(() {
+                      if (controller.isLoading.value) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                  const SizedBox(height: 12),
+                      if (jobs.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text("No jobs available for this company."),
+                        );
+                      }
+                      return Column(
+                        children: jobs.map((job) {
+                          final formattedDate = DateFormat(
+                            'd MMMM, yyyy',
+                          ).format(job.publishDate);
 
-                  CompanyJobCard(
-                    jobTitle: "Enterprise Manager",
-                    companyName: "Tech System",
-                    location: "Ambriz, Angola",
-                    jobType: "Onsite",
-                    jobLevel: "Internship",
-                    applicants: 0,
-                    postedDate: "10 January 2026",
-                  ),
-                ],
+                          return CompanyJobCard(
+                            jobTitle: job.title,
+                            companyName: company.cname,
+                            description: job.description,
+                            location: job.location,
+                            location_Type: job.locationType,
+                            employement_Type: job.employementType,
+                            applicants: job.counter,
+                            postedDate: formattedDate,
+                            companyLogo: company.clogo,
+                            onTap: () {
+                              Get.to(
+                                () => JobDetailsScreen(
+                                  jobData: {
+                                    'id': job.id,
+                                    'jobTitle': job.title,
+                                    'company': job.company.cname,
+                                    'location': job.location,
+                                    'salary': job.salaryRange,
+                                    'timePosted': DateFormat(
+                                      'd MMMM, yyyy',
+                                    ).format(job.publishDate),
+
+                                    // 🔥 THIS IS THE KEY
+                                    'raw': job.toJson(),
+                                  },
+                                ),
+                              );
+                            },
+                            onEasyApply: () {
+                              final jobDetailsController = Get.put(
+                                JobDetailsController(),
+                              );
+
+                              final applicationData = {
+                                '_id': job.id,
+                                'jobId': job.id,
+                                'jobTitle': job.title,
+                                'companyId': job.company.id,
+                                'companyName': job.company.cname,
+                                'companyLogo': job.company.clogo,
+                                'location': job.location,
+                                'employmentType': job.employementType,
+                                'locationType': job.locationType,
+                                'customQuestion': job.customQuestion
+                                    .map((e) => e.toJson())
+                                    .toList(),
+
+                                // Send full job JSON for backend safety
+                                'raw': job.toJson(),
+                              };
+
+                              jobDetailsController.checkResumeAndApply(
+                                applicationData,
+                              );
+                            },
+                          );
+                        }).toList(),
+                      );
+
+                      // return Column(
+                      //   children: jobs.map((job) {
+                      //     return CompanyJobCard(
+                      //       jobTitle: job.title,
+                      //       companyName: company.cname,
+                      //       description: job.description,
+                      //       location: job.location,
+                      //       location_Type: job.locationType,
+                      //       employement_Type: job.employementType,
+                      //       applicants: job.counter,
+                      //       postedDate: "${job.publishDate.day}-${job.publishDate.month}-${job.publishDate.year}",
+                      //     );
+                      //   }).toList(),
+                      // );
+                    }),
+                  ],
+                ),
               ),
-            ),
 
-             const SizedBox(height: 20),
-                // Align(
-                //   alignment: Alignment.centerRight,
-                //   child: TextButton(onPressed: () {}, child: Text("See all")),
-                // ),
-
-                // -------------------- 🏅 Honors & Achievements --------------------
-                Text(
+              const SizedBox(height: 24),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
                   "Awards and Honors",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                 ),
-
-                Comcontroller.userInfo.value?.honors != null &&
-                        Comcontroller.userInfo.value!.honors.isNotEmpty
-                    ? Column(
-                        children: Comcontroller.userInfo.value!.honors.map((
-                          honor,
-                        ) {
-                          return Container(
+              ),
+              honors.isNotEmpty
+                  ? Column(
+                      children: honors.map((honor) {
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 150, // 👈 match JobCard height
+                          child: Container(
                             margin: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 6,
@@ -263,124 +337,128 @@ class PublicViewSeachScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: Colors.grey.shade300),
                               color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  blurRadius: 3,
-                                  spreadRadius: 1,
-                                  color: Colors.black.withOpacity(.05),
-                                ),
-                              ],
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // 🏆 Honor Title
-                                Row(
-                                  children: [
-                                    // Icon(
-                                    //   Icons.workspace_premium,
-                                    //   size: 20,
-                                    //   color: Colors.amber,
-                                    // ),
-                                    // SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        honor.title,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  honor.title,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-
-                                SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        honor.programeName,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  honor.programeName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-
-                                SizedBox(height: 6),
-
-                                // 🔸 Issued By + Date
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_month_outlined,
-                                      size: 14,
-                                      color: Colors.grey,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      _formatDate(honor.programeDate.toIso8601String()),
-                                      style: TextStyle(
-                                        color: Colors.black54,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
+                                const SizedBox(height: 6),
+                                Text(
+                                  _formatDate(honor.programeDate),
+                                  style: const TextStyle(color: Colors.black54),
                                 ),
-
-                                SizedBox(height: 6),
-                                SizedBox(width: 6),
-
-                                // 📝 Description
+                                const SizedBox(height: 6),
                                 Text(
                                   honor.description,
-                                  style: TextStyle(
-                                    color: Colors.black87,
-                                    height: 1.3,
-                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
-                          );
-                        }).toList(),
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 6,
-                        ),
-                        child: Text(
-                          "No honors awarded yet.",
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-
-                SizedBox(height: 20),
-          ],
-        ),
-      ),
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  : const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text("No honors awarded yet."),
+                    ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
 
-Widget sectionTitle(String title, {bool canDelete = false}) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-      if (canDelete) Icon(Icons.delete_outline, color: Colors.red),
-    ],
+Widget buildSocialLinks(Company company) {
+  final validSocialLinks = company.sLink
+      .where((link) => link.url.trim().isNotEmpty)
+      .toList();
+
+  if (validSocialLinks.isEmpty) {
+    return const Text(
+      "No social links available",
+      style: TextStyle(color: Colors.black54, fontSize: 12),
+    );
+  }
+
+  return Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: validSocialLinks.map((link) {
+      return GestureDetector(
+        onTap: () async {
+          final Uri url = Uri.parse(link.url);
+
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
+          } else {
+            Get.snackbar(
+              "Error",
+              "Could not open ${link.label}",
+              snackPosition: SnackPosition.BOTTOM,
+            );
+          }
+        },
+        child: SocialMedia(image: _getSocialIcon(link.label)),
+      );
+    }).toList(),
   );
 }
+
+Widget sectionTitle(String title) => Text(
+  title,
+  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+);
+
 String _formatDate(String isoDateString) {
   try {
-    // Example input: "2025-09-01T00:00:00.000Z"
-    final DateTime date = DateTime.parse(isoDateString);
-    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
-  } catch (e) {
+    final date = DateTime.parse(isoDateString);
+    return "${date.day.toString().padLeft(2, '0')}/"
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
+  } catch (_) {
     return "Invalid Date";
+  }
+}
+
+String _getSocialIcon(String? label) {
+  switch (label?.toLowerCase()) {
+    case 'linkedin':
+      return 'assets/icons/linkedin.png';
+    case 'twitter':
+      return 'assets/icons/twitter.png';
+    case 'upwork':
+      return 'assets/icons/upwork_logo_icon_168329.png';
+    case 'facebook':
+      return 'assets/icons/facebook.png';
+    case 'tiktok':
+      return 'assets/icons/tiktok.png';
+    case 'instagram':
+      return 'assets/icons/instagram.png';
+
+    case 'fiverr':
+      return 'assets/icons/fiverrIcon.png';
+    case 'website':
+      return 'assets/icons/webIcon.png';
+    default:
+      return 'assets/icons/link.png';
   }
 }
