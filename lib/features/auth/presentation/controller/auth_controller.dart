@@ -25,6 +25,9 @@ import 'package:giveandtake/features/create_job/presentation/screen/create_job_s
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
 import 'package:giveandtake/features/company/presentation/screen/company_details_screen.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
@@ -93,7 +96,42 @@ class AuthController extends BaseController {
             print('✅ BottomNavController reset to Home');
           }
 
-          Get.offAll(() => DashboardScreen());
+          // Fetch resume data to check if profile is complete
+          try {
+            final resumeEndpoint = '${ApiConstants.baseUrl}/create-resume/get-resume';
+            final resumeResult = await ApiClient().get(
+              resumeEndpoint,
+              fromJsonT: (json) => json as Map<String, dynamic>,
+            );
+
+            resumeResult.fold(
+              (fail) {
+                // If resume fetch fails, go to form to create one
+                DPrint.log('Resume fetch failed, navigating to ElevatorResumeScreen');
+                Get.offAll(() => ElevatorResumeScreen());
+              },
+              (success) {
+                final resumeData = success.data;
+                final city = resumeData['resume']?['city'];
+                
+                DPrint.log('Resume city: $city');
+                
+                // If city is null or empty, profile is incomplete - go to form
+                if (city == null || city.toString().isEmpty) {
+                  DPrint.log('City is null/empty, navigating to ElevatorResumeScreen');
+                  Get.offAll(() => ElevatorResumeScreen());
+                } else {
+                  // Profile is complete - go to dashboard
+                  DPrint.log('Profile complete, navigating to DashboardScreen');
+                  Get.offAll(() => DashboardScreen());
+                }
+              },
+            );
+          } catch (e) {
+            DPrint.log('Error checking resume: $e');
+            // On error, default to dashboard
+            Get.offAll(() => DashboardScreen());
+          }
         } else if (user.role == 'recruiter') {
           await _authStorageService.storeAuthData(
             accessToken: success.data.accessToken,

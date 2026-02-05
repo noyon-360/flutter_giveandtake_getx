@@ -1,8 +1,7 @@
 // profile_response_model.dart
-import 'dart:convert';
+
 
 class CandidateResumeResponseModel {
-  final bool deactivate;
   final Resume? resume;
   final List<Experience> experiences;
   final List<Education> education;
@@ -10,7 +9,6 @@ class CandidateResumeResponseModel {
   final List<ElevatorPitch> elevatorPitch;
 
   CandidateResumeResponseModel({
-    required this.deactivate,
     required this.resume,
     required this.experiences,
     required this.education,
@@ -20,7 +18,6 @@ class CandidateResumeResponseModel {
 
   factory CandidateResumeResponseModel.fromJson(Map<String, dynamic> json) {
     return CandidateResumeResponseModel(
-      deactivate: json['deactivate'] ?? false,
       resume:
           json['resume'] != null ? Resume.fromJson(json['resume']) : null,
       experiences: (json['experiences'] as List<dynamic>?)
@@ -44,7 +41,6 @@ class CandidateResumeResponseModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'deactivate': deactivate,
       'resume': resume?.toJson(),
       'experiences': experiences.map((e) => e.toJson()).toList(),
       'education': education.map((e) => e.toJson()).toList(),

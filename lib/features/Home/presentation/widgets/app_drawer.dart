@@ -46,7 +46,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ListTileForNav(
               title: "Elevator Pitch & Resume",
               onTap: () {
-                Get.to(() => ElevatorResumeScreen());
+                Get.to(() => const CandidateDashboardScreen());
               },
             ),
             ListTileForNav(

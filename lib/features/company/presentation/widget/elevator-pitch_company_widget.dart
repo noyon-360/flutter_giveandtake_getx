@@ -182,7 +182,7 @@ class _ElevatorPitchCompanySectionState
     try {
       _videoController = VideoPlayerController.networkUrl(
         Uri.parse(widget.videoUrl!),
-        formatHint: VideoFormat.hls,
+        // formatHint: VideoFormat.hls,
         videoPlayerOptions: VideoPlayerOptions(
           mixWithOthers: true,
           allowBackgroundPlayback: false,

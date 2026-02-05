@@ -2,18 +2,23 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/network/constants/key_constants.dart';
+import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 import '../../../../core/services/get_user_profile_service.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../data/models/upload_video_request_model.dart';
+import '../../data/models/upload_video_response_model.dart';
 
 class ElevatorResumeController extends GetxController {
   final ImagePicker _picker = ImagePicker();
@@ -429,6 +434,21 @@ class ElevatorResumeController extends GetxController {
       return;
     }
 
+    final file = File(elevatorVideoPath.value);
+    if (!file.existsSync()) {
+      Get.snackbar('Error', 'Selected video file not found.');
+      return;
+    }
+
+    // Get user ID
+    final authStorageService = Get.find<AuthStorageService>();
+    final userId = await authStorageService.getUserId();
+    
+    if (userId == null || userId.isEmpty) {
+      Get.snackbar('Error', 'User ID not found. Please log in again.');
+      return;
+    }
+
     try {
       // Show loading
       Get.dialog(
@@ -436,27 +456,141 @@ class ElevatorResumeController extends GetxController {
         barrierDismissible: false,
       );
 
-      // TODO: Implement actual API upload here
-      // For now, simulate upload
-      await Future.delayed(const Duration(seconds: 2));
+      // Get ApiClient instance
+      final apiClient = ApiClient();
 
-      // Close loading
-      Get.back();
+      // Step 1: Get file info
+      final fileName = file.path.split('/').last;
+      final fileSize = await file.length();
+      final fileType = 'video/mp4'; // You can determine this from file extension if needed
 
-      isVideoUploaded.value = true;
-      Get.snackbar(
-        'Success',
-        'Elevator pitch upload finish! We\'re processing your video—feel free to submit your resume while it finalizes.',
-        backgroundColor: Colors.green.shade100,
-        colorText: Colors.green.shade900,
-        duration: const Duration(seconds: 5),
-        snackPosition: SnackPosition.BOTTOM,
+      print('📹 Preparing to upload video...');
+      print('File name: $fileName');
+      print('File size: $fileSize bytes');
+      print('File type: $fileType');
+
+      // Step 2: Request upload URL from server
+      final requestModel = UploadVideoRequestModel(
+        fileName: fileName,
+        fileType: fileType,
+        fileSize: fileSize,
       );
+
+      print('🔄 Requesting upload URL from server...');
+      final urlResult = await apiClient.post(
+        ApiConstants.elevatorPitchVideo.uploadVideo(userId),
+        data: requestModel.toJson(),
+        fromJsonT: (json) => UploadVideoResponseModel.fromJson(json),
+      );
+
+      UploadVideoResponseModel? uploadResponse;
+      urlResult.fold(
+        (fail) {
+          print('❌ Failed to get upload URL: ${fail.message}');
+          throw Exception('Failed to get upload URL: ${fail.message}');
+        },
+        (success) {
+          uploadResponse = success.data;
+          print('✅ Received upload URL');
+          print('Upload URL: ${success.data.uploadUrl}');
+          print('Key: ${success.data.key}');
+          print('Bucket: ${success.data.bucket}');
+        },
+      );
+
+      if (uploadResponse == null) {
+        throw Exception('Upload URL not received');
+      }
+
+      // Step 3: Upload video to the pre-signed URL using Dio directly
+      print('⬆️  Uploading video to storage...');
+      final dio = Dio();
+      final videoBytes = await file.readAsBytes();
+
+      final uploadToStorageResponse = await dio.put(
+        uploadResponse!.uploadUrl,
+        data: videoBytes,
+        options: Options(
+          headers: {
+            'Content-Type': fileType,
+            'Content-Length': fileSize.toString(),
+          },
+          validateStatus: (status) => status != null && status < 400,
+        ),
+      );
+
+      if (uploadToStorageResponse.statusCode == 200 || 
+          uploadToStorageResponse.statusCode == 201 ||
+          uploadToStorageResponse.statusCode == 204) {
+        print('✅ Video uploaded successfully to storage');
+        
+        // Step 4: Confirm video upload completion
+        print('🔄 Confirming video upload with server...');
+        
+        final completeUrl = ApiConstants.elevatorPitchVideo.completeVideoUpload(userId);
+        final completeData = {
+          'fileKey': uploadResponse!.key,
+          'fileName': fileName,
+          'fileSize': fileSize,
+        };
+        
+        print('Sending completion request to: $completeUrl');
+        print('Completion data: $completeData');
+        
+        final completeResult = await apiClient.post(
+          completeUrl,
+          data: completeData,
+          fromJsonT: (json) {
+            // Just return the raw response as map
+            return json as Map<String, dynamic>;
+          },
+        );
+        
+        completeResult.fold(
+          (fail) {
+            print('⚠️ Warning: Failed to confirm video completion: ${fail.message}');
+            // Don't fail the upload, just warn
+            print('Video is uploaded but completion confirmation failed. Server will process it.');
+          },
+          (success) {
+            print('✅ Video completion confirmed successfully');
+            print('Response: ${success.data}');
+          },
+        );
+        
+        // Close loading
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+        
+        isVideoUploaded.value = true;
+        
+        Get.snackbar(
+          'Success',
+          'Elevator pitch uploaded successfully! We\'re processing your video—feel free to submit your resume while it finalizes.',
+          backgroundColor: Colors.green.shade100,
+          colorText: Colors.green.shade900,
+          duration: const Duration(seconds: 5),
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+      } else {
+        throw Exception('Failed to upload video to storage. Status: ${uploadToStorageResponse.statusCode}');
+      }
     } catch (e) {
+      print('❌ Error uploading video: $e');
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-      Get.snackbar('Error', 'Failed to upload video: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to upload video: ${e.toString()}',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+        duration: const Duration(seconds: 5),
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
     }
   }
 

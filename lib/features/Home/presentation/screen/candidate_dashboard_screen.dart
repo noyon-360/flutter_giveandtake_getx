@@ -1,12 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
-import 'package:giveandtake/features/company/presentation/widget/elevator-pitch_company_widget.dart';
 import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/video_upload_screen.dart';
+import 'edit_candidate_profile_screen.dart';
+
+import '../../../recruiter_account/presentation/widgets/elevator_pitch.dart';
 
 class CandidateDashboardScreen extends StatefulWidget {
   const CandidateDashboardScreen({super.key});
@@ -21,11 +26,19 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
     CandidateDashboardController(),
   );
 
+  String? _accessToken;
+
   @override
   void initState() {
     super.initState();
     print('🚀 [CandidateDashboardScreen] Screen initialized');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      if (mounted) {
+        setState(() {
+          _accessToken = token;
+        });
+      }
       print('🔄 [CandidateDashboardScreen] Fetching dashboard data...');
       controller.fetchDashboardData();
     });
@@ -71,7 +84,7 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
           final resume = resumeData?.resume;
           final elevatorPitches = resumeData?.elevatorPitch ?? [];
           final hasElevatorPitch =
-              elevatorPitches.isNotEmpty &&
+              elevatorPitches.first.id!=null ||
               elevatorPitches.first.video?.hlsUrl != null;
 
           // Log what's being displayed
@@ -187,8 +200,9 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
                       ),
                       TextButton.icon(
                         onPressed: () {
-                          // Navigate to elevator resume screen
-                          Get.to(() => const ElevatorResumeScreen());
+                          // Navigate to edit candidate profile screen
+                          Get.to(() => const EditCandidateProfileScreen(), 
+                            arguments: controller.resumeData.value);
                         },
                         icon: const Icon(
                           Icons.edit,
@@ -288,37 +302,46 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: hasElevatorPitch
                       ? Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                              color: const Color(0xFF999999),
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: const Color(0xFF191919),
-                            ),
-                            height: 200,
-                            width: double.infinity,
-                            child: ElevatorPitchCompanySection(
-                              videoUrl: elevatorPitches.first.video!.hlsUrl!,
-                              httpHeaders: {
-                                'Accept': '*/*',
-                                'Accept-Encoding': 'identity',
-                                if (elevatorPitches
-                                        .first
-                                        .video!
-                                        .encryptionKeyUrl !=
-                                    null)
-                                  "Authorization":
-                                      "Bearer ${elevatorPitches.first.video!.encryptionKeyUrl}",
-                              },
-                            ),
-                          ),
-                        )
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFF999999),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+
+                  //fetch elevated pitch e
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: const Color(0xFF191919),
+                    ),
+                    height: 280,
+                    width: double.infinity,
+                    child: Builder(
+                      builder: (context) {
+                        DPrint.log("DEBUG: VIDEO INFO CLEAN TEST");
+                        DPrint.log(
+                          "Video URL: ${ApiConstants.baseUrl}/elevator-pitch/stream/${elevatorPitches.first.id ?? ''}",
+                        );
+
+                        return ElevatorPitchSection(
+                          key: ValueKey(_accessToken),
+                          videoUrl:
+                              "${ApiConstants.baseUrl}/elevator-pitch/stream/${elevatorPitches.first.id ?? ''}",
+                              // "https://test.evpitch.com/api/v1/elevator-pitch/stream/69674f57f7f512dd8539b9a2",
+                          // httpHeaders: {
+                          //   "Custom-Header": "value",
+                          //   if (_accessToken != null) ...{
+                          //     "Authorization": "Bearer $_accessToken",
+                          //   },
+                          // },
+                        );
+                      },
+                    ),
+                  ),
+                )
                       : GestureDetector(
                           onTap: () {
                             // Navigate to video upload screen
