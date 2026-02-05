@@ -7,11 +7,11 @@ import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
-import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
+import 'package:giveandtake/features/Home/presentation/screen/home_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/video_upload_screen.dart';
-import 'edit_candidate_profile_screen.dart';
 
 import '../../../recruiter_account/presentation/widgets/elevator_pitch.dart';
+import 'edit_candidate_profile_screen.dart';
 
 class CandidateDashboardScreen extends StatefulWidget {
   const CandidateDashboardScreen({super.key});
@@ -55,7 +55,7 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () => Get.back(),
+          onPressed: () => Get.to(() => const HomeScreen()),
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
         ),
         title: const Text(

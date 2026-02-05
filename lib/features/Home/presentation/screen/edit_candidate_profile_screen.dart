@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -41,7 +40,7 @@ class EditCandidateProfileScreen extends StatelessWidget {
              const SizedBox(height: 16),
              _buildImagesSection(controller),
              
-             const SizedBox(height: 24),
+             const SizedBox(height: 54),
              _buildSectionTitle('Personal Information'),
              const SizedBox(height: 16),
              _buildPersonalInfoSection(controller),
@@ -255,24 +254,24 @@ class EditCandidateProfileScreen extends StatelessWidget {
                     ),
 
                     // "Click to change" Overlay
-                    Positioned(
-                      bottom: 20,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                         margin: const EdgeInsets.symmetric(horizontal: 24),
-                         padding: const EdgeInsets.symmetric(vertical: 4),
-                         decoration: BoxDecoration(
-                           color: Colors.black.withOpacity(0.6),
-                           borderRadius: BorderRadius.circular(4),
-                         ),
-                         child: const Text(
-                           'Click to change',
-                           textAlign: TextAlign.center,
-                           style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                         ),
-                      ),
-                    ),
+                    // Positioned(
+                    //   bottom: 20,
+                    //   left: 0,
+                    //   right: 0,
+                    //   child: Container(
+                    //      margin: const EdgeInsets.symmetric(horizontal: 24),
+                    //      padding: const EdgeInsets.symmetric(vertical: 4),
+                    //      decoration: BoxDecoration(
+                    //        color: Colors.black.withOpacity(0.6),
+                    //        borderRadius: BorderRadius.circular(4),
+                    //      ),
+                    //      child: const Text(
+                    //        'Click to change',
+                    //        textAlign: TextAlign.center,
+                    //        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    //      ),
+                    //   ),
+                    // ),
                   ],
                 ),
               );
