@@ -7,6 +7,7 @@ import 'package:karlfive/features/company/data/model/archieve_response_model.dar
 import 'package:karlfive/features/company/data/model/candidate_resume_response_model.dart';
 import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
 import 'package:karlfive/features/company/data/model/employee_fetch_single_model.dart';
+import 'package:karlfive/features/company/data/model/public_view_search_response_model.dart';
 
 import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_response_model.dart';
@@ -17,6 +18,7 @@ import '../../data/model/all_user_response_model.dart';
 import '../../data/model/company_details_model.dart';
 import '../../data/model/job_usage_response_model.dart';
 import '../../data/model/rec_company_request_model.dart';
+import '../../data/model/seach_all_user_response_model.dart';
 import '../../data/model/single_Company_response_model.dart';
 import '../../domain/repo/company_repo.dart';
 import '../screen/company_details_screen.dart';
@@ -30,7 +32,16 @@ class CompanyDetailsController extends BaseController {
 
   // Change from Rxn (problematic) to Rx with explicit null
   final userInfo = Rx<SingleCompanyResponseModel?>(null);
+  final RxList<SeachAllUserResponseModel> searchInfo =
+      <SeachAllUserResponseModel>[].obs;
+  final RxList<SeachAllUserResponseModel> filteredSearchInfo =
+      <SeachAllUserResponseModel>[].obs;
+
+  // NEW: reactive search input
+  final searchQuery = ''.obs;
+
   final employee = Rx<EmployeeFetchSingleModel?>(null);
+   final publicView = Rx<PublicViewSearchResponseModel?>(null);
   final usage = Rx<JobUsageResponseModel?>(null);
 
   var resume = <ResumeUpdatedResponseModel>[].obs;
@@ -428,5 +439,84 @@ class CompanyDetailsController extends BaseController {
     );
 
     isJobUsageLoading.value = false;
+  }
+
+  Future<void> fetchSearchUser() async {
+    setLoading(true);
+    setError("");
+
+    final result = await _companyRepo.fetchSearchUser();
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('❌ Search fetch failed: ${fail.message}');
+      },
+      (success) {
+        DPrint.log("Search result 2: ${success.data.first.name}");
+        // Assign only the list safely
+        final users = success.data;
+        searchInfo.assignAll(users);
+        // filteredSearchInfo.clear(); // initially empty
+        DPrint.log('✅ Search users loaded: ${users.length}');
+      },
+    );
+
+    setLoading(false);
+  }
+
+  void searchUsers(String query) {
+  if (query.trim().isEmpty) {
+    filteredSearchInfo.assignAll(searchInfo);   // show all when empty
+  } else {
+    filteredSearchInfo.value = filterUsers(searchInfo, query);
+  }
+}
+  List<SeachAllUserResponseModel> filterUsers(
+    List<SeachAllUserResponseModel> users,
+    String query,
+  ) {
+    if (query.trim().isEmpty) return users;
+
+    final lowerQuery = query.toLowerCase().trim();
+
+    return users.where((user) {
+      return (user.name.toLowerCase().contains(lowerQuery)) ||
+          (user.slug.toLowerCase().contains(lowerQuery)) ||
+          (user.address.toLowerCase().contains(lowerQuery)) ||
+          (user.role.toLowerCase().contains(lowerQuery));
+    }).toList();
+  }
+
+  void clearSearch() {
+    searchQuery.value = '';
+    filteredSearchInfo.clear();
+  }
+  Future<void> getpublicView() async {
+    setLoading(true);
+    // isEmployeeLoading.value = true;
+    setError("");
+
+    
+    final result = await _companyRepo.getpublicView();
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+        // isEmployeeLoading.value = false;
+      },
+      (success) {
+        DPrint.log('data fetch successfully: ${success.message}');
+        // success is NetworkSuccess<SingleCompanyResponseModel>
+        // → extract the actual model using .data
+        publicView.value = success.data;
+        publicView.refresh(); // ← THIS IS THE CORRECT WAY
+
+        setLoading(false);
+        // isEmployeeLoading.value = false;
+      },
+    );
   }
 }

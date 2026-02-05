@@ -44,6 +44,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
     await controller.fetchCompanyProfile();
     await controller.fetchEmployee();
   }
+  String? _accessToken;
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +155,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.edit_calendar_sharp),
+              leading: const Icon(Icons.person_add_outlined),
               title: const Text('Recruiter Requests'),
               onTap: () {
                 Get.back();
@@ -162,7 +163,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.person),
+              leading: const Icon(Icons.lock_clock_outlined),
               title: const Text('Change Password'),
               onTap: () {
                 Get.back();
@@ -458,12 +459,12 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                     child: ElevatorPitchCompanySection(
                       videoUrl:
                               "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
-                          // httpHeaders: {
-                          //   "Custom-Header": "value",
-                          //   if (_accessToken != null) ...{
-                          //     "Authorization": "Bearer $_accessToken",
-                          //   },
-                          // },
+                          httpHeaders: {
+                            "Custom-Header": "value",
+                            if (_accessToken != null) ...{
+                              "Authorization": "Bearer $_accessToken",
+                            },
+                          },
                     ),
                   ),
                 ),
@@ -541,7 +542,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                 //                   ),
                 //                   textAlign: TextAlign.center,
                 //                 ),
-                //                 const SizedBox(height: 8),
+                //              const SizedBox(height: 8),
                 //                 const Text(
                 //                   ' Upload or view a short video',
                 //                   style: TextStyle(

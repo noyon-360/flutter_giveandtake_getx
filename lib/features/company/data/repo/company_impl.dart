@@ -27,12 +27,14 @@ import 'package:karlfive/features/company/data/model/candidate_resume_response_m
 import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
 import 'package:karlfive/features/company/data/model/job_usage_response_model.dart';
 import 'package:karlfive/features/company/data/model/manage_job_response_model.dart';
+import 'package:karlfive/features/company/data/model/public_view_search_response_model.dart';
 import 'package:karlfive/features/company/data/model/rec_company_response_model.dart';
 import 'package:karlfive/features/company/data/model/recruiter_added_request_model.dart';
 import 'package:karlfive/features/company/data/model/recruiter_added_response_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
 import 'package:karlfive/features/company/data/model/remove_recruiter_response_model.dart';
 import 'package:karlfive/features/company/data/model/resume_updated_response_model.dart';
+import 'package:karlfive/features/company/data/model/seach_all_user_response_model.dart';
 import 'package:karlfive/features/company/data/model/single_Company_response_model.dart';
 import 'package:karlfive/features/company/data/model/status_update_response_model.dart';
 import 'package:karlfive/features/recruiter_account/data/models/job_update_response_model.dart';
@@ -40,6 +42,7 @@ import 'package:karlfive/features/recruiter_account/data/models/job_update_respo
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/network/network_result.dart';
+import '../../../../core/utils/debug_print.dart';
 import '../../domain/repo/company_repo.dart';
 import '../model/all_user_response_model.dart';
 import '../model/company_response_model.dart';
@@ -227,7 +230,7 @@ class CompanyRepoImplementation extends CompanyRepository {
     );
   }
 
-   @override
+  @override
   NetworkResult<List<ResumeUpdatedResponseModel>> fetchResume(
     String candidateUserId,
   ) {
@@ -250,7 +253,7 @@ class CompanyRepoImplementation extends CompanyRepository {
     );
   }
 
-    @override
+  @override
   NetworkResult<RecCompanyResponseModel> updateRecCompany(
     String recId,
     Map<String, dynamic> data,
@@ -262,12 +265,38 @@ class CompanyRepoImplementation extends CompanyRepository {
     );
   }
 
-    @override
+  @override
   NetworkResult<JobUsageResponseModel> fetchJobUsage() {
     return _apiClient.get(
       ApiConstants.company.getJobUsage,
       fromJsonT: (json) =>
           JobUsageResponseModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+
+  NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser() {
+    return _apiClient.get(
+      ApiConstants.company.getAllSearchUser,
+      fromJsonT: (json) => (json as List<dynamic>? ?? [])
+          .where((item) => item != null) // ← remove nulls
+          .map(
+            (item) => SeachAllUserResponseModel.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    
+    );
+  }
+
+    @override
+  NetworkResult<PublicViewSearchResponseModel> getpublicView() {
+    return _apiClient.get(
+      ApiConstants.company.getPublicView,
+      fromJsonT: (json) =>
+          PublicViewSearchResponseModel.fromJson(json as Map<String, dynamic>),
     );
   }
 }

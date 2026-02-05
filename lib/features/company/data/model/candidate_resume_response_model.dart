@@ -607,11 +607,3 @@ class VideoProcessing {
   }
 }
 
-/* --------------------- Example usage --------------------- */
-
-// Example: parse from JSON string
-// final map = jsonDecode(responseString) as Map<String, dynamic>;
-// final profile = ProfileResponseModel.fromJson(map);
-
-// Example: convert back to JSON
-// final jsonString = jsonEncode(profile.toJson());

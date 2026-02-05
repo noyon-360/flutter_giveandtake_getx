@@ -7,6 +7,10 @@ import 'package:karlfive/features/home_static_screens/data/models/contactus_mode
 import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
 
+import '../../../company/data/model/seach_all_user_response_model.dart';
+import '../../../company/presentation/controller/company_details_controller.dart';
+import '../../../company/presentation/controller/search_controller.dart';
+import '../../../company/presentation/widget/custom_search_company.dart';
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
 import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
 import '../../../home_static_screens/presentation/screen/blog.dart';
@@ -18,6 +22,7 @@ import '../../../profile_dasboard/presentation/screens/job_history.dart';
 import '../../../profile_dasboard/presentation/screens/payment_history.dart';
 import '../screen/candidate_dashboard_screen.dart';
 import '../screens/my_plan_screen.dart';
+import 'custom_searchbox.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -29,6 +34,30 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   bool _isHelpExpanded = false;
   bool _isMoreExpanded = false;
+
+  final _searchController = TextEditingController();
+
+  late final CompanyDetailsController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<CompanyDetailsController>();
+
+    // Load users if not already loaded
+    if (controller.searchInfo.isEmpty && !controller.isLoading.value) {
+      controller.fetchSearchUser();
+    }
+
+    // Optional: clear previous search when drawer opens
+    _searchController.clear();
+    controller.clearSearch();
+
+    // Sync text field with reactive searchQuery
+    _searchController.addListener(() {
+      controller.searchQuery.value = _searchController.text;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +72,128 @@ class _AppDrawerState extends State<AppDrawer> {
               liconPath: "assets/icons/drawer_back.png",
               onTap: () => Get.back(),
             ),
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 48,
+                    child: CustomSearchCompany(
+                      hintText: "Search people...",
+                      controller: _searchController,
+                      onChanged: (value) {
+                        controller.searchQuery.value = value;
+                        controller.searchUsers(value);
+                      },
+                      // onChanged is optional now — we use listener
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Reactive search results
+                  Obx(() {
+                    // final users = controller.searchInfo;
+                    final users = controller.filteredSearchInfo;
+
+                    if (controller.searchQuery.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    if (users.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            "No matching users found",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      );
+                    }
+                    if (users.isEmpty) {
+                      return const SizedBox.shrink(); // or show "Start typing..." message
+                    }
+
+                    return Container(
+                      constraints: const BoxConstraints(maxHeight: 340),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Scrollable list
+                          Flexible(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              itemCount: users.length,
+                              itemBuilder: (context, index) {
+                                final user = users[index];
+                                return ListTile(
+                                  dense: true,
+                                  leading: CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: Colors.grey[300],
+                                    backgroundImage: user.avatar?.url != null
+                                        ? NetworkImage(user.avatar!.url!)
+                                        : null,
+                                    child: user.avatar?.url == null
+                                        ? Text(
+                                            (user.name?[0] ?? '?')
+                                                .toUpperCase(),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  title: Text(
+                                    user.name ?? 'Unknown',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  subtitle: Text(user.address ?? ''),
+                                  trailing: const Icon(Icons.person_outline),
+                                  onTap: () {
+                                    Get.back();
+                                    Get.snackbar(
+                                      'Selected',
+                                      user.name ?? 'User',
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+
+                          const Divider(height: 1),
+
+                          TextButton(
+                            onPressed: () {
+                              // TODO: go to full search results page
+                            },
+                            child: const Text("Show All Results"),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+
             ListTileForNav(
               title: "Elevator Pitch & Resume",
               onTap: () {

@@ -260,4 +260,7 @@ class CompanyAccountApi {
       '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
 
   final String getJobUsage = '${ApiConstants.baseUrl}/jobs/posting/usage';
+  final String getAllSearchUser = '${ApiConstants.baseUrl}/fetch/all/users';
+  final String getPublicView = '${ApiConstants.baseUrl}/company/companies/slug';
+
 }
