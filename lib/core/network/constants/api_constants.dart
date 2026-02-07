@@ -260,9 +260,10 @@ class CompanyAccountApi {
       '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
 
   final String getJobUsage = '${ApiConstants.baseUrl}/jobs/posting/usage';
-  final String getAllSearchUser = '${ApiConstants.baseUrl}/fetch/all/users';
+   String getAllSearchUser(String q) => '${ApiConstants.baseUrl}/fetch/all/users?q=$q';
   //  String getPublicView(String slug) = '${ApiConstants.baseUrl}/company/companies/slug/$slug';
-
+  // String getUserPayments(String userId, int page, int limit) =>
+  //     '$_base/user/$userId?page=$page&limit=$limit';
      String getPublicView(String slug) =>
       '${ApiConstants.baseUrl}/company/companies/slug/$slug';
 

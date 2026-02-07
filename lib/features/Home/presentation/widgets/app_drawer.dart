@@ -11,6 +11,7 @@ import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs
 import '../../../company/data/model/seach_all_user_response_model.dart';
 import '../../../company/presentation/controller/company_details_controller.dart';
 import '../../../company/presentation/controller/search_controller.dart';
+import '../../../company/presentation/screen/public_view_show_result.dart';
 import '../../../company/presentation/widget/custom_search_company.dart';
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
 import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
@@ -46,8 +47,10 @@ class _AppDrawerState extends State<AppDrawer> {
     controller = Get.find<CompanyDetailsController>();
 
     // Load users if not already loaded
-    if (controller.searchInfo.isEmpty && !controller.isLoading.value) {
-      controller.fetchSearchUser();
+    if (controller.searchInfo.isEmpty &&
+        !controller.isLoading.value &&
+        controller.searchQuery.value != null) {
+      controller.fetchSearchUser("");
     }
 
     // Optional: clear previous search when drawer opens
@@ -191,7 +194,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
                           TextButton(
                             onPressed: () {
-                              // TODO: go to full search results page
+                              Get.to(() => PublicViewShowResultScreen());
                             },
                             child: const Text("Show All Results"),
                           ),

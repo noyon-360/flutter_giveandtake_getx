@@ -90,7 +90,9 @@ class PublicViewJobsResponseModel {
       benefits: json['benefits'],
       vacancy: json['vacancy'],
       counter: json['counter'],
-      embedding: List<double>.from(json['embedding']),
+      embedding: (json['embedding'] != null)
+          ? List<double>.from(json['embedding'])
+          : [],
       experience: json['experience'],
       deadline: DateTime.parse(json['deadline']),
       status: json['status'],
@@ -99,12 +101,14 @@ class PublicViewJobsResponseModel {
       role: json['role'],
       compensation: json['compensation'],
       arcrivedJob: json['arcrivedJob'],
-      applicationRequirement: (json['applicationRequirement'] as List)
-          .map((e) => ApplicationRequirement.fromJson(e))
-          .toList(),
-      customQuestion: (json['customQuestion'] as List)
-          .map((e) => CustomQuestion.fromJson(e))
-          .toList(),
+      applicationRequirement: (json['applicationRequirement'] as List?)
+              ?.map((e) => ApplicationRequirement.fromJson(e))
+              .toList() ??
+          [],
+      customQuestion: (json['customQuestion'] as List?)
+              ?.map((e) => CustomQuestion.fromJson(e))
+              .toList() ??
+          [],
       jobApprove: json['jobApprove'],
       adminApprove: json['adminApprove'],
       publishDate: DateTime.parse(json['publishDate']),
@@ -215,12 +219,17 @@ class Company {
       city: json['city'],
       zipcode: json['zipcode'],
       cemail: json['cemail'],
-      sLink: (json['sLink'] as List)
-          .map((e) => SocialLink.fromJson(e))
-          .toList(),
+      sLink: (json['sLink'] as List?)
+              ?.map((e) => SocialLink.fromJson(e))
+              .toList() ??
+          [],
       industry: json['industry'],
-      service: List<dynamic>.from(json['service']),
-      employeesId: List<String>.from(json['employeesId']),
+      service: (json['service'] != null)
+          ? List<dynamic>.from(json['service'])
+          : [],
+      employeesId: (json['employeesId'] != null)
+          ? List<String>.from(json['employeesId'])
+          : [],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );

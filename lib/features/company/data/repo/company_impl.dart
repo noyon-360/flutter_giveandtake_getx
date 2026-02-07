@@ -276,9 +276,9 @@ class CompanyRepoImplementation extends CompanyRepository {
   }
 
   @override
-  NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser() {
+  NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser( String q) {
     return _apiClient.get(
-      ApiConstants.company.getAllSearchUser,
+      ApiConstants.company.getAllSearchUser(q),
       fromJsonT: (json) => (json as List<dynamic>? ?? [])
           .where((item) => item != null) // ← remove nulls
           .map(
@@ -299,18 +299,34 @@ class CompanyRepoImplementation extends CompanyRepository {
     );
   }
 
-    @override
-  NetworkResult<List<PublicViewJobsResponseModel>> getPublicJobs(String companyId) {
+  @override
+  NetworkResult<List<PublicViewJobsResponseModel>> getPublicJobs(
+    String companyId,
+  ) {
     return _apiClient.get(
       ApiConstants.company.getPulicJobs(companyId),
-      fromJsonT: (json) => (json as List<dynamic>? ?? [])
-          .where((item) => item != null) // ← remove nulls
-          .map(
-            (item) => PublicViewJobsResponseModel.fromJson(
-              item as Map<String, dynamic>,
-            ),
-          )
-          .toList(),
+      fromJsonT: (json) {
+        // Critical Fix: Extract 'data' array from response
+        if (json is Map<String, dynamic> && json.containsKey('data')) {
+          final List<dynamic> dataList = json['data'];
+          return dataList
+              .map(
+                (item) => PublicViewJobsResponseModel.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+        } else {
+          // Fallback: if backend sends raw list
+          return (json as List)
+              .map(
+                (item) => PublicViewJobsResponseModel.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+        }
+      },
     );
   }
 }

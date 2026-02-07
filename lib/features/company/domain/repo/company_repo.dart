@@ -57,7 +57,7 @@ abstract class CompanyRepository {
     Map<String, dynamic> data,
   );
   NetworkResult<JobUsageResponseModel> fetchJobUsage();
-  NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser();
+ NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser( String q) ;
   NetworkResult<PublicViewSearchResponseModel> getpublicView(String slug);
   NetworkResult<List<PublicViewJobsResponseModel>> getPublicJobs(
     String companyId,

@@ -445,11 +445,12 @@ class CompanyDetailsController extends BaseController {
     isJobUsageLoading.value = false;
   }
 
-  Future<void> fetchSearchUser() async {
+  Future<void> fetchSearchUser(String q) async {
     setLoading(true);
     setError("");
 
-    final result = await _companyRepo.fetchSearchUser();
+    DPrint.log("Fetching users with query: '$q'");
+    final result = await _companyRepo.fetchSearchUser(q);
 
     result.fold(
       (fail) {
@@ -477,20 +478,56 @@ class CompanyDetailsController extends BaseController {
     }
   }
 
+  // Filters
+  final RxBool isImmediate = false.obs;
+  final RxString selectedRole = 'All Roles'.obs;
+
+  void toggleImmediate() {
+    isImmediate.value = !isImmediate.value;
+    searchUsers(searchQuery.value); // Re-trigger filter
+  }
+
+  void updateRole(String role) {
+    selectedRole.value = role;
+    searchUsers(searchQuery.value); // Re-trigger filter
+  }
+
+  int get immediateCount =>
+      searchInfo.where((u) => u.immediatelyAvailable == true).length;
+
   List<SeachAllUserResponseModel> filterUsers(
     List<SeachAllUserResponseModel> users,
     String query,
   ) {
-    if (query.trim().isEmpty) return users;
+    var filtered = users;
 
-    final lowerQuery = query.toLowerCase().trim();
+    // 1. Text Search
+    if (query.trim().isNotEmpty) {
+      final lowerQuery = query.toLowerCase().trim();
+      filtered = filtered.where((user) {
+        return (user.name.toLowerCase().contains(lowerQuery)) ||
+            (user.slug.toLowerCase().contains(lowerQuery)) ||
+            (user.address.toLowerCase().contains(lowerQuery)) ||
+            (user.role.toLowerCase().contains(lowerQuery));
+      }).toList();
+    }
 
-    return users.where((user) {
-      return (user.name.toLowerCase().contains(lowerQuery)) ||
-          (user.slug.toLowerCase().contains(lowerQuery)) ||
-          (user.address.toLowerCase().contains(lowerQuery)) ||
-          (user.role.toLowerCase().contains(lowerQuery));
-    }).toList();
+    // 2. Immediate Filter
+    if (isImmediate.value) {
+      filtered =
+          filtered.where((user) => user.immediatelyAvailable == true).toList();
+    }
+
+    // 3. Role Filter
+    if (selectedRole.value != 'All Roles') {
+      // Normalize role comparison if needed (e.g. case insensitive)
+      filtered = filtered
+          .where((user) =>
+              user.role.toLowerCase() == selectedRole.value.toLowerCase())
+          .toList();
+    }
+
+    return filtered;
   }
 
   void clearSearch() {

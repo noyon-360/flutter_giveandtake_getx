@@ -7,6 +7,8 @@ import 'package:karlfive/features/auth/presentation/screens/splash_screen.dart';
 import 'package:karlfive/features/company/presentation/screen/public_view_seach_screen.dart';
 import 'package:karlfive/features/recruiter_account/presentation/screens/public_view_screen.dart';
 
+import 'features/company/presentation/screen/public_view_show_result.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
