@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:karlfive/features/job_listing/presentation/controllers/job_details_controller.dart';
@@ -187,14 +188,50 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
 
                   const SizedBox(height: 24),
                    
-                    const Text(
-                      "About",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "About",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _showShareOptions(context, company),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.share,
+                                  size: 18,
+                                  color: Colors.blue.shade800,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  "Share profile",
+                                  style: TextStyle(
+                                    color: Colors.blue.shade800,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                     const Divider(),
+                    const Divider(),
                     const SizedBox(height: 8),
                     Text(company.aboutUs),
                     const SizedBox(height: 34),
@@ -383,6 +420,166 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
           ),
         );
       }),
+    );
+  }
+
+  void _showShareOptions(BuildContext context, Company company) {
+    // Generate the profile URL - adjust this to your actual URL structure
+    final String profileUrl = "https://yourapp.com/company/${widget.slug}";
+    final String shareText = "Check out ${company.cname} on our platform!";
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Share profile",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ShareButton(
+                    imagePath: 'assets/icons/facebook.png',
+                    label: "Facebook",
+                    onTap: () async {
+                      final url = Uri.parse(
+                        "https://www.facebook.com/sharer/sharer.php?u=$profileUrl",
+                      );
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _ShareButton(
+                    imagePath: 'assets/icons/twitter.png',
+                    label: "Twitter",
+                    onTap: () async {
+                      final url = Uri.parse(
+                        "https://twitter.com/intent/tweet?text=$shareText&url=$profileUrl",
+                      );
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _ShareButton(
+                    imagePath: 'assets/icons/linkedin.png',
+                    label: "LinkedIn",
+                    onTap: () async {
+                      final url = Uri.parse(
+                        "https://www.linkedin.com/sharing/share-offsite/?url=$profileUrl",
+                      );
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _ShareButton(
+                    imagePath: 'assets/icons/telegram.png',
+                    label: "Telegram",
+                    onTap: () async {
+                      final url = Uri.parse(
+                        "https://t.me/share/url?url=$profileUrl&text=$shareText",
+                      );
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: profileUrl));
+                  Get.snackbar(
+                    "Copied!",
+                    "Profile link copied to clipboard",
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 2),
+                  );
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.copy),
+                label: const Text("Copy link"),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Share button widget
+class _ShareButton extends StatelessWidget {
+  final String imagePath;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ShareButton({
+    required this.imagePath,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 66,
+            height: 66,
+            // decoration: BoxDecoration(
+            //   color: Colors.white,
+            //   shape: BoxShape.circle,
+            //   border: Border.all(color: Colors.grey.shade300, width: 1),
+            // ),
+            padding: const EdgeInsets.all(12),
+            child: ClipOval(
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.share,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

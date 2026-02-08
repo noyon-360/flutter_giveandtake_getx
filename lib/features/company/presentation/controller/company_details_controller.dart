@@ -614,12 +614,12 @@ class CompanyDetailsController extends BaseController {
     // 🔁 OPTIONAL: Call API here
     // await _companyRepo.followCompany(companyId);
 
-    Get.snackbar(
-      isFollowing.value ? 'Followed' : 'Unfollowed',
-      isFollowing.value
-          ? 'You are now following this company'
-          : 'You unfollowed this company',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Get.snackbar(
+    //   isFollowing.value ? 'Followed' : 'Unfollowed',
+    //   isFollowing.value
+    //       ? 'You are now following this company'
+    //       : 'You unfollowed this company',
+    //   snackPosition: SnackPosition.BOTTOM,
+    // );
   }
 }

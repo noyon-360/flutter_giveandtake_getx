@@ -162,14 +162,79 @@ class _AppDrawerState extends State<AppDrawer> {
                                           )
                                         : null,
                                   ),
-                                  title: Text(
-                                    user.name ?? 'Unknown',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  title: Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          user.name ?? 'Unknown',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      if (user.immediatelyAvailable == true) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.green.withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                Icons.circle,
+                                                color: Colors.green,
+                                                size: 8,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              const Text(
+                                                "Immediate",
+                                                style: TextStyle(
+                                                  color: Colors.green,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      if (user.role.toLowerCase() ==
+                                          'candidate') ...[
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.person_outline,
+                                          color: Colors.green,
+                                          size: 18,
+                                        ),
+                                      ] else if (user.role.toLowerCase() ==
+                                          'company') ...[
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.business,
+                                          color: Colors.purple,
+                                          size: 18,
+                                        ),
+                                      ] else if (user.role.toLowerCase() ==
+                                          'recruiter') ...[
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.how_to_reg,
+                                          color: Colors.blue,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                   subtitle: Text(user.address ?? ''),
-                                  trailing: const Icon(Icons.person_outline),
+                                  // trailing: const Icon(Icons.person_outline),
                                   onTap: () {
                                     final slug = user.slug;
 
