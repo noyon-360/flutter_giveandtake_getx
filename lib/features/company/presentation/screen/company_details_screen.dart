@@ -351,33 +351,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                       const SizedBox(height: 20),
 
                       // ----- Social Media -----
-                      // Wrap(
-                      //   spacing: 8,
-                      //   runSpacing: 8,
-                      //   children: (company.sLink)
-                      //       .map(
-                      //         (link) => GestureDetector(
-                      //           onTap: () async {
-                      //             final Uri url = Uri.parse(link.url ?? '');
-                      //             if (await canLaunchUrl(url)) {
-                      //               await launchUrl(
-                      //                 url,
-                      //                 mode: LaunchMode.externalApplication,
-                      //               );
-                      //             } else {
-                      //               Get.snackbar(
-                      //                 'Error',
-                      //                 'Could not open ${link.url}',
-                      //               );
-                      //             }
-                      //           },
-                      //           child: SocialMedia(
-                      //             image: _getSocialIcon(link.label),
-                      //           ),
-                      //         ),
-                      //       )
-                      //       .toList(),
-                      // ),
+             
                       buildSocialLinks(company),
 
                       const SizedBox(height: 20),

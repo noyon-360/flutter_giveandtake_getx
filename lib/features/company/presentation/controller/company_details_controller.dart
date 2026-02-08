@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
 import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/features/company/data/model/archieve_request_model.dart';
+
 import 'package:karlfive/features/company/data/model/archieve_response_model.dart';
 import 'package:karlfive/features/company/data/model/candidate_resume_response_model.dart';
 import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
@@ -16,13 +16,13 @@ import 'package:karlfive/features/company/data/model/resume_updated_response_mod
 import 'package:karlfive/features/company/data/model/status_update_response_model.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/model/all_user_response_model.dart';
-import '../../data/model/company_details_model.dart';
+
 import '../../data/model/job_usage_response_model.dart';
 import '../../data/model/rec_company_request_model.dart';
 import '../../data/model/seach_all_user_response_model.dart';
 import '../../data/model/single_Company_response_model.dart';
 import '../../domain/repo/company_repo.dart';
-import '../screen/company_details_screen.dart';
+
 import 'company_account_controller.dart';
 
 class CompanyDetailsController extends BaseController {
@@ -56,10 +56,6 @@ class CompanyDetailsController extends BaseController {
   Rx<ArchieveResponseModel?> jobData = Rx<ArchieveResponseModel?>(null);
 
   Rx<StatusUpdateResponseModel?> status = Rx<StatusUpdateResponseModel?>(null);
-
-  // final Rx<ApplicantListResponseModel?> venue = Rx<ApplicantListResponseModel?>(
-  //   null,
-  // );
 
   var venue = <ApplicantListResponseModel>[].obs;
 
@@ -186,41 +182,6 @@ class CompanyDetailsController extends BaseController {
     );
   }
 
-  //  Future<void> archiveJobs(
-  //     String jobId,
-  //     // <-- just a list of task IDs
-  //   ) async {
-  //    setLoading(true);
-  //    setError("");
-  //         final userId = await _authStorageService.getUserId();
-  //   if (userId == null || userId.isEmpty) {
-  //     setError('User not authenticated');
-  //     Get.snackbar('Error', 'User not authenticated');
-  //     setLoading(false);
-  //     return;
-  //   }
-
-  //     final data = {
-  //       "userId": userId,
-  //       "jobId": jobId, // send list of ObjectId strings
-  //     };
-
-  //     final result = await _companyRepo.archiveJobs(jobId, data);
-
-  //     result.fold(
-  //       (fail) {
-  //         setError(fail.message);
-  //         DPrint.log('❌ Client info update failed: ${fail.message}');
-  //         isLoading(false);
-  //       },
-  //       (success) async {
-  //         DPrint.log('✅ Client info updated: ${success.message}');
-
-  //         Get.back(); // navigate back after success
-  //         isLoading(false);
-  //       },
-  //     );
-  //   }
   Future<void> archiveJobs(String jobId) async {
     setLoading(true);
     setError("");
@@ -389,9 +350,6 @@ class CompanyDetailsController extends BaseController {
     setLoading(true);
     setError("");
 
-    // We do NOT use the currently logged-in user here
-    // We use the recruiterUserId passed from the UI (the applicant)
-
     final data = RecCompanyRequestModel(
       status: status,
       companyId: companyId,
@@ -420,7 +378,7 @@ class CompanyDetailsController extends BaseController {
 
         // Refresh the lists
         fetchEmployee(); // This will now show the correct recruiter
-        // If requests are part of the same fetch, it will update too
+       
       },
     );
 
@@ -514,16 +472,19 @@ class CompanyDetailsController extends BaseController {
 
     // 2. Immediate Filter
     if (isImmediate.value) {
-      filtered =
-          filtered.where((user) => user.immediatelyAvailable == true).toList();
+      filtered = filtered
+          .where((user) => user.immediatelyAvailable == true)
+          .toList();
     }
 
     // 3. Role Filter
     if (selectedRole.value != 'All Roles') {
       // Normalize role comparison if needed (e.g. case insensitive)
       filtered = filtered
-          .where((user) =>
-              user.role.toLowerCase() == selectedRole.value.toLowerCase())
+          .where(
+            (user) =>
+                user.role.toLowerCase() == selectedRole.value.toLowerCase(),
+          )
           .toList();
     }
 
@@ -534,32 +495,7 @@ class CompanyDetailsController extends BaseController {
     searchQuery.value = '';
     filteredSearchInfo.clear();
   }
-  // Future<void> getpublicView(String slug) async {
-  //   setLoading(true);
-  //   // isEmployeeLoading.value = true;
-  //   setError("");
 
-  //   final result = await _companyRepo.getpublicView(slug);
-
-  //   result.fold(
-  //     (fail) {
-  //       setError(fail.message);
-  //       DPrint.log('data fetch failed: ${fail.message}');
-  //       setLoading(false);
-  //       // isEmployeeLoading.value = false;
-  //     },
-  //     (success) {
-  //       DPrint.log('data fetch successfully: ${success.message}');
-  //       // success is NetworkSuccess<SingleCompanyResponseModel>
-  //       // → extract the actual model using .data
-  //       publicView.value = success.data;
-  //       publicView.refresh(); // ← THIS IS THE CORRECT WAY
-
-  //       setLoading(false);
-  //       // isEmployeeLoading.value = false;
-  //     },
-  //   );
-  // }
   Future<void> getpublicView(String slug) async {
     setLoading(true);
     setError("");

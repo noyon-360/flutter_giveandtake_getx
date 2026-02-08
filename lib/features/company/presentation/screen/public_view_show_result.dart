@@ -22,10 +22,7 @@ class PublicViewShowResultScreen extends StatelessWidget {
             children: [
               const Text(
                 "Search Results",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
 
               /// Result Count
@@ -35,7 +32,9 @@ class PublicViewShowResultScreen extends StatelessWidget {
                 return Text(
                   "$count users found · $immediateCount immediate",
                   style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w500),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 );
               }),
 
@@ -69,7 +68,7 @@ class PublicViewShowResultScreen extends StatelessWidget {
               /// Filter Row
               Row(
                 children: [
-                   /// Dropdown
+                  /// Dropdown
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
@@ -77,72 +76,76 @@ class PublicViewShowResultScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
-                    child: Obx(() => DropdownButton<String>(
-                          value: controller.selectedRole.value,
-                          underline: const SizedBox(),
-                          items: [
-                            "All Roles",
-                            "candidate",
-                            "recruiter",
-                            "company"
-                          ]
-                              .map((e) => DropdownMenuItem(
+                    child: Obx(
+                      () => DropdownButton<String>(
+                        value: controller.selectedRole.value,
+                        underline: const SizedBox(),
+                        items:
+                            ["All Roles", "candidate", "recruiter", "company"]
+                                .map(
+                                  (e) => DropdownMenuItem(
                                     value: e,
                                     child: Text(e),
-                                  ))
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) {
-                              controller.updateRole(val);
-                            }
-                          },
-                        )),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            controller.updateRole(val);
+                          }
+                        },
+                      ),
+                    ),
                   ),
 
                   const SizedBox(width: 12),
 
-                   /// Immediate Button
-                  Obx(() => GestureDetector(
-                        onTap: () {
-                          controller.toggleImmediate();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 10),
-                          decoration: BoxDecoration(
+                  /// Immediate Button
+                  Obx(
+                    () => GestureDetector(
+                      onTap: () {
+                        controller.toggleImmediate();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: controller.isImmediate.value
+                              ? Colors.green.shade50
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
                             color: controller.isImmediate.value
-                                ? Colors.green.shade50
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: controller.isImmediate.value
-                                  ? Colors.green
-                                  : Colors.grey.shade300,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.access_time,
-                                size: 18,
-                                color: controller.isImmediate.value
-                                    ? Colors.green
-                                    : Colors.grey,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                "Immediate (${controller.isImmediate.value ? 'only' : 'off'})",
-                                style: TextStyle(
-                                  color: controller.isImmediate.value
-                                      ? Colors.green
-                                      : Colors.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
+                                ? Colors.green
+                                : Colors.grey.shade300,
                           ),
                         ),
-                      )),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 18,
+                              color: controller.isImmediate.value
+                                  ? Colors.green
+                                  : Colors.grey,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              "Immediate (${controller.isImmediate.value ? 'only' : 'off'})",
+                              style: TextStyle(
+                                color: controller.isImmediate.value
+                                    ? Colors.green
+                                    : Colors.black,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
 
@@ -158,9 +161,7 @@ class PublicViewShowResultScreen extends StatelessWidget {
                   final users = controller.filteredSearchInfo;
 
                   if (users.isEmpty) {
-                    return const Center(
-                      child: Text("No users found"),
-                    );
+                    return const Center(child: Text("No users found"));
                   }
 
                   return ListView.builder(
@@ -171,8 +172,9 @@ class PublicViewShowResultScreen extends StatelessWidget {
                         user: user,
                         onTap: () {
                           if (user.slug.isNotEmpty) {
-                            Get.to(() =>
-                                PublicViewSeachScreen(slug: user.slug));
+                            Get.to(
+                              () => PublicViewSeachScreen(slug: user.slug),
+                            );
                           } else {
                             Get.snackbar("Error", "User has no profile slug");
                           }

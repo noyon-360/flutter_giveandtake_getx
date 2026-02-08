@@ -149,45 +149,47 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                     buildSocialLinks(company),
 
                     const SizedBox(height: 20),
-                 
-                  Row(
-                    children: [
-                      Obx(
-                        () => GestureDetector(
-                          onTap: controller.toggleFollow,
-                          child: Container(
-                            height: 40,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: controller.isFollowing.value
-                                  ? Colors.transparent
-                                  : const Color(0xFFE6F0FF), // light sky blue
-                              border: Border.all(
-                                color: Colors.blue.shade800,
-                                width: 1,
+
+                    Row(
+                      children: [
+                        Obx(
+                          () => GestureDetector(
+                            onTap: controller.toggleFollow,
+                            child: Container(
+                              height: 40,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
                               ),
-                              borderRadius: BorderRadius.circular(
-                                8,
-                              ), // square feel
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              controller.isFollowing.value
-                                  ? 'Following'
-                                  : 'Follow',
-                              style: TextStyle(
-                                color: Colors.blue.shade800,
-                                fontWeight: FontWeight.w600,
+                              decoration: BoxDecoration(
+                                color: controller.isFollowing.value
+                                    ? Colors.transparent
+                                    : const Color(0xFFE6F0FF), // light sky blue
+                                border: Border.all(
+                                  color: Colors.blue.shade800,
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  8,
+                                ), // square feel
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                controller.isFollowing.value
+                                    ? 'Following'
+                                    : 'Follow',
+                                style: TextStyle(
+                                  color: Colors.blue.shade800,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 24),
-                   
+                    const SizedBox(height: 24),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -330,21 +332,6 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                           );
                         }).toList(),
                       );
-
-                      // return Column(
-                      //   children: jobs.map((job) {
-                      //     return CompanyJobCard(
-                      //       jobTitle: job.title,
-                      //       companyName: company.cname,
-                      //       description: job.description,
-                      //       location: job.location,
-                      //       location_Type: job.locationType,
-                      //       employement_Type: job.employementType,
-                      //       applicants: job.counter,
-                      //       postedDate: "${job.publishDate.day}-${job.publishDate.month}-${job.publishDate.year}",
-                      //     );
-                      //   }).toList(),
-                      // );
                     }),
                   ],
                 ),
@@ -441,10 +428,7 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
             children: [
               const Text(
                 "Share profile",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               Row(
@@ -458,7 +442,10 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                         "https://www.facebook.com/sharer/sharer.php?u=$profileUrl",
                       );
                       if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
                       }
                       Navigator.pop(context);
                     },
@@ -471,7 +458,10 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                         "https://twitter.com/intent/tweet?text=$shareText&url=$profileUrl",
                       );
                       if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
                       }
                       Navigator.pop(context);
                     },
@@ -484,7 +474,10 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                         "https://www.linkedin.com/sharing/share-offsite/?url=$profileUrl",
                       );
                       if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
                       }
                       Navigator.pop(context);
                     },
@@ -497,7 +490,10 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                         "https://t.me/share/url?url=$profileUrl&text=$shareText",
                       );
                       if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
                       }
                       Navigator.pop(context);
                     },
@@ -563,20 +559,15 @@ class _ShareButton extends StatelessWidget {
               child: Image.asset(
                 imagePath,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.share,
-                  color: Colors.grey,
-                ),
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.share, color: Colors.grey),
               ),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           ),
         ],
       ),
