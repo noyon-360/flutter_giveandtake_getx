@@ -1,16 +1,10 @@
-
-
-
 import 'dart:convert';
 
 class CompanyUpdateResponse {
   final UpdateCompanyResponseModel? updated;
   final List<AwardResult>? results;
 
-  CompanyUpdateResponse({
-    this.updated,
-    this.results,
-  });
+  CompanyUpdateResponse({this.updated, this.results});
 
   factory CompanyUpdateResponse.fromJson(Map<String, dynamic> json) {
     return CompanyUpdateResponse(
@@ -19,17 +13,18 @@ class CompanyUpdateResponse {
           : null,
       results: json["results"] != null
           ? List<AwardResult>.from(
-              json["results"].map((x) => AwardResult.fromJson(x)))
+              json["results"].map((x) => AwardResult.fromJson(x)),
+            )
           : [],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        "updated": updated?.toJson(),
-        "results": results != null
-            ? List<dynamic>.from(results!.map((x) => x.toJson()))
-            : [],
-      };
+    "updated": updated?.toJson(),
+    "results": results != null
+        ? List<dynamic>.from(results!.map((x) => x.toJson()))
+        : [],
+  };
 }
 
 /// ----------------------- UPDATED COMPANY -----------------------
@@ -95,7 +90,8 @@ class UpdateCompanyResponseModel {
           : [],
       sLink: json["sLink"] != null
           ? List<SocialLink>.from(
-              json["sLink"].map((x) => SocialLink.fromJson(x)))
+              json["sLink"].map((x) => SocialLink.fromJson(x)),
+            )
           : [],
       createdAt: json["createdAt"],
       updatedAt: json["updatedAt"],
@@ -104,27 +100,27 @@ class UpdateCompanyResponseModel {
   }
 
   Map<String, dynamic> toJson() => {
-        "_id": id,
-        "userId": userId,
-        "clogo": clogo,
-        "banner": banner,
-        "aboutUs": aboutUs,
-        "slug": slug,
-        "cname": cname,
-        "country": country,
-        "city": city,
-        "zipcode": zipcode,
-        "cemail": cemail,
-        "industry": industry,
-        "service": service,
-        "employeesId":
-            employeesId != null ? List<dynamic>.from(employeesId!) : [],
-        "sLink":
-            sLink != null ? List<dynamic>.from(sLink!.map((x) => x.toJson())) : [],
-        "createdAt": createdAt,
-        "updatedAt": updatedAt,
-        "__v": v,
-      };
+    "_id": id,
+    "userId": userId,
+    "clogo": clogo,
+    "banner": banner,
+    "aboutUs": aboutUs,
+    "slug": slug,
+    "cname": cname,
+    "country": country,
+    "city": city,
+    "zipcode": zipcode,
+    "cemail": cemail,
+    "industry": industry,
+    "service": service,
+    "employeesId": employeesId != null ? List<dynamic>.from(employeesId!) : [],
+    "sLink": sLink != null
+        ? List<dynamic>.from(sLink!.map((x) => x.toJson()))
+        : [],
+    "createdAt": createdAt,
+    "updatedAt": updatedAt,
+    "__v": v,
+  };
 }
 
 /// ----------------------- SOCIAL LINK -----------------------
@@ -134,23 +130,12 @@ class SocialLink {
   final String? url;
   final String? id;
 
-  SocialLink({
-    this.label,
-    this.url,
-    this.id,
-  });
+  SocialLink({this.label, this.url, this.id});
 
-  factory SocialLink.fromJson(Map<String, dynamic> json) => SocialLink(
-        label: json["label"],
-        url: json["url"],
-        id: json["_id"],
-      );
+  factory SocialLink.fromJson(Map<String, dynamic> json) =>
+      SocialLink(label: json["label"], url: json["url"], id: json["_id"]);
 
-  Map<String, dynamic> toJson() => {
-        "label": label,
-        "url": url,
-        "_id": id,
-      };
+  Map<String, dynamic> toJson() => {"label": label, "url": url, "_id": id};
 }
 
 /// ----------------------- RESULT (Award & Honors) -----------------------
@@ -196,15 +181,15 @@ class AwardResult {
   }
 
   Map<String, dynamic> toJson() => {
-        "_id": id,
-        "userId": userId,
-        "title": title,
-        "programeName": programeName,
-        "programeDate": programeDate,
-        "description": description,
-        "__v": v,
-        "createdAt": createdAt,
-        "updatedAt": updatedAt,
-        "issuer": issuer,
-      };
+    "_id": id,
+    "userId": userId,
+    "title": title,
+    "programeName": programeName,
+    "programeDate": programeDate,
+    "description": description,
+    "__v": v,
+    "createdAt": createdAt,
+    "updatedAt": updatedAt,
+    "issuer": issuer,
+  };
 }

@@ -186,29 +186,7 @@ class _CompanyJobCardState extends State<CompanyJobCard> {
           const SizedBox(height: 12),
 
           // /// Description with See More
-          // if (widget.description.isNotEmpty)
-          //   Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text(
-          //         widget.description,
-          //         maxLines: isExpanded ? null : 2,
-          //         overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-          //         style: const TextStyle(fontSize: 14, color: Colors.black87),
-          //       ),
-          //       if (widget.description.length > 100) // show "See More" only if text is long
-          //         GestureDetector(
-          //           onTap: () => setState(() => isExpanded = !isExpanded),
-          //           child: Text(
-          //             isExpanded ? "See Less" : "See More",
-          //             style: const TextStyle(
-          //               color: Colors.blue,
-          //               fontWeight: FontWeight.w600,
-          //             ),
-          //           ),
-          //         ),
-          //     ],
-          //   ),
+   
           const SizedBox(height: 12),
 
           /// Date
