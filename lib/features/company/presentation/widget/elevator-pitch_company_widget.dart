@@ -1,4 +1,3 @@
-
 import 'package:chewie/chewie.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +39,7 @@ class _ElevatorPitchCompanySectionState
     try {
       _videoController = VideoPlayerController.networkUrl(
         Uri.parse(widget.videoUrl!),
-        // formatHint: VideoFormat.hls,
+        formatHint: VideoFormat.hls,
         videoPlayerOptions: VideoPlayerOptions(
           mixWithOthers: true,
           allowBackgroundPlayback: false,
@@ -106,10 +105,7 @@ class _ElevatorPitchCompanySectionState
       return const Center(
         child: Text(
           "No pitch added yet.",
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.white70,
-          ),
+          style: TextStyle(fontSize: 15, color: Colors.white70),
         ),
       );
     }
@@ -138,4 +134,3 @@ class _ElevatorPitchCompanySectionState
     );
   }
 }
-

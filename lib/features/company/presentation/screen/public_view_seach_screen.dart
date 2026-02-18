@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:karlfive/features/job_listing/presentation/controllers/job_details_controller.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/job_details_screen.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/network/constants/api_constants.dart';
+import '../../../job_listing/presentation/controllers/job_details_controller.dart';
+import '../../../job_listing/presentation/screens/job_details_screen.dart';
 import '../../../recruiter_account/presentation/widgets/social_media.dart';
 import '../../data/model/public_view_search_response_model.dart';
 import '../controller/company_details_controller.dart';

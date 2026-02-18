@@ -1,8 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
 
+
+import '../../../../core/theme/app_colors.dart';
 import '../../../job_listing/presentation/screens/job_details_screen.dart';
 
 class CompanyJobCard extends StatefulWidget {
