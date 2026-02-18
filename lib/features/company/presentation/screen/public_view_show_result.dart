@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../controller/company_details_controller.dart';
 import '../widget/user_card_widget.dart';
 import 'public_view_seach_screen.dart';
+import '../../../public_view/screens/public_view_candidate_screens.dart';
 
 class PublicViewShowResultScreen extends StatelessWidget {
   PublicViewShowResultScreen({super.key});
@@ -172,9 +173,15 @@ class PublicViewShowResultScreen extends StatelessWidget {
                         user: user,
                         onTap: () {
                           if (user.slug.isNotEmpty) {
+                          if (user.role.toLowerCase() == 'candidate') {
+                            Get.to(
+                              () => PublicViewCandidateScreen(slug: user.slug),
+                            );
+                          } else {
                             Get.to(
                               () => PublicViewSeachScreen(slug: user.slug),
                             );
+                          }
                           } else {
                             Get.snackbar("Error", "User has no profile slug");
                           }

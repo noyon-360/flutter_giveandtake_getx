@@ -12,6 +12,7 @@ import 'package:giveandtake/features/company/data/model/remove_recruiter_request
 import 'package:giveandtake/features/company/data/model/remove_recruiter_response_model.dart';
 import 'package:giveandtake/features/company/data/model/resume_updated_response_model.dart';
 import 'package:giveandtake/features/company/data/model/status_update_response_model.dart';
+import 'package:giveandtake/features/public_view/models/get_resume_public_view_response_model.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/model/all_user_response_model.dart';
 
@@ -43,6 +44,7 @@ class CompanyDetailsController extends BaseController {
 
   final employee = Rx<EmployeeFetchSingleModel?>(null);
   final publicView = Rx<PublicViewSearchResponseModel?>(null);
+  final candidateView = Rx<GetResumePublicViewResponseModel?>(null);
   final usage = Rx<JobUsageResponseModel?>(null);
 
   var resume = <ResumeUpdatedResponseModel>[].obs;
@@ -557,5 +559,27 @@ class CompanyDetailsController extends BaseController {
     //       : 'You unfollowed this company',
     //   snackPosition: SnackPosition.BOTTOM,
     // );
+  }
+
+
+  Future<void> getCandidatePublicView(String slug) async {
+    setLoading(true);
+    setError("");
+
+    final result = await _companyRepo.getCandidateublicView(slug);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log('data fetch successfully: ${success.message}');
+        candidateView.value = success.data;
+        candidateView.refresh();
+        setLoading(false);
+      },
+    );
   }
 }

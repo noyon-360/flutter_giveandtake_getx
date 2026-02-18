@@ -35,6 +35,8 @@ import 'package:giveandtake/features/company/data/model/remove_recruiter_respons
 import 'package:giveandtake/features/company/data/model/resume_updated_response_model.dart';
 import 'package:giveandtake/features/company/data/model/single_Company_response_model.dart';
 import 'package:giveandtake/features/company/data/model/status_update_response_model.dart';
+import 'package:giveandtake/features/public_view/models/get_resume_public_view_response_model.dart';
+import 'package:giveandtake/features/public_view/screens/public_view_candidate_screens.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/job_update_response_model.dart';
 
 import '../../../../core/network/api_client.dart';
@@ -327,6 +329,16 @@ class CompanyRepoImplementation extends CompanyRepository {
               .toList();
         }
       },
+    );
+  }
+
+
+   @override
+  NetworkResult<GetResumePublicViewResponseModel> getCandidateublicView(String slug) {
+    return _apiClient.get(
+      ApiConstants.company.getCandidatePublicView(slug),
+      fromJsonT: (json) =>
+          GetResumePublicViewResponseModel.fromJson(json as Map<String, dynamic>),
     );
   }
 }

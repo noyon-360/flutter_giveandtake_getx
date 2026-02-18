@@ -11,6 +11,7 @@ import '../../../company/data/model/seach_all_user_response_model.dart';
 import '../../../company/presentation/controller/company_details_controller.dart';
 import '../../../company/presentation/controller/search_controller.dart';
 import '../../../company/presentation/screen/public_view_seach_screen.dart';
+import '../../../public_view/screens/public_view_candidate_screens.dart';
 import '../../../company/presentation/screen/public_view_show_result.dart';
 import '../../../company/presentation/widget/custom_search_company.dart';
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
@@ -246,9 +247,16 @@ class _AppDrawerState extends State<AppDrawer> {
                                       return;
                                     }
 
-                                    Get.to(
-                                      () => PublicViewSeachScreen(slug: slug),
-                                    );
+                                    if (user.role.toLowerCase() == 'candidate') {
+                                      Get.to(
+                                        () => PublicViewCandidateScreen(
+                                            slug: slug),
+                                      );
+                                    } else {
+                                      Get.to(
+                                        () => PublicViewSeachScreen(slug: slug),
+                                      );
+                                    }
                                   },
                                 );
                               },

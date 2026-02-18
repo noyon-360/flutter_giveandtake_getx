@@ -272,4 +272,7 @@ class CompanyAccountApi {
        String getPulicJobs(String companyId) =>
       '${ApiConstants.baseUrl}/all-jobs/company/$companyId';
 
+        String getCandidatePublicView(String slug) =>
+      '${ApiConstants.baseUrl}/create-resume/get-resume/$slug';
+
 }

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/network_result.dart';
+import '../../../public_view/models/get_resume_public_view_response_model.dart';
 import '../../../recruiter_account/data/models/job_update_response_model.dart';
 import '../../data/model/all_user_response_model.dart';
 import '../../data/model/archieve_request_model.dart';
@@ -62,4 +63,5 @@ abstract class CompanyRepository {
   NetworkResult<List<PublicViewJobsResponseModel>> getPublicJobs(
     String companyId,
   );
+  NetworkResult<GetResumePublicViewResponseModel> getCandidateublicView(String slug);
 }
