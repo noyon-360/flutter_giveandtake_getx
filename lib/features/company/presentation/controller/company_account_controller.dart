@@ -410,29 +410,6 @@ class CompanyAccountController extends BaseController {
                                   colorText: Colors.white,
                                 );
                               },
-
-                        // onTap: isAlreadyAdded
-                        //     ? null
-                        //     : () {
-                        //         final emptyCtrl = employeeControllers
-                        //             .firstWhere(
-                        //               (c) => c.text.isEmpty,
-                        //               orElse: () => employeeControllers.last,
-                        //             );
-
-                        //         // Store only the recruiter name
-                        //         emptyCtrl.text =
-                        //             user.name;
-                        //           emptyCtrl.text = user.id; // 👈 Save only name (No email)
-
-                        //         Get.back();
-                        //         Get.snackbar(
-                        //           "Added",
-                        //           "${user.name} added as recruiter", // 👈 Message also simplified
-                        //           backgroundColor: Colors.green,
-                        //           colorText: Colors.white,
-                        //         );
-                        //       },
                       ),
                     );
                   },
@@ -505,11 +482,6 @@ class CompanyAccountController extends BaseController {
       _multiFormDataManager.addTextData("service", jsonEncode(serviceList));
     }
 
-    // 2. Employees → MUST SEND USER IDs (not names!), as JSON string
-    // final employeeIds = employeeControllers
-    //     .map((c) => c.text.trim())
-    //     .where((id) => id.isNotEmpty && id.length >= 20) // rough ObjectId check
-    //     .toList();
     final employeeIds = employeeControllers
         .where((c) => employeeIdMap.containsKey(c))
         .map((c) => employeeIdMap[c]!)
@@ -522,7 +494,7 @@ class CompanyAccountController extends BaseController {
     }
 
     // Awards as JSON string
-    // _multiFormDataManager.addTextData("AwardsAndHonors", awardsJson);
+
     final awardsList = getAwards();
 
     if (awardsList.isNotEmpty) {
@@ -556,8 +528,6 @@ class CompanyAccountController extends BaseController {
     final formData = await _multiFormDataManager.toFormDataAsync();
 
     print("Final Fields: ${formData.fields}");
-
-    // print("Files: ${formData.files.entries.map((entry) => '${entry.key}: ${entry.value.filename}').join(', ')}");
 
     final result = await _companyRepo.createCompany(formData);
 
@@ -639,11 +609,6 @@ class CompanyAccountController extends BaseController {
       _multiFormDataManager.addTextData("service", jsonEncode(serviceList));
     }
 
-    // 2. Employees → MUST SEND USER IDs (not names!), as JSON string
-    // final employeeIds = employeeControllers
-    //     .map((c) => c.text.trim())
-    //     .where((id) => id.isNotEmpty && id.length >= 20) // rough ObjectId check
-    //     .toList();
     final employeeIds = employeeControllers
         .where((c) => employeeIdMap.containsKey(c))
         .map((c) => employeeIdMap[c]!)
@@ -675,17 +640,6 @@ class CompanyAccountController extends BaseController {
     if (sLinks.isNotEmpty) {
       _multiFormDataManager.addTextData("sLink", jsonEncode(sLinks));
     }
-
-    // final formData = await _multiFormDataManager.toFormDataAsync();
-
-    // Add social links as array
-    // for (int i = 0; i < sLinks.length; i++) {
-    //   _multiFormDataManager.addTextData(
-    //     "sLink[$i][label]",
-    //     sLinks[i]["label"]!,
-    //   );
-    //   _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
-    // }
 
     final formRequest = await _multiFormDataManager.toFormDataAsync();
 
@@ -753,33 +707,6 @@ class CompanyAccountController extends BaseController {
       },
     );
   }
-
-  // Future connectRecruiter(
-  //   final String companyId,
-  //   final List<String> employeeIds,
-  // ) async {
-  //   setLoading(true);
-  //   setError("");
-
-  //   final request = RecruiterAddedRequestModel(
-  //     companyId: companyId,
-  //     employeeIds: employeeIds,
-  //   );
-  //   final result = await _companyRepo.connectRecruiter(request);
-
-  //   result.fold(
-  //     (fail) {
-  //       setError(fail.message);
-  //       DPrint.log("connect company success result : ${fail.message}");
-  //       setLoading(false);
-  //     },
-  //     (success) {
-  //       DPrint.log("connect company success result : ${success.message}");
-  //       Get.back();
-  //       setLoading(false);
-  //     },
-  //   );
-  // }
 
   Future<void> connectRecruiter(List<String> employeeIds) async {
     setLoading(true);

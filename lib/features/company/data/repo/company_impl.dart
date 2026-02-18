@@ -40,10 +40,14 @@ import 'package:giveandtake/features/recruiter_account/data/models/job_update_re
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/network/network_result.dart';
+import '../../../../core/utils/debug_print.dart';
 import '../../domain/repo/company_repo.dart';
 import '../model/all_user_response_model.dart';
 import '../model/company_response_model.dart';
 import '../model/employee_fetch_single_model.dart';
+import '../model/public_view_jobs_response_model.dart';
+import '../model/public_view_search_response_model.dart';
+import '../model/seach_all_user_response_model.dart';
 import '../model/update_company_response_model.dart';
 
 class CompanyRepoImplementation extends CompanyRepository {
@@ -268,6 +272,61 @@ class CompanyRepoImplementation extends CompanyRepository {
       ApiConstants.company.getJobUsage,
       fromJsonT: (json) =>
           JobUsageResponseModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser( String q) {
+    return _apiClient.get(
+      ApiConstants.company.getAllSearchUser(q),
+      fromJsonT: (json) => (json as List<dynamic>? ?? [])
+          .where((item) => item != null) // ← remove nulls
+          .map(
+            (item) => SeachAllUserResponseModel.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  @override
+  NetworkResult<PublicViewSearchResponseModel> getpublicView(String slug) {
+    return _apiClient.get(
+      ApiConstants.company.getPublicView(slug),
+      fromJsonT: (json) =>
+          PublicViewSearchResponseModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  NetworkResult<List<PublicViewJobsResponseModel>> getPublicJobs(
+    String companyId,
+  ) {
+    return _apiClient.get(
+      ApiConstants.company.getPulicJobs(companyId),
+      fromJsonT: (json) {
+        // Critical Fix: Extract 'data' array from response
+        if (json is Map<String, dynamic> && json.containsKey('data')) {
+          final List<dynamic> dataList = json['data'];
+          return dataList
+              .map(
+                (item) => PublicViewJobsResponseModel.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+        } else {
+          // Fallback: if backend sends raw list
+          return (json as List)
+              .map(
+                (item) => PublicViewJobsResponseModel.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+        }
+      },
     );
   }
 }

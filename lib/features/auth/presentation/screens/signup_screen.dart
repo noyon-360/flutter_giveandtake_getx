@@ -47,6 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordTEController = TextEditingController();
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
+  final ValueNotifier<String> _selectedRole = ValueNotifier<String>('candidate');
 
   late TapGestureRecognizer _termsRecognizer;
   late TapGestureRecognizer _privacyRecognizer;
@@ -110,6 +111,7 @@ class _SignupScreenState extends State<SignupScreen> {
   void dispose() {
     _errorWorker.dispose(); // Dispose the error listener
     _obscurePassword.dispose();
+    _selectedRole.dispose();
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
     _signInRecognizer.dispose();
@@ -149,6 +151,7 @@ class _SignupScreenState extends State<SignupScreen> {
       phoneNumber: _phoneNumberTEController.text.trim(),
       address: _countryTEController.text.trim(),
       dateOfBirth: _dateOfBirthTEController.text,
+      role: _selectedRole.value, // Pass the selected role
     );
   }
 
@@ -644,7 +647,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         Gap.h16,
 
                         SecondaryButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _selectedRole.value = 'recruiter';
+                            _submit();
+                          },
                           text: "Join as a Recruiter",
                           width: double.infinity - 40,
                           textColor: AppColors.primaryBlue,
@@ -654,7 +660,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         Gap.h8,
 
                         SecondaryButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _selectedRole.value = 'company';
+                            _submit();
+                          },
                           text: "Join as a Company",
                           width: double.infinity - 40,
                           textColor: AppColors.primaryBlue,

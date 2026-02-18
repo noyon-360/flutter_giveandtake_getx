@@ -11,12 +11,15 @@ import '../../data/model/company_response_model.dart';
 import '../../data/model/employee_fetch_single_model.dart';
 import '../../data/model/job_usage_response_model.dart';
 import '../../data/model/manage_job_response_model.dart';
+import '../../data/model/public_view_jobs_response_model.dart';
+import '../../data/model/public_view_search_response_model.dart';
 import '../../data/model/rec_company_response_model.dart';
 import '../../data/model/recruiter_added_request_model.dart';
 import '../../data/model/recruiter_added_response_model.dart';
 import '../../data/model/remove_recruiter_request_model.dart';
 import '../../data/model/remove_recruiter_response_model.dart';
 import '../../data/model/resume_updated_response_model.dart';
+import '../../data/model/seach_all_user_response_model.dart';
 import '../../data/model/single_Company_response_model.dart';
 import '../../data/model/status_update_response_model.dart';
 import '../../data/model/update_company_response_model.dart';
@@ -54,4 +57,9 @@ abstract class CompanyRepository {
     Map<String, dynamic> data,
   );
   NetworkResult<JobUsageResponseModel> fetchJobUsage();
+ NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser( String q) ;
+  NetworkResult<PublicViewSearchResponseModel> getpublicView(String slug);
+  NetworkResult<List<PublicViewJobsResponseModel>> getPublicJobs(
+    String companyId,
+  );
 }

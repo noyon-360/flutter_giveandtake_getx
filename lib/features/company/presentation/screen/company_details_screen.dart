@@ -1,23 +1,28 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
-import 'package:giveandtake/features/company/data/model/single_Company_response_model.dart';
 import 'package:giveandtake/features/company/presentation/screen/company_edit_profile.dart';
-import 'package:giveandtake/features/company/presentation/screen/connect_company_dialog_screen.dart';
-import 'package:giveandtake/features/company/presentation/screen/recruiter_request_screen.dart';
-import 'package:giveandtake/features/company_pricing/presentation/screens/plan_pricing_screen.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/network/constants/api_constants.dart';
+import '../../../../core/utils/debug_print.dart';
+import '../../../company_pricing/presentation/screens/plan_pricing_screen.dart';
 import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
+import '../../../recruiter_account/presentation/widgets/elevator_pitch.dart';
 import '../../../recruiter_account/presentation/widgets/social_media.dart';
+import '../../data/model/single_Company_response_model.dart';
 import '../controller/company_details_controller.dart';
 import '../widget/elevator-pitch_company_widget.dart';
 import 'company_change_password_screen.dart';
+import 'connect_company_dialog_screen.dart';
 import 'employee_screen.dart';
 import 'manage_job_req_screen.dart';
+import 'recruiter_request_screen.dart';
 
 class CompanyDetailsPage extends StatefulWidget {
   CompanyDetailsPage({super.key});
@@ -44,6 +49,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
     await controller.fetchCompanyProfile();
     await controller.fetchEmployee();
   }
+
+  String? _accessToken;
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +161,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.edit_calendar_sharp),
+              leading: const Icon(Icons.person_add_outlined),
               title: const Text('Recruiter Requests'),
               onTap: () {
                 Get.back();
@@ -162,7 +169,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.person),
+              leading: const Icon(Icons.lock_clock_outlined),
               title: const Text('Change Password'),
               onTap: () {
                 Get.back();
@@ -347,91 +354,13 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                       const SizedBox(height: 20),
 
                       // ----- Social Media -----
-                      // Wrap(
-                      //   spacing: 8,
-                      //   runSpacing: 8,
-                      //   children: (company.sLink)
-                      //       .map(
-                      //         (link) => GestureDetector(
-                      //           onTap: () async {
-                      //             final Uri url = Uri.parse(link.url ?? '');
-                      //             if (await canLaunchUrl(url)) {
-                      //               await launchUrl(
-                      //                 url,
-                      //                 mode: LaunchMode.externalApplication,
-                      //               );
-                      //             } else {
-                      //               Get.snackbar(
-                      //                 'Error',
-                      //                 'Could not open ${link.url}',
-                      //               );
-                      //             }
-                      //           },
-                      //           child: SocialMedia(
-                      //             image: _getSocialIcon(link.label),
-                      //           ),
-                      //         ),
-                      //       )
-                      //       .toList(),
-                      // ),
+             
                       buildSocialLinks(company),
 
                       const SizedBox(height: 20),
 
-                      /// 🔹 Buttons in one row
-                      Row(
-                        children: [
-                          // ElevatedButton(
-                          //   onPressed: () => Get.to(() => ManageJobPostScreen()),
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Color(0xFF2B7FD0),
-                          //     foregroundColor: Colors.white,
-                          //     padding: EdgeInsets.symmetric(horizontal: 14),
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(10),
-                          //     ),
-                          //   ),
-                          //   child: Text("Manage Jobs"),
-                          // ),
-
-                          // const SizedBox(width: 10),
-
-                          // ElevatedButton(
-                          //   onPressed: () {},
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Color(0xFF2B7FD0),
-                          //     foregroundColor: Colors.white,
-                          //     padding: EdgeInsets.symmetric(horizontal: 14),
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(10),
-                          //     ),
-                          //   ),
-                          //   child: Text(
-                          //     "Post A Job",
-                          //   ), // ⬅ added beside Manage Job
-                          // ),
-
-                          // const SizedBox(width: 10),
-                          // ElevatedButton(
-                          //   onPressed: () {
-                          //     Get.to(
-                          //       () => CompanyEditAccountPage(
-                          //         companyData: controller.userInfo.value!,
-                          //       ),
-                          //     );
-                          //   },
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Color(0xFF2B7FD0),
-                          //     foregroundColor: Colors.white,
-                          //     padding: EdgeInsets.symmetric(horizontal: 14),
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(10),
-                          //     ),
-                          //   ),
-                          //   child: Text("Edit Profile"),
-                          // ),
-                        ],
-                      ),
+                  
+                     
                     ],
                   ),
                 ),
@@ -451,6 +380,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                   ),
 
                   //fetch elevated pitch e
+             
+
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
@@ -460,123 +391,24 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                     width: double.infinity,
                     child: ElevatorPitchCompanySection(
                       videoUrl:
-                          "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
-                      // httpHeaders: {
-                      //   "Custom-Header": "value",
-                      //   if (_accessToken != null) ...{
-                      //     "Authorization": "Bearer $_accessToken",
-                      //   },
-                      // },
+                              "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
+                          httpHeaders: {
+                            "Custom-Header": "value",
+                            if (_accessToken != null) ...{
+                              "Authorization": "Bearer $_accessToken",
+                            },
+                          },
                     ),
                   ),
                 ),
-
-                /// ================= Elevator Pitch =================
-                // sectionTitle("Elevator Video Pitch"),
-                // const SizedBox(height: 20),
-
-                // // Check if elevator pitch exists
-                // company.elevatorPitch?.video.hlsUrl != null &&
-                //         company.elevatorPitch!.video.hlsUrl!.isNotEmpty
-                //     ? Container(
-                //         decoration: BoxDecoration(
-                //           color: Colors.white,
-                //           border: Border.all(
-                //             color: const Color(0xFF999999),
-                //             width: 1,
-                //           ),
-                //           borderRadius: BorderRadius.circular(12),
-                //         ),
-                //         child: Container(
-                //           decoration: BoxDecoration(
-                //             borderRadius: BorderRadius.circular(4),
-                //             color: const Color(0xFF191919),
-                //           ),
-                //           height: 160,
-                //           width: double.infinity,
-                //           child: ElevatorPitchCompanySection(
-                //             videoUrl: company.elevatorPitch!.video.hlsUrl,
-                //             httpHeaders: {
-                //               'Accept': '*/*',
-                //               'Accept-Encoding': 'identity',
-                //               "Authorization":
-                //                   "Bearer ${company.elevatorPitch!.video.encryptionKeyUrl}",
-                //             },
-                //           ),
-                //         ),
-                //       )
-                //     : GestureDetector(
-                //         onTap: () {
-                //           // Navigate to video upload screen (same as create flow)
-                //           Get.to(() => VideoUploadScreen());
-                //         },
-                //         child: Container(
-                //           decoration: BoxDecoration(
-                //             border: Border.all(
-                //               color: const Color(0xFF999999),
-                //               width: 1,
-                //             ),
-                //             borderRadius: BorderRadius.circular(12),
-                //             color: Colors.white,
-                //           ),
-                //           height: 160,
-                //           width: double.infinity,
-                //           child: Container(
-                //             decoration: BoxDecoration(
-                //               borderRadius: BorderRadius.circular(4),
-                //               color: const Color(0xFF191919),
-                //             ),
-                //             child: Column(
-                //               mainAxisAlignment: MainAxisAlignment.center,
-                //               children: [
-                //                 Image.asset(
-                //                   'assets/icons/gallery.png', // same icon used in create screen
-                //                   height: 32,
-                //                   width: 32,
-                //                   color: Colors.white70,
-                //                 ),
-                //                 const SizedBox(height: 12),
-                //                 const Text(
-                //                   'Upload your company elevator pitch',
-                //                   style: TextStyle(
-                //                     color: Colors.white,
-                //                     fontSize: 14,
-                //                     fontWeight: FontWeight.w500,
-                //                   ),
-                //                   textAlign: TextAlign.center,
-                //                 ),
-                //                 const SizedBox(height: 8),
-                //                 const Text(
-                //                   ' Upload or view a short video',
-                //                   style: TextStyle(
-                //                     color: Colors.white70,
-                //                     fontSize: 12,
-                //                   ),
-                //                   textAlign: TextAlign.center,
-                //                 ),
-                //               ],
-                //             ),
-                //           ),
-                //         ),
-                //       ),
+              
                 const SizedBox(height: 20),
                 SizedBox(height: 20),
 
                 /// ================= COMPANY DETAILS =================
                 infoTile("About us", stripHtmlTags(company.aboutUs)),
                 SizedBox(height: 20),
-                // infoTile("Industry", company.industry),
-                // infoTile("Zip Code", company.zipcode),
-                // infoTile("Business Email", company.cemail),
-                // infoTile("Services", company.service.join(", ")),
-                // infoTile(
-                //   "Social Links",
-                //   company.sLink.isNotEmpty
-                //       ? company.sLink
-                //             .map((e) => "• ${e.label} → ${e.url}")
-                //             .join("\n")
-                //       : "No social links available",
-                // ),
+              
 
                 /// ================= Employees =================
                 sectionTitle("Internal Recruiters"),
