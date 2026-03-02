@@ -75,9 +75,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  NetworkResult<OtpResponseModelRegister> otpVerifyRegister(
-    OtpRequestModelRegister request,
-  ) {
+  NetworkResult<void> otpVerifyRegister(
+      OtpVerifyRequestModel request,
+      ) {
     return _apiClient.post(
       ApiConstants.auth.otpVerifyRegister,
       data: request.toJson(),

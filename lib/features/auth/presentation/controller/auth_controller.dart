@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
@@ -41,6 +42,43 @@ class AuthController extends BaseController {
   bool _isSuccess = false;
 
   AuthController(this._authRepository, this._authStorageService);
+
+  Timer? _otpTimer;
+  final timerSeconds = 600.obs;
+  final isOtpExpired = false.obs;
+
+  void startOtpTimer() {
+    _otpTimer?.cancel();
+    timerSeconds.value = 600;
+    isOtpExpired.value = false;
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (timerSeconds.value > 0) {
+        timerSeconds.value--;
+      } else {
+        isOtpExpired.value = true;
+        _otpTimer?.cancel();
+      }
+    });
+  }
+
+  void resetOtpTimer() {
+    startOtpTimer();
+  }
+
+  String get timerDisplay {
+    final minutes = (timerSeconds.value / 60).floor().toString().padLeft(
+      2,
+      '0',
+    );
+    final seconds = (timerSeconds.value % 60).toString().padLeft(2, '0');
+    return "$minutes:$seconds";
+  }
+
+  @override
+  void onClose() {
+    _otpTimer?.cancel();
+    super.onClose();
+  }
 
   // Login
   Future<void> login(
@@ -98,7 +136,8 @@ class AuthController extends BaseController {
 
           // Fetch resume data to check if profile is complete
           try {
-            final resumeEndpoint = '${ApiConstants.baseUrl}/create-resume/get-resume';
+            final resumeEndpoint =
+                '${ApiConstants.baseUrl}/create-resume/get-resume';
             final resumeResult = await ApiClient().get(
               resumeEndpoint,
               fromJsonT: (json) => json as Map<String, dynamic>,
@@ -107,18 +146,22 @@ class AuthController extends BaseController {
             resumeResult.fold(
               (fail) {
                 // If resume fetch fails, go to form to create one
-                DPrint.log('Resume fetch failed, navigating to ElevatorResumeScreen');
+                DPrint.log(
+                  'Resume fetch failed, navigating to ElevatorResumeScreen',
+                );
                 Get.offAll(() => ElevatorResumeScreen());
               },
               (success) {
                 final resumeData = success.data;
                 final city = resumeData['resume']?['city'];
-                
+
                 DPrint.log('Resume city: $city');
-                
+
                 // If city is null or empty, profile is incomplete - go to form
                 if (city == null || city.toString().isEmpty) {
-                  DPrint.log('City is null/empty, navigating to ElevatorResumeScreen');
+                  DPrint.log(
+                    'City is null/empty, navigating to ElevatorResumeScreen',
+                  );
                   Get.offAll(() => ElevatorResumeScreen());
                 } else {
                   // Profile is complete - go to dashboard
@@ -218,6 +261,7 @@ class AuthController extends BaseController {
       (success) {
         DPrint.log("Register success result : ${success.data.id}");
         setLoading(false);
+        startOtpTimer();
         Get.to(OtpVerificationToCompleteRegister(email: email));
       },
     );
@@ -252,6 +296,7 @@ class AuthController extends BaseController {
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
+        startOtpTimer();
         setLoading(false);
         // Navigate to OTP verification screen for password reset
         Get.to(() => OtpVerificationForPasswordResetScreen(email: email));
@@ -275,6 +320,7 @@ class AuthController extends BaseController {
       (success) {
         DPrint.log("reset pass success result : ${success.data.message}");
         Get.snackbar("OTP Sent", "We have resent the OTP to $email");
+        resetOtpTimer();
         setLoading(false);
       },
     );
@@ -282,48 +328,48 @@ class AuthController extends BaseController {
 
   // This method is now only used for registration OTP verification
   // For password reset, we navigate directly to SetNewPasswordScreen from resetPass
-  Future verifyOTPForRegistration(String email, String otp) async {
-    setLoading(true);
-    setError("");
-
-    final result = await _authRepository.otpVerifyRegister(
-      OtpRequestModelRegister(email: email, otp: otp),
-    );
-
-    result.fold(
-      (fail) {
-        setError(fail.message);
-        DPrint.log("verify otp failed: ${fail.message}");
-        Get.snackbar(
-          'Error',
-          fail.message,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        setLoading(false);
-      },
-      (success) {
-        DPrint.log("verify otp success: ${success.message}");
-        setLoading(false);
-        Get.snackbar(
-          'Success',
-          'Registration completed successfully!',
-          backgroundColor: const Color(0xFF10B287),
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        //* <--- Navigate to security questions for Sign Up --->
-        Get.to(() => SecurityQuestionsScreen(email: email));
-      },
-    );
-  }
+  // Future verifyOTPForRegistration(String email, String otp) async {
+  //   setLoading(true);
+  //   setError("");
+  //
+  //   final result = await _authRepository.otpVerifyRegister(
+  //     OtpRequestModelRegister(email: email, otp: otp),
+  //   );
+  //
+  //   result.fold(
+  //     (fail) {
+  //       setError(fail.message);
+  //       DPrint.log("verify otp failed: ${fail.message}");
+  //       Get.snackbar(
+  //         'Error',
+  //         fail.message,
+  //         backgroundColor: Colors.red,
+  //         colorText: Colors.white,
+  //         snackPosition: SnackPosition.BOTTOM,
+  //       );
+  //       setLoading(false);
+  //     },
+  //     (success) {
+  //       DPrint.log("verify otp success: ${success.message}");
+  //       setLoading(false);
+  //       Get.snackbar(
+  //         'Success',
+  //         'Registration completed successfully!',
+  //         backgroundColor: const Color(0xFF10B287),
+  //         colorText: Colors.white,
+  //         snackPosition: SnackPosition.BOTTOM,
+  //       );
+  //       //* <--- Navigate to security questions for Sign Up --->
+  //       Get.to(() => SecurityQuestionsScreen(email: email));
+  //     },
+  //   );
+  // }
 
   Future verifyOTPRegister(String email, String otp) async {
     setLoading(true);
     setError("");
 
-    final request = OtpRequestModelRegister(email: email, otp: otp);
+    final request = OtpVerifyRequestModel(email: email, otp: otp);
     final result = await _authRepository.otpVerifyRegister(request);
 
     result.fold(

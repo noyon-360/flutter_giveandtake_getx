@@ -15,6 +15,7 @@ import 'package:giveandtake/features/recruiter_account/data/models/job_update_re
 import 'package:giveandtake/features/recruiter_account/data/models/job_update_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/leave_company_request_model.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/leave_company_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/public_view_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/your_job_response_model.dart';
 import '../../../../core/network/network_result.dart';
 import '../../data/models/current_password_update_request_model.dart';
@@ -58,4 +59,6 @@ abstract class Repo {
     FormData formData,
   );
   NetworkResult<void> changePass(UpdatePasswordRequestModel request);
+
+  NetworkResult<RecruiterPublicViewResponseModel> recruiterPublicView(String slug);
 }

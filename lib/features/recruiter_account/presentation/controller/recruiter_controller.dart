@@ -16,6 +16,7 @@ import 'package:giveandtake/features/recruiter_account/data/models/get_single_jo
 import 'package:giveandtake/features/recruiter_account/data/models/job_update_request_model.dart'
     hide ApplicationRequirement, CustomQuestion;
 import 'package:giveandtake/features/recruiter_account/data/models/leave_company_request_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/public_view_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/domain/repo/repo.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/upload_elevator_pitch.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
@@ -49,6 +50,8 @@ class RecruiterController extends BaseController {
   final RxString searchText = ''.obs;
 
   final companies = <GetCompanyResponseModel>[].obs;
+
+  final publicView = Rx<RecruiterPublicViewResponseModel?>(null);
 
   // In RecruiterController
   final JobFormController jobFormController = Get.put(JobFormController());
@@ -96,11 +99,18 @@ class RecruiterController extends BaseController {
   void onInit() {
     super.onInit();
     fetchCompany(); //Fetch when controller is created
-    fetchProfile();
+    _fetchProfileIfLoggedIn();
     fetchCategory();
     fetchCurrency();
 
     // getJob();
+  }
+
+  Future<void> _fetchProfileIfLoggedIn() async {
+    final userId = await _authStorageService.getUserId();
+    if (userId != null && userId.isNotEmpty) {
+      await fetchProfile();
+    }
   }
 
   Future<void> fetchCompany() async {
@@ -806,6 +816,27 @@ class RecruiterController extends BaseController {
       (success) {
         DPrint.log("change pass success result : ${success.message}");
         Get.to(() => RecruiterPageScreen());
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> recruiterPublicView(String slug) async {
+    setLoading(true);
+    setError("");
+
+    final result = await _recruiterRepo.recruiterPublicView(slug);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log('data fetch successfully: ${success.message}');
+        publicView.value = success.data;
+        publicView.refresh();
         setLoading(false);
       },
     );

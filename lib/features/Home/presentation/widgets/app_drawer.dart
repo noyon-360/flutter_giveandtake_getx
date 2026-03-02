@@ -6,6 +6,8 @@ import 'package:giveandtake/features/elevator/presentation/controller/resume_che
 import 'package:giveandtake/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:giveandtake/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/public_view_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_public_view.dart';
 
 import '../../../company/data/model/seach_all_user_response_model.dart';
 import '../../../company/presentation/controller/company_details_controller.dart';
@@ -252,7 +254,14 @@ class _AppDrawerState extends State<AppDrawer> {
                                         () => PublicViewCandidateScreen(
                                             slug: slug),
                                       );
-                                    } else {
+                                    }
+                                    else if (user.role.toLowerCase() == 'recruiter') {
+                                      Get.to(
+                                        () => RecruiterPublicViewScreen(
+                                            slug: slug),
+                                      );
+                                    }
+                                    else {
                                       Get.to(
                                         () => PublicViewSeachScreen(slug: slug),
                                       );

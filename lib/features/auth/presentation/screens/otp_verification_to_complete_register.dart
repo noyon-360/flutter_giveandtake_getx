@@ -40,7 +40,7 @@ class _OtpVerificationToCompleteRegisterState
       };
   }
 
-  _submit() {
+  void _submit() {
     if (otpController.text.length == 6) {
       _authController.verifyOTPRegister(widget.email, otpController.text);
     } else {
@@ -99,7 +99,27 @@ class _OtpVerificationToCompleteRegisterState
                   return const SizedBox.shrink(); // return empty widget
                 }),
 
-                PinCode(otpController: otpController),
+                Obx(
+                  () => PinCode(
+                    otpController: otpController,
+                    enabled: !_authController.isOtpExpired.value,
+                  ),
+                ),
+
+                SizedBox(height: 16),
+
+                Obx(
+                  () => Text(
+                    _authController.timerDisplay,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: _authController.isOtpExpired.value
+                          ? Colors.red
+                          : Colors.black,
+                    ),
+                  ),
+                ),
 
                 SizedBox(height: 24),
 
@@ -130,9 +150,13 @@ class _OtpVerificationToCompleteRegisterState
                 SizedBox(height: 12),
                 Obx(
                   () => PrimaryButton(
-                    onPressed: _submit,
+                    onPressed: _authController.isOtpExpired.value
+                        ? null
+                        : _submit,
                     isLoading: _authController.isLoading.value,
-                    text: 'Verify Now',
+                    text: _authController.isOtpExpired.value
+                        ? 'OTP Expired'
+                        : 'Verify Now',
                   ),
                 ),
               ],

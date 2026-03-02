@@ -107,6 +107,8 @@ class RecruiterAccountApi {
       '${ApiConstants.baseUrl}/jobs/update/$jobId';
   String updateArchieveJob(String jobId) =>
       '${ApiConstants.baseUrl}/jobs/$jobId/archive';
+  String getPublicView(String slug) =>
+      '${ApiConstants.baseUrl}/recruiter/recruiter-account/slug/$slug';
 }
 
 class ElevatorPitchVideo {
