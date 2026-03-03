@@ -36,8 +36,8 @@ abstract class AuthRepository {
   NetworkResult<RefreshTokenResponseModel> refreshToken(
     RefreshTokenRequestModel request,
   );
-  NetworkResult<OtpResponseModelRegister> otpVerifyRegister(
-    OtpRequestModelRegister request,
+  NetworkResult<void> otpVerifyRegister(
+      OtpVerifyRequestModel request,
   );
   NetworkResult<UserModel> getUserProfile();
 

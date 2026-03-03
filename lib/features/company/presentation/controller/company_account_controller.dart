@@ -15,6 +15,7 @@ import '../../../../core/network/services/multiple_form_data_manager.dart';
 import '../../data/model/all_user_response_model.dart';
 import '../../data/model/recruiter_added_request_model.dart';
 import '../screen/company_details_screen.dart';
+import '../screen/company_screen.dart';
 
 class CompanyAccountController extends BaseController {
   final CompanyRepository _companyRepo;
@@ -756,5 +757,47 @@ class CompanyAccountController extends BaseController {
           (id) => id.isNotEmpty && id.length >= 20,
         ) // valid ObjectId length
         .toList();
+  }
+
+  /// Called from AppDrawer → Elevator Pitch & Resume for company role.
+  /// Fetches the company profile and decides which screen to open:
+  ///   - industry present → [CompanyDetailsPage] (company dashboard)
+  ///   - industry absent  → [CreateCompanyAccountPage] (setup)
+  Future<void> navigateFromElevatorPitch() async {
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      Get.snackbar('Error', 'User ID not found. Please log in again.');
+      return;
+    }
+
+    // Show loading overlay
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    final result = await _companyRepo.fetchCompanyInfo(userId);
+
+    // Close loading overlay
+    if (Get.isDialogOpen ?? false) Get.back();
+
+    result.fold(
+      (fail) {
+        // On error assume profile not set up yet
+        Get.to(() => const CreateCompanyAccountPage());
+      },
+      (success) {
+        final companies = success.data.companies;
+        DPrint.log("Company data: $companies");
+        // Company profile exists if the companies list is non-empty
+        final hasCompany = companies.isNotEmpty;
+
+        if (hasCompany) {
+          Get.to(() => CompanyDetailsPage());
+        } else {
+          Get.to(() => const CreateCompanyAccountPage());
+        }
+      },
+    );
   }
 }

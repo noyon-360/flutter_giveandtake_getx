@@ -1,4 +1,5 @@
 import 'dart:developer' as DPrint;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
@@ -9,29 +10,28 @@ import '../../../../core/network/services/auth_storage_service.dart';
 import '../widgets/elevator_pitch.dart';
 import '../widgets/social_media.dart';
 
-class PublicViewScreen extends StatefulWidget {
-  const PublicViewScreen({super.key});
+class RecruiterPublicViewScreen extends StatefulWidget {
+  const RecruiterPublicViewScreen({super.key, required this.slug});
+  final String slug;
 
   @override
-  State<PublicViewScreen> createState() => _PublicViewScreenState();
+  State<RecruiterPublicViewScreen> createState() => _RecruiterPublicViewScreenState();
 }
 
-class _PublicViewScreenState extends State<PublicViewScreen> {
-  final RecruiterController recruiterController =
-      Get.find<RecruiterController>();
+class _RecruiterPublicViewScreenState extends State<RecruiterPublicViewScreen> {
+  final RecruiterController recruiterController = Get.find<RecruiterController>();
+  String? _accessToken;
 
   String _parseHtmlString(String htmlString) {
     final document = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
     return htmlString.replaceAll(document, '');
   }
 
-  String? _accessToken;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      recruiterController.fetchProfile();
+      recruiterController.recruiterPublicView(widget.slug);
       final token = await Get.find<AuthStorageService>().getAccessToken();
       if (mounted) {
         setState(() {
@@ -55,11 +55,13 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (recruiterController.userInfo.value == null) {
+          if (recruiterController.publicView.value == null)
+          {
             return const Center(child: Text("No recruiter data found."));
           }
 
-          final user = recruiterController.userInfo.value!;
+          final user = recruiterController.publicView.value!;
+
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(0),
@@ -86,9 +88,9 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
                               color: Colors.grey.shade300,
                               image: user.banner.isNotEmpty
                                   ? DecorationImage(
-                                      image: NetworkImage(user.banner),
-                                      fit: BoxFit.cover,
-                                    )
+                                image: NetworkImage(user.banner),
+                                fit: BoxFit.cover,
+                              )
                                   : null,
                             ),
                           ),
@@ -107,9 +109,9 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
                               color: Colors.grey.shade300,
                               image: user.photo.isNotEmpty
                                   ? DecorationImage(
-                                      image: NetworkImage(user.photo),
-                                      fit: BoxFit.cover,
-                                    )
+                                image: NetworkImage(user.photo),
+                                fit: BoxFit.cover,
+                              )
                                   : null,
                             ),
                           ),
@@ -171,23 +173,23 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
                   children: (user.sLink)
                       .map(
                         (link) => GestureDetector(
-                          onTap: () async {
-                            final Uri url = Uri.parse(link.url ?? '');
-                            if (await canLaunchUrl(url)) {
-                              await launchUrl(
-                                url,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            } else {
-                              Get.snackbar(
-                                'Error',
-                                'Could not open ${link.url}',
-                              );
-                            }
-                          },
-                          child: SocialMedia(image: _getSocialIcon(link.label)),
-                        ),
-                      )
+                      onTap: () async {
+                        final Uri url = Uri.parse(link.url ?? '');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } else {
+                          Get.snackbar(
+                            'Error',
+                            'Could not open ${link.url}',
+                          );
+                        }
+                      },
+                      child: SocialMedia(image: _getSocialIcon(link.label)),
+                    ),
+                  )
                       .toList(),
                 ),
 
@@ -209,6 +211,8 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 20),
 
                 Divider(color: Color(0xFF999999)),
 
@@ -252,8 +256,6 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 20),
               ],
             ),
           );

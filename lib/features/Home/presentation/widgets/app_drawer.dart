@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
 import 'package:giveandtake/features/elevator/presentation/controller/resume_check_controller.dart';
 import 'package:giveandtake/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:giveandtake/features/home_static_screens/presentation/screen/contact_us_screen.dart';
@@ -64,6 +67,45 @@ class _AppDrawerState extends State<AppDrawer> {
     });
   }
 
+  /// Handles the "Elevator Pitch & Resume" button with role-based navigation:
+  ///  - Guest (no token)  → LoginScreen
+  ///  - Candidate         → existing ResumeCheckController flow (unchanged)
+  ///  - Company           → calls fetchCompanyInfo API; if companies list is
+  ///                        non-empty → company dashboard, else → account setup
+  Future<void> _handleElevatorPitch() async {
+    final authController = Get.find<AuthController>();
+
+    // 1. Guest: no access token → go to LoginScreen
+    if (!authController.isLoggedIn.value) {
+      Get.to(() => const LoginScreen());
+      return;
+    }
+
+
+    final userRole = await authController.authStorageService.getUserRole();
+
+    // 2. Candidate: keep existing behaviour (all existing conditions preserved)
+    if (userRole == 'candidate') {
+      final resumeController = Get.put(ResumeCheckController());
+      resumeController.checkResumeAndNavigate();
+      return;
+    }
+
+    // 3. Company: fetch company info and navigate based on whether company exists
+    if (userRole == 'company') {
+      final companyController = Get.find<CompanyAccountController>();
+      await companyController.navigateFromElevatorPitch();
+      return;
+    }
+
+    // 4. Other roles: fallback
+    Get.snackbar(
+      'Not Available',
+      'This feature is not available for your account type.',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -116,9 +158,6 @@ class _AppDrawerState extends State<AppDrawer> {
                           ),
                         ),
                       );
-                    }
-                    if (users.isEmpty) {
-                      return const SizedBox.shrink(); // or show "Start typing..." message
                     }
 
                     return Container(
@@ -175,27 +214,32 @@ class _AppDrawerState extends State<AppDrawer> {
                                           ),
                                         ),
                                       ),
-                                      if (user.immediatelyAvailable == true) ...[
+                                      if (user.immediatelyAvailable ==
+                                          true) ...[
                                         const SizedBox(width: 8),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                Colors.green.withOpacity(0.1),
-                                            borderRadius:
-                                                BorderRadius.circular(20),
+                                            horizontal: 8,
+                                            vertical: 4,
                                           ),
-                                          child: Row(
+                                          decoration: BoxDecoration(
+                                            color: Colors.green.withOpacity(
+                                              0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: const Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              const Icon(
+                                              Icon(
                                                 Icons.circle,
                                                 color: Colors.green,
                                                 size: 8,
                                               ),
-                                              const SizedBox(width: 4),
-                                              const Text(
+                                              SizedBox(width: 4),
+                                              Text(
                                                 "Immediate",
                                                 style: TextStyle(
                                                   color: Colors.green,
@@ -247,10 +291,12 @@ class _AppDrawerState extends State<AppDrawer> {
                                       return;
                                     }
 
-                                    if (user.role.toLowerCase() == 'candidate') {
+                                    if (user.role.toLowerCase() ==
+                                        'candidate') {
                                       Get.to(
                                         () => PublicViewCandidateScreen(
-                                            slug: slug),
+                                          slug: slug,
+                                        ),
                                       );
                                     } else {
                                       Get.to(
@@ -281,11 +327,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
             ListTileForNav(
               title: "Elevator Pitch & Resume",
-              onTap: () {
-                // Check resume status before navigating
-                final controller = Get.put(ResumeCheckController());
-                controller.checkResumeAndNavigate();
-              },
+              onTap: () async =>await _handleElevatorPitch(),
             ),
             ListTileForNav(
               title: "Jobs",
@@ -486,7 +528,7 @@ class ListTileForNav extends StatelessWidget {
           : null,
       title: Text(
         title ?? '',
-        style: TextStyle(
+        style: const TextStyle(
           color: Color(0xff333333),
           fontSize: 16,
           fontWeight: FontWeight.w600,

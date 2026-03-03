@@ -260,9 +260,6 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                 // ),
                 const SizedBox(height: 20),
 
-                // ----- Buttons -----
-                const SizedBox(height: 20),
-
                 Divider(color: Color(0xFF999999)),
 
                 SizedBox(height: 20),

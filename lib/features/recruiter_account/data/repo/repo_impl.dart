@@ -28,6 +28,7 @@ import '../models/job_update_request_model.dart';
 import '../models/job_update_response_model.dart';
 import '../models/leave_company_request_model.dart';
 import '../models/leave_company_response_model.dart';
+import '../models/public_view_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
 import '../models/your_job_response_model.dart';
 
@@ -228,6 +229,14 @@ class RepoImplementation extends Repo {
       ApiConstants.recruiter.changePass,
       data: request.toJson(),
       fromJsonT: (json) => [],
+    );
+  }
+
+  NetworkResult<RecruiterPublicViewResponseModel> recruiterPublicView(String slug){
+    return _apiClient.get(
+      ApiConstants.recruiter.getPublicView(slug),
+      fromJsonT: (json) =>
+          RecruiterPublicViewResponseModel.fromJson(json as Map<String, dynamic>),
     );
   }
 }
