@@ -41,7 +41,19 @@ class AuthController extends BaseController {
   final AuthStorageService _authStorageService;
   bool _isSuccess = false;
 
-  AuthController(this._authRepository, this._authStorageService);
+  /// Expose storage service so other widgets can read user role/id without DI coupling.
+  AuthStorageService get authStorageService => _authStorageService;
+
+  final isLoggedIn = false.obs;
+
+  AuthController(this._authRepository, this._authStorageService) {
+    checkLoginStatus();
+  }
+
+  Future<void> checkLoginStatus() async {
+    final token = await _authStorageService.getAccessToken();
+    isLoggedIn.value = token != null;
+  }
 
   Timer? _otpTimer;
   final timerSeconds = 600.obs;
@@ -126,6 +138,7 @@ class AuthController extends BaseController {
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
           }
+          isLoggedIn.value = true;
           setLoading(false);
 
           // Reset nav controller to show home screen
@@ -188,6 +201,7 @@ class AuthController extends BaseController {
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
           }
+          isLoggedIn.value = true;
           setLoading(false);
 
           if (user.email.isNotEmpty) {
@@ -217,6 +231,7 @@ class AuthController extends BaseController {
           }
         } else {
           setError("You are not authorized to login as candidate");
+          isLoggedIn.value = true;
           setLoading(false);
         }
       },
@@ -735,6 +750,7 @@ class AuthController extends BaseController {
       final secureStore = SecureStoreServices();
       await secureStore.deleteAllData();
 
+      isLoggedIn.value = false;
       setLoading(false);
       setError('');
 
