@@ -115,13 +115,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       final user = _profileService.userInfoRx.value;
                       final displayName = (user != null && user.name.isNotEmpty)
                           ? user.name
-                          : 'Guest';
+                          : '';
 
                       return Text(
-                        "Hello $displayName",
+                        "Hello $displayName ,",
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textBlack,
+                          color: AppColors.textBlack, 
                           fontWeight: FontWeight.w400,
                         ),
                       );
