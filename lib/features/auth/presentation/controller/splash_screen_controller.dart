@@ -2,6 +2,7 @@ import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/bottomNavbar/screens/dashboard_screen.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/features/Home/presentation/screen/home_screen.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/company/presentation/screen/company_details_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
@@ -35,10 +36,10 @@ class SplashController extends GetxController {
         Get.offAll(() => CompanyDetailsPage());
       } else {
         // Unknown role, go to login
-        Get.offAll(() => LoginScreen());
+        Get.offAll(() => HomeScreen());
       }
     } else {
-      Get.offAll(() => LoginScreen(), transition: Transition.fade);
+      Get.offAll(() => HomeScreen(), transition: Transition.fade);
     }
   }
 }

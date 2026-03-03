@@ -101,7 +101,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
 
       // ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         child: Form(
           key: controller.formKey,
           child: Column(
@@ -1071,6 +1071,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 width: double.infinity,
                 height: 45,
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
