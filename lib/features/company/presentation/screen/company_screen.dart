@@ -96,10 +96,14 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-
-      // ),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(10),
         child: Form(

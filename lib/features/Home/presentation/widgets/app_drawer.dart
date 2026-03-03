@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
@@ -9,6 +11,8 @@ import 'package:giveandtake/features/elevator/presentation/controller/resume_che
 import 'package:giveandtake/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:giveandtake/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
 
 import '../../../company/data/model/seach_all_user_response_model.dart';
 import '../../../company/presentation/controller/company_details_controller.dart';
@@ -70,6 +74,8 @@ class _AppDrawerState extends State<AppDrawer> {
   /// Handles the "Elevator Pitch & Resume" button with role-based navigation:
   ///  - Guest (no token)  → LoginScreen
   ///  - Candidate         → existing ResumeCheckController flow (unchanged)
+  ///  - Recruiter         → calls fetchRecruiterInfo API; if not found → setup,
+  ///                        else → RecruiterPageScreen
   ///  - Company           → calls fetchCompanyInfo API; if companies list is
   ///                        non-empty → company dashboard, else → account setup
   Future<void> _handleElevatorPitch() async {
@@ -81,24 +87,70 @@ class _AppDrawerState extends State<AppDrawer> {
       return;
     }
 
-
     final userRole = await authController.authStorageService.getUserRole();
 
-    // 2. Candidate: keep existing behaviour (all existing conditions preserved)
+    // 2. Candidate: keep existing behaviour
     if (userRole == 'candidate') {
       final resumeController = Get.put(ResumeCheckController());
       resumeController.checkResumeAndNavigate();
       return;
     }
 
-    // 3. Company: fetch company info and navigate based on whether company exists
+    // 3. Recruiter: fetch recruiter profile and navigate accordingly
+    if (userRole == 'recruiter') {
+      final userId = await authController.authStorageService.getUserId();
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'User ID not found. Please log in again.');
+        return;
+      }
+
+      // Show loading overlay
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      try {
+        final endpoint = ApiConstants.recruiter.fetchRecruiterInfo(userId);
+        final result = await ApiClient().get(
+          endpoint,
+          fromJsonT: (json) => json as Map<String, dynamic>,
+        );
+
+        if (Get.isDialogOpen ?? false) Get.back();
+
+        result.fold(
+          (fail) {
+            DPrint.log('Recruiter fetch failed: ${fail.message}');
+            Get.to(() => CreateRecruiterAccount());
+          },
+          (res) {
+            final message =
+                (res.data['message'] as String? ?? '').toLowerCase();
+            DPrint.log('Recruiter fetch message: $message');
+            if (message.contains('recruiter account not found')) {
+              Get.to(() => CreateRecruiterAccount());
+            } else {
+              Get.to(() => const RecruiterPageScreen());
+            }
+          },
+        );
+      } catch (e) {
+        if (Get.isDialogOpen ?? false) Get.back();
+        DPrint.log('Recruiter fetch error: $e');
+        Get.to(() => CreateRecruiterAccount());
+      }
+      return;
+    }
+
+    // 4. Company: fetch company info and navigate based on whether company exists
     if (userRole == 'company') {
       final companyController = Get.find<CompanyAccountController>();
       await companyController.navigateFromElevatorPitch();
       return;
     }
 
-    // 4. Other roles: fallback
+    // 5. Other roles: fallback
     Get.snackbar(
       'Not Available',
       'This feature is not available for your account type.',

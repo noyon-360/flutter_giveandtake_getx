@@ -109,6 +109,13 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: AppScaffold(
         appBar: AppBar(
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            onPressed: () {
+              Get.back(); // since you're using GetX
+            },
+          ),
           title: const Text(
             'Create Recruiter Account',
             style: TextStyle(

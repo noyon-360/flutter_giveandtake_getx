@@ -759,11 +759,14 @@ class CompanyAccountController extends BaseController {
         .toList();
   }
 
-  /// Called from AppDrawer → Elevator Pitch & Resume for company role.
+  /// Called from AppDrawer → Elevator Pitch & Resume, or after login for company role.
   /// Fetches the company profile and decides which screen to open:
-  ///   - industry present → [CompanyDetailsPage] (company dashboard)
-  ///   - industry absent  → [CreateCompanyAccountPage] (setup)
-  Future<void> navigateFromElevatorPitch() async {
+  ///   - non-empty companies list → [CompanyDetailsPage] (company dashboard)
+  ///   - empty companies list     → [CreateCompanyAccountPage] (setup)
+  ///
+  /// [clearStack] – set to `true` when called after login so that the
+  /// LoginScreen is removed from the navigation history.
+  Future<void> navigateFromElevatorPitch({bool clearStack = false}) async {
     final userId = await _authStorageService.getUserId();
     if (userId == null || userId.isEmpty) {
       Get.snackbar('Error', 'User ID not found. Please log in again.');
@@ -784,7 +787,11 @@ class CompanyAccountController extends BaseController {
     result.fold(
       (fail) {
         // On error assume profile not set up yet
-        Get.to(() => const CreateCompanyAccountPage());
+        if (clearStack) {
+          Get.offAll(() => const CreateCompanyAccountPage());
+        } else {
+          Get.to(() => const CreateCompanyAccountPage());
+        }
       },
       (success) {
         final companies = success.data.companies;
@@ -792,10 +799,14 @@ class CompanyAccountController extends BaseController {
         // Company profile exists if the companies list is non-empty
         final hasCompany = companies.isNotEmpty;
 
-        if (hasCompany) {
-          Get.to(() => CompanyDetailsPage());
+        if (clearStack) {
+          Get.offAll(() => hasCompany ? CompanyDetailsPage() : const CreateCompanyAccountPage());
         } else {
-          Get.to(() => const CreateCompanyAccountPage());
+          if (hasCompany) {
+            Get.to(() => CompanyDetailsPage());
+          } else {
+            Get.to(() => const CreateCompanyAccountPage());
+          }
         }
       },
     );
