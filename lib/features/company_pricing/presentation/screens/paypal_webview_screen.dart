@@ -1,0 +1,352 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
+import '../../../plan_pricing/presentation/services/paypal_services.dart';
+
+class CompanyPaypalWebViewScreen extends StatefulWidget {
+  final String planTitle;
+  final double amount;
+  final String? orderId;
+  final String? approveUrl;
+  final Function(String)? onFinish;
+
+  const CompanyPaypalWebViewScreen({
+    Key? key,
+    required this.planTitle,
+    required this.amount,
+    this.orderId,
+    this.approveUrl,
+    this.onFinish,
+  }) : super(key: key);
+
+  @override
+  State<CompanyPaypalWebViewScreen> createState() =>
+      _CompanyPaypalWebViewScreenState();
+}
+
+class _CompanyPaypalWebViewScreenState
+    extends State<CompanyPaypalWebViewScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String? checkoutUrl;
+  String? executeUrl;
+  String? accessToken;
+  final PaypalServices services = PaypalServices();
+  late WebViewController? _webViewController;
+
+  bool isEnableShipping = false;
+  bool isEnableAddress = false;
+
+  String returnURL = 'return.example.com';
+  String cancelURL = 'cancel.example.com';
+
+  @override
+  void initState() {
+    super.initState();
+    _webViewController = null;
+
+    Future.delayed(Duration.zero, () async {
+      try {
+        // If approveUrl is provided directly (backend create-order flow)
+        if (widget.approveUrl != null && widget.approveUrl!.isNotEmpty) {
+          print(
+            '✅ [Company PayPal]: Using provided approve URL: ${widget.approveUrl}',
+          );
+
+          setState(() {
+            checkoutUrl = widget.approveUrl;
+          });
+
+          if (checkoutUrl != null) {
+            print(
+              '🔵 [Company PayPal]: Initializing WebView with URL: $checkoutUrl',
+            );
+            _webViewController = WebViewController()
+              ..setJavaScriptMode(JavaScriptMode.unrestricted)
+              ..setNavigationDelegate(
+                NavigationDelegate(
+                  onPageStarted: (String url) {
+                    print('🔵 [Company WebView]: Page started: $url');
+                  },
+                  onPageFinished: (String url) {
+                    print('✅ [Company WebView]: Page finished: $url');
+                  },
+                  onWebResourceError: (WebResourceError error) {
+                    print(
+                      '❌ [Company WebView] Error: ${error.description}',
+                    );
+                    Get.snackbar(
+                      'WebView Error',
+                      error.description,
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.orange,
+                      colorText: Colors.white,
+                    );
+                  },
+                  onNavigationRequest: (NavigationRequest request) {
+                    print('🔵 [Company Navigation]: ${request.url}');
+
+                    if (request.url.contains(returnURL)) {
+                      final uri = Uri.parse(request.url);
+                      final token = uri.queryParameters['token'];
+                      final payerID = uri.queryParameters['PayerID'];
+
+                      print('✅ [Company PayPal]: Payment approved!');
+                      print('   Token: $token');
+                      print('   PayerID: $payerID');
+
+                      if (widget.orderId != null) {
+                        Get.back();
+                        Get.snackbar(
+                          'Success',
+                          'Payment completed successfully!',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.green,
+                          colorText: Colors.white,
+                        );
+                        if (widget.onFinish != null) {
+                          widget.onFinish!(widget.orderId!);
+                        }
+                      } else {
+                        Get.back();
+                        Get.snackbar(
+                          'Success',
+                          'Payment approved! Processing...',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.green,
+                          colorText: Colors.white,
+                        );
+                      }
+                      return NavigationDecision.prevent;
+                    }
+
+                    if (request.url.contains(cancelURL)) {
+                      print('⚠️ [Company PayPal]: Payment cancelled by user');
+                      Get.back();
+                      Get.snackbar(
+                        'Cancelled',
+                        'Payment was cancelled',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                      return NavigationDecision.prevent;
+                    }
+
+                    return NavigationDecision.navigate;
+                  },
+                ),
+              )
+              ..loadRequest(Uri.parse(checkoutUrl!));
+
+            print('✅ [Company PayPal]: WebView initialized successfully');
+            setState(() {});
+          }
+          return;
+        }
+
+        // Legacy flow — create payment from scratch via PaypalServices
+        print('🔵 [Company PayPal]: Getting access token...');
+        accessToken = await services.getAccessToken();
+
+        if (accessToken == null) {
+          throw Exception(
+            'Failed to get PayPal access token. Please check your credentials.',
+          );
+        }
+
+        print('✅ [Company PayPal]: Access token received');
+        print('🔵 [Company PayPal]: Creating payment...');
+
+        final transactions = getOrderParams();
+        final res = await services.createPaypalPayment(
+          transactions,
+          accessToken!,
+        );
+
+        if (res == null) {
+          throw Exception('Failed to create PayPal payment.');
+        }
+
+        print('✅ [Company PayPal]: Payment created');
+        print('🔵 [Company PayPal]: Approval URL: ${res["approvalUrl"]}');
+
+        if (res["approvalUrl"] == null || res["approvalUrl"]!.isEmpty) {
+          throw Exception('No approval URL received from PayPal');
+        }
+
+        setState(() {
+          checkoutUrl = res["approvalUrl"];
+          executeUrl = res["executeUrl"];
+        });
+
+        if (checkoutUrl != null) {
+          _webViewController = WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..setNavigationDelegate(
+              NavigationDelegate(
+                onPageStarted: (String url) =>
+                    print('🔵 [Company WebView]: Page started: $url'),
+                onPageFinished: (String url) =>
+                    print('✅ [Company WebView]: Page finished: $url'),
+                onWebResourceError: (WebResourceError error) {
+                  print('❌ [Company WebView] Error: ${error.description}');
+                  Get.snackbar(
+                    'WebView Error',
+                    error.description,
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.orange,
+                    colorText: Colors.white,
+                  );
+                },
+                onNavigationRequest: (NavigationRequest request) {
+                  if (request.url.contains(returnURL)) {
+                    final uri = Uri.parse(request.url);
+                    final payerID = uri.queryParameters['PayerID'];
+                    if (payerID != null &&
+                        executeUrl != null &&
+                        accessToken != null) {
+                      print(
+                        '✅ [Company PayPal]: Payment approved! Executing...',
+                      );
+                      services
+                          .executePayment(executeUrl!, payerID, accessToken!)
+                          .then((id) {
+                        if (id != null) {
+                          Get.back();
+                          Get.snackbar(
+                            'Success',
+                            'Payment completed successfully!',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.green,
+                            colorText: Colors.white,
+                          );
+                          if (widget.onFinish != null) widget.onFinish!(id);
+                        } else {
+                          Get.back();
+                          Get.snackbar(
+                            'Error',
+                            'Payment execution failed',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                        }
+                      }).catchError((error) {
+                        Get.back();
+                        Get.snackbar(
+                          'Error',
+                          'Failed to execute payment: $error',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                      });
+                    } else {
+                      Navigator.of(context).pop();
+                    }
+                    return NavigationDecision.prevent;
+                  }
+                  if (request.url.contains(cancelURL)) {
+                    print('⚠️ [Company PayPal]: Payment cancelled');
+                    Get.back();
+                    Get.snackbar(
+                      'Cancelled',
+                      'Payment was cancelled',
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                    return NavigationDecision.prevent;
+                  }
+                  return NavigationDecision.navigate;
+                },
+              ),
+            )
+            ..loadRequest(Uri.parse(checkoutUrl!));
+
+          print('✅ [Company PayPal]: WebView initialized');
+          setState(() {});
+        }
+      } catch (e, stackTrace) {
+        print('❌ [Company PayPal] Error: $e');
+        print('❌ Stack trace: $stackTrace');
+        if (mounted) {
+          Get.back();
+          Get.snackbar(
+            'PayPal Error',
+            e.toString(),
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 10),
+          );
+        }
+      }
+    });
+  }
+
+  Map<String, dynamic> getOrderParams() {
+    final String totalAmount = widget.amount.toStringAsFixed(2);
+    final List items = [
+      {
+        "name": widget.planTitle,
+        "quantity": 1,
+        "price": widget.amount.toStringAsFixed(2),
+        "currency": "USD",
+      },
+    ];
+
+    return {
+      "intent": "sale",
+      "payer": {"payment_method": "paypal"},
+      "transactions": [
+        {
+          "amount": {
+            "total": totalAmount,
+            "currency": "USD",
+            "details": {
+              "subtotal": totalAmount,
+              "shipping": '0',
+              "shipping_discount": "0",
+            },
+          },
+          "description": "Payment for ${widget.planTitle} subscription",
+          "payment_options": {
+            "allowed_payment_method": "INSTANT_FUNDING_SOURCE",
+          },
+          "item_list": {"items": items},
+        },
+      ],
+      "note_to_payer": "Contact us for any questions on your order.",
+      "redirect_urls": {"return_url": returnURL, "cancel_url": cancelURL},
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (checkoutUrl != null && _webViewController != null) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          leading: GestureDetector(
+            child: const Icon(Icons.arrow_back_ios),
+            onTap: () => Navigator.pop(context),
+          ),
+          title: const Text('PayPal Payment'),
+        ),
+        body: WebViewWidget(controller: _webViewController!),
+      );
+    } else {
+      return Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0.0,
+          title: const Text('PayPal Payment'),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+  }
+}

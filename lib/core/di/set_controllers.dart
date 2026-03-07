@@ -3,7 +3,7 @@ import 'package:giveandtake/features/Home/presentation/controllers/home_controll
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
-import 'package:giveandtake/features/company/presentation/controller/employee_screen_controller.dart';
+import 'package:giveandtake/features/company_pricing/presentation/controllers/company_pricing_controller.dart';
 import 'package:giveandtake/features/create_job/presentation/controller/category_controller.dart';
 import 'package:giveandtake/features/job_listing/presentation/controller/job_listing_controller.dart';
 import 'package:giveandtake/features/plan_pricing/presentation/controllers/paypal_controller.dart';
@@ -32,6 +32,12 @@ void setupController() {
   // Plan Pricing Controller
   Get.lazyPut<PlanPricingController>(
     () => PlanPricingController(),
+    fenix: true,
+  );
+
+  // Company Pricing Controller
+  Get.lazyPut<CompanyPricingController>(
+    () => CompanyPricingController(),
     fenix: true,
   );
 

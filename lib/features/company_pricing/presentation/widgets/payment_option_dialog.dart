@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../../core/common/constants/app_images.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../screens/payment_screen.dart';
@@ -8,12 +8,14 @@ import '../screens/payment_screen.dart';
 class PaymentMethodDialog extends StatefulWidget {
   final String planTitle;
   final double price;
+  final String? planId;
   final VoidCallback? onPayNow;
 
   const PaymentMethodDialog({
     super.key,
     required this.planTitle,
     required this.price,
+    this.planId,
     this.onPayNow,
   });
 
@@ -34,14 +36,15 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Title + Close
-            Center(
-              child: const Text(
+            // Title
+            const Center(
+              child: Text(
                 "Select Payment Method",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 16),
+
             // PayPal option
             GestureDetector(
               onTap: () => setState(() => _selectedMethod = 'PayPal'),
@@ -52,7 +55,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                 ),
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: _selectedMethod == "PayPal"
+                    color: _selectedMethod == 'PayPal'
                         ? Colors.blue
                         : Colors.grey.shade300,
                   ),
@@ -63,7 +66,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                     Image.asset(AppImages.paypalImage, height: 30),
                     const Spacer(),
                     Radio<String>(
-                      value: "PayPal",
+                      value: 'PayPal',
                       groupValue: _selectedMethod,
                       onChanged: (v) => setState(() => _selectedMethod = v!),
                       activeColor: Colors.blue,
@@ -87,13 +90,30 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
-                onPressed: () {
-                  Get.to(
-                    PaymentScreen(
-                      planTitle: widget.planTitle,
-                      amount: widget.price,
-                    ),
-                  );
+                onPressed: () async {
+                  if (_selectedMethod == 'PayPal') {
+                    // Close dialog first
+                    if (mounted) Navigator.of(context).pop();
+
+                    // Navigate to PaymentScreen (yellow PayPal button + card flow)
+                    // Same as plan_pricing iOS/fallback path — no native SDK
+                    Get.to(
+                      () => PaymentScreen(
+                        planTitle: widget.planTitle,
+                        amount: widget.price,
+                        planId: widget.planId,
+                      ),
+                    );
+                  } else {
+                    // Fallback for other payment methods
+                    Get.to(
+                      () => PaymentScreen(
+                        planTitle: widget.planTitle,
+                        amount: widget.price,
+                        planId: widget.planId,
+                      ),
+                    );
+                  }
                 },
                 child: const Text(
                   "Pay Now",
@@ -117,6 +137,7 @@ void showPaymentMethodDialog(
   BuildContext context, {
   required String planTitle,
   required double price,
+  String? planId,
   VoidCallback? onPayNow,
 }) {
   showDialog(
@@ -125,6 +146,7 @@ void showPaymentMethodDialog(
     builder: (context) => PaymentMethodDialog(
       planTitle: planTitle,
       price: price,
+      planId: planId,
       onPayNow: onPayNow,
     ),
   );
