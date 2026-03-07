@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/models/payment_history_response_model.dart';
 import '../controller/payment_history_controller.dart';
 import '../services/receipt_pdf_service.dart';
@@ -13,17 +12,12 @@ class PaymentHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PaymentHistoryController ctrl = Get.put(PaymentHistoryController());
-    final AuthStorageService authStorageService = AuthStorageService();
     final ScrollController scrollController = ScrollController();
 
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent - 200) {
-        authStorageService.getUserId().then((userId) {
-          if (userId != null) {
-            ctrl.loadMore(userId);
-          }
-        });
+        ctrl.loadMoreData();
       }
     });
 
@@ -47,120 +41,86 @@ class PaymentHistoryScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.black),
-            onPressed: () {
-              authStorageService.getUserId().then((userId) {
-                if (userId != null) {
-                  ctrl.refreshPayments(userId);
-                }
-              });
-            },
+            onPressed: () => ctrl.refreshData(),
             tooltip: 'Refresh',
           ),
         ],
       ),
       body: SafeArea(
-        child: FutureBuilder<String?>(
-          future: authStorageService.getUserId(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(40.0),
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }
+        child: Obx(() {
+          if (ctrl.isLoading.value) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(40.0),
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
 
-            if (snapshot.hasError ||
-                !snapshot.hasData ||
-                snapshot.data == null) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: Text('Unable to load user data'),
-                ),
-              );
-            }
-
-            final userId = snapshot.data!;
-            ctrl.fetchUserPayments(userId, isRefresh: true);
-
-            return Obx(() {
-              if (ctrl.isLoading.value) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(40.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-
-              if (ctrl.error.value != null) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Error: ${ctrl.error.value}'),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () => ctrl.refreshPayments(userId),
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              final transactions = ctrl.transactions;
-
-              if (transactions.isEmpty) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(40.0),
-                    child: Text(
-                      'No payment transactions found',
-                      style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
-                    ),
-                  ),
-                );
-              }
-
-              return SingleChildScrollView(
-                controller: scrollController,
-                padding: const EdgeInsets.all(16),
+          if (ctrl.error.value != null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ...transactions.map(
-                      (transaction) => _buildTransactionCard(transaction),
+                    Text('Error: ${ctrl.error.value}'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => ctrl.refreshData(),
+                      child: const Text('Retry'),
                     ),
-                    if (ctrl.isLoadingMore.value)
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    if (!ctrl.hasMore && transactions.isNotEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(
-                          child: Text(
-                            'No more transactions',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF595959),
-                            ),
-                          ),
-                        ),
-                      ),
                   ],
                 ),
-              );
-            });
-          },
-        ),
+              ),
+            );
+          }
+
+          final transactions = ctrl.transactions;
+
+          if (transactions.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(40.0),
+                child: Text(
+                  'No payment transactions found',
+                  style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
+                ),
+              ),
+            );
+          }
+
+          return SingleChildScrollView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...transactions.map(
+                  (transaction) => _buildTransactionCard(transaction),
+                ),
+                if (ctrl.isLoadingMore.value)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                if (!ctrl.hasMore && transactions.isNotEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        'No more transactions',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF595959),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

@@ -100,7 +100,7 @@ class TermsandConditions extends StatelessWidget {
         );
       }),
 
-      bottomNavigationBar: CustomBottomNavBar(),
+      // bottomNavigationBar: CustomBottomNavBar(),
     );
   }
 }
