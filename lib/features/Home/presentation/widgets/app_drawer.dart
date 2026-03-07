@@ -14,11 +14,8 @@ import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_j
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
 
-import '../../../company/data/model/seach_all_user_response_model.dart';
 import '../../../company/presentation/controller/company_details_controller.dart';
-import '../../../company/presentation/controller/search_controller.dart';
 import '../../../company/presentation/screen/public_view_seach_screen.dart';
-import '../../../public_view/screens/public_view_candidate_screens.dart';
 import '../../../company/presentation/screen/public_view_show_result.dart';
 import '../../../company/presentation/widget/custom_search_company.dart';
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
@@ -30,9 +27,9 @@ import '../../../job_listing/presentation/screens/all_jobs_screen.dart';
 import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
 import '../../../profile_dasboard/presentation/screens/job_history.dart';
 import '../../../profile_dasboard/presentation/screens/payment_history.dart';
+import '../../../public_view/screens/public_view_candidate_screens.dart';
 import '../screen/candidate_dashboard_screen.dart';
 import '../screens/my_plan_screen.dart';
-import 'custom_searchbox.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -54,21 +51,32 @@ class _AppDrawerState extends State<AppDrawer> {
     super.initState();
     controller = Get.find<CompanyDetailsController>();
 
-    // Load users if not already loaded
-    if (controller.searchInfo.isEmpty &&
-        !controller.isLoading.value &&
-        controller.searchQuery.value != null) {
-      controller.fetchSearchUser("");
-    }
-
-    // Optional: clear previous search when drawer opens
-    _searchController.clear();
-    controller.clearSearch();
-
     // Sync text field with reactive searchQuery
     _searchController.addListener(() {
       controller.searchQuery.value = _searchController.text;
     });
+
+    // Clear search and load users after frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchController.clear();
+      
+      // Clear previous search safely
+      if (controller.searchQuery.value.isNotEmpty) {
+        controller.clearSearch();
+      }
+
+      // Load users if not already loaded
+      if (controller.searchInfo.isEmpty &&
+          !controller.isLoading.value) {
+        controller.fetchSearchUser("");
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   /// Handles the "Elevator Pitch & Resume" button with role-based navigation:
@@ -82,7 +90,8 @@ class _AppDrawerState extends State<AppDrawer> {
     final authController = Get.find<AuthController>();
 
     // 1. Guest: no access token → go to LoginScreen
-    if (!authController.isLoggedIn.value) {
+    final accessToken = await authController.authStorageService.getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
       Get.to(() => const LoginScreen());
       return;
     }
