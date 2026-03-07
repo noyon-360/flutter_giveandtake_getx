@@ -66,12 +66,6 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
 
   final TextEditingController _comapanyTEController = TextEditingController();
 
-  final companyNameController = TextEditingController();
-  final countryController = TextEditingController();
-  final cityController = TextEditingController();
-  final postalCodeController = TextEditingController();
-  final emailController = TextEditingController();
-
   final FocusNode _linkedINFocusNode = FocusNode();
 
   final FocusNode _twitterFocusNode = FocusNode();
@@ -87,11 +81,34 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
   final FocusNode _fiverrFocusNode = FocusNode();
 
   final FocusNode _companyFocusNode = FocusNode();
-  late int zipCode = int.tryParse(postalCodeController.text) ?? 0;
 
   final DescriptionController descriptionController = Get.put(
     DescriptionController(),
   );
+
+  @override
+  void dispose() {
+    _descriptionTController.dispose();
+    _linkedINTEController.dispose();
+    _twitterTEController.dispose();
+    _upworkTEController.dispose();
+    _facebookTEController.dispose();
+    _instaTEController.dispose();
+    _tiktokTEController.dispose();
+    _fiverrTEController.dispose();
+    _comapanyTEController.dispose();
+
+    _linkedINFocusNode.dispose();
+    _twitterFocusNode.dispose();
+    _upworkFocusNode.dispose();
+    _facebookFocusNode.dispose();
+    _instaFocusNode.dispose();
+    _tiktokFocusNode.dispose();
+    _fiverrFocusNode.dispose();
+    _companyFocusNode.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

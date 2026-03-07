@@ -10,6 +10,8 @@ import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/auth/presentation/controller/term_of_services_and_privacy_policy_controller.dart';
 import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/features/create_job/presentation/controller/create_job_controller.dart';
+import 'package:giveandtake/features/create_job/presentation/widgets/searchable_widgets.dart';
 import '../../../../core/common/constants/app_images.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -23,12 +25,14 @@ class _SignupScreenState extends State<SignupScreen> {
   final controller = Get.put(TermOfServicesAndPrivacyPolicyController());
 
   final _authController = Get.find<AuthController>();
+  final CreateJobPostingController jobController = Get.put(
+    CreateJobPostingController(Get.find()),
+  );
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final FocusNode _firstNameFocus = FocusNode();
   final FocusNode _surnameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
-  final FocusNode _countryFocus = FocusNode();
   final FocusNode _phoneNumberFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
   final FocusNode _confirmPasswordFocus = FocusNode();
@@ -37,7 +41,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _firstNameTEController = TextEditingController();
   final TextEditingController _surnameTEController = TextEditingController();
   final TextEditingController _emailTEController = TextEditingController();
-  final TextEditingController _countryTEController = TextEditingController();
   final TextEditingController _phoneNumberTEController =
       TextEditingController();
   final TextEditingController _dateOfBirthTEController =
@@ -124,7 +127,6 @@ class _SignupScreenState extends State<SignupScreen> {
     _firstNameFocus.dispose();
     _surnameFocus.dispose();
     _emailFocus.dispose();
-    _countryFocus.dispose();
     _phoneNumberFocus.dispose();
     _passwordFocus.dispose();
     _dateOfBirthFocus.dispose();
@@ -143,13 +145,18 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    if (jobController.selectedCountry.value.isEmpty) {
+      _authController.setError('Please select your country');
+      return;
+    }
+
     _authController.register(
       firstName: _firstNameTEController.text.trim(),
       surname: _surnameTEController.text.trim(),
       email: _emailTEController.text.trim(),
       password: _passwordTEController.text,
       phoneNumber: _phoneNumberTEController.text.trim(),
-      address: _countryTEController.text.trim(),
+      address: jobController.selectedCountry.value,
       dateOfBirth: _dateOfBirthTEController.text,
       role: _selectedRole.value, // Pass the selected role
     );
@@ -318,39 +325,21 @@ class _SignupScreenState extends State<SignupScreen> {
                         Gap.h16,
 
                         //* <-----------------Country----------------->*//
-                        Text(
-                          'Country',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                        Obx(
+                          () => SearchableDropdownField(
+                            label: "Country",
+                            hintText: "Select country",
+                            items: jobController.filteredCountries,
+                            value: jobController.selectedCountry.value,
+                            onChanged: (value) {
+                              jobController.selectedCountry.value = value;
+                              jobController.fetchCities(
+                                value,
+                              ); // load cities for this country
+                            },
+                            isRequired: true,
+                            enabled: !jobController.isLoadingCountries.value,
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        TextFormField(
-                          controller: _countryTEController,
-                          focusNode: _countryFocus,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textBlack,
-                          ),
-                          decoration: context.primaryInputDecoration.copyWith(
-                            hintText: "Country",
-                            hintStyle: TextStyle(
-                              color: AppColors.textFieldLightGrey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter your country';
-                            }
-                            return null;
-                          },
-                          autofillHints: const [AutofillHints.email],
                         ),
 
                         Gap.h16,
