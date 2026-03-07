@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/utils/debug_print.dart';
-import '../../../company_pricing/presentation/screens/plan_pricing_screen.dart';
+import '../../../company_pricing/presentation/screens/plan_pricing_screen(company).dart';
 import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
