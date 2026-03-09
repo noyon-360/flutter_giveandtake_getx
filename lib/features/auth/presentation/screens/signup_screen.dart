@@ -50,7 +50,9 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordTEController = TextEditingController();
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
-  final ValueNotifier<String> _selectedRole = ValueNotifier<String>('candidate');
+  final ValueNotifier<String> _selectedRole = ValueNotifier<String>(
+    'candidate',
+  );
 
   late TapGestureRecognizer _termsRecognizer;
   late TapGestureRecognizer _privacyRecognizer;
@@ -345,115 +347,113 @@ class _SignupScreenState extends State<SignupScreen> {
                         Gap.h16,
 
                         //*<-------------Phone Number--------------->*//
-                        Text(
-                          'Phone Number',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextFormField(
-                          controller: _phoneNumberTEController,
-                          focusNode: _phoneNumberFocus,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textBlack,
-                          ),
-                          decoration: context.primaryInputDecoration.copyWith(
-                            hintText: "Enter Phone Number",
-                            hintStyle: TextStyle(
-                              color: AppColors.textFieldLightGrey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.phone_outlined,
-                              color: AppColors.textFieldLightGrey,
-                            ),
-                          ),
-                          validator: Validators.phone,
-                          autofillHints: const [AutofillHints.email],
-                        ),
-
-                        Gap.h16,
+                        // Text(
+                        //   'Phone Number',
+                        //   style: TextStyle(
+                        //     color: AppColors.textBlack,
+                        //     fontSize: 14,
+                        //     fontWeight: FontWeight.w700,
+                        //   ),
+                        // ),
+                        // SizedBox(height: 8),
+                        // TextFormField(
+                        //   controller: _phoneNumberTEController,
+                        //   focusNode: _phoneNumberFocus,
+                        //   keyboardType: TextInputType.emailAddress,
+                        //   textInputAction: TextInputAction.next,
+                        //   style: TextStyle(
+                        //     fontSize: 16,
+                        //     color: AppColors.textBlack,
+                        //   ),
+                        //   decoration: context.primaryInputDecoration.copyWith(
+                        //     hintText: "Enter Phone Number",
+                        //     hintStyle: TextStyle(
+                        //       color: AppColors.textFieldLightGrey,
+                        //       fontSize: 14,
+                        //       fontWeight: FontWeight.w400,
+                        //     ),
+                        //     prefixIcon: Icon(
+                        //       Icons.phone_outlined,
+                        //       color: AppColors.textFieldLightGrey,
+                        //     ),
+                        //   ),
+                        //   validator: Validators.phone,
+                        //   autofillHints: const [AutofillHints.email],
+                        // ),
+                   
 
                         //*<-------------Date of Birth--------------->*//
-                        Text(
-                          'Date of Birth',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextFormField(
-                          controller: _dateOfBirthTEController,
-                          focusNode: _dateOfBirthFocus,
-                          readOnly: true,
-                          textInputAction: TextInputAction.next,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textBlack,
-                          ),
-                          decoration: context.primaryInputDecoration.copyWith(
-                            hintText: "MM/DD/YYYY",
-                            hintStyle: TextStyle(
-                              color: AppColors.textFieldLightGrey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.calendar_today_outlined,
-                              color: AppColors.textFieldLightGrey,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please select your date of birth';
-                            }
-                            return null;
-                          },
-                          onTap: () async {
-                            // Close keyboard if open
-                            FocusScope.of(context).unfocus();
+                        // Text(
+                        //   'Date of Birth',
+                        //   style: TextStyle(
+                        //     color: AppColors.textBlack,
+                        //     fontSize: 14,
+                        //     fontWeight: FontWeight.w700,
+                        //   ),
+                        // ),
+                        // SizedBox(height: 8),
+                        // TextFormField(
+                        //   controller: _dateOfBirthTEController,
+                        //   focusNode: _dateOfBirthFocus,
+                        //   readOnly: true,
+                        //   textInputAction: TextInputAction.next,
+                        //   style: TextStyle(
+                        //     fontSize: 16,
+                        //     color: AppColors.textBlack,
+                        //   ),
+                        //   decoration: context.primaryInputDecoration.copyWith(
+                        //     hintText: "MM/DD/YYYY",
+                        //     hintStyle: TextStyle(
+                        //       color: AppColors.textFieldLightGrey,
+                        //       fontSize: 14,
+                        //       fontWeight: FontWeight.w400,
+                        //     ),
+                        //     prefixIcon: Icon(
+                        //       Icons.calendar_today_outlined,
+                        //       color: AppColors.textFieldLightGrey,
+                        //     ),
+                        //   ),
+                        //   validator: (value) {
+                        //     if (value == null || value.trim().isEmpty) {
+                        //       return 'Please select your date of birth';
+                        //     }
+                        //     return null;
+                        //   },
+                        //   onTap: () async {
+                        //     // Close keyboard if open
+                        //     FocusScope.of(context).unfocus();
 
-                            // Show date picker
-                            final DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime(2000, 1, 1),
-                              firstDate: DateTime(1950),
-                              lastDate: DateTime.now(),
-                              builder: (context, child) {
-                                return Theme(
-                                  data: Theme.of(context).copyWith(
-                                    colorScheme: ColorScheme.light(
-                                      primary: AppColors.primaryBlue,
-                                      onPrimary: AppColors.primaryWhite,
-                                      onSurface: AppColors.textBlack,
-                                    ),
-                                  ),
-                                  child: child!,
-                                );
-                              },
-                            );
+                        //     // Show date picker
+                        //     final DateTime? pickedDate = await showDatePicker(
+                        //       context: context,
+                        //       initialDate: DateTime(2000, 1, 1),
+                        //       firstDate: DateTime(1950),
+                        //       lastDate: DateTime.now(),
+                        //       builder: (context, child) {
+                        //         return Theme(
+                        //           data: Theme.of(context).copyWith(
+                        //             colorScheme: ColorScheme.light(
+                        //               primary: AppColors.primaryBlue,
+                        //               onPrimary: AppColors.primaryWhite,
+                        //               onSurface: AppColors.textBlack,
+                        //             ),
+                        //           ),
+                        //           child: child!,
+                        //         );
+                        //       },
+                        //     );
 
-                            if (pickedDate != null) {
-                              // Format the date as MM/DD/YYYY
-                              final formattedDate =
-                                  '${pickedDate.month.toString().padLeft(2, '0')}/'
-                                  '${pickedDate.day.toString().padLeft(2, '0')}/'
-                                  '${pickedDate.year}';
-                              _dateOfBirthTEController.text = formattedDate;
-                            }
-                          },
-                        ),
-
-                        Gap.h16,
+                        //     if (pickedDate != null) {
+                        //       // Format the date as MM/DD/YYYY
+                        //       final formattedDate =
+                        //           '${pickedDate.month.toString().padLeft(2, '0')}/'
+                        //           '${pickedDate.day.toString().padLeft(2, '0')}/'
+                        //           '${pickedDate.year}';
+                        //       _dateOfBirthTEController.text = formattedDate;
+                        //     }
+                        //   },
+                        // ),
+                     
 
                         //* <-----------------Password----------------->*//
                         Text(

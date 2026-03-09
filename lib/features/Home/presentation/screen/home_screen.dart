@@ -111,21 +111,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Reactive greeting using profile service
-                    Obx(() {
-                      final user = _profileService.userInfoRx.value;
-                      final displayName = (user != null && user.name.isNotEmpty)
-                          ? user.name
-                          : '';
+                    // Obx(() {
+                    //   final user = _profileService.userInfoRx.value;
+                    //   final displayName = (user != null && user.name.isNotEmpty)
+                    //       ? user.name
+                    //       : '';
 
-                      return Text(
-                        "Hello $displayName ,",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textBlack, 
-                          fontWeight: FontWeight.w400,
-                        ),
-                      );
-                    }),
+                    //   return
+                    //   Text(
+                    //     "Hello $displayName ,",
+                    //     style: TextStyle(
+                    //       fontSize: 14,
+                    //       color: AppColors.textBlack,
+                    //       fontWeight: FontWeight.w400,
+                    //     ),
+                    //   );
+                    // }),
                     Text(
                       "Find your Dream Job",
                       style: TextStyle(
