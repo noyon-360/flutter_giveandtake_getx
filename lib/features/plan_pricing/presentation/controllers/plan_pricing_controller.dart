@@ -63,7 +63,7 @@ class PlanPricingController extends BaseController {
       print('🐞 DEBUG: Final User Role: $userRole');
 
       if (userRole.isEmpty) {
-        setError('User role not found. Please login again.');
+        setError('User role not found. Please log in again.');
         setLoading(false);
         return;
       }

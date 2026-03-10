@@ -23,7 +23,7 @@ class OtherUrlsSection extends StatelessWidget {
                     child: TextField(
                       decoration: const InputDecoration(
                         labelText: 'Other URL',
-                        hintText: 'Enter Here',
+                        hintText: 'Enter URL here',
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (value) {

@@ -256,7 +256,7 @@ class JobApplicationController extends GetxController {
       if (userId == null || userId.isEmpty) {
         Get.snackbar(
           'Error',
-          'User ID not found. Please login again.',
+          'User ID not found. Please log in again.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,

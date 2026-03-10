@@ -663,7 +663,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text("Already Have An Account?"),
+                            Text("Already have an account?"),
                             GestureDetector(
                               onTap: () {
                                 Get.to(
@@ -672,7 +672,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 );
                               },
                               child: Text(
-                                "  Sign In Here",
+                                "  Sign in",
                                 style: TextStyle(
                                   color: AppColors.primaryLightBlue,
                                   fontWeight: FontWeight.bold,

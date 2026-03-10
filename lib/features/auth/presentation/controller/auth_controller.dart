@@ -267,7 +267,7 @@ class AuthController extends BaseController {
           final companyController = Get.find<CompanyAccountController>();
           await companyController.navigateFromElevatorPitch(clearStack: true);
         } else {
-          setError("You are not authorized to login as candidate");
+          setError("You are not authorized to log in as a candidate");
           isLoggedIn.value = true;
           setLoading(false);
         }
@@ -570,7 +570,7 @@ class AuthController extends BaseController {
           // Show success message
           Get.snackbar(
             'Success',
-            'Password reset successfully! Please login with your new password.',
+            'Password reset successfully. Please log in with your new password.',
             backgroundColor: const Color(0xFF10B287),
             colorText: Colors.white,
             snackPosition: SnackPosition.BOTTOM,

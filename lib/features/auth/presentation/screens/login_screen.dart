@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen>
                               style: TextStyle(color: AppColors.textGrey),
                               decoration: context.primaryInputDecoration
                                   .copyWith(
-                                    hintText: "Enter your Password",
+                                    hintText: "Enter your password",
                                     prefixIcon: Icon(
                                       Icons.lock_open_outlined,
                                       color: AppColors.textFieldLightGrey,
@@ -283,7 +283,7 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                               children: [
                                 TextSpan(
-                                  text: 'click here',
+                                  text: 'Sign up',
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400,
@@ -304,7 +304,7 @@ class _LoginScreenState extends State<LoginScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'or continue with,',
+                              'Or continue with',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 12,

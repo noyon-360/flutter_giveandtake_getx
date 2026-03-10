@@ -259,7 +259,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                                   ),
                                 )
                               : const Text(
-                                  'company banner',
+                                  'Company banner',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 13,
@@ -354,7 +354,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 controller: controller.companyNameController,
 
                 isRequired: true,
-                hintText: "Enter Your Country Name",
+                hintText: "Enter your company name",
               ),
               const SizedBox(height: 8),
               Row(
@@ -406,7 +406,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                     child: CustomTextField(
                       label: "Postal Code",
                       controller: controller.postalCodeController, // ✅ bind
-                      hintText: "Enter Code",
+                      hintText: "Enter postal code",
                       isRequired: true,
                     ),
                   ),
@@ -415,7 +415,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                     child: CustomTextField(
                       label: "Email",
                       controller: controller.emailController, // ✅ bind
-                      hintText: "Enter Your Email",
+                      hintText: "Enter your email",
                       isRequired: true,
                     ),
                   ),
@@ -636,7 +636,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "View your Company recruiters",
+                  "View your company recruiters",
                   style: TextStyle(
                     color: AppColors.textBlack,
                     fontSize: 16,
@@ -1208,7 +1208,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1233,7 +1233,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1258,7 +1258,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1283,7 +1283,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1308,7 +1308,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1333,7 +1333,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1357,7 +1357,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1381,7 +1381,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,

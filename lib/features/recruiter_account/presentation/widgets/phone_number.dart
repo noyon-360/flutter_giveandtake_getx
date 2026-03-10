@@ -33,7 +33,7 @@ class PhoneNumberAndEmail extends StatelessWidget {
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 decoration: context.primaryInputDecoration.copyWith(
-                  hintText: "Enter Your Email",
+                  hintText: "Enter your email",
                   hintStyle: TextStyle(
                     color: Color(0xFF787878),
                     fontSize: 14,

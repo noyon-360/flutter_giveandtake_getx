@@ -65,7 +65,7 @@ class ContactUsScreen extends StatelessWidget {
                   Expanded(
                     child: _buildTextField(
                       label: "First Name*",
-                      hintText: "Enter Your Surname",
+                      hintText: "Enter your first name",
                       controller: firstNameController,
                     ),
                   ),
@@ -73,7 +73,7 @@ class ContactUsScreen extends StatelessWidget {
                   Expanded(
                     child: _buildTextField(
                       label: "Last Name*",
-                      hintText: "Enter Your Last Name",
+                      hintText: "Enter your last name",
                       controller: lastNameController,
                     ),
                   ),
@@ -84,7 +84,7 @@ class ContactUsScreen extends StatelessWidget {
               // Address
               _buildTextField(
                 label: "Address",
-                hintText: "Enter Your Address",
+                hintText: "Enter your address",
                 controller: addressController,
               ),
               const SizedBox(height: 10),
@@ -100,7 +100,7 @@ class ContactUsScreen extends StatelessWidget {
               // Subject
               _buildTextField(
                 label: "Subject",
-                hintText: "Enter Here",
+                hintText: "Enter subject",
                 controller: subjectController,
               ),
               const SizedBox(height: 10),

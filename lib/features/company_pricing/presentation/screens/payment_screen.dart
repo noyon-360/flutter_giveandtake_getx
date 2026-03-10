@@ -366,7 +366,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       setState(() => _isCapturing = false);
       Get.snackbar(
         'Error',
-        'Unable to retrieve company information. Please login again.',
+        'Unable to retrieve company information. Please log in again.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
