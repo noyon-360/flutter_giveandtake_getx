@@ -66,7 +66,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               Gap.h8,
 
               Text(
-                'Enter your receive OTP',
+                'Enter the OTP sent to your email',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,

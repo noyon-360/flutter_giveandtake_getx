@@ -289,7 +289,7 @@ class EditCandidateProfileController extends GetxController {
       final token = await secureStore.retrieveData(KeyConstants.accessToken);
       
       if (token == null) {
-        Get.snackbar('Error', 'Authentication error. Please login again.');
+        Get.snackbar('Error', 'Authentication error. Please log in again.');
         return;
       }
 

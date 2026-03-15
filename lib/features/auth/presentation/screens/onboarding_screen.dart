@@ -96,7 +96,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                "Create a powerful profile, showcase your video pitch, and connect with top recruiters all in one app. Create a powerful profile, showcase your video pitch, and connect with top recruiters all in one app.",
+                "Create a powerful profile, showcase your video pitch, and connect with top recruiters all in one app.",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontSize: 14.0,

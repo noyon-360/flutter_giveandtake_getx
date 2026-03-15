@@ -351,7 +351,7 @@ class ElevatorResumeScreen extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'Elevator pitch upload finish! We\'re processing your video—feel free to submit your resume while it finalizes.',
+                                    'Elevator pitch uploaded successfully. We\'re processing your video. Feel free to submit your resume while it finalizes.',
                                     style: TextStyle(
                                       color: Colors.green.shade900,
                                       fontSize: 13,
@@ -1031,10 +1031,10 @@ class ElevatorResumeScreen extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(width: 12),
-                              Text('Uploading Resume...'),
+                              Text('Uploading resume...'),
                             ],
                           )
-                        : const Text('Upload Elevator Pitch'),
+                        : const Text('Upload Resume'),
                   ),
                 );
               }),

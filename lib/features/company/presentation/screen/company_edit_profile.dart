@@ -301,7 +301,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   errorBuilder: (_, __, ___) =>
                                       const Text('Failed to load banner'),
                                 )
-                              : const Text('company banner'),
+                              : const Text('Company banner'),
                         ),
                       );
                     }),
@@ -363,7 +363,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                         height: 130,
                                         fit: BoxFit.cover,
                                         errorBuilder: (_, __, ___) =>
-                                            const Text('Logo failed'),
+                                            const Text('Failed to load logo'),
                                       ),
                                     )
                                   : const Text('Company logo'),
@@ -391,7 +391,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                 controller: controller.companyNameController,
 
                 isRequired: true,
-                hintText: "Enter Your Country Name",
+                hintText: "Enter your company name",
               ),
               const SizedBox(height: 8),
               Row(
@@ -443,7 +443,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                     child: CustomTextField(
                       label: "Postal Code",
                       controller: controller.postalCodeController, // ✅ bind
-                      hintText: "Enter Code",
+                      hintText: "Enter postal code",
                       isRequired: true,
                     ),
                   ),
@@ -452,7 +452,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                     child: CustomTextField(
                       label: "Email",
                       controller: controller.emailController, // ✅ bind
-                      hintText: "Enter Your Email",
+                      hintText: "Enter your email",
                       // isRequired: true,
                     ),
                   ),
@@ -516,7 +516,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: context.primaryInputDecoration
                                       .copyWith(
-                                        hintText: "Enter Here",
+                                        hintText: "Enter URL here",
                                         hintStyle: TextStyle(
                                           color: Color(0xFF787878),
                                           fontSize: 14,
@@ -542,7 +542,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: context.primaryInputDecoration
                                       .copyWith(
-                                        hintText: "Enter Here",
+                                        hintText: "Enter URL here",
                                         hintStyle: TextStyle(
                                           color: Color(0xFF787878),
                                           fontSize: 14,
@@ -568,7 +568,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: context.primaryInputDecoration
                                       .copyWith(
-                                        hintText: "Enter Here",
+                                        hintText: "Enter URL here",
                                         hintStyle: TextStyle(
                                           color: Color(0xFF787878),
                                           fontSize: 14,
@@ -594,7 +594,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: context.primaryInputDecoration
                                       .copyWith(
-                                        hintText: "Enter Here",
+                                        hintText: "Enter URL here",
                                         hintStyle: TextStyle(
                                           color: Color(0xFF787878),
                                           fontSize: 14,
@@ -620,7 +620,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: context.primaryInputDecoration
                                       .copyWith(
-                                        hintText: "Enter Here",
+                                        hintText: "Enter URL here",
                                         hintStyle: TextStyle(
                                           color: Color(0xFF787878),
                                           fontSize: 14,
@@ -646,7 +646,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: context.primaryInputDecoration
                                       .copyWith(
-                                        hintText: "Enter Here",
+                                        hintText: "Enter URL here",
                                         hintStyle: TextStyle(
                                           color: Color(0xFF787878),
                                           fontSize: 14,
@@ -671,7 +671,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: context.primaryInputDecoration
                                       .copyWith(
-                                        hintText: "Enter Here",
+                                        hintText: "Enter URL here",
                                         hintStyle: TextStyle(
                                           color: Color(0xFF787878),
                                           fontSize: 14,
@@ -696,7 +696,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: context.primaryInputDecoration
                                       .copyWith(
-                                        hintText: "Enter Here",
+                                        hintText: "Enter URL here",
                                         hintStyle: TextStyle(
                                           color: Color(0xFF787878),
                                           fontSize: 14,
@@ -909,7 +909,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "View your Company recruiters",
+                  "View your company recruiters",
                   style: TextStyle(
                     color: AppColors.textBlack,
                     fontSize: 16,

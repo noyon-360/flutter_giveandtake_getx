@@ -268,7 +268,7 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                                       ),
                                     )
                                   : const Text(
-                                      'company banner',
+                                      'Company banner',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 13,
@@ -685,7 +685,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -710,7 +710,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -735,7 +735,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -760,7 +760,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -785,7 +785,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -810,7 +810,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -835,7 +835,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -847,7 +847,7 @@ class SocialLink extends StatelessWidget {
 
                       SizedBox(height: 12),
                       Text(
-                        'Instagram URL',
+                        'Company Website URL',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -860,7 +860,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
