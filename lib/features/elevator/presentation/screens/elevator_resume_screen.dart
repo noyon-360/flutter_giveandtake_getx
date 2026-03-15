@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
+import '../../../Home/presentation/screen/home_screen.dart';
 import '../controller/elevator_resume_controller.dart';
 import '../widgets/awards_form_section.dart';
 import '../widgets/education_form_section.dart';
@@ -27,14 +28,16 @@ class ElevatorResumeScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+         
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () {
-            Get.back(); // since you're using GetX
+            Get.to(()=>const HomeScreen()); // since you're using GetX
           },
         ),
+         backgroundColor: Color(0xFF2B7FD0),
         title: const Text(
           'Create Your Profile',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
       ),
@@ -1023,7 +1026,7 @@ class ElevatorResumeScreen extends StatelessWidget {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                                    Colors.grey,
                                   ),
                                 ),
                               ),
@@ -1036,34 +1039,34 @@ class ElevatorResumeScreen extends StatelessWidget {
                 );
               }),
               const SizedBox(height: 8),
-              Obx(() {
-                final hasVideo = controller.elevatorVideoPath.value.isNotEmpty;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          hasVideo ? Icons.check_circle : Icons.info,
-                          color: hasVideo ? Colors.green : Colors.orange,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            hasVideo
-                                ? 'Elevator pitch video uploaded. You can now submit your resume.'
-                                : 'Elevator pitch video upload is optional but recommended.',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: hasVideo ? Colors.green : Colors.orange,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              }),
+              // Obx(() {
+              //   final hasVideo = controller.elevatorVideoPath.value.isNotEmpty;
+              //   return Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Row(
+              //         children: [
+              //           Icon(
+              //             hasVideo ? Icons.check_circle : Icons.info,
+              //             color: hasVideo ? Colors.green : Colors.orange,
+              //             size: 16,
+              //           ),
+              //           const SizedBox(width: 8),
+              //           Expanded(
+              //             child: Text(
+              //               hasVideo
+              //                   ? 'Elevator pitch video uploaded. You can now submit your resume.'
+              //                   : 'Elevator pitch video upload is optional but recommended.',
+              //               style: theme.textTheme.bodySmall?.copyWith(
+              //                 color: hasVideo ? Colors.green : Colors.orange,
+              //               ),
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //     ],
+              //   );
+              // }),
               const SizedBox(height: 32),
             ],
           ),
@@ -1092,7 +1095,7 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Colors.grey),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -207,38 +207,39 @@ class CompanyAccountController extends BaseController {
   }
 
   @override
-  void onClose() {
-    // Dispose all text controllers
-    aboutUsController.dispose();
-    companyNameController.dispose();
-    countryController.dispose();
-    cityController.dispose();
-    postalCodeController.dispose();
-    emailController.dispose();
-    contactNumberController.dispose();
-    websiteController.dispose();
-    linkedInController.dispose();
-    twitterController.dispose();
-    upworkController.dispose();
-    otherWebsiteController.dispose();
-    awardTitleController.dispose();
-    issuerController.dispose();
-    issueDateController.dispose();
-    awardDescriptionController.dispose();
-    addMoreLinksController.dispose();
-    otherWebsiteController2.dispose();
+  // void onClose() {
+  //   // Dispose all text controllers
+  //   aboutUsController.dispose();
+  //   companyNameController.dispose();
+  //   countryController.dispose();
+  //   cityController.dispose();
+  //   postalCodeController.dispose();
+  //   emailController.dispose();
+  //   contactNumberController.dispose();
+  //   websiteController.dispose();
+  //   linkedInController.dispose();
+  //   twitterController.dispose();
+  //   upworkController.dispose();
+  //   otherWebsiteController.dispose();
+  //   awardTitleController.dispose();
+  //   issuerController.dispose();
+  //   issueDateController.dispose();
+  //   awardDescriptionController.dispose();
+    
+  //   addMoreLinksController.dispose();
+  //   otherWebsiteController2.dispose();
 
-    // Dispose service controllers
-    for (var c in serviceControllers) {
-      c.dispose();
-    }
+  //   // Dispose service controllers
+  //   for (var c in serviceControllers) {
+  //     c.dispose();
+  //   }
 
-    for (var c in employeeControllers) {
-      c.dispose();
-    }
+  //   for (var c in employeeControllers) {
+  //     c.dispose();
+  //   }
 
-    super.onClose();
-  }
+  //   super.onClose();
+  // }
 
   Future<void> fetchUsers() async {
     setLoading(true);
@@ -800,7 +801,11 @@ class CompanyAccountController extends BaseController {
         final hasCompany = companies.isNotEmpty;
 
         if (clearStack) {
-          Get.offAll(() => hasCompany ? CompanyDetailsPage() : const CreateCompanyAccountPage());
+          Get.offAll(
+            () => hasCompany
+                ? CompanyDetailsPage()
+                : const CreateCompanyAccountPage(),
+          );
         } else {
           if (hasCompany) {
             Get.to(() => CompanyDetailsPage());

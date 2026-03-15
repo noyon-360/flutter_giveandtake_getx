@@ -19,9 +19,6 @@ import '../../../recruiter_account/presentation/widgets/video_player_widget.dart
 import '../controller/company_account_controller.dart';
 import '../widget/custom_text_field.dart';
 import '../widget/month_added_widget.dart';
-import '../widget/upload_card_widget.dart';
-import '../widget/upload_video_widget.dart';
-import 'company_details_screen.dart';
 
 class CreateCompanyAccountPage extends StatefulWidget {
   const CreateCompanyAccountPage({super.key});
@@ -87,39 +84,43 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
   );
 
   @override
-  void dispose() {
-    _descriptionTController.dispose();
-    _linkedINTEController.dispose();
-    _twitterTEController.dispose();
-    _upworkTEController.dispose();
-    _facebookTEController.dispose();
-    _instaTEController.dispose();
-    _tiktokTEController.dispose();
-    _fiverrTEController.dispose();
-    _comapanyTEController.dispose();
-
-    _linkedINFocusNode.dispose();
-    _twitterFocusNode.dispose();
-    _upworkFocusNode.dispose();
-    _facebookFocusNode.dispose();
-    _instaFocusNode.dispose();
-    _tiktokFocusNode.dispose();
-    _fiverrFocusNode.dispose();
-    _companyFocusNode.dispose();
-
-    super.dispose();
-  }
-
+  // void dispose() {
+  //   _descriptionTController.dispose();
+  //   _linkedINTEController.dispose();
+  //   _twitterTEController.dispose();
+  //   _upworkTEController.dispose();
+  //   _facebookTEController.dispose();
+  //   _instaTEController.dispose();
+  //   _tiktokTEController.dispose();
+  //   _fiverrTEController.dispose();
+  //   _comapanyTEController.dispose();
+  //   _linkedINFocusNode.dispose();
+  //   _twitterFocusNode.dispose();
+  //   _upworkFocusNode.dispose();
+  //   _facebookFocusNode.dispose();
+  //   _instaFocusNode.dispose();
+  //   _tiktokFocusNode.dispose();
+  //   _fiverrFocusNode.dispose();
+  //   _companyFocusNode.dispose();
+  //   super.dispose();
+  // }
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          onPressed: () => Get.back(),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () {
+            // Get.to(()=>const HomeScreen()); // since you're using GetX
+          },
         ),
+        backgroundColor: Color(0xFF2B7FD0),
+        title: const Text(
+          'Create Company/Business Account',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(10),
@@ -129,20 +130,20 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
 
             children: [
-              const SizedBox(height: 51),
-              Text(
-                "Create Company Account",
-                style: TextStyle(
-                  color: AppColors.textBlack,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Text(
-                "Sign-up and pitch your way into a new role",
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-              const SizedBox(height: 28),
+              // const SizedBox(height: 51),
+              // Text(
+              //   "Create Company Account",
+              //   style: TextStyle(
+              //     color: AppColors.textBlack,
+              //     fontSize: 18,
+              //     fontWeight: FontWeight.w500,
+              //   ),
+              // ),
+              // const Text(
+              //   "Sign-up and pitch your way into a new role",
+              //   style: TextStyle(color: Colors.grey, fontSize: 14),
+              // ),
+              // const SizedBox(height: 28),
 
               // const SizedBox(height: 8),
               Column(
@@ -152,7 +153,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                     "Upload company elevator pitch",
                     style: TextStyle(
                       color: AppColors.textBlack,
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:giveandtake/core/network/api_client.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 
+import '../../../Home/presentation/screen/home_screen.dart';
 import '../../data/repo/job_listing_repository_impl.dart';
 import '../../domain/repo/job_listing_repository.dart';
 import '../../domain/usecases/get_jobs_usecase.dart';
@@ -42,10 +43,17 @@ class AllJobsScreen extends GetView<AllJobsController> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () {
+            Get.to(() => const HomeScreen()); // since you're using GetX
+          },
+        ),
+        backgroundColor: Color(0xFF2B7FD0),
         title: const Text(
           'Back to Drawer',
           style: TextStyle(
-            color: AppColors.textBlack,
+            color: AppColors.primaryWhite,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

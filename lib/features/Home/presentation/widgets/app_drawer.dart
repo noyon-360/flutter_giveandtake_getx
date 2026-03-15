@@ -387,7 +387,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             ListTileForNav(
-              title: "Elevator Pitch & Rzesume",
+              title: "Elevator Pitch & Resume",
               onTap: () async =>await _handleElevatorPitch(),
             ),
             ListTileForNav(
