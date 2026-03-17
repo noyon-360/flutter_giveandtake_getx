@@ -576,7 +576,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               textInputAction: TextInputAction.next,
                               decoration: context.primaryInputDecoration
                                   .copyWith(
-                                    hintText: "Enter Your First Name",
+                                    hintText: "Enter your first name",
                                     hintStyle: TextStyle(
                                       color: Color(0xFF787878),
                                       fontSize: 14,
@@ -609,7 +609,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               textInputAction: TextInputAction.next,
                               decoration: context.primaryInputDecoration
                                   .copyWith(
-                                    hintText: "Enter Your Surname",
+                                    hintText: "Enter your surname",
                                     hintStyle: TextStyle(
                                       color: Color(0xFF787878),
                                       fontSize: 14,
@@ -742,7 +742,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       textInputAction: TextInputAction.next,
                                       decoration: context.primaryInputDecoration
                                           .copyWith(
-                                            hintText: "Enter Here",
+                                            hintText: "Enter URL here",
                                             hintStyle: TextStyle(
                                               color: Color(0xFF787878),
                                               fontSize: 14,
@@ -768,7 +768,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       textInputAction: TextInputAction.next,
                                       decoration: context.primaryInputDecoration
                                           .copyWith(
-                                            hintText: "Enter Here",
+                                            hintText: "Enter URL here",
                                             hintStyle: TextStyle(
                                               color: Color(0xFF787878),
                                               fontSize: 14,
@@ -794,7 +794,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       textInputAction: TextInputAction.next,
                                       decoration: context.primaryInputDecoration
                                           .copyWith(
-                                            hintText: "Enter Here",
+                                            hintText: "Enter URL here",
                                             hintStyle: TextStyle(
                                               color: Color(0xFF787878),
                                               fontSize: 14,
@@ -820,7 +820,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       textInputAction: TextInputAction.next,
                                       decoration: context.primaryInputDecoration
                                           .copyWith(
-                                            hintText: "Enter Here",
+                                            hintText: "Enter URL here",
                                             hintStyle: TextStyle(
                                               color: Color(0xFF787878),
                                               fontSize: 14,
@@ -846,7 +846,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       textInputAction: TextInputAction.next,
                                       decoration: context.primaryInputDecoration
                                           .copyWith(
-                                            hintText: "Enter Here",
+                                            hintText: "Enter URL here",
                                             hintStyle: TextStyle(
                                               color: Color(0xFF787878),
                                               fontSize: 14,
@@ -872,7 +872,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       textInputAction: TextInputAction.next,
                                       decoration: context.primaryInputDecoration
                                           .copyWith(
-                                            hintText: "Enter Here",
+                                            hintText: "Enter URL here",
                                             hintStyle: TextStyle(
                                               color: Color(0xFF787878),
                                               fontSize: 14,
@@ -898,7 +898,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       textInputAction: TextInputAction.next,
                                       decoration: context.primaryInputDecoration
                                           .copyWith(
-                                            hintText: "Enter Here",
+                                            hintText: "Enter URL here",
                                             hintStyle: TextStyle(
                                               color: Color(0xFF787878),
                                               fontSize: 14,
@@ -924,7 +924,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       textInputAction: TextInputAction.next,
                                       decoration: context.primaryInputDecoration
                                           .copyWith(
-                                            hintText: "Enter Here",
+                                            hintText: "Enter URL here",
                                             hintStyle: TextStyle(
                                               color: Color(0xFF787878),
                                               fontSize: 14,

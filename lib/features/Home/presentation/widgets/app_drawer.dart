@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
@@ -9,13 +11,12 @@ import 'package:giveandtake/features/elevator/presentation/controller/resume_che
 import 'package:giveandtake/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:giveandtake/features/home_static_screens/presentation/screen/contact_us_screen.dart';
 import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_public_view.dart';
 
-import '../../../company/data/model/seach_all_user_response_model.dart';
 import '../../../company/presentation/controller/company_details_controller.dart';
-import '../../../company/presentation/controller/search_controller.dart';
 import '../../../company/presentation/screen/public_view_seach_screen.dart';
-import '../../../public_view/screens/public_view_candidate_screens.dart';
 import '../../../company/presentation/screen/public_view_show_result.dart';
 import '../../../company/presentation/widget/custom_search_company.dart';
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
@@ -27,9 +28,9 @@ import '../../../job_listing/presentation/screens/all_jobs_screen.dart';
 import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
 import '../../../profile_dasboard/presentation/screens/job_history.dart';
 import '../../../profile_dasboard/presentation/screens/payment_history.dart';
+import '../../../public_view/screens/public_view_candidate_screens.dart';
 import '../screen/candidate_dashboard_screen.dart';
 import '../screens/my_plan_screen.dart';
-import 'custom_searchbox.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -51,55 +52,115 @@ class _AppDrawerState extends State<AppDrawer> {
     super.initState();
     controller = Get.find<CompanyDetailsController>();
 
-    // Load users if not already loaded
-    if (controller.searchInfo.isEmpty &&
-        !controller.isLoading.value &&
-        controller.searchQuery.value != null) {
-      controller.fetchSearchUser("");
-    }
-
-    // Optional: clear previous search when drawer opens
-    _searchController.clear();
-    controller.clearSearch();
-
     // Sync text field with reactive searchQuery
     _searchController.addListener(() {
       controller.searchQuery.value = _searchController.text;
     });
+
+    // Clear search and load users after frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchController.clear();
+      
+      // Clear previous search safely
+      if (controller.searchQuery.value.isNotEmpty) {
+        controller.clearSearch();
+      }
+
+      // Load users if not already loaded
+      if (controller.searchInfo.isEmpty &&
+          !controller.isLoading.value) {
+        controller.fetchSearchUser("");
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   /// Handles the "Elevator Pitch & Resume" button with role-based navigation:
   ///  - Guest (no token)  → LoginScreen
   ///  - Candidate         → existing ResumeCheckController flow (unchanged)
+  ///  - Recruiter         → calls fetchRecruiterInfo API; if not found → setup,
+  ///                        else → RecruiterPageScreen
   ///  - Company           → calls fetchCompanyInfo API; if companies list is
   ///                        non-empty → company dashboard, else → account setup
   Future<void> _handleElevatorPitch() async {
     final authController = Get.find<AuthController>();
 
     // 1. Guest: no access token → go to LoginScreen
-    if (!authController.isLoggedIn.value) {
+    final accessToken = await authController.authStorageService.getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
       Get.to(() => const LoginScreen());
       return;
     }
 
-
     final userRole = await authController.authStorageService.getUserRole();
 
-    // 2. Candidate: keep existing behaviour (all existing conditions preserved)
+    // 2. Candidate: keep existing behaviour
     if (userRole == 'candidate') {
       final resumeController = Get.put(ResumeCheckController());
       resumeController.checkResumeAndNavigate();
       return;
     }
 
-    // 3. Company: fetch company info and navigate based on whether company exists
+    // 3. Recruiter: fetch recruiter profile and navigate accordingly
+    if (userRole == 'recruiter') {
+      final userId = await authController.authStorageService.getUserId();
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'User ID not found. Please log in again.');
+        return;
+      }
+
+      // Show loading overlay
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      try {
+        final endpoint = ApiConstants.recruiter.fetchRecruiterInfo(userId);
+        final result = await ApiClient().get(
+          endpoint,
+          fromJsonT: (json) => json as Map<String, dynamic>,
+        );
+
+        if (Get.isDialogOpen ?? false) Get.back();
+
+        result.fold(
+          (fail) {
+            DPrint.log('Recruiter fetch failed: ${fail.message}');
+            Get.to(() => CreateRecruiterAccount());
+          },
+          (res) {
+            final message =
+                (res.data['message'] as String? ?? '').toLowerCase();
+            DPrint.log('Recruiter fetch message: $message');
+            if (message.contains('recruiter account not found')) {
+              Get.to(() => CreateRecruiterAccount());
+            } else {
+              Get.to(() => const RecruiterPageScreen());
+            }
+          },
+        );
+      } catch (e) {
+        if (Get.isDialogOpen ?? false) Get.back();
+        DPrint.log('Recruiter fetch error: $e');
+        Get.to(() => CreateRecruiterAccount());
+      }
+      return;
+    }
+
+    // 4. Company: fetch company info and navigate based on whether company exists
     if (userRole == 'company') {
       final companyController = Get.find<CompanyAccountController>();
       await companyController.navigateFromElevatorPitch();
       return;
     }
 
-    // 4. Other roles: fallback
+    // 5. Other roles: fallback
     Get.snackbar(
       'Not Available',
       'This feature is not available for your account type.',
@@ -336,7 +397,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             ListTileForNav(
-              title: "Elevator Pitch & Resume",
+              title: "Elevator Pitch & Rzesume",
               onTap: () async =>await _handleElevatorPitch(),
             ),
             ListTileForNav(

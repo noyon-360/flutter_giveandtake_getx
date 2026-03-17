@@ -148,7 +148,7 @@ class CompanyChangePasswordScreen extends StatelessWidget {
                 }
                 if (controller.isSuccess.value) {
                   return const Text(
-                    "Password Changed Successfully",
+                    "Password changed successfully",
                     style: TextStyle(color: Colors.green, fontSize: 14),
                   );
                 }

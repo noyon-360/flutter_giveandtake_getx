@@ -358,44 +358,7 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                 },
               ),
 
-              SizedBox(height: 10),
 
-              const Text(
-                'Department *',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _departmentTEController,
-                focusNode: _departmentFocusNode,
-                onChanged: (value) => controller.department.value = value,
-                textInputAction: TextInputAction.next,
-                decoration: context.primaryInputDecoration.copyWith(
-                  hintText: "Enter department",
-                  hintStyle: const TextStyle(
-                    color: Color(0xFF787878),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  // Set horizontal content padding to 0 (or minimal) for the text area
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 0,
-                    vertical: 14,
-                  ),
-                  // Add invisible prefix space for the input text/cursor indent
-                  prefix: const SizedBox(width: 8),
-                  errorStyle: const TextStyle(
-                    height: 1.5,
-                    color: Color(0xFFC12222),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Department is required';
-                  }
-                  return null;
-                },
-              ),
 
               SizedBox(height: 10),
               FormField(
@@ -535,9 +498,9 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               ),
 
               const SizedBox(height: 4),
-              const Text(
+               Text(
                 "Maximum 50",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
               ),
 
               SizedBox(height: 10),

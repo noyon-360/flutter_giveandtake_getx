@@ -1,10 +1,13 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/base/base_controller.dart';
 import 'package:giveandtake/core/bottomNavbar/controllers/bottom_nav_controller.dart';
 import 'package:giveandtake/core/bottomNavbar/screens/dashboard_screen.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/core/services/get_user_profile_service.dart';
 import 'package:giveandtake/features/auth/data/models/login_request_model.dart';
 import 'package:giveandtake/features/auth/data/models/otp_request_model.dart';
@@ -21,14 +24,10 @@ import 'package:giveandtake/features/auth/presentation/screens/otp_verification_
 import 'package:giveandtake/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
 import 'package:giveandtake/features/auth/presentation/screens/security_questions_screen.dart';
 import 'package:giveandtake/features/auth/presentation/screens/set_new_password_screen.dart';
-import 'package:giveandtake/features/company/presentation/screen/company_screen.dart';
-import 'package:giveandtake/features/create_job/presentation/screen/create_job_screen.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
+import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
-import 'package:giveandtake/features/company/presentation/screen/company_details_screen.dart';
-import 'package:giveandtake/core/network/constants/api_constants.dart';
-import 'package:giveandtake/core/network/api_client.dart';
-import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
@@ -39,7 +38,6 @@ import 'remember_me_controller.dart';
 class AuthController extends BaseController {
   final AuthRepository _authRepository;
   final AuthStorageService _authStorageService;
-  bool _isSuccess = false;
 
   /// Expose storage service so other widgets can read user role/id without DI coupling.
   AuthStorageService get authStorageService => _authStorageService;
@@ -204,9 +202,47 @@ class AuthController extends BaseController {
           isLoggedIn.value = true;
           setLoading(false);
 
-          if (user.email.isNotEmpty) {
-            Get.offAll(() => const RecruiterPageScreen());
-          } else {
+          // Show loading overlay while fetching recruiter profile
+          Get.dialog(
+            const Center(child: CircularProgressIndicator()),
+            barrierDismissible: false,
+          );
+
+          try {
+            final userId = success.data.user.id;
+            final recruiterEndpoint =
+                ApiConstants.recruiter.fetchRecruiterInfo(userId);
+
+            final recruiterResult = await ApiClient().get(
+              recruiterEndpoint,
+              fromJsonT: (json) => json as Map<String, dynamic>,
+            );
+
+            // Close loading overlay
+            if (Get.isDialogOpen ?? false) Get.back();
+
+            recruiterResult.fold(
+              (fail) {
+                // API error → assume account not set up yet
+                DPrint.log('Recruiter fetch failed: ${fail.message}');
+                Get.offAll(() => CreateRecruiterAccount());
+              },
+              (res) {
+                final message =
+                    (res.data['message'] as String? ?? '').toLowerCase();
+                DPrint.log('Recruiter fetch message: $message');
+
+                if (message.contains('recruiter account not found')) {
+                  Get.offAll(() => CreateRecruiterAccount());
+                } else {
+                  Get.offAll(() => const RecruiterPageScreen());
+                }
+              },
+            );
+          } catch (e) {
+            // Close loading overlay on exception
+            if (Get.isDialogOpen ?? false) Get.back();
+            DPrint.log('Recruiter fetch error: $e');
             Get.offAll(() => CreateRecruiterAccount());
           }
         } else if (user.role == 'company') {
@@ -222,15 +258,16 @@ class AuthController extends BaseController {
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
           }
+          isLoggedIn.value = true;
           setLoading(false);
 
-          if (user.email.isNotEmpty) {
-            Get.offAll(() => CompanyDetailsPage());
-          } else {
-            Get.offAll(() => CreateCompanyAccountPage());
-          }
+          // Fetch company info and navigate based on whether company exists:
+          //  - non-empty companies list → CompanyDetailsPage
+          //  - empty companies list    → CreateCompanyAccountPage
+          final companyController = Get.find<CompanyAccountController>();
+          await companyController.navigateFromElevatorPitch(clearStack: true);
         } else {
-          setError("You are not authorized to login as candidate");
+          setError("You are not authorized to log in as a candidate");
           isLoggedIn.value = true;
           setLoading(false);
         }
@@ -533,7 +570,7 @@ class AuthController extends BaseController {
           // Show success message
           Get.snackbar(
             'Success',
-            'Password reset successfully! Please login with your new password.',
+            'Password reset successfully. Please log in with your new password.',
             backgroundColor: const Color(0xFF10B287),
             colorText: Colors.white,
             snackPosition: SnackPosition.BOTTOM,
@@ -573,7 +610,7 @@ class AuthController extends BaseController {
       (fail) {
         DPrint.log("Refresh token failed: ${fail.message}");
         setLoading(false);
-        return _isSuccess = false;
+        return false;
       },
       (success) async {
         DPrint.log("Refresh token success: ${success.message}");
@@ -585,7 +622,7 @@ class AuthController extends BaseController {
           () => HomeScreen(),
           transition: Transition.rightToLeft,
         ); //! <<< If the user is already logged in, go to home screen >>>
-        return _isSuccess = true;
+        return true;
       },
     );
     return navi;

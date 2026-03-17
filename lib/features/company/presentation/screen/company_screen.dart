@@ -66,12 +66,6 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
 
   final TextEditingController _comapanyTEController = TextEditingController();
 
-  final companyNameController = TextEditingController();
-  final countryController = TextEditingController();
-  final cityController = TextEditingController();
-  final postalCodeController = TextEditingController();
-  final emailController = TextEditingController();
-
   final FocusNode _linkedINFocusNode = FocusNode();
 
   final FocusNode _twitterFocusNode = FocusNode();
@@ -87,21 +81,48 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
   final FocusNode _fiverrFocusNode = FocusNode();
 
   final FocusNode _companyFocusNode = FocusNode();
-  late int zipCode = int.tryParse(postalCodeController.text) ?? 0;
 
   final DescriptionController descriptionController = Get.put(
     DescriptionController(),
   );
 
   @override
+  void dispose() {
+    _descriptionTController.dispose();
+    _linkedINTEController.dispose();
+    _twitterTEController.dispose();
+    _upworkTEController.dispose();
+    _facebookTEController.dispose();
+    _instaTEController.dispose();
+    _tiktokTEController.dispose();
+    _fiverrTEController.dispose();
+    _comapanyTEController.dispose();
+
+    _linkedINFocusNode.dispose();
+    _twitterFocusNode.dispose();
+    _upworkFocusNode.dispose();
+    _facebookFocusNode.dispose();
+    _instaFocusNode.dispose();
+    _tiktokFocusNode.dispose();
+    _fiverrFocusNode.dispose();
+    _companyFocusNode.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-
-      // ),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         child: Form(
           key: controller.formKey,
           child: Column(
@@ -238,7 +259,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                                   ),
                                 )
                               : const Text(
-                                  'company banner',
+                                  'Company banner',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 13,
@@ -333,7 +354,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 controller: controller.companyNameController,
 
                 isRequired: true,
-                hintText: "Enter Your Country Name",
+                hintText: "Enter your company name",
               ),
               const SizedBox(height: 8),
               Row(
@@ -385,7 +406,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                     child: CustomTextField(
                       label: "Postal Code",
                       controller: controller.postalCodeController, // ✅ bind
-                      hintText: "Enter Code",
+                      hintText: "Enter postal code",
                       isRequired: true,
                     ),
                   ),
@@ -394,7 +415,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                     child: CustomTextField(
                       label: "Email",
                       controller: controller.emailController, // ✅ bind
-                      hintText: "Enter Your Email",
+                      hintText: "Enter your email",
                       isRequired: true,
                     ),
                   ),
@@ -615,7 +636,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "View your Company recruiters",
+                  "View your company recruiters",
                   style: TextStyle(
                     color: AppColors.textBlack,
                     fontSize: 16,
@@ -1071,6 +1092,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 width: double.infinity,
                 height: 45,
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -1186,7 +1208,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1211,7 +1233,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1236,7 +1258,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1261,7 +1283,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1286,7 +1308,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1311,7 +1333,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1335,7 +1357,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1359,7 +1381,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,

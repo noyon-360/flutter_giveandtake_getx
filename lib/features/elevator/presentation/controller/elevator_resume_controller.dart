@@ -567,7 +567,7 @@ class ElevatorResumeController extends GetxController {
         
         Get.snackbar(
           'Success',
-          'Elevator pitch uploaded successfully! We\'re processing your video—feel free to submit your resume while it finalizes.',
+          'Elevator pitch uploaded successfully. We\'re processing your video. Feel free to submit your resume while it finalizes.',
           backgroundColor: Colors.green.shade100,
           colorText: Colors.green.shade900,
           duration: const Duration(seconds: 5),
@@ -847,7 +847,7 @@ class ElevatorResumeController extends GetxController {
         print('ERROR: User not logged in');
         Get.snackbar(
           'Error',
-          'User not logged in. Please login again.',
+          'User not logged in. Please log in again.',
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -942,7 +942,7 @@ class ElevatorResumeController extends GetxController {
         print('ERROR: No auth token found');
         Get.snackbar(
           'Error',
-          'Authentication token not found. Please login again.',
+          'Authentication token not found. Please log in again.',
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );

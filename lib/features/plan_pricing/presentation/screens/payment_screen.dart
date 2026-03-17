@@ -564,7 +564,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       });
       Get.snackbar(
         'Error',
-        'Unable to retrieve user information. Please login again.',
+        'Unable to retrieve user information. Please log in again.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
