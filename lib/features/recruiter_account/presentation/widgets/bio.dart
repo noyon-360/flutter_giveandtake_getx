@@ -21,7 +21,7 @@ class Bio extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'About Us*',
+            'About me',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,

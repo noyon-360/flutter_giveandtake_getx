@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_public_view.dart';
 
 import '../controller/company_details_controller.dart';
 import '../widget/user_card_widget.dart';
@@ -177,7 +178,13 @@ class PublicViewShowResultScreen extends StatelessWidget {
                             Get.to(
                               () => PublicViewCandidateScreen(slug: user.slug),
                             );
-                          } else {
+                          }
+                          else if(user.role.toLowerCase() == 'recruiter'){
+                            Get.to(
+                                  () => RecruiterPublicViewScreen(slug: user.slug),
+                            );
+                          }
+                          else {
                             Get.to(
                               () => PublicViewSeachScreen(slug: user.slug),
                             );

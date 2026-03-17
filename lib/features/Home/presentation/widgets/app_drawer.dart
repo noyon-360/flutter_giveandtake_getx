@@ -13,6 +13,7 @@ import 'package:giveandtake/features/home_static_screens/presentation/screen/con
 import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_public_view.dart';
 
 import '../../../company/presentation/controller/company_details_controller.dart';
 import '../../../company/presentation/screen/public_view_seach_screen.dart';
@@ -267,7 +268,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                     children: [
                                       Flexible(
                                         child: Text(
-                                          user.name ?? 'Unknown',
+                                          user.name,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
@@ -339,7 +340,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                       ],
                                     ],
                                   ),
-                                  subtitle: Text(user.address ?? ''),
+                                  subtitle: Text(user.address),
                                   // trailing: const Icon(Icons.person_outline),
                                   onTap: () {
                                     final slug = user.slug;
@@ -359,7 +360,16 @@ class _AppDrawerState extends State<AppDrawer> {
                                           slug: slug,
                                         ),
                                       );
-                                    } else {
+                                    }
+                                    else if(user.role.toLowerCase() ==
+                                        'recruiter'){
+                                      Get.to(
+                                            () => RecruiterPublicViewScreen(
+                                          slug: slug,
+                                        ),
+                                      );
+                                    }
+                                    else {
                                       Get.to(
                                         () => PublicViewSeachScreen(slug: slug),
                                       );
