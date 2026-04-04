@@ -152,7 +152,7 @@ class RepoImplementation extends Repo {
   @override
   NetworkResult<void> deleteVideo(String userId) {
     return _apiClient.delete(
-      ApiConstants.elevatorPitchVideo.uploadVideo(userId),
+      ApiConstants.elevatorPitchVideo.deleteVideo(userId),
       fromJsonT: (json) => [],
     );
   }

@@ -190,12 +190,23 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(
-                      _parseHtmlString(user.bio),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF898989),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(
+                          width: 1, color: Colors.grey
+                        )
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          _parseHtmlString(user.bio),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF898989),
+                          ),
+                        ),
                       ),
                     ),
                   ],

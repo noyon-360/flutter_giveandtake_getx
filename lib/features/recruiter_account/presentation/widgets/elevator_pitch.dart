@@ -1,7 +1,10 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutx_core/flutx_core.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
+
+import '../controller/recruiter_controller.dart';
 
 class ElevatorPitchSection extends StatefulWidget {
   final String? videoUrl;
@@ -14,6 +17,7 @@ class ElevatorPitchSection extends StatefulWidget {
 }
 
 class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
+  final recruiterController = Get.find<RecruiterController>();
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
 
@@ -117,17 +121,29 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Elevator Pitch",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Elevator Pitch",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+
+              IconButton(
+                onPressed: () {
+                  recruiterController.deleteElevatorVideo();
+                },
+                icon: Icon(Icons.delete, color: Colors.white),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
 
-          // 👇 This prevents overflow
+          //This prevents overflow
           Expanded(
             child: widget.videoUrl != null && widget.videoUrl!.isNotEmpty
                 ? _chewieController != null &&

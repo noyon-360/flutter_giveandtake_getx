@@ -382,71 +382,70 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  //const SizedBox(height: 16),
 
-                  // Elevator Pitch
-                  Text(
-                    'Elevator Pitch',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'Upload or view a short video introducing yourself.',
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-                  SizedBox(height: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Color(0xFF999999), width: .5),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          Get.to(VideoUploadScreen());
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: Color(0xFF191919),
-                          ),
-                          height: 160,
-                          width: double.infinity,
-                          child: Column(
-                            children: [
-                              SizedBox(height: 20),
-                              SizedBox(
-                                height: 18,
-                                width: 18,
-                                child: Image.asset('assets/icons/gallery.png'),
-                              ),
-                              SizedBox(height: 7),
-                              Text(
-                                'Drop your files here',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 9.5),
-                              Text(
-                                'Choose file',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
+                  // // Elevator Pitch
+                  // Text(
+                  //   'Elevator Pitch',
+                  //   textAlign: TextAlign.center,
+                  //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  // ),
+                  // SizedBox(height: 3),
+                  // Text(
+                  //   'Upload or view a short video introducing yourself.',
+                  //   style: TextStyle(fontSize: 14, color: Colors.black54),
+                  // ),
+                  // SizedBox(height: 10),
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //     borderRadius: BorderRadius.circular(4),
+                  //     border: Border.all(color: Color(0xFF999999), width: .5),
+                  //   ),
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(8.0),
+                  //     child: GestureDetector(
+                  //       onTap: () {
+                  //         Get.to(VideoUploadScreen());
+                  //       },
+                  //       child: Container(
+                  //         decoration: BoxDecoration(
+                  //           borderRadius: BorderRadius.circular(4),
+                  //           color: Color(0xFF191919),
+                  //         ),
+                  //         height: 160,
+                  //         width: double.infinity,
+                  //         child: Column(
+                  //           children: [
+                  //             SizedBox(height: 20),
+                  //             SizedBox(
+                  //               height: 18,
+                  //               width: 18,
+                  //               child: Image.asset('assets/icons/gallery.png'),
+                  //             ),
+                  //             SizedBox(height: 7),
+                  //             Text(
+                  //               'Drop your files here',
+                  //               style: TextStyle(
+                  //                 fontSize: 12,
+                  //                 fontWeight: FontWeight.w400,
+                  //                 color: Colors.white,
+                  //               ),
+                  //             ),
+                  //             SizedBox(height: 9.5),
+                  //             Text(
+                  //               'Choose file',
+                  //               style: TextStyle(
+                  //                 fontSize: 12,
+                  //                 fontWeight: FontWeight.w400,
+                  //                 color: Colors.white,
+                  //               ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(height: 20),
 
                   Row(
@@ -618,29 +617,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   ),
                               validator: Validators.name,
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 9),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Email Address*',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(height: 6),
                           ],
                         ),
                       ),

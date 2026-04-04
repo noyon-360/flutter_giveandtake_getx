@@ -1,5 +1,6 @@
 import 'dart:developer' as DPrint;
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
@@ -31,7 +32,10 @@ import '../../data/models/get_job_response_model.dart'
 import '../../data/models/get_recruiter_response_model.dart';
 import '../../data/models/job_create_request_model.dart';
 import '../models/job_model.dart';
-import 'package:http_parser/http_parser.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/network/constants/api_constants.dart';
+import '../../../elevator/data/models/upload_video_request_model.dart';
+import '../../../elevator/data/models/upload_video_response_model.dart';
 
 import '../widgets/populate_for_single_job_edit.dart';
 import 'job_controller/career_stage_controller.dart';
@@ -505,10 +509,10 @@ class RecruiterController extends BaseController {
       deleteResult.fold(
         (fail) {
           //DPrint.log('Failed to delete existing video: ${fail.message}');
-          Get.snackbar(
-            'Error',
-            'Could not delete previous video: ${fail.message}',
-          );
+          // Get.snackbar(
+          //   'Error',
+          //   'Could not delete previous video: ${fail.message}',
+          // );
           setLoading(false);
           return;
         },
@@ -519,33 +523,149 @@ class RecruiterController extends BaseController {
         },
       );
 
-      //Upload new video
-      final formData = FormData.fromMap({
-        "videoFile": await MultipartFile.fromFile(
-          file.path,
-          filename: file.path.split('/').last,
-          contentType: MediaType('video', 'mp4'),
-        ),
-      });
+      //Upload new video using pre-signed URL flow
+      final apiClient = ApiClient();
 
-      final uploadResult = await _recruiterRepo.uploadVideo(userId, formData);
+      final fileName = file.path.split('/').last;
+      final fileSize = await file.length();
+      final fileType = 'video/mp4';
 
-      uploadResult.fold(
+      final requestModel = UploadVideoRequestModel(
+        fileName: fileName,
+        fileType: fileType,
+        fileSize: fileSize,
+      );
+
+      DPrint.log('🔄 Requesting upload URL from server...');
+      final urlResult = await apiClient.post(
+        ApiConstants.elevatorPitchVideo.uploadVideo(userId),
+        data: requestModel.toJson(),
+        fromJsonT: (json) => UploadVideoResponseModel.fromJson(json),
+      );
+
+      UploadVideoResponseModel? uploadResponse;
+      urlResult.fold(
         (fail) {
-          setError(fail.message);
-          DPrint.log('Upload video failed: ${fail.message}');
-          Get.snackbar('Error', fail.message);
+          DPrint.log('❌ Failed to get upload URL: ${fail.message}');
+          throw Exception('Failed to get upload URL: ${fail.message}');
         },
         (success) {
-          uploadedVideoPath.value = videoPath;
-          successVideoUploaded.value = true;
-          DPrint.log('Upload video success: ${success.message}');
-          Get.snackbar('Success', success.message);
-          Get.to(() => CreateRecruiterAccount());
+          uploadResponse = success.data;
+          DPrint.log('✅ Received upload URL');
+        },
+      );
+
+      if (uploadResponse == null) {
+        throw Exception('Upload URL not received');
+      }
+
+      DPrint.log('⬆️  Uploading video to storage...');
+      final dio = Dio();
+      final videoBytes = await file.readAsBytes();
+
+      final uploadToStorageResponse = await dio.put(
+        uploadResponse!.uploadUrl,
+        data: videoBytes,
+        options: Options(
+          headers: {
+            'Content-Type': fileType,
+            'Content-Length': fileSize.toString(),
+          },
+          validateStatus: (status) => status != null && status < 400,
+        ),
+      );
+
+      if (uploadToStorageResponse.statusCode == 200 ||
+          uploadToStorageResponse.statusCode == 201 ||
+          uploadToStorageResponse.statusCode == 204) {
+        DPrint.log('✅ Video uploaded successfully to storage');
+
+        // Confirm video upload completion
+        DPrint.log('🔄 Confirming video upload with server...');
+
+        final completeUrl = ApiConstants.elevatorPitchVideo.completeVideoUpload(
+          userId,
+        );
+        final completeData = {
+          'fileKey': uploadResponse!.key,
+          'fileName': fileName,
+          'fileSize': fileSize,
+        };
+
+        final completeResult = await apiClient.post(
+          completeUrl,
+          data: completeData,
+          fromJsonT: (json) => json as Map<String, dynamic>,
+        );
+
+        bool completeSuccess = false;
+        String completeError = '';
+        completeResult.fold(
+          (fail) {
+            DPrint.log(
+              '⚠️ Warning: Failed to confirm video completion: ${fail.message}',
+            );
+            completeError = fail.message;
+          },
+          (success) {
+            DPrint.log('✅ Video completion confirmed successfully');
+            completeSuccess = true;
+          },
+        );
+
+        if (!completeSuccess) {
+          throw Exception(completeError);
+        }
+
+        uploadedVideoPath.value = videoPath;
+        successVideoUploaded.value = true;
+        DPrint.log('Upload video success');
+        Get.snackbar(
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          'Success',
+          'Video uploaded successfully',
+        );
+        Get.back();
+      } else {
+        throw Exception(
+          'Failed to upload video to storage. Status: ${uploadToStorageResponse.statusCode}',
+        );
+      }
+    } catch (e) {
+      DPrint.log('Error uploading video: $e');
+      Get.snackbar(
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        'Failed',
+        'Maximum allowed video duration is 60 seconds for your plan',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> deleteElevatorVideo() async {
+    setLoading(true);
+    try {
+      final userId = await _authStorageService.getUserId();
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'User ID not found.');
+        return;
+      }
+
+      final deleteResult = await _recruiterRepo.deleteVideo(userId);
+      deleteResult.fold(
+        (fail) {
+          Get.snackbar('Error', 'Could not delete video: ${fail.message}');
+        },
+        (_) {
+          uploadedVideoPath.value = '';
+          successVideoUploaded.value = false;
+          Get.snackbar('Success', 'Video deleted successfully');
         },
       );
     } catch (e) {
-      DPrint.log('Error uploading video: $e');
       Get.snackbar('Error', 'Something went wrong: $e');
     } finally {
       setLoading(false);

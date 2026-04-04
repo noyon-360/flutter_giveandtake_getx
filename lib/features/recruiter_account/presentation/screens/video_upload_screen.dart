@@ -163,13 +163,16 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          controller.formatDuration(
-                                            controller.currentPosition.value,
-                                          ),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8.0),
+                                          child: Text(
+                                            controller.formatDuration(
+                                              controller.currentPosition.value,
+                                            ),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         ),
                                         IconButton(
@@ -181,13 +184,16 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                           ),
                                           onPressed: controller.togglePlayPause,
                                         ),
-                                        Text(
-                                          controller.formatDuration(
-                                            controller.totalDuration.value,
-                                          ),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 8.0),
+                                          child: Text(
+                                            controller.formatDuration(
+                                              controller.totalDuration.value,
+                                            ),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         ),
                                       ],
