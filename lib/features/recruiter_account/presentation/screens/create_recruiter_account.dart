@@ -474,10 +474,10 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                   child: ElevatedButton(
                     onPressed: () {
                       _submit();
-                      // if(recruiterController.successVideoUploaded.value){
-                      //   _submit();
+                      if(recruiterController.successVideoUploaded.value){
+                        _submit();
 
-                      // }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
