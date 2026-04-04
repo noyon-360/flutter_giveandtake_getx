@@ -19,7 +19,7 @@ class UserRepositoryImpl implements UserRepository {
     final token = await _authStorageService.getAccessToken();
 
     if (token == null || token.isEmpty) {
-      throw Exception('No access token found. Please login again.');
+      throw Exception('No access token found. Please log in again.');
     }
 
     final resp = await client.get(
@@ -51,7 +51,7 @@ class UserRepositoryImpl implements UserRepository {
     print('Token exists: ${token?.isNotEmpty}');
 
     if (token == null || token.isEmpty) {
-      throw Exception('No access token found. Please login again.');
+      throw Exception('No access token found. Please log in again.');
     }
 
     // Use MultipartRequest for form + image upload

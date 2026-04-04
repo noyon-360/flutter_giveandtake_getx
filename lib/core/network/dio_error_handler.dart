@@ -22,7 +22,7 @@ String dioErrorToUserMessage(DioException error) {
       case 400:
         return "Bad request - please check your input";
       case 401:
-        return "Unauthorized - please login again";
+        return "Unauthorized. Please log in again.";
       case 403:
         return "Forbidden - you don't have permission";
       case 404:

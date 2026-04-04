@@ -47,7 +47,7 @@ class CreateJobPostingScreen extends StatelessWidget {
               _progressIndicator(),
               const SizedBox(height: 20),
               const Text(
-                "Please update the candidate at every stage of their application journey with a simple click!",
+                "Keep candidates updated at every stage of their application journey with a single click.",
                 style: TextStyle(fontSize: 12, color: Colors.black),
               ),
               const SizedBox(height: 24),

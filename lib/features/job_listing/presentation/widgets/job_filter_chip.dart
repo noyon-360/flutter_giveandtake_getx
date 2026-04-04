@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
 
 class JobFilterChip extends StatelessWidget {
   final String label;

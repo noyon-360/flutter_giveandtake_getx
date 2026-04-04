@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/edit_personal_information_screen.dart';
+import 'package:giveandtake/features/profile_dasboard/presentation/screens/edit_personal_information_screen.dart';
 import '../controller/profile_controller.dart';
-import 'package:karlfive/core/network/api_client.dart';
-import 'package:karlfive/core/network/constants/api_constants.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 
 class PersonalInfoScreen extends StatelessWidget {
   const PersonalInfoScreen({super.key});

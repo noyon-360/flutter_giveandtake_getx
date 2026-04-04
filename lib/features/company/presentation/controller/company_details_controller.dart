@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/features/company/data/model/archieve_request_model.dart';
-import 'package:karlfive/features/company/data/model/archieve_response_model.dart';
-import 'package:karlfive/features/company/data/model/candidate_resume_response_model.dart';
-import 'package:karlfive/features/company/data/model/company_applicant_list_response_model.dart';
-import 'package:karlfive/features/company/data/model/employee_fetch_single_model.dart';
-import 'package:karlfive/features/company/data/model/remove_recruiter_request_model.dart';
-import 'package:karlfive/features/company/data/model/remove_recruiter_response_model.dart';
-import 'package:karlfive/features/company/data/model/resume_updated_response_model.dart';
-import 'package:karlfive/features/company/data/model/status_update_response_model.dart';
+import 'package:giveandtake/core/base/base_controller.dart';
+import 'package:giveandtake/features/company/data/model/archieve_request_model.dart';
+import 'package:giveandtake/features/company/data/model/archieve_response_model.dart';
+import 'package:giveandtake/features/company/data/model/candidate_resume_response_model.dart';
+import 'package:giveandtake/features/company/data/model/company_applicant_list_response_model.dart';
+import 'package:giveandtake/features/company/data/model/employee_fetch_single_model.dart';
+
+import 'package:giveandtake/features/company/data/model/remove_recruiter_request_model.dart';
+import 'package:giveandtake/features/company/data/model/remove_recruiter_response_model.dart';
+import 'package:giveandtake/features/company/data/model/resume_updated_response_model.dart';
+import 'package:giveandtake/features/company/data/model/status_update_response_model.dart';
+import 'package:giveandtake/features/public_view/models/get_resume_public_view_response_model.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/model/all_user_response_model.dart';
-import '../../data/model/company_details_model.dart';
+
+import '../../data/model/job_usage_response_model.dart';
+import '../../data/model/public_view_jobs_response_model.dart';
+import '../../data/model/public_view_search_response_model.dart';
+import '../../data/model/rec_company_request_model.dart';
+import '../../data/model/seach_all_user_response_model.dart';
 import '../../data/model/single_Company_response_model.dart';
 import '../../domain/repo/company_repo.dart';
-import '../screen/company_details_screen.dart';
+
 import 'company_account_controller.dart';
 
 class CompanyDetailsController extends BaseController {
@@ -27,20 +34,30 @@ class CompanyDetailsController extends BaseController {
 
   // Change from Rxn (problematic) to Rx with explicit null
   final userInfo = Rx<SingleCompanyResponseModel?>(null);
+  final RxList<SeachAllUserResponseModel> searchInfo =
+      <SeachAllUserResponseModel>[].obs;
+  final RxList<SeachAllUserResponseModel> filteredSearchInfo =
+      <SeachAllUserResponseModel>[].obs;
+
+  // NEW: reactive search input
+  final searchQuery = ''.obs;
+
   final employee = Rx<EmployeeFetchSingleModel?>(null);
-    var resume = <ResumeUpdatedResponseModel>[].obs;
+  final publicView = Rx<PublicViewSearchResponseModel?>(null);
+  final candidateView = Rx<GetResumePublicViewResponseModel?>(null);
+  final usage = Rx<JobUsageResponseModel?>(null);
+
+  var resume = <ResumeUpdatedResponseModel>[].obs;
+  final pubJobs = <PublicViewJobsResponseModel>[].obs;
   final remove = Rx<RemoveRecruiterResponseModel?>(
     null,
   ); // <AllUserResponseModel>
   var recruiters = <AllUserResponseModel>[].obs;
+  final isJobUsageLoading = false.obs;
 
   Rx<ArchieveResponseModel?> jobData = Rx<ArchieveResponseModel?>(null);
 
   Rx<StatusUpdateResponseModel?> status = Rx<StatusUpdateResponseModel?>(null);
-
-  // final Rx<ApplicantListResponseModel?> venue = Rx<ApplicantListResponseModel?>(
-  //   null,
-  // );
 
   var venue = <ApplicantListResponseModel>[].obs;
 
@@ -49,6 +66,8 @@ class CompanyDetailsController extends BaseController {
   var isCompanyLoading = true.obs;
   var isEmployeeLoading = true.obs;
   final Rx<CandidateResumeResponseModel?> candidate = Rx(null);
+  // Follow state for public company view
+  final RxBool isFollowing = false.obs;
 
   Future<void> fetchCompanyProfile() async {
     setLoading(true);
@@ -165,41 +184,6 @@ class CompanyDetailsController extends BaseController {
     );
   }
 
-  //  Future<void> archiveJobs(
-  //     String jobId,
-  //     // <-- just a list of task IDs
-  //   ) async {
-  //    setLoading(true);
-  //    setError("");
-  //         final userId = await _authStorageService.getUserId();
-  //   if (userId == null || userId.isEmpty) {
-  //     setError('User not authenticated');
-  //     Get.snackbar('Error', 'User not authenticated');
-  //     setLoading(false);
-  //     return;
-  //   }
-
-  //     final data = {
-  //       "userId": userId,
-  //       "jobId": jobId, // send list of ObjectId strings
-  //     };
-
-  //     final result = await _companyRepo.archiveJobs(jobId, data);
-
-  //     result.fold(
-  //       (fail) {
-  //         setError(fail.message);
-  //         DPrint.log('❌ Client info update failed: ${fail.message}');
-  //         isLoading(false);
-  //       },
-  //       (success) async {
-  //         DPrint.log('✅ Client info updated: ${success.message}');
-
-  //         Get.back(); // navigate back after success
-  //         isLoading(false);
-  //       },
-  //     );
-  //   }
   Future<void> archiveJobs(String jobId) async {
     setLoading(true);
     setError("");
@@ -330,30 +314,272 @@ class CompanyDetailsController extends BaseController {
     );
   }
 
+  Future<void> fetchResume(String candidateUserId) async {
+    setLoading(true);
+    setError("");
 
-Future<void> fetchResume(String candidateUserId) async {
-  setLoading(true);
-  setError("");
+    if (candidateUserId.isEmpty) {
+      setError('Invalid candidate ID');
+      setLoading(false);
+      return;
+    }
 
-  if (candidateUserId.isEmpty) {
-    setError('Invalid candidate ID');
-    setLoading(false);
-    return;
+    final result = await _companyRepo.fetchResume(candidateUserId);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log('data fetch successfully: ${success.message}');
+        resume.value = success.data;
+        setLoading(false);
+      },
+    );
   }
 
-  final result = await _companyRepo.fetchResume(candidateUserId);
+  // In CompanyDetailsController
 
-  result.fold(
-    (fail) {
-      setError(fail.message);
-      DPrint.log('data fetch failed: ${fail.message}');
+  Future<void> updateRecCompany({
+    required String id, // request document _id (recId) → goes in URL
+    required String
+    recruiterUserId, // ← THIS IS CRITICAL: the user who requested
+    required String companyId, // company _id
+    required String status, // 'accepted' or 'rejected'
+  }) async {
+    setLoading(true);
+    setError("");
+
+    final data = RecCompanyRequestModel(
+      status: status,
+      companyId: companyId,
+      userId: recruiterUserId, // ← the recruiter who wants to join
+    ).toJson();
+
+    final result = await _companyRepo.updateRecCompany(id, data);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        Get.snackbar(
+          "Error",
+          fail.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      },
+      (success) {
+        Get.snackbar(
+          "Success",
+          "Request $status successfully",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        // Refresh the lists
+        fetchEmployee(); // This will now show the correct recruiter
+       
+      },
+    );
+
+    setLoading(false);
+  }
+
+  Future<void> fetchJobUsage() async {
+    isJobUsageLoading.value = true;
+    setError("");
+
+    final result = await _companyRepo.fetchJobUsage();
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+      },
+      (success) {
+        usage.value = success.data;
+      },
+    );
+
+    isJobUsageLoading.value = false;
+  }
+
+  Future<void> fetchSearchUser(String q) async {
+    setLoading(true);
+    setError("");
+
+    DPrint.log("Fetching users with query: '$q'");
+    final result = await _companyRepo.fetchSearchUser(q);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('❌ Search fetch failed: ${fail.message}');
+      },
+      (success) {
+        DPrint.log("Search result 2: ${success.data.first.name}");
+        // Assign only the list safely
+        final users = success.data;
+        searchInfo.assignAll(users);
+        // filteredSearchInfo.clear(); // initially empty
+        DPrint.log('✅ Search users loaded: ${users.length}');
+      },
+    );
+
+    setLoading(false);
+  }
+
+  void searchUsers(String query) {
+    if (query.trim().isEmpty) {
+      filteredSearchInfo.assignAll(searchInfo); // show all when empty
+    } else {
+      filteredSearchInfo.value = filterUsers(searchInfo, query);
+    }
+  }
+
+  // Filters
+  final RxBool isImmediate = false.obs;
+  final RxString selectedRole = 'All Roles'.obs;
+
+  void toggleImmediate() {
+    isImmediate.value = !isImmediate.value;
+    searchUsers(searchQuery.value); // Re-trigger filter
+  }
+
+  void updateRole(String role) {
+    selectedRole.value = role;
+    searchUsers(searchQuery.value); // Re-trigger filter
+  }
+
+  int get immediateCount =>
+      searchInfo.where((u) => u.immediatelyAvailable == true).length;
+
+  List<SeachAllUserResponseModel> filterUsers(
+    List<SeachAllUserResponseModel> users,
+    String query,
+  ) {
+    var filtered = users;
+
+    // 1. Text Search
+    if (query.trim().isNotEmpty) {
+      final lowerQuery = query.toLowerCase().trim();
+      filtered = filtered.where((user) {
+        return (user.name.toLowerCase().contains(lowerQuery)) ||
+            (user.slug.toLowerCase().contains(lowerQuery)) ||
+            (user.address.toLowerCase().contains(lowerQuery)) ||
+            (user.role.toLowerCase().contains(lowerQuery));
+      }).toList();
+    }
+
+    // 2. Immediate Filter
+    if (isImmediate.value) {
+      filtered = filtered
+          .where((user) => user.immediatelyAvailable == true)
+          .toList();
+    }
+
+    // 3. Role Filter
+    if (selectedRole.value != 'All Roles') {
+      // Normalize role comparison if needed (e.g. case insensitive)
+      filtered = filtered
+          .where(
+            (user) =>
+                user.role.toLowerCase() == selectedRole.value.toLowerCase(),
+          )
+          .toList();
+    }
+
+    return filtered;
+  }
+
+  void clearSearch() {
+    searchQuery.value = '';
+    filteredSearchInfo.clear();
+  }
+
+  Future<void> getpublicView(String slug) async {
+    setLoading(true);
+    setError("");
+
+    final result = await _companyRepo.getpublicView(slug);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log('data fetch successfully: ${success.message}');
+        publicView.value = success.data;
+        publicView.refresh();
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> fetchPublicJobs(String companyId) async {
+    setLoading(true);
+    setError("");
+
+    if (companyId.isEmpty) {
+      setError('Invalid candidate ID');
       setLoading(false);
-    },
-    (success) {
-      DPrint.log('data fetch successfully: ${success.message}');
-      resume.value = success.data;
-      setLoading(false);
-    },
-  );
-}
+      return;
+    }
+
+    final result = await _companyRepo.getPublicJobs(companyId);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log('data fetch successfully: ${success.message}');
+        pubJobs.value = success.data;
+        setLoading(false);
+      },
+    );
+  }
+
+  void toggleFollow() async {
+    // Optimistic UI update
+    isFollowing.value = !isFollowing.value;
+
+    // 🔁 OPTIONAL: Call API here
+    // await _companyRepo.followCompany(companyId);
+
+    // Get.snackbar(
+    //   isFollowing.value ? 'Followed' : 'Unfollowed',
+    //   isFollowing.value
+    //       ? 'You are now following this company'
+    //       : 'You unfollowed this company',
+    //   snackPosition: SnackPosition.BOTTOM,
+    // );
+  }
+
+
+  Future<void> getCandidatePublicView(String slug) async {
+    setLoading(true);
+    setError("");
+
+    final result = await _companyRepo.getCandidateublicView(slug);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('data fetch failed: ${fail.message}');
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log('data fetch successfully: ${success.message}');
+        candidateView.value = success.data;
+        candidateView.refresh();
+        setLoading(false);
+      },
+    );
+  }
 }

@@ -2,13 +2,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/constants/app_images.dart';
-import 'package:karlfive/core/theme/app_buttoms.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
-import 'package:karlfive/features/auth/presentation/controller/remember_me_controller.dart';
-import 'package:karlfive/features/auth/presentation/screens/reset_password_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/signup_screen.dart';
-import 'package:karlfive/features/auth/presentation/widgets/different_login_approach.dart';
+import 'package:giveandtake/core/common/constants/app_images.dart';
+import 'package:giveandtake/core/theme/app_buttoms.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/features/auth/presentation/controller/remember_me_controller.dart';
+import 'package:giveandtake/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/signup_screen.dart';
+import 'package:giveandtake/features/auth/presentation/widgets/different_login_approach.dart';
 
 import '../../../../core/common/widgets/app_logo.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen>
                               style: TextStyle(color: AppColors.textGrey),
                               decoration: context.primaryInputDecoration
                                   .copyWith(
-                                    hintText: "Enter your Password",
+                                    hintText: "Enter your password",
                                     prefixIcon: Icon(
                                       Icons.lock_open_outlined,
                                       color: AppColors.textFieldLightGrey,
@@ -283,7 +283,7 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                               children: [
                                 TextSpan(
-                                  text: 'click here',
+                                  text: 'Sign up',
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400,
@@ -304,7 +304,7 @@ class _LoginScreenState extends State<LoginScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'or continue with,',
+                              'Or continue with',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 12,

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/validation/validators.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 
 class PhoneNumberAndEmail extends StatelessWidget {
   const PhoneNumberAndEmail({
     super.key,
     required TextEditingController emailTEController,
     required FocusNode emailFocusNode,
-  }) : _emailTEController = emailTEController, _emailFocusNode = emailFocusNode;
+  }) : _emailTEController = emailTEController,
+       _emailFocusNode = emailFocusNode;
 
   final TextEditingController _emailTEController;
   final FocusNode _emailFocusNode;
@@ -23,10 +24,7 @@ class PhoneNumberAndEmail extends StatelessWidget {
             children: [
               Text(
                 'Email Address*',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
               SizedBox(height: 6),
               TextFormField(
@@ -35,7 +33,7 @@ class PhoneNumberAndEmail extends StatelessWidget {
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 decoration: context.primaryInputDecoration.copyWith(
-                  hintText: "Enter Your Email",
+                  hintText: "Enter your email",
                   hintStyle: TextStyle(
                     color: Color(0xFF787878),
                     fontSize: 14,

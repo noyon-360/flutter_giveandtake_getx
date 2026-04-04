@@ -1,11 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/constants/app_images.dart';
-import 'package:karlfive/core/common/widgets/app_logo.dart';
-import 'package:karlfive/core/theme/app_buttoms.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/auth/presentation/widgets/otp_code_field.dart';
+import 'package:giveandtake/core/common/constants/app_images.dart';
+import 'package:giveandtake/core/common/widgets/app_logo.dart';
+import 'package:giveandtake/core/theme/app_buttoms.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/auth/presentation/widgets/otp_code_field.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/common/widgets/form_error_message.dart';
@@ -102,7 +102,27 @@ class _OtpVerificationForPasswordResetScreenState
                   return const SizedBox.shrink(); // return empty widget
                 }),
 
-                PinCode(otpController: otpController),
+                Obx(
+                  () => PinCode(
+                    otpController: otpController,
+                    enabled: !_authController.isOtpExpired.value,
+                  ),
+                ),
+
+                SizedBox(height: 16),
+
+                Obx(
+                  () => Text(
+                    _authController.timerDisplay,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: _authController.isOtpExpired.value
+                          ? Colors.red
+                          : Colors.black,
+                    ),
+                  ),
+                ),
 
                 SizedBox(height: 24),
 
@@ -133,9 +153,13 @@ class _OtpVerificationForPasswordResetScreenState
                 SizedBox(height: 12),
                 Obx(
                   () => PrimaryButton(
-                    onPressed: _submit,
+                    onPressed: _authController.isOtpExpired.value
+                        ? null
+                        : _submit,
                     isLoading: _authController.isLoading.value,
-                    text: 'Verify OTP',
+                    text: _authController.isOtpExpired.value
+                        ? 'OTP Expired'
+                        : 'Verify OTP',
                   ),
                 ),
               ],

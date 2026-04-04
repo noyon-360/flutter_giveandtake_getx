@@ -1,28 +1,33 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/core/bottomNavbar/controllers/bottom_nav_controller.dart';
-import 'package:karlfive/core/bottomNavbar/screens/dashboard_screen.dart';
-import 'package:karlfive/core/services/get_user_profile_service.dart';
-import 'package:karlfive/features/auth/data/models/login_request_model.dart';
-import 'package:karlfive/features/auth/data/models/otp_request_model.dart';
-import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
-import 'package:karlfive/features/auth/data/models/refresh_token_request_model.dart';
-import 'package:karlfive/features/auth/data/models/register_request_model.dart';
-import 'package:karlfive/features/auth/data/models/reset_password_request_model.dart';
-import 'package:karlfive/features/auth/data/models/reset_password_with_token_request_model.dart';
-import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
-import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
-import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
-import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/otp_verification_for_password_reset_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
-import 'package:karlfive/features/auth/presentation/screens/security_questions_screen.dart';
-import 'package:karlfive/features/auth/presentation/screens/set_new_password_screen.dart';
-import 'package:karlfive/features/company/presentation/screen/company_screen.dart';
-import 'package:karlfive/features/create_job/presentation/screen/create_job_screen.dart';
-import 'package:karlfive/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:giveandtake/core/base/base_controller.dart';
+import 'package:giveandtake/core/bottomNavbar/controllers/bottom_nav_controller.dart';
+import 'package:giveandtake/core/bottomNavbar/screens/dashboard_screen.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/core/services/get_user_profile_service.dart';
+import 'package:giveandtake/features/auth/data/models/login_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/otp_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/otp_request_model_register.dart';
+import 'package:giveandtake/features/auth/data/models/refresh_token_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/register_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/reset_password_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/reset_password_with_token_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/security_questions_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/verify_security_answers_request_model.dart';
+import 'package:giveandtake/features/auth/domain/repo/auth_repo.dart';
+import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/otp_verification_for_password_reset_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/otp_verification_to_complete_register.dart';
+import 'package:giveandtake/features/auth/presentation/screens/security_questions_screen.dart';
+import 'package:giveandtake/features/auth/presentation/screens/set_new_password_screen.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
+import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
@@ -33,9 +38,57 @@ import 'remember_me_controller.dart';
 class AuthController extends BaseController {
   final AuthRepository _authRepository;
   final AuthStorageService _authStorageService;
-  bool _isSuccess = false;
 
-  AuthController(this._authRepository, this._authStorageService);
+  /// Expose storage service so other widgets can read user role/id without DI coupling.
+  AuthStorageService get authStorageService => _authStorageService;
+
+  final isLoggedIn = false.obs;
+
+  AuthController(this._authRepository, this._authStorageService) {
+    checkLoginStatus();
+  }
+
+  Future<void> checkLoginStatus() async {
+    final token = await _authStorageService.getAccessToken();
+    isLoggedIn.value = token != null;
+  }
+
+  Timer? _otpTimer;
+  final timerSeconds = 600.obs;
+  final isOtpExpired = false.obs;
+
+  void startOtpTimer() {
+    _otpTimer?.cancel();
+    timerSeconds.value = 600;
+    isOtpExpired.value = false;
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (timerSeconds.value > 0) {
+        timerSeconds.value--;
+      } else {
+        isOtpExpired.value = true;
+        _otpTimer?.cancel();
+      }
+    });
+  }
+
+  void resetOtpTimer() {
+    startOtpTimer();
+  }
+
+  String get timerDisplay {
+    final minutes = (timerSeconds.value / 60).floor().toString().padLeft(
+      2,
+      '0',
+    );
+    final seconds = (timerSeconds.value % 60).toString().padLeft(2, '0');
+    return "$minutes:$seconds";
+  }
+
+  @override
+  void onClose() {
+    _otpTimer?.cancel();
+    super.onClose();
+  }
 
   // Login
   Future<void> login(
@@ -83,6 +136,7 @@ class AuthController extends BaseController {
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
           }
+          isLoggedIn.value = true;
           setLoading(false);
 
           // Reset nav controller to show home screen
@@ -91,7 +145,47 @@ class AuthController extends BaseController {
             print('✅ BottomNavController reset to Home');
           }
 
-          Get.offAll(() => DashboardScreen());
+          // Fetch resume data to check if profile is complete
+          try {
+            final resumeEndpoint =
+                '${ApiConstants.baseUrl}/create-resume/get-resume';
+            final resumeResult = await ApiClient().get(
+              resumeEndpoint,
+              fromJsonT: (json) => json as Map<String, dynamic>,
+            );
+
+            resumeResult.fold(
+              (fail) {
+                // If resume fetch fails, go to form to create one
+                DPrint.log(
+                  'Resume fetch failed, navigating to ElevatorResumeScreen',
+                );
+                Get.offAll(() => ElevatorResumeScreen());
+              },
+              (success) {
+                final resumeData = success.data;
+                final city = resumeData['resume']?['city'];
+
+                DPrint.log('Resume city: $city');
+
+                // If city is null or empty, profile is incomplete - go to form
+                if (city == null || city.toString().isEmpty) {
+                  DPrint.log(
+                    'City is null/empty, navigating to ElevatorResumeScreen',
+                  );
+                  Get.offAll(() => ElevatorResumeScreen());
+                } else {
+                  // Profile is complete - go to dashboard
+                  DPrint.log('Profile complete, navigating to DashboardScreen');
+                  Get.offAll(() => DashboardScreen());
+                }
+              },
+            );
+          } catch (e) {
+            DPrint.log('Error checking resume: $e');
+            // On error, default to dashboard
+            Get.offAll(() => DashboardScreen());
+          }
         } else if (user.role == 'recruiter') {
           await _authStorageService.storeAuthData(
             accessToken: success.data.accessToken,
@@ -99,19 +193,58 @@ class AuthController extends BaseController {
             userId: success.data.user.id,
             userRole: user.role,
           );
-          // Populate the shared GetUserProfileService with the user from login response
-          // try {
-          //   Get.find<GetUserProfileService>().setUserInfo(user);
-          // } catch (_) {
-          //   // If service not found, ignore silently (DI should normally register it)
-          // }
+
           if (rememberMeController!.rememberMe.value) {
             final secureStore = SecureStoreServices();
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
           }
+          isLoggedIn.value = true;
           setLoading(false);
-          Get.offAll(() => CreateRecruiterAccount());
+
+          // Show loading overlay while fetching recruiter profile
+          Get.dialog(
+            const Center(child: CircularProgressIndicator()),
+            barrierDismissible: false,
+          );
+
+          try {
+            final userId = success.data.user.id;
+            final recruiterEndpoint =
+                ApiConstants.recruiter.fetchRecruiterInfo(userId);
+
+            final recruiterResult = await ApiClient().get(
+              recruiterEndpoint,
+              fromJsonT: (json) => json as Map<String, dynamic>,
+            );
+
+            // Close loading overlay
+            if (Get.isDialogOpen ?? false) Get.back();
+
+            recruiterResult.fold(
+              (fail) {
+                // API error → assume account not set up yet
+                DPrint.log('Recruiter fetch failed: ${fail.message}');
+                Get.offAll(() => CreateRecruiterAccount());
+              },
+              (res) {
+                final message =
+                    (res.data['message'] as String? ?? '').toLowerCase();
+                DPrint.log('Recruiter fetch message: $message');
+
+                if (message.contains('recruiter account not found')) {
+                  Get.offAll(() => CreateRecruiterAccount());
+                } else {
+                  Get.offAll(() => const RecruiterPageScreen());
+                }
+              },
+            );
+          } catch (e) {
+            // Close loading overlay on exception
+            if (Get.isDialogOpen ?? false) Get.back();
+            DPrint.log('Recruiter fetch error: $e');
+            Get.offAll(() => CreateRecruiterAccount());
+          }
         } else if (user.role == 'company') {
           await _authStorageService.storeAuthData(
             accessToken: success.data.accessToken,
@@ -119,21 +252,23 @@ class AuthController extends BaseController {
             userId: success.data.user.id,
             userRole: user.role,
           );
-          // Populate the shared GetUserProfileService with the user from login response
-          // try {
-          //   Get.find<GetUserProfileService>().setUserInfo(user);
-          // } catch (_) {
-          //   // If service not found, ignore silently (DI should normally register it)
-          // }
+
           if (rememberMeController!.rememberMe.value) {
             final secureStore = SecureStoreServices();
             secureStore.storeData('email', email);
             secureStore.storeData('password', password);
           }
+          isLoggedIn.value = true;
           setLoading(false);
-          Get.offAll(() => CreateCompanyAccountPage());
-        }else {
-          setError("You are not authorized to login as candidate");
+
+          // Fetch company info and navigate based on whether company exists:
+          //  - non-empty companies list → CompanyDetailsPage
+          //  - empty companies list    → CreateCompanyAccountPage
+          final companyController = Get.find<CompanyAccountController>();
+          await companyController.navigateFromElevatorPitch(clearStack: true);
+        } else {
+          setError("You are not authorized to log in as a candidate");
+          isLoggedIn.value = true;
           setLoading(false);
         }
       },
@@ -178,6 +313,7 @@ class AuthController extends BaseController {
       (success) {
         DPrint.log("Register success result : ${success.data.id}");
         setLoading(false);
+        startOtpTimer();
         Get.to(OtpVerificationToCompleteRegister(email: email));
       },
     );
@@ -212,6 +348,7 @@ class AuthController extends BaseController {
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
+        startOtpTimer();
         setLoading(false);
         // Navigate to OTP verification screen for password reset
         Get.to(() => OtpVerificationForPasswordResetScreen(email: email));
@@ -235,6 +372,7 @@ class AuthController extends BaseController {
       (success) {
         DPrint.log("reset pass success result : ${success.data.message}");
         Get.snackbar("OTP Sent", "We have resent the OTP to $email");
+        resetOtpTimer();
         setLoading(false);
       },
     );
@@ -242,48 +380,48 @@ class AuthController extends BaseController {
 
   // This method is now only used for registration OTP verification
   // For password reset, we navigate directly to SetNewPasswordScreen from resetPass
-  Future verifyOTPForRegistration(String email, String otp) async {
-    setLoading(true);
-    setError("");
-
-    final result = await _authRepository.otpVerifyRegister(
-      OtpRequestModelRegister(email: email, otp: otp),
-    );
-
-    result.fold(
-      (fail) {
-        setError(fail.message);
-        DPrint.log("verify otp failed: ${fail.message}");
-        Get.snackbar(
-          'Error',
-          fail.message,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        setLoading(false);
-      },
-      (success) {
-        DPrint.log("verify otp success: ${success.message}");
-        setLoading(false);
-        Get.snackbar(
-          'Success',
-          'Registration completed successfully!',
-          backgroundColor: const Color(0xFF10B287),
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        //* <--- Navigate to security questions for Sign Up --->
-        Get.to(() => SecurityQuestionsScreen(email: email));
-      },
-    );
-  }
+  // Future verifyOTPForRegistration(String email, String otp) async {
+  //   setLoading(true);
+  //   setError("");
+  //
+  //   final result = await _authRepository.otpVerifyRegister(
+  //     OtpRequestModelRegister(email: email, otp: otp),
+  //   );
+  //
+  //   result.fold(
+  //     (fail) {
+  //       setError(fail.message);
+  //       DPrint.log("verify otp failed: ${fail.message}");
+  //       Get.snackbar(
+  //         'Error',
+  //         fail.message,
+  //         backgroundColor: Colors.red,
+  //         colorText: Colors.white,
+  //         snackPosition: SnackPosition.BOTTOM,
+  //       );
+  //       setLoading(false);
+  //     },
+  //     (success) {
+  //       DPrint.log("verify otp success: ${success.message}");
+  //       setLoading(false);
+  //       Get.snackbar(
+  //         'Success',
+  //         'Registration completed successfully!',
+  //         backgroundColor: const Color(0xFF10B287),
+  //         colorText: Colors.white,
+  //         snackPosition: SnackPosition.BOTTOM,
+  //       );
+  //       //* <--- Navigate to security questions for Sign Up --->
+  //       Get.to(() => SecurityQuestionsScreen(email: email));
+  //     },
+  //   );
+  // }
 
   Future verifyOTPRegister(String email, String otp) async {
     setLoading(true);
     setError("");
 
-    final request = OtpRequestModelRegister(email: email, otp: otp);
+    final request = OtpVerifyRequestModel(email: email, otp: otp);
     final result = await _authRepository.otpVerifyRegister(request);
 
     result.fold(
@@ -432,7 +570,7 @@ class AuthController extends BaseController {
           // Show success message
           Get.snackbar(
             'Success',
-            'Password reset successfully! Please login with your new password.',
+            'Password reset successfully. Please log in with your new password.',
             backgroundColor: const Color(0xFF10B287),
             colorText: Colors.white,
             snackPosition: SnackPosition.BOTTOM,
@@ -472,7 +610,7 @@ class AuthController extends BaseController {
       (fail) {
         DPrint.log("Refresh token failed: ${fail.message}");
         setLoading(false);
-        return _isSuccess = false;
+        return false;
       },
       (success) async {
         DPrint.log("Refresh token success: ${success.message}");
@@ -484,7 +622,7 @@ class AuthController extends BaseController {
           () => HomeScreen(),
           transition: Transition.rightToLeft,
         ); //! <<< If the user is already logged in, go to home screen >>>
-        return _isSuccess = true;
+        return true;
       },
     );
     return navi;
@@ -649,6 +787,7 @@ class AuthController extends BaseController {
       final secureStore = SecureStoreServices();
       await secureStore.deleteAllData();
 
+      isLoggedIn.value = false;
       setLoading(false);
       setError('');
 

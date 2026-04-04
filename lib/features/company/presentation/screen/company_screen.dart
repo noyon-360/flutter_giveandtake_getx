@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -19,9 +19,6 @@ import '../../../recruiter_account/presentation/widgets/video_player_widget.dart
 import '../controller/company_account_controller.dart';
 import '../widget/custom_text_field.dart';
 import '../widget/month_added_widget.dart';
-import '../widget/upload_card_widget.dart';
-import '../widget/upload_video_widget.dart';
-import 'company_details_screen.dart';
 
 class CreateCompanyAccountPage extends StatefulWidget {
   const CreateCompanyAccountPage({super.key});
@@ -66,12 +63,6 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
 
   final TextEditingController _comapanyTEController = TextEditingController();
 
-  final companyNameController = TextEditingController();
-  final countryController = TextEditingController();
-  final cityController = TextEditingController();
-  final postalCodeController = TextEditingController();
-  final emailController = TextEditingController();
-
   final FocusNode _linkedINFocusNode = FocusNode();
 
   final FocusNode _twitterFocusNode = FocusNode();
@@ -87,42 +78,72 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
   final FocusNode _fiverrFocusNode = FocusNode();
 
   final FocusNode _companyFocusNode = FocusNode();
-  late int zipCode = int.tryParse(postalCodeController.text) ?? 0;
 
   final DescriptionController descriptionController = Get.put(
     DescriptionController(),
   );
 
   @override
+  // void dispose() {
+  //   _descriptionTController.dispose();
+  //   _linkedINTEController.dispose();
+  //   _twitterTEController.dispose();
+  //   _upworkTEController.dispose();
+  //   _facebookTEController.dispose();
+  //   _instaTEController.dispose();
+  //   _tiktokTEController.dispose();
+  //   _fiverrTEController.dispose();
+  //   _comapanyTEController.dispose();
+  //   _linkedINFocusNode.dispose();
+  //   _twitterFocusNode.dispose();
+  //   _upworkFocusNode.dispose();
+  //   _facebookFocusNode.dispose();
+  //   _instaFocusNode.dispose();
+  //   _tiktokFocusNode.dispose();
+  //   _fiverrFocusNode.dispose();
+  //   _companyFocusNode.dispose();
+  //   super.dispose();
+  // }
+  @override
   Widget build(BuildContext context) {
     return AppScaffold(
-     
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-
-      // ),
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () {
+            // Get.to(()=>const HomeScreen()); // since you're using GetX
+          },
+        ),
+        backgroundColor: Color(0xFF2B7FD0),
+        title: const Text(
+          'Create Company/Business Account',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         child: Form(
           key: controller.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
 
             children: [
-              const SizedBox(height: 51),
-              Text(
-                "Create Company Account",
-                style: TextStyle(
-                  color: AppColors.textBlack,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Text(
-                "Sign-up and pitch your way into a new role",
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-              const SizedBox(height: 28),
+              // const SizedBox(height: 51),
+              // Text(
+              //   "Create Company Account",
+              //   style: TextStyle(
+              //     color: AppColors.textBlack,
+              //     fontSize: 18,
+              //     fontWeight: FontWeight.w500,
+              //   ),
+              // ),
+              // const Text(
+              //   "Sign-up and pitch your way into a new role",
+              //   style: TextStyle(color: Colors.grey, fontSize: 14),
+              // ),
+              // const SizedBox(height: 28),
 
               // const SizedBox(height: 8),
               Column(
@@ -132,7 +153,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                     "Upload company elevator pitch",
                     style: TextStyle(
                       color: AppColors.textBlack,
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -239,7 +260,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                                   ),
                                 )
                               : const Text(
-                                  'company banner',
+                                  'Company banner',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 13,
@@ -334,7 +355,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 controller: controller.companyNameController,
 
                 isRequired: true,
-                hintText: "Enter Your Country Name",
+                hintText: "Enter your company name",
               ),
               const SizedBox(height: 8),
               Row(
@@ -386,7 +407,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                     child: CustomTextField(
                       label: "Postal Code",
                       controller: controller.postalCodeController, // ✅ bind
-                      hintText: "Enter Code",
+                      hintText: "Enter postal code",
                       isRequired: true,
                     ),
                   ),
@@ -395,7 +416,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                     child: CustomTextField(
                       label: "Email",
                       controller: controller.emailController, // ✅ bind
-                      hintText: "Enter Your Email",
+                      hintText: "Enter your email",
                       isRequired: true,
                     ),
                   ),
@@ -616,7 +637,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "View your Company recruiters",
+                  "View your company recruiters",
                   style: TextStyle(
                     color: AppColors.textBlack,
                     fontSize: 16,
@@ -729,8 +750,11 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 ),
               ),
 
-            const SizedBox(height: 25),
-              const Text("Award Description*", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 25),
+              const Text(
+                "Award Description*",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 12),
 
               Container(
@@ -743,122 +767,203 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Award & Honors", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-                    const Text("Highlight your achievements and recognitions.", style: TextStyle(fontSize: 12, color: AppColors.textGrey)),
+                    const Text(
+                      "Award & Honors",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Text(
+                      "Highlight your achievements and recognitions.",
+                      style: TextStyle(fontSize: 12, color: AppColors.textGrey),
+                    ),
 
                     const SizedBox(height: 20),
 
                     // Dynamic Award Cards
-                    Obx(() => Column(
-                      children: List.generate(controller.awardFields.length, (index) {
-                        final fields = controller.awardFields[index];
+                    Obx(
+                      () => Column(
+                        children: List.generate(controller.awardFields.length, (
+                          index,
+                        ) {
+                          final fields = controller.awardFields[index];
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                            boxShadow: [
-                              BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 3)),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Header: Award Title + Remove Button
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Award ${index + 1}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                                  IconButton(
-                                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                                    onPressed: () => controller.removeAwardField(index),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                  ),
-                                ],
-                              ),
-                              const Divider(),
-
-                              CustomTextField(label: "Award Title", hintText: "e.g. Employee of the Year", controller: fields['title'], isRequired: true),
-                              const SizedBox(height: 12),
-
-                              CustomTextField(label: "Program Name", hintText: "e.g. Company Recognition Program", controller: fields['issuer'], isRequired: true),
-                              const SizedBox(height: 12),
-
-                              // Program Date - Month/Year Picker
-                              const Text("Program Date", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () async {
-                                  int? initMonth, initYear;
-                                  final text = fields['date']!.text;
-                                  if (text.length == 6) {
-                                    initMonth = int.tryParse(text.substring(0, 2));
-                                    initYear = int.tryParse(text.substring(2));
-                                  }
-
-                                  final result = await showDialog<Map<String, int>>(
-                                    context: context,
-                                    builder: (_) => MonthYearPickerDialog(initialMonth: initMonth, initialYear: initYear),
-                                  );
-
-                                  if (result != null) {
-                                    final month = result['month']!.toString().padLeft(2, '0');
-                                    final year = result['year'].toString();
-                                    // fields['date']?.text = "$month/$year";
-                                    fields['date']?.text = month+year; // e.g. 122025
-                                  }
-                                },
-                                child: AbsorbPointer(
-                                  child: TextFormField(
-                                    controller: fields['date'],
-                                    decoration: InputDecoration(
-                                      hintText: "MMYYYY",
-                                      suffixIcon: const Icon(Icons.calendar_today_outlined, size: 20),
-                                      filled: true,
-                                      fillColor: Colors.grey[50],
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade300),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Header: Award Title + Remove Button
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Award ${index + 1}",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                    validator: (val) {
-                                      if (val == null || val.isEmpty) return "Required";
-                                      if (!RegExp(r'^\d{6}$').hasMatch(val)) return "Format: MMYYYY";
-                                      final m = int.tryParse(val.substring(0, 2));
-                                      if (m == null || m < 1 || m > 12) return "Invalid month";
-                                      return null;
-                                    },
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                      onPressed: () =>
+                                          controller.removeAwardField(index),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(),
+
+                                CustomTextField(
+                                  label: "Award Title",
+                                  hintText: "e.g. Employee of the Year",
+                                  controller: fields['title'],
+                                  isRequired: true,
+                                ),
+                                const SizedBox(height: 12),
+
+                                CustomTextField(
+                                  label: "Program Name",
+                                  hintText: "e.g. Company Recognition Program",
+                                  controller: fields['issuer'],
+                                  isRequired: true,
+                                ),
+                                const SizedBox(height: 12),
+
+                                // Program Date - Month/Year Picker
+                                const Text(
+                                  "Program Date",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
+                                const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () async {
+                                    int? initMonth, initYear;
+                                    final text = fields['date']!.text;
+                                    if (text.length == 6) {
+                                      initMonth = int.tryParse(
+                                        text.substring(0, 2),
+                                      );
+                                      initYear = int.tryParse(
+                                        text.substring(2),
+                                      );
+                                    }
 
-                              CustomTextField(
-                                label: "Award Short Description",
-                                hintText: "Briefly describe the award and what you achieved",
-                                controller: fields['description'],
-                                isRequired: true,
-                                maxLines: 4,
-                              ),
-                              const SizedBox(height: 16),
+                                    final result =
+                                        await showDialog<Map<String, int>>(
+                                          context: context,
+                                          builder: (_) => MonthYearPickerDialog(
+                                            initialMonth: initMonth,
+                                            initialYear: initYear,
+                                          ),
+                                        );
 
-                              // Add Another Award Button
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton.icon(
-                                  onPressed: controller.addAwardField,
-                                  icon: const Icon(Icons.add_circle_outline, size: 18),
-                                  label: const Text("Add Another Award"),
-                                  style: TextButton.styleFrom(foregroundColor: AppColors.primaryWhite),
+                                    if (result != null) {
+                                      final month = result['month']!
+                                          .toString()
+                                          .padLeft(2, '0');
+                                      final year = result['year'].toString();
+                                      // fields['date']?.text = "$month/$year";
+                                      fields['date']?.text =
+                                          month + year; // e.g. 122025
+                                    }
+                                  },
+                                  child: AbsorbPointer(
+                                    child: TextFormField(
+                                      controller: fields['date'],
+                                      decoration: InputDecoration(
+                                        hintText: "MMYYYY",
+                                        suffixIcon: const Icon(
+                                          Icons.calendar_today_outlined,
+                                          size: 20,
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.grey[50],
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.grey.shade400,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                      validator: (val) {
+                                        if (val == null || val.isEmpty)
+                                          return "Required";
+                                        if (!RegExp(r'^\d{6}$').hasMatch(val))
+                                          return "Format: MMYYYY";
+                                        final m = int.tryParse(
+                                          val.substring(0, 2),
+                                        );
+                                        if (m == null || m < 1 || m > 12)
+                                          return "Invalid month";
+                                        return null;
+                                      },
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    )),
+                                const SizedBox(height: 12),
+
+                                CustomTextField(
+                                  label: "Award Short Description",
+                                  hintText:
+                                      "Briefly describe the award and what you achieved",
+                                  controller: fields['description'],
+                                  isRequired: true,
+                                  maxLines: 4,
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Add Another Award Button
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton.icon(
+                                    onPressed: controller.addAwardField,
+                                    icon: const Icon(
+                                      Icons.add_circle_outline,
+                                      size: 18,
+                                    ),
+                                    label: const Text("Add Another Award"),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.primaryWhite,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
 
                     const SizedBox(height: 12),
 
@@ -872,8 +977,13 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                         foregroundColor: Colors.black,
                         elevation: 0,
                         side: BorderSide(color: Colors.grey.shade400),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -912,7 +1022,9 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                       final cleanRecruiterIds = recruiterEmails.join(",");
 
                       // Safe awards JSON
-                      final awardsJson = jsonEncode(controller.getAwards()); // always valid JSON
+                      final awardsJson = jsonEncode(
+                        controller.getAwards(),
+                      ); // always valid JSON
 
                       // Debug print (optional - remove later)
                       debugPrint("Recruiters being sent → $cleanRecruiterIds");
@@ -968,7 +1080,6 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                         _comapanyTEController.text.trim(),
                         services.join(", "),
                         cleanRecruiterIds, // ← NOW ONLY EMAILS: eshitta@example.com,john@doe.com
-                        
                       );
 
                       // Success navigation (only if API succeeds — already handled inside controller)
@@ -982,6 +1093,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                 width: double.infinity,
                 height: 45,
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -1097,7 +1209,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1122,7 +1234,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1147,7 +1259,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1172,7 +1284,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1197,7 +1309,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1222,7 +1334,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1246,7 +1358,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
@@ -1270,7 +1382,7 @@ class SocialLink extends StatelessWidget {
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Enter Here",
+                          hintText: "Enter URL here",
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,

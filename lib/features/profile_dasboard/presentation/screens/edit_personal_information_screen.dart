@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controller/profile_controller.dart';
 import '../../data/models/user_model.dart';
-import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
-import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
-import 'package:karlfive/core/network/api_client.dart';
-import 'package:karlfive/core/network/constants/api_constants.dart';
+import 'package:giveandtake/features/auth/domain/repo/auth_repo.dart';
+import 'package:giveandtake/features/auth/data/models/verify_security_answers_request_model.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -63,6 +63,11 @@ class _EditProfileState extends State<EditProfile> {
     _surnameCtrl.text = lastName;
     _emailCtrl.text = user.email;
     _addressCtrl.text = user.address ?? '';
+
+    // Set selected country if user has an address
+    if (user.address != null && user.address!.isNotEmpty) {
+      _ctrl.selectedCountry.value = user.address;
+    }
   }
 
   Future<void> _pickImage() async {
@@ -364,7 +369,11 @@ class _EditProfileState extends State<EditProfile> {
                               : (user != null &&
                                         user.avatarUrl != null &&
                                         user.avatarUrl!.isNotEmpty
-                                    ? NetworkImage(user.avatarUrl!)
+                                    ? NetworkImage(
+                                        user.avatarUrl!.startsWith('http')
+                                            ? user.avatarUrl!
+                                            : '${ApiConstants.baseDomain}/${user.avatarUrl!}',
+                                      )
                                     : const AssetImage(
                                         "assets/images/profile.jpg",
                                       )),
@@ -503,7 +512,37 @@ class _EditProfileState extends State<EditProfile> {
                 ),
               ),
 
-              _textField(controller: _addressCtrl, label: "Country", hint: ""),
+              const SizedBox(height: 8),
+
+              // Country SearchableDropdown
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Country",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF212121),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(
+                      () => SearchableDropdown(
+                        hint: 'Select Country',
+                        items: _ctrl.countries.toList(),
+                        value: _ctrl.selectedCountry.value,
+                        onChanged: (value) {
+                          _ctrl.selectedCountry.value = value;
+                          _addressCtrl.text = value ?? '';
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
               const SizedBox(height: 30),
 

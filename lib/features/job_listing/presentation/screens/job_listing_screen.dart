@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
 import '../controller/job_listing_controller.dart';
 import '../widgets/job_card.dart';
 import 'job_application_screen.dart';

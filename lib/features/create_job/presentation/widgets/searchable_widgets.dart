@@ -36,6 +36,12 @@ class _SearchableDropdownFieldState extends State<SearchableDropdownField> {
     filteredItems = List.from(widget.items);
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _openDropdownSheet() {
     if (!widget.enabled) return;
 

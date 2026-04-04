@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class PrimaryButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   final double? width;
   final double? height;
@@ -14,7 +14,7 @@ class PrimaryButton extends StatelessWidget {
 
   const PrimaryButton({
     super.key,
-    required this.onPressed,
+    this.onPressed,
     required this.text,
     this.width,
     this.height,
@@ -26,12 +26,13 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isEnabled = onPressed != null && !isLoading;
     return GestureDetector(
-      onTap: isLoading ? null : onPressed,
+      onTap: isEnabled ? onPressed : null,
       child: AbsorbPointer(
-        absorbing: isLoading,
+        absorbing: !isEnabled,
         child: Opacity(
-          opacity: isLoading ? 0.6 : 1.0,
+          opacity: isEnabled ? 1.0 : 0.6,
           child: Container(
             width: width ?? double.infinity,
             height: height ?? 48,
@@ -65,7 +66,7 @@ class PrimaryButton extends StatelessWidget {
 }
 
 class SecondaryButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   final Color backgroundColor;
   final Color textColor;
@@ -77,7 +78,7 @@ class SecondaryButton extends StatelessWidget {
 
   const SecondaryButton({
     super.key,
-    required this.onPressed,
+    this.onPressed,
     required this.text,
     this.backgroundColor = AppColors.primaryWhite,
     this.textColor = AppColors.textBlack,
@@ -90,12 +91,13 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isEnabled = onPressed != null && !isLoading;
     return GestureDetector(
-      onTap: isLoading ? null : onPressed,
+      onTap: isEnabled ? onPressed : null,
       child: AbsorbPointer(
-        absorbing: isLoading,
+        absorbing: !isEnabled,
         child: Opacity(
-          opacity: isLoading ? 0.6 : 1.0,
+          opacity: isEnabled ? 1.0 : 0.6,
           child: Container(
             width: width ?? double.infinity,
             height: height ?? 48,

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:intl/intl.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/features/recruiter_account/presentation/widgets/application_requirements.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/widgets/application_requirements.dart';
 
 import '../../../../core/theme/input_decoration_extensions.dart';
 import '../../data/models/get_currency_response_model.dart';
@@ -184,13 +184,13 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                     items: controller.categories
                         .map(
                           (cat) => DropdownMenuItem(
-                        value: cat.name,
-                        child: Text(
-                          cat.name,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    )
+                            value: cat.name,
+                            child: Text(
+                              cat.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (_) {},
                   ),
@@ -241,10 +241,10 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                     items: controller.roles
                         .map(
                           (role) => DropdownMenuItem(
-                        value: role,
-                        child: Text(role, overflow: TextOverflow.ellipsis),
-                      ),
-                    )
+                            value: role,
+                            child: Text(role, overflow: TextOverflow.ellipsis),
+                          ),
+                        )
                         .toList(),
                     onChanged: (_) {},
                   ),
@@ -419,7 +419,7 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
             SizedBox(height: 6),
 
             Obx(
-                  () => DropdownButtonFormField<String>(
+              () => DropdownButtonFormField<String>(
                 isExpanded: true,
                 value: employeeController.selectedEmploymentType.value.isEmpty
                     ? null
@@ -436,16 +436,16 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                 items: employeeController.employmentTypes
                     .map(
                       (type) => DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(
-                      type,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
+                        value: type,
+                        child: Text(
+                          type,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                )
+                    )
                     .toList(),
                 onChanged: (value) {
                   employeeController.selectedEmploymentType.value = value ?? '';
@@ -461,13 +461,13 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
             ),
             SizedBox(height: 6),
             Obx(
-                  () => DropdownButtonFormField<String>(
+              () => DropdownButtonFormField<String>(
                 isExpanded: true,
                 value:
-                experienceLevelController
-                    .selectedExperienceLevel
-                    .value
-                    .isEmpty
+                    experienceLevelController
+                        .selectedExperienceLevel
+                        .value
+                        .isEmpty
                     ? null
                     : experienceLevelController.selectedExperienceLevel.value,
                 decoration: InputDecoration(
@@ -484,16 +484,16 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                 items: experienceLevelController.experienceLevels
                     .map(
                       (type) => DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(
-                      type,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
+                        value: type,
+                        child: Text(
+                          type,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                )
+                    )
                     .toList(),
                 onChanged: (value) {
                   experienceLevelController.selectedExperienceLevel.value =
@@ -511,7 +511,7 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
             SizedBox(height: 6),
 
             Obx(
-                  () => DropdownButtonFormField<String>(
+              () => DropdownButtonFormField<String>(
                 isExpanded: true,
                 value: locationTypeController.selectedLocationType.value.isEmpty
                     ? null
@@ -530,16 +530,16 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                 items: locationTypeController.locationTypes
                     .map(
                       (type) => DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(
-                      type,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
+                        value: type,
+                        child: Text(
+                          type,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                )
+                    )
                     .toList(),
                 onChanged: (value) {
                   locationTypeController.selectedLocationType.value =
@@ -557,7 +557,7 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
             SizedBox(height: 6),
 
             Obx(
-                  () => DropdownButtonFormField<String>(
+              () => DropdownButtonFormField<String>(
                 isExpanded: true,
                 value: careerStageController.selectedCareerStage.value.isEmpty
                     ? null
@@ -576,16 +576,16 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                 items: careerStageController.careerStages
                     .map(
                       (type) => DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(
-                      type,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
+                        value: type,
+                        child: Text(
+                          type,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                )
+                    )
                     .toList(),
                 onChanged: (value) {
                   careerStageController.selectedCareerStage.value = value ?? '';
@@ -612,70 +612,71 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                     return;
                   }
 
-                  final selected = await showModalBottomSheet<GetCurrencyResponseModel>(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (ctx) {
-                      final searchController = TextEditingController();
-                      final filteredCurrencies =
-                      RxList<GetCurrencyResponseModel>(
-                        controller.currencies,
-                      );
+                  final selected =
+                      await showModalBottomSheet<GetCurrencyResponseModel>(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (ctx) {
+                          final searchController = TextEditingController();
+                          final filteredCurrencies =
+                              RxList<GetCurrencyResponseModel>(
+                                controller.currencies,
+                              );
 
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(ctx).viewInsets.bottom,
-                        ),
-                        child: Column(
-                          children: [
-                            TextField(
-                              controller: searchController,
-                              decoration: const InputDecoration(
-                                prefixIcon: Icon(Icons.search),
-                                hintText: 'Search currency',
-                              ),
-                              onChanged: (value) {
-                                filteredCurrencies.assignAll(
-                                  controller.currencies
-                                      .where(
-                                        (c) =>
-                                    c.currencyName
-                                        .toLowerCase()
-                                        .contains(
-                                      value.toLowerCase(),
-                                    ) ||
-                                        c.symbol.toLowerCase().contains(
-                                          value.toLowerCase(),
-                                        ) ||
-                                        c.code.toLowerCase().contains(
-                                          value.toLowerCase(),
-                                        ),
-                                  )
-                                      .toList(),
-                                );
-                              },
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(ctx).viewInsets.bottom,
                             ),
-                            Obx(
-                                  () => Expanded(
-                                child: ListView.builder(
-                                  itemCount: filteredCurrencies.length,
-                                  itemBuilder: (_, index) {
-                                    final c = filteredCurrencies[index];
-                                    return ListTile(
-                                      title: Text(
-                                        '${c.currencyName} (${c.symbol})',
-                                      ),
-                                      onTap: () => Navigator.pop(ctx, c),
+                            child: Column(
+                              children: [
+                                TextField(
+                                  controller: searchController,
+                                  decoration: const InputDecoration(
+                                    prefixIcon: Icon(Icons.search),
+                                    hintText: 'Search currency',
+                                  ),
+                                  onChanged: (value) {
+                                    filteredCurrencies.assignAll(
+                                      controller.currencies
+                                          .where(
+                                            (c) =>
+                                                c.currencyName
+                                                    .toLowerCase()
+                                                    .contains(
+                                                      value.toLowerCase(),
+                                                    ) ||
+                                                c.symbol.toLowerCase().contains(
+                                                  value.toLowerCase(),
+                                                ) ||
+                                                c.code.toLowerCase().contains(
+                                                  value.toLowerCase(),
+                                                ),
+                                          )
+                                          .toList(),
                                     );
                                   },
                                 ),
-                              ),
+                                Obx(
+                                  () => Expanded(
+                                    child: ListView.builder(
+                                      itemCount: filteredCurrencies.length,
+                                      itemBuilder: (_, index) {
+                                        final c = filteredCurrencies[index];
+                                        return ListTile(
+                                          title: Text(
+                                            '${c.currencyName} (${c.symbol})',
+                                          ),
+                                          onTap: () => Navigator.pop(ctx, c),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       );
-                    },
-                  );
 
                   if (selected != null) {
                     controller.selectedCurrency.value = selected;
@@ -746,13 +747,20 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
             SizedBox(height: 6),
 
             Obx(
-                  () => DropdownButtonFormField<String>(
+              () => DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: jobPostingExpirationController.selectedJobPostingExpiration.value.isEmpty
+                value:
+                    jobPostingExpirationController
+                        .selectedJobPostingExpiration
+                        .value
+                        .isEmpty
                     ? null
-                    : jobPostingExpirationController.selectedJobPostingExpiration.value,
+                    : jobPostingExpirationController
+                          .selectedJobPostingExpiration
+                          .value,
                 decoration: context.primaryInputDecoration.copyWith(
-                  hintText: jobPostingExpirationController.jobPostingExpiration[2],
+                  hintText:
+                      jobPostingExpirationController.jobPostingExpiration[2],
                   hintStyle: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -763,20 +771,23 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                 items: jobPostingExpirationController.jobPostingExpiration
                     .map(
                       (type) => DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(
-                      type,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
+                        value: type,
+                        child: Text(
+                          type,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                )
+                    )
                     .toList(),
                 onChanged: (value) {
-                  jobPostingExpirationController.selectedJobPostingExpiration.value = value ?? '';
+                  jobPostingExpirationController
+                          .selectedJobPostingExpiration
+                          .value =
+                      value ?? '';
                 },
               ),
             ),
@@ -1038,10 +1049,7 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                 /// FINAL LAYOUT
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    mainContent,
-
-                  ],
+                  children: [mainContent],
                 );
               },
             ),
@@ -1256,14 +1264,12 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
     );
   }
 
-
-
   void _showSearchableBottomSheet(
-      BuildContext context, {
-        required String title,
-        required List<String> items,
-        required Function(String) onSelect,
-      }) {
+    BuildContext context, {
+    required String title,
+    required List<String> items,
+    required Function(String) onSelect,
+  }) {
     final searchController = TextEditingController();
     final filteredItems = RxList<String>(List.from(items));
 
@@ -1321,16 +1327,16 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                           items
                               .where(
                                 (item) => item.toLowerCase().contains(
-                              query.toLowerCase(),
-                            ),
-                          )
+                                  query.toLowerCase(),
+                                ),
+                              )
                               .toList(),
                         );
                       },
                     ),
                   ),
                   Obx(
-                        () => Expanded(
+                    () => Expanded(
                       child: ListView.builder(
                         itemCount: filteredItems.length,
                         itemBuilder: (context, index) {

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../../../profile_dasboard/controller/change_pass_controller.dart';
 
-
 class CompanyChangePasswordScreen extends StatelessWidget {
   CompanyChangePasswordScreen({super.key});
 
@@ -32,29 +31,6 @@ class CompanyChangePasswordScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // /// Profile Avatar
-              // const CircleAvatar(
-              //   radius: 50,
-              //   backgroundImage: AssetImage("assets/images/profile.jpg"),
-              // ),
-              //
-              // const SizedBox(height: 12),
-              // const Text(
-              //   "Brooklyn Simmons",
-              //   style: TextStyle(
-              //     fontSize: 16,
-              //     fontWeight: FontWeight.w600,
-              //     color: Color(0xFF212121),
-              //   ),
-              // ),
-              // const SizedBox(height: 4),
-              // const Text(
-              //   "brooklynsimmons@gmail.com",
-              //   style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
-              // ),
-              // const SizedBox(height: 24),
-              // const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
-              //
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -172,7 +148,7 @@ class CompanyChangePasswordScreen extends StatelessWidget {
                 }
                 if (controller.isSuccess.value) {
                   return const Text(
-                    "Password Changed Successfully",
+                    "Password changed successfully",
                     style: TextStyle(color: Colors.green, fontSize: 14),
                   );
                 }

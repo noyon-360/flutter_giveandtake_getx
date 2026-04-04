@@ -31,11 +31,6 @@ class JobDescriptionStep extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              const Text(
-                'Job Description',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 6),
 
               // HTML Editor
               Container(
@@ -65,7 +60,15 @@ class JobDescriptionStep extends StatelessWidget {
                   otherOptions: const OtherOptions(height: 250),
                   callbacks: Callbacks(
                     onChangeContent: (String? changed) {
-                      controller.updateJobDescriptionHtml(changed ?? '');
+                      final html = changed ?? '';
+                      controller.updateJobDescriptionHtml(html);
+
+                      // Compute plain text by stripping HTML tags
+                      final plainText = html.replaceAll(RegExp(r'<[^>]*>'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+
+                      // Update counts
+                      controller.characterCount.value = plainText.length;
+                      controller.wordCount.value = plainText.isEmpty ? 0 : plainText.split(RegExp(r'\s+')).length;
                     },
                   ),
                 ),
@@ -73,19 +76,28 @@ class JobDescriptionStep extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              // Character / Word Count
+// Character / Word Count (with color indicators for better UX)
               Obx(() {
                 final charCount = controller.characterCount.value;
                 final wordCount = controller.wordCount.value;
                 const wordMin = 20;
                 const charMax = 2000;
 
+                final bool wordValid = wordCount >= wordMin;
+                final bool charValid = charCount <= charMax;
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Character count: $charCount/$charMax'),
+                    Text(
+                      'Character count: $charCount/$charMax',
+                      style: TextStyle(color: charValid ? Colors.green : Colors.red),
+                    ),
                     const SizedBox(height: 6),
-                    Text('Word count: $wordCount/$wordMin minimum'),
+                    Text(
+                      'Word count: $wordCount/$wordMin minimum',
+                      style: TextStyle(color: wordValid ? Colors.green : Colors.red),
+                    ),
                   ],
                 );
               }),
@@ -274,7 +286,42 @@ class JobDescriptionStep extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: ElevatedButton(
-                      onPressed: () => controller.nextStep(),
+                      onPressed: () {
+                        final wordCount = controller.wordCount.value;
+                        final charCount = controller.characterCount.value;
+
+                        const int wordMin = 20;
+                        const int charMax = 2000;
+
+                        // Check word count
+                        if (wordCount < wordMin) {
+                          Get.snackbar(
+                            "Incomplete Information",
+                            "Please provide a job description (at least 20 words).",
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red.shade700,
+                            colorText: Colors.white,
+                            duration: const Duration(seconds: 4),
+                          );
+                          return;
+                        }
+
+                        // Check character limit
+                        if (charCount > charMax) {
+                          Get.snackbar(
+                            "Incomplete Information",
+                            "Job description exceeds 2000 characters. Please shorten it.",
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red.shade700,
+                            colorText: Colors.white,
+                            duration: const Duration(seconds: 4),
+                          );
+                          return;
+                        }
+
+                        // All validations passed → go to next step
+                        controller.nextStep();
+                      },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -291,6 +338,76 @@ class JobDescriptionStep extends StatelessWidget {
                         ),
                       ),
                     ),
+
+
+
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     controller.nextStep();
+                    //   } ,
+                    //   style: ElevatedButton.styleFrom(
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(8),
+                    //     ),
+                    //     backgroundColor: Colors.transparent,
+                    //     shadowColor: Colors.transparent,
+                    //   ),
+                    //   child: const Text(
+                    //     'Next',
+                    //     style: TextStyle(
+                    //       color: Colors.white,
+                    //       fontWeight: FontWeight.bold,
+                    //       fontSize: 16,
+                    //     ),
+                    //   ),
+                    // ),
+                    // ElevatedButton(
+                    //   style: ElevatedButton.styleFrom(
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(8),
+                    //     ),
+                    //     backgroundColor: Colors.transparent,
+                    //     shadowColor: Colors.transparent,
+                    //   ),
+                    //   onPressed: () {
+                    //     final wordCount = controller.wordCount.value;
+                    //     final charCount = controller.characterCount.value;
+                    //     const wordMin = 20;
+                    //     const charMax = 2000;
+                    //
+                    //     if (wordCount < wordMin) {
+                    //       Get.snackbar("Incomplete Information", "Please enter at least 20 words in the job description.", snackPosition: SnackPosition.BOTTOM,
+                    //         backgroundColor: Colors.red.shade700,
+                    //         colorText: Colors.white,
+                    //         duration: const Duration(seconds: 2),
+                    //         //margin: const EdgeInsets.all(12),
+                    //       );
+                    //       return;
+                    //     }
+                    //
+                    //     if (charCount > charMax) {
+                    //       Get.snackbar('Incomplete Information', 'Job description exceeds 2000 characters. Please shorten it.', snackPosition: SnackPosition.BOTTOM,
+                    //         backgroundColor: Colors.red.shade700,
+                    //         colorText: Colors.white,
+                    //         duration: const Duration(seconds: 2),
+                    //         //margin: const EdgeInsets.all(12),
+                    //       );
+                    //       return;
+                    //     }
+                    //
+                    //     // Validation passed → proceed to next step
+                    //     // e.g., Get.to(() => NextPage());
+                    //   },
+                    //   child: const Text('Next', style: TextStyle(
+                    //           color: Colors.white,
+                    //           fontWeight: FontWeight.bold,
+                    //           fontSize: 16,
+                    //         ),),
+                    // ),
+
+
+
+
                   ),
                 ],
               ),

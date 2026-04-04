@@ -1,15 +1,15 @@
 import 'package:get/get.dart';
-import 'package:karlfive/features/Home/presentation/controllers/home_controller.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/company/presentation/controller/company_account_controller.dart';
-import 'package:karlfive/features/company/presentation/controller/company_details_controller.dart';
-import 'package:karlfive/features/company/presentation/controller/employee_screen_controller.dart';
-import 'package:karlfive/features/create_job/presentation/controller/category_controller.dart';
-import 'package:karlfive/features/job_listing/presentation/controller/job_listing_controller.dart';
-import 'package:karlfive/features/plan_pricing/presentation/controllers/paypal_controller.dart';
-import 'package:karlfive/features/plan_pricing/presentation/controllers/plan_pricing_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/country_city_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/features/Home/presentation/controllers/home_controller.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
+import 'package:giveandtake/features/company_pricing/presentation/controllers/company_pricing_controller.dart';
+import 'package:giveandtake/features/create_job/presentation/controller/category_controller.dart';
+import 'package:giveandtake/features/job_listing/presentation/controller/job_listing_controller.dart';
+import 'package:giveandtake/features/plan_pricing/presentation/controllers/paypal_controller.dart';
+import 'package:giveandtake/features/plan_pricing/presentation/controllers/plan_pricing_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 
 void setupController() {
   // Auth Controller
@@ -35,6 +35,12 @@ void setupController() {
     fenix: true,
   );
 
+  // Company Pricing Controller
+  Get.lazyPut<CompanyPricingController>(
+    () => CompanyPricingController(),
+    fenix: true,
+  );
+
   // PayPal Controller
   Get.lazyPut<PaypalController>(
     () => PaypalController(Get.find()),
@@ -42,10 +48,7 @@ void setupController() {
   );
 
   // Home Controller
-  Get.lazyPut<HomeController>(
-    () => HomeController(Get.find()),
-    fenix: true,
-  );
+  Get.lazyPut<HomeController>(() => HomeController(Get.find()), fenix: true);
 
   // Category Controller
   Get.lazyPut<CategoryController>(
@@ -57,13 +60,9 @@ void setupController() {
     fenix: true,
   );
 
-   Get.lazyPut<CompanyDetailsController>(
+  Get.lazyPut<CompanyDetailsController>(
     () => CompanyDetailsController(Get.find(), Get.find()),
     fenix: true,
   );
-  Get.lazyPut<LocationController>(
-    () => LocationController(),
-    fenix: true,
-  );
- 
+  Get.lazyPut<LocationController>(() => LocationController(), fenix: true);
 }

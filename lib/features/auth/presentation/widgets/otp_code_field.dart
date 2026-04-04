@@ -6,9 +6,10 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class PinCode extends StatefulWidget {
-  const PinCode({super.key, required this.otpController});
+  const PinCode({super.key, required this.otpController, this.enabled = true});
 
   final TextEditingController otpController;
+  final bool enabled;
 
   @override
   State<PinCode> createState() => _PinCodeState();
@@ -35,6 +36,7 @@ class _PinCodeState extends State<PinCode> {
       appContext: context,
       controller: widget.otpController,
       length: 6,
+      enabled: widget.enabled,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       animationType: AnimationType.fade,
       keyboardType: TextInputType.number,
@@ -63,8 +65,8 @@ class _PinCodeState extends State<PinCode> {
         //  reduce the spacing here
         // default ~16, reduce to make boxes closer
         inactiveColor: Colors.grey,
-        activeColor: Colors.black,
-        selectedColor: Colors.black,
+        activeColor: Colors.grey,
+        selectedColor: Colors.grey,
 
         inactiveFillColor: AppColors.primaryWhite,
         activeFillColor: AppColors.primaryWhite,

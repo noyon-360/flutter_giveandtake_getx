@@ -1,9 +1,8 @@
-// applicants_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:karlfive/features/company/presentation/controller/company_details_controller.dart';
-import 'package:karlfive/features/company/presentation/screen/candidate_details_screen.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
+import 'package:giveandtake/features/company/presentation/screen/candidate_details_screen.dart';
 import '../../data/model/company_applicant_list_response_model.dart';
 
 class CompanyApplicantsListScreen extends StatefulWidget {
@@ -26,13 +25,9 @@ class _CompanyApplicantsListScreenState
     controller = Get.find<CompanyDetailsController>();
     controller.jobId.value = widget.jobId;
 
-    // First fetch applicants, THEN fetch resumes
     controller.fetchApplicantList().then((_) {
-      // This runs only AFTER applicants are loaded
       for (var applicant in controller.venue) {
-        final candidateUserId = applicant.user.id; 
-
-        // Optional: Add safety check
+        final candidateUserId = applicant.user.id;
         if (candidateUserId.isNotEmpty) {
           controller.fetchResume(candidateUserId);
         }
@@ -79,9 +74,8 @@ class _CompanyApplicantsListScreenState
               style: TextStyle(fontSize: 14, color: Colors.black54),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            /// FULLY SCROLLABLE DATATABLE
             Expanded(
               child: Obx(() {
                 if (controller.isLoading.value) {
@@ -97,236 +91,175 @@ class _CompanyApplicantsListScreenState
                   );
                 }
 
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                    child: DataTable(
-                      headingRowColor: MaterialStateProperty.all(
-                        Colors.blue.shade50,
+                /// ✅ MOBILE CARD LIST
+                return ListView.builder(
+                  itemCount: controller.venue.length,
+                  itemBuilder: (context, index) {
+                    final applicant = controller.venue[index];
+                    final user = applicant.user;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.20),
+                            blurRadius: 16,
+                            spreadRadius: 4,
+                            offset: const Offset(0, 0), // shadow on all sides
+                          ),
+                        ],
                       ),
-                      columnSpacing: 40,
-                      dataRowHeight: 65,
 
-                      columns: const [
-                        DataColumn(
-                          label: Text(
-                            "Name",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff1e3a8a),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /// NAME
+                          Text(
+                            user.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ),
-                        DataColumn(
-                          label: Text(
+
+                          const SizedBox(height: 6),
+
+                          _infoRow(
                             "Applied",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff1e3a8a),
-                            ),
+                            formatAppliedDate(applicant.createdAt),
                           ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            "Details",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff1e3a8a),
-                            ),
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            "Custom Question",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff1e3a8a),
-                            ),
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            "Status",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff1e3a8a),
-                            ),
-                          ),
-                        ),
-                      ],
 
-                      /// DATA ROWS
-                      rows: controller.venue.map((applicant) {
-                        final user = applicant.user;
+                          const SizedBox(height: 10),
 
-                        return DataRow(
-                          cells: [
-                            /// NAME
-                            DataCell(
-                              Text(
-                                user.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-
-                            /// DATE
-                            DataCell(
-                              Text(formatAppliedDate(applicant.createdAt)),
-                            ),
-
-                            /// DETAILS BUTTON
-                            DataCell(
-                              TextButton.icon(
+                          /// DETAILS BUTTON
+                          /// /// DETAILS + ANSWER ROW
+                          Row(
+                            children: [
+                              /// View Details
+                              TextButton(
                                 onPressed: () {
                                   Get.to(() => CandidateDetailsScreen());
                                 },
-                                // icon: const Icon(Icons.description, size: 16),
-                                label: const Text("Details"),
                                 style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
                                   foregroundColor: Colors.blue,
                                 ),
+                                child: const Text(
+                                  "View Details",
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
                               ),
-                            ),
 
-                            /// CUSTOM QUESTION
-                            DataCell(
-                              applicant.answer.isEmpty
-                                  ? const Text("—")
-                                  : InkWell(
-                                      onTap: () {
-                                        _showCustomQuestionDialog(
-                                          context: context,
-                                          answers: applicant.answer,
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade400,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          applicant.answer.length == 1
-                                              ? "View Answer"
-                                              : "View Answers (${applicant.answer.length})",
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
+                              const Spacer(),
+
+                              /// View Answer(s) — ONLY if backend has questions
+                              if (applicant.answer.isNotEmpty)
+                                InkWell(
+                                  onTap: () {
+                                    _showCustomQuestionDialog(
+                                      context: context,
+                                      answers: applicant.answer,
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.grey.shade400,
                                       ),
                                     ),
-                            ),
+                                    child: Text(
+                                      applicant.answer.length == 1
+                                          ? "View Answer"
+                                          : "View Answers (${applicant.answer.length})",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
 
-                            /// STATUS CHIP
-                            // DataCell(
-                            //   Container(
-                            //     padding: const EdgeInsets.symmetric(
-                            //         horizontal: 12, vertical: 8),
-                            //     decoration: BoxDecoration(
-                            //       color: _getStatusColor(applicant.status),
-                            //       borderRadius: BorderRadius.circular(20),
-                            //     ),
-                            //     child: Text(
-                            //       applicant.status.capitalizeFirst ?? "",
-                            //       style: const TextStyle(
-                            //           color: Colors.white,
-                            //           fontWeight: FontWeight.bold),
-                            //       textAlign: TextAlign.center,
-                            //     ),
-                            //   ),
-                            // ),
-                            /// STATUS BUTTONS (Application Received / Shortlisted / Unsuccessful)
-                            DataCell(
-                              Row(
-                                children: [
-                                  // ----------------- APPLICATION RECEIVED -----------------
-                                  _statusBtn(
-                                    label: "Application Received",
-                                    isActive:
-                                        applicant.status.toLowerCase() ==
+                          const Divider(height: 24),
+
+                          /// STATUS BUTTONS
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              _statusBtn(
+                                label: "Received",
+                                isActive:
+                                    applicant.status.toLowerCase() ==
+                                        "applied" ||
+                                    applicant.status.toLowerCase() == "pending",
+                                color: Colors.grey.shade300,
+                                textColor: Colors.black87,
+                                onTap:
+                                    applicant.status.toLowerCase() ==
                                             "applied" ||
                                         applicant.status.toLowerCase() ==
-                                            "pending",
-                                    color: Colors.grey.shade300,
-                                    textColor: Colors.black87,
-                                    onTap:
-                                        applicant.status.toLowerCase() ==
-                                                "applied" ||
-                                            applicant.status.toLowerCase() ==
-                                                "pending"
-                                        ? () {
-                                            controller.statusUpdated(
-                                              applicantId: applicant.id,
-                                              status: "applied",
-                                            );
-                                          }
-                                        : null,
-                                  ),
-
-                                  const SizedBox(width: 10),
-
-                                  // ----------------- SHORTLISTED -----------------
-                                  _statusBtn(
-                                    label: "Shortlisted",
-                                    isActive:
-                                        applicant.status.toLowerCase() !=
-                                        "shortlisted",
-                                    color: Colors.blue.shade100,
-                                    textColor: Colors.blue.shade900,
-                                    onTap:
-                                        applicant.status.toLowerCase() !=
-                                            "shortlisted"
-                                        ? () {
-                                            controller.statusUpdated(
-                                              applicantId: applicant.id,
-                                              status: "shortlisted",
-                                            );
-                                          }
-                                        : null,
-                                  ),
-
-                                  const SizedBox(width: 10),
-
-                                  // ----------------- UNSUCCESSFUL -----------------
-                                  _statusBtn(
-                                    label: "Unsuccessful",
-                                    isActive:
-                                        applicant.status.toLowerCase() !=
-                                            "rejected" &&
-                                        applicant.status.toLowerCase() !=
-                                            "rejected",
-                                    color: Colors.red.shade100,
-                                    textColor: Colors.red.shade700,
-                                    onTap:
-                                        applicant.status.toLowerCase() !=
-                                                "rejected" &&
-                                            applicant.status.toLowerCase() !=
-                                                "rejected"
-                                        ? () {
-                                            controller.statusUpdated(
-                                              applicantId: applicant.id,
-                                              status: "unsuccessful",
-                                            );
-                                          }
-                                        : null,
-                                  ),
-                                ],
+                                            "pending"
+                                    ? () {
+                                        controller.statusUpdated(
+                                          applicantId: applicant.id,
+                                          status: "applied",
+                                        );
+                                      }
+                                    : null,
                               ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  ),
+
+                              _statusBtn(
+                                label: "Shortlisted",
+                                isActive:
+                                    applicant.status.toLowerCase() !=
+                                    "shortlisted",
+                                color: Colors.blue.shade100,
+                                textColor: Colors.blue.shade900,
+                                onTap:
+                                    applicant.status.toLowerCase() !=
+                                        "shortlisted"
+                                    ? () {
+                                        controller.statusUpdated(
+                                          applicantId: applicant.id,
+                                          status: "shortlisted",
+                                        );
+                                      }
+                                    : null,
+                              ),
+
+                              _statusBtn(
+                                label: "Unsuccessful",
+                                isActive:
+                                    applicant.status.toLowerCase() !=
+                                    "rejected",
+                                color: Colors.red.shade100,
+                                textColor: Colors.red.shade700,
+                                onTap:
+                                    applicant.status.toLowerCase() != "rejected"
+                                    ? () {
+                                        controller.statusUpdated(
+                                          applicantId: applicant.id,
+                                          status: "rejected",
+                                        );
+                                      }
+                                    : null,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               }),
             ),
@@ -335,23 +268,27 @@ class _CompanyApplicantsListScreenState
       ),
     );
   }
+}
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'applied':
-        return Colors.blue;
-      case 'shortlisted':
-        return Colors.orange;
-      case 'interview':
-        return Colors.purple;
-      case 'rejected':
-        return Colors.red;
-      case 'hired':
-        return Colors.green;
-      default:
-        return Colors.grey.shade600;
-    }
-  }
+/// LABEL + VALUE ROW
+Widget _infoRow(String label, String value) {
+  return Row(
+    children: [
+      SizedBox(
+        width: 80,
+        child: Text(
+          "$label:",
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.black54,
+          ),
+        ),
+      ),
+      Expanded(
+        child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+      ),
+    ],
+  );
 }
 
 void _showCustomQuestionDialog({
@@ -362,71 +299,38 @@ void _showCustomQuestionDialog({
     context: context,
     builder: (context) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            answers.length == 1
-                ? "Custom Question Answers"
-                : "Custom Questions Answers",
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
+      title: const Text(
+        "Custom Question Answers",
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: answers.isEmpty
-            ? const Text("No answers provided")
-            : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: answers.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 20),
-                itemBuilder: (context, index) {
-                  final ans = answers[index];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        (ans.question ?? '').isEmpty
-                            ? "Question ${index + 1}"
-                            : ans.question ?? '',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        width: double.maxFinite,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Text(
-                          (ans.ans ?? '').isEmpty
-                              ? "No response"
-                              : ans.ans ?? '',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: (ans.ans ?? '').isEmpty
-                                ? Colors.grey.shade600
-                                : Colors.black87,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: answers.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
+          itemBuilder: (context, index) {
+            final ans = answers[index];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ans.question ?? "Question ${index + 1}",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(ans.ans ?? "No response"),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     ),
   );

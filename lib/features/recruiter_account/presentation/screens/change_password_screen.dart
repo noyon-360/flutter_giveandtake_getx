@@ -1,209 +1,290 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/input_decoration_extensions.dart';
 import '../../../auth/presentation/controller/auth_controller.dart';
+import '../../../profile_dasboard/controller/change_pass_controller.dart';
 
-
-class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({super.key});
+class ChangePassword extends StatefulWidget {
+  const ChangePassword({super.key});
 
   @override
-  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+  State<ChangePassword> createState() => _ChangePasswordScreenState();
 }
 
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  final _formKey = GlobalKey<FormState>();
+class _ChangePasswordScreenState extends State<ChangePassword> {
+  final ChangePasswordController controller = Get.put(
+    ChangePasswordController(),
+  );
 
-  final _currentFocus = FocusNode();
-  final _newFocus = FocusNode();
-  final _confirmFocus = FocusNode();
+  final TextEditingController currentCtrl = TextEditingController();
+  final TextEditingController newCtrl = TextEditingController();
+  final TextEditingController confirmCtrl = TextEditingController();
 
-  final _currentCtrl = TextEditingController();
-  final _newCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
-
-  final _obscureCurrent = ValueNotifier<bool>(true);
-  final _obscureNew = ValueNotifier<bool>(true);
-  final _obscureConfirm = ValueNotifier<bool>(true);
-
-  final _recruiterCtrl = Get.find<RecruiterController>();
-
-  @override
-  void dispose() {
-    _currentCtrl.dispose();
-    _newCtrl.dispose();
-    _confirmCtrl.dispose();
-    _currentFocus.dispose();
-    _newFocus.dispose();
-    _confirmFocus.dispose();
-    super.dispose();
-  }
-
-  Future _submit () async{
-    if (!_formKey.currentState!.validate()) return;
-    _recruiterCtrl.changePassword(_currentCtrl.text, _confirmCtrl.text);
-  }
+  // @override
+  // void dispose() {
+  //   _currentCtrl.dispose();
+  //   _newCtrl.dispose();
+  //   _confirmCtrl.dispose();
+  //   _currentFocus.dispose();
+  //   _newFocus.dispose();
+  //   _confirmFocus.dispose();
+  //   super.dispose();
+  // }
+  //
+  // Future _submit () async{
+  //   if (!_formKey.currentState!.validate()) return;
+  //   _recruiterCtrl.changePassword(_currentCtrl.text, _confirmCtrl.text);
+  // }
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFF3E0),
+        title: Text('Change Password', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Get.back(),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF8C42),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Colors.white,
-              size: 18,
-            ),
-          ),
-        ),
-        title: const Text(
-          "Change Password",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // ────── SCROLLABLE FORM ──────
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-              ).copyWith(bottom: 24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Gap(h: 30),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // /// Profile Avatar
+              // const CircleAvatar(
+              //   radius: 50,
+              //   backgroundImage: AssetImage("assets/images/profile.jpg"),
+              // ),
+              //
+              // const SizedBox(height: 12),
+              // const Text(
+              //   "Brooklyn Simmons",
+              //   style: TextStyle(
+              //     fontSize: 16,
+              //     fontWeight: FontWeight.w600,
+              //     color: Color(0xFF212121),
+              //   ),
+              // ),
+              // const SizedBox(height: 4),
+              // const Text(
+              //   "brooklynsimmons@gmail.com",
+              //   style: TextStyle(fontSize: 14, color: Color(0xFF595959)),
+              // ),
+              // const SizedBox(height: 24),
+              // const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
+              //
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Change Password",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.start,
+                  ),
+                ],
+              ),
 
-                    // Current Password
-                    ValueListenableBuilder<bool>(
-                      valueListenable: _obscureCurrent,
-                      builder: (_, obscure, __) => TextFormField(
-                        controller: _currentCtrl,
-                        focusNode: _currentFocus,
-                        obscureText: obscure,
-                        textInputAction: TextInputAction.next,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                        decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Current Password",
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obscure
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.grey,
+              const SizedBox(height: 20),
+
+              /// Fields
+              Obx(
+                () => _passwordField(
+                  hint: "Enter Current Password",
+                  controller: currentCtrl,
+                  onChanged: (val) => controller.currentPassword.value = val,
+                  hasError: controller.hasError.value,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Obx(
+                () => _passwordField(
+                  hint: "New Password",
+                  controller: newCtrl,
+                  onChanged: (val) => controller.newPassword.value = val,
+                  hasError: controller.hasError.value,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Obx(
+                () => _passwordField(
+                  hint: "Confirm Password",
+                  controller: confirmCtrl,
+                  onChanged: (val) => controller.confirmPassword.value = val,
+                  hasError: controller.hasError.value,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              /// Error message
+              /// Error message
+              Obx(
+                () => controller.hasError.value
+                    ? const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 0),
+                          child: Text(
+                            "Passphrase must be at least 12 characters and \n include one uppercase, one lowercase, one number, \n and one special character.",
+                            style: TextStyle(
+                              color: Color(0xFFB90000),
+                              fontSize: 10,
                             ),
-                            onPressed: () => _obscureCurrent.value = !obscure,
+                            textAlign: TextAlign.left,
                           ),
                         ),
-                        validator: Validators.password,
-                        autofillHints: const [AutofillHints.password],
-                        onFieldSubmitted: (_) =>
-                            FocusScope.of(context).requestFocus(_newFocus),
+                      )
+                    : SizedBox.shrink(),
+              ),
+
+              const SizedBox(height: 16),
+
+              /// Save Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: Obx(
+                  () => ElevatedButton(
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () {
+                            controller.validateAndSubmit();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2B7FD0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
                       ),
                     ),
-                    Gap.h16,
-
-                    // New Password
-                    ValueListenableBuilder<bool>(
-                      valueListenable: _obscureNew,
-                      builder: (_, obscure, __) => TextFormField(
-                        controller: _newCtrl,
-                        focusNode: _newFocus,
-                        obscureText: obscure,
-                        textInputAction: TextInputAction.next,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                        decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "New Password",
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obscure
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.grey,
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
                             ),
-                            onPressed: () => _obscureNew.value = !obscure,
-                          ),
-                        ),
-                        validator: Validators.password,
-                        autofillHints: const [AutofillHints.newPassword],
-                        onFieldSubmitted: (_) =>
-                            FocusScope.of(context).requestFocus(_confirmFocus),
-                      ),
-                    ),
-                    Gap.h16,
-
-                    // Confirm New Password
-                    ValueListenableBuilder<bool>(
-                      valueListenable: _obscureConfirm,
-                      builder: (_, obscure, __) => TextFormField(
-                        controller: _confirmCtrl,
-                        focusNode: _confirmFocus,
-                        obscureText: obscure,
-                        textInputAction: TextInputAction.done,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                        decoration: context.primaryInputDecoration.copyWith(
-                          hintText: "Confirm New Password",
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obscure
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.grey,
+                          )
+                        : const Text(
+                            "Save",
+                            style: TextStyle(
+                              color: Color(0xFFF4F4F4),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
                             ),
-                            onPressed: () => _obscureConfirm.value = !obscure,
                           ),
-                        ),
-                        validator: (v) =>
-                            Validators.confirmPassword(v, _newCtrl.text),
-                        autofillHints: const [AutofillHints.newPassword],
-                        onFieldSubmitted: (_) => _submit(),
-                      ),
-                    ),
+                  ),
+                ),
+              ),
 
-                    Gap(h: 40),
-                  ],
+              const SizedBox(height: 20),
+
+              // Server error or success
+              Obx(() {
+                if (controller.serverError.isNotEmpty) {
+                  return Text(
+                    controller.serverError.value,
+                    style: const TextStyle(color: Colors.red),
+                  );
+                }
+                if (controller.isSuccess.value) {
+                  return const Text(
+                    "Password changed successfully",
+                    style: TextStyle(color: Colors.green, fontSize: 14),
+                  );
+                }
+                return const SizedBox();
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _passwordField({
+    required TextEditingController controller,
+    required Function(String) onChanged,
+    required bool hasError,
+    String? hint,
+    double height = 53,
+  }) {
+    final isObscure = true.obs;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Obx(
+        () => SizedBox(
+          height: height,
+          child: TextFormField(
+            controller: controller,
+            obscureText: isObscure.value,
+            obscuringCharacter: "*",
+            onChanged: onChanged,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF212121),
+            ),
+            decoration: InputDecoration(
+              prefixIcon: SizedBox(
+                width: 20,
+                height: 20,
+                child: Center(
+                  child: Image.asset(
+                    "assets/icons/changepass_lock.png",
+                    width: 18,
+                    height: 18,
+
+                    color: const Color(0xFF999999),
+                  ),
+                ),
+              ),
+              suffixIcon: IconButton(
+                icon: Image.asset(
+                  "assets/icons/eye_closed.png",
+                  width: 20,
+                  height: 20,
+                  color: const Color(0xFF999999),
+                ),
+                onPressed: () {
+                  isObscure.value = !isObscure.value;
+                },
+              ),
+              hintText: hint ?? "Enter password",
+              hintStyle: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: hasError ? Colors.red : const Color(0xFF737373),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: const BorderSide(
+                  color: Color(0xFF4B5563),
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: BorderSide(
+                  color: hasError ? Colors.red : const Color(0xFF4B5563),
+                  width: 1,
                 ),
               ),
             ),
           ),
-
-          // ────── FIXED SAVE BUTTON ──────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: PrimaryButton(onPressed: _submit, text: "Save", ),
-          ),
-        ],
+        ),
       ),
     );
   }

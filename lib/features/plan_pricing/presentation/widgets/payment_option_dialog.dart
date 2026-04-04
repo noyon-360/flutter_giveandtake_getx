@@ -1,19 +1,25 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/constants/app_images.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/plan_pricing/presentation/screens/payment_screen.dart';
-import 'package:karlfive/features/plan_pricing/presentation/controllers/paypal_controller.dart';
+import 'package:giveandtake/core/common/constants/app_images.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/core/services/get_user_profile_service.dart';
+import 'package:giveandtake/features/plan_pricing/presentation/screens/payment_screen.dart';
+import 'package:giveandtake/features/plan_pricing/presentation/screens/plan_pricing_screen.dart';
+import 'package:giveandtake/features/plan_pricing/presentation/controllers/paypal_controller.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final String planTitle;
   final double price;
+  final String? planId;
   final VoidCallback? onPayNow;
 
   const PaymentMethodDialog({
     super.key,
     required this.planTitle,
     required this.price,
+    this.planId,
     this.onPayNow,
   });
 
@@ -89,41 +95,101 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                 ),
                 onPressed: () async {
                   if (_selectedMethod == 'PayPal') {
-                    // Use PaypalController to create order
-                    final paypalController = Get.find<PaypalController>();
-                    final response = await paypalController.createOrder(
-                      widget.price,
-                    );
+                    // Close dialog first
+                    if (mounted) Navigator.of(context).pop();
 
-                    if (response != null) {
-                      // Close dialog first
-                      if (mounted) Navigator.of(context).pop();
+                    // Check if platform is Android for native SDK
+                    if (Platform.isAndroid) {
+                      // Get userId from user profile service
+                      final userProfileService =
+                          Get.find<GetUserProfileService>();
+                      final userId = userProfileService.userInfo?.id ?? '';
 
-                      // Navigate to PaymentScreen with orderId and approveUrl
-                      Get.to(
-                        () => PaymentScreen(
-                          planTitle: widget.planTitle,
-                          amount: widget.price,
-                          orderId: response.orderId,
-                          approveUrl: response.approveUrl,
-                        ),
+                      if (userId.isEmpty) {
+                        Get.snackbar(
+                          'Error',
+                          'User not logged in. Please log in and try again.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                        return;
+                      }
+
+                      if (widget.planId == null || widget.planId!.isEmpty) {
+                        Get.snackbar(
+                          'Error',
+                          'Invalid plan selected. Please try again.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                        return;
+                      }
+
+                      // Show loading indicator
+                      Get.dialog(
+                        Center(child: CircularProgressIndicator()),
+                        barrierDismissible: false,
+                      );
+
+                      // Directly call native PayPal flow for Android
+                      final paypalController = Get.find<PaypalController>();
+                      await paypalController.startNativePayment(
+                        amount: widget.price,
+                        userId: userId,
+                        planId: widget.planId!,
+                        seasonId: null, // Optional: Add if needed
+                        onSuccess: (orderId) {
+                          // Close loading dialog
+                          if (Get.isDialogOpen == true) Get.back();
+
+                          // Show success snackbar
+                          Get.snackbar(
+                            'Success',
+                            'Payment completed successfully!',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.green,
+                            colorText: Colors.white,
+                            duration: const Duration(seconds: 2),
+                          );
+
+                          // Navigate to Plan Pricing screen as user requested
+                          Future.delayed(const Duration(seconds: 2), () {
+                            Get.offAll(() => PlanPricingScreen());
+                          });
+                        },
+                        onError: (error) {
+                          // Close loading dialog
+                          if (Get.isDialogOpen == true) Get.back();
+
+                          // Show error snackbar
+                          Get.snackbar(
+                            'Payment Error',
+                            error,
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                        },
                       );
                     } else {
-                      // Show error from controller
-                      Get.snackbar(
-                        'Error',
-                        paypalController.errorMessage.value.isEmpty
-                            ? 'Failed to create PayPal order'
-                            : paypalController.errorMessage.value,
-                        snackPosition: SnackPosition.BOTTOM,
+                      // Fallback to PaymentScreen for iOS/Web (WebView flow)
+                      Get.to(
+                        PaymentScreen(
+                          planTitle: widget.planTitle,
+                          amount: widget.price,
+                          planId: widget.planId,
+                        ),
                       );
                     }
                   } else {
-                    // Fallback to existing PaymentScreen
+                    // Fallback to existing PaymentScreen for other payment methods
                     Get.to(
                       PaymentScreen(
                         planTitle: widget.planTitle,
                         amount: widget.price,
+                        planId: widget.planId,
                       ),
                     );
                   }
@@ -150,6 +216,7 @@ void showPaymentMethodDialog(
   BuildContext context, {
   required String planTitle,
   required double price,
+  String? planId,
   VoidCallback? onPayNow,
 }) {
   showDialog(
@@ -158,6 +225,7 @@ void showPaymentMethodDialog(
     builder: (context) => PaymentMethodDialog(
       planTitle: planTitle,
       price: price,
+      planId: planId,
       onPayNow: onPayNow,
     ),
   );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:karlfive/features/home_static_screens/data/models/blog_model.dart';
+import 'package:giveandtake/features/home_static_screens/data/models/blog_model.dart';
 import 'package:get/get.dart';
 
 import '../controller/blog_details_controller.dart';

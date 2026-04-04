@@ -1,15 +1,12 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 import '../controller/country_city_controller.dart';
+
 class CountryCitySearchableDropdown extends StatelessWidget {
-  const CountryCitySearchableDropdown({
-    super.key,
-    required this.controller,
-  });
+  const CountryCitySearchableDropdown({super.key, required this.controller});
 
   final LocationController controller;
-
 
   void _showSearchDialog({
     required BuildContext context,
@@ -39,16 +36,20 @@ class CountryCitySearchableDropdown extends StatelessWidget {
                     controller: searchController,
                     decoration: context.primaryInputDecoration.copyWith(
                       hintText: "Search...",
-                      prefixIcon: const Icon(Icons.search,color: Color(0xFF787878),),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF787878),
                       ),
+                      border: OutlineInputBorder(borderSide: BorderSide.none),
                     ),
                     onChanged: (value) {
                       setState(() {
                         filteredItems = items
-                            .where((item) =>
-                            item.toLowerCase().contains(value.toLowerCase()))
+                            .where(
+                              (item) => item.toLowerCase().contains(
+                                value.toLowerCase(),
+                              ),
+                            )
                             .toList();
                       });
                     },
@@ -79,7 +80,6 @@ class CountryCitySearchableDropdown extends StatelessWidget {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +117,7 @@ class CountryCitySearchableDropdown extends StatelessWidget {
                       (controller.selectedCountry.value?.isEmpty ?? true)
                           ? "Select country"
                           : controller.selectedCountry.value ?? "",
-                    )
+                    ),
                   ),
                 );
               }),
@@ -133,7 +133,7 @@ class CountryCitySearchableDropdown extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'City (Optional)',
+                'City*',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 6),
@@ -142,15 +142,15 @@ class CountryCitySearchableDropdown extends StatelessWidget {
                   onTap: controller.cities.isEmpty
                       ? null
                       : () => _showSearchDialog(
-                    context: context,
-                    title: "Select City",
-                    items: controller.cities,
-                    onSelected: (selected) {
-                      if (selected != null) {
-                        controller.onCitySelected(selected);
-                      }
-                    },
-                  ),
+                          context: context,
+                          title: "Select City",
+                          items: controller.cities,
+                          onSelected: (selected) {
+                            if (selected != null) {
+                              controller.onCitySelected(selected);
+                            }
+                          },
+                        ),
                   child: InputDecorator(
                     decoration: context.primaryInputDecoration.copyWith(
                       border: OutlineInputBorder(),

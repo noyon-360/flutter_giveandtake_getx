@@ -1,13 +1,13 @@
 import 'package:flutx_core/core/theme/gap.dart';
 import 'package:flutx_core/core/validation/validators.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/constants/app_images.dart';
-import 'package:karlfive/core/common/widgets/app_logo.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/core/common/constants/app_images.dart';
+import 'package:giveandtake/core/common/widgets/app_logo.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 import 'package:flutter/material.dart';
-import 'package:karlfive/core/theme/app_buttoms.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/core/theme/app_buttoms.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 
 import '../controller/auth_controller.dart';
 

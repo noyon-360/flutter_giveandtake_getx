@@ -1,7 +1,7 @@
 
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:karlfive/core/common/widgets/app_scaffold.dart';
+// import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 // import 'package:video_player/video_player.dart';
 
 // import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';

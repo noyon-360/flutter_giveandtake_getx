@@ -1,20 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/elevator/presentation/screens/elevator_resume_screen.dart';
-import 'package:karlfive/features/elevator/presentation/screens/elevator_speech_resume_screen.dart';
-import 'package:karlfive/features/home_static_screens/data/models/contactus_model.dart';
-import 'package:karlfive/features/home_static_screens/presentation/screen/contact_us_screen.dart';
-import 'package:karlfive/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
-import 'package:karlfive/features/profile_dasboard/presentation/screens/personal_iformation_screen.dart';
+import 'package:giveandtake/core/network/api_client.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
+import 'package:giveandtake/features/elevator/presentation/controller/resume_check_controller.dart';
+import 'package:giveandtake/features/home_static_screens/data/models/contactus_model.dart';
+import 'package:giveandtake/features/home_static_screens/presentation/screen/contact_us_screen.dart';
+import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_public_view.dart';
 
-import '../../../elevator/presentation/screens/applied_jobs_screen.dart';
+import '../../../company/presentation/controller/company_details_controller.dart';
+import '../../../company/presentation/screen/public_view_seach_screen.dart';
+import '../../../company/presentation/screen/public_view_show_result.dart';
+import '../../../company/presentation/widget/custom_search_company.dart';
 import '../../../home_static_screens/presentation/screen/Terms_screen.dart';
 import '../../../home_static_screens/presentation/screen/aboutus_screen.dart';
 import '../../../home_static_screens/presentation/screen/blog.dart';
 import '../../../home_static_screens/presentation/screen/frequently_questions.dart';
 import '../../../home_static_screens/presentation/screen/privacy_policy.dart';
+import '../../../job_listing/presentation/screens/all_jobs_screen.dart';
+import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
+import '../../../profile_dasboard/presentation/screens/job_history.dart';
+import '../../../profile_dasboard/presentation/screens/payment_history.dart';
+import '../../../public_view/screens/public_view_candidate_screens.dart';
+import '../screen/candidate_dashboard_screen.dart';
 import '../screens/my_plan_screen.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -27,6 +42,131 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   bool _isHelpExpanded = false;
   bool _isMoreExpanded = false;
+
+  final _searchController = TextEditingController();
+
+  late final CompanyDetailsController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<CompanyDetailsController>();
+
+    // Sync text field with reactive searchQuery
+    _searchController.addListener(() {
+      controller.searchQuery.value = _searchController.text;
+    });
+
+    // Clear search and load users after frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchController.clear();
+      
+      // Clear previous search safely
+      if (controller.searchQuery.value.isNotEmpty) {
+        controller.clearSearch();
+      }
+
+      // Load users if not already loaded
+      if (controller.searchInfo.isEmpty &&
+          !controller.isLoading.value) {
+        controller.fetchSearchUser("");
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// Handles the "Elevator Pitch & Resume" button with role-based navigation:
+  ///  - Guest (no token)  → LoginScreen
+  ///  - Candidate         → existing ResumeCheckController flow (unchanged)
+  ///  - Recruiter         → calls fetchRecruiterInfo API; if not found → setup,
+  ///                        else → RecruiterPageScreen
+  ///  - Company           → calls fetchCompanyInfo API; if companies list is
+  ///                        non-empty → company dashboard, else → account setup
+  Future<void> _handleElevatorPitch() async {
+    final authController = Get.find<AuthController>();
+
+    // 1. Guest: no access token → go to LoginScreen
+    final accessToken = await authController.authStorageService.getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      Get.to(() => const LoginScreen());
+      return;
+    }
+
+    final userRole = await authController.authStorageService.getUserRole();
+
+    // 2. Candidate: keep existing behaviour
+    if (userRole == 'candidate') {
+      final resumeController = Get.put(ResumeCheckController());
+      resumeController.checkResumeAndNavigate();
+      return;
+    }
+
+    // 3. Recruiter: fetch recruiter profile and navigate accordingly
+    if (userRole == 'recruiter') {
+      final userId = await authController.authStorageService.getUserId();
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'User ID not found. Please log in again.');
+        return;
+      }
+
+      // Show loading overlay
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      try {
+        final endpoint = ApiConstants.recruiter.fetchRecruiterInfo(userId);
+        final result = await ApiClient().get(
+          endpoint,
+          fromJsonT: (json) => json as Map<String, dynamic>,
+        );
+
+        if (Get.isDialogOpen ?? false) Get.back();
+
+        result.fold(
+          (fail) {
+            DPrint.log('Recruiter fetch failed: ${fail.message}');
+            Get.to(() => CreateRecruiterAccount());
+          },
+          (res) {
+            final message =
+                (res.data['message'] as String? ?? '').toLowerCase();
+            DPrint.log('Recruiter fetch message: $message');
+            if (message.contains('recruiter account not found')) {
+              Get.to(() => CreateRecruiterAccount());
+            } else {
+              Get.to(() => const RecruiterPageScreen());
+            }
+          },
+        );
+      } catch (e) {
+        if (Get.isDialogOpen ?? false) Get.back();
+        DPrint.log('Recruiter fetch error: $e');
+        Get.to(() => CreateRecruiterAccount());
+      }
+      return;
+    }
+
+    // 4. Company: fetch company info and navigate based on whether company exists
+    if (userRole == 'company') {
+      final companyController = Get.find<CompanyAccountController>();
+      await companyController.navigateFromElevatorPitch();
+      return;
+    }
+
+    // 5. Other roles: fallback
+    Get.snackbar(
+      'Not Available',
+      'This feature is not available for your account type.',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,16 +181,237 @@ class _AppDrawerState extends State<AppDrawer> {
               liconPath: "assets/icons/drawer_back.png",
               onTap: () => Get.back(),
             ),
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 48,
+                    child: CustomSearchCompany(
+                      hintText: "Search people...",
+                      controller: _searchController,
+                      onChanged: (value) {
+                        controller.searchQuery.value = value;
+                        controller.searchUsers(value);
+                      },
+                      // onChanged is optional now — we use listener
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Reactive search results
+                  Obx(() {
+                    // final users = controller.searchInfo;
+                    final users = controller.filteredSearchInfo;
+
+                    if (controller.searchQuery.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    if (users.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            "No matching users found",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Container(
+                      constraints: const BoxConstraints(maxHeight: 340),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Scrollable list
+                          Flexible(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              itemCount: users.length,
+                              itemBuilder: (context, index) {
+                                final user = users[index];
+                                return ListTile(
+                                  dense: true,
+                                  leading: CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: Colors.grey[300],
+                                    backgroundImage: user.avatar?.url != null
+                                        ? NetworkImage(user.avatar!.url!)
+                                        : null,
+                                    child: user.avatar?.url == null
+                                        ? Text(
+                                            (user.name?[0] ?? '?')
+                                                .toUpperCase(),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  title: Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          user.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      if (user.immediatelyAvailable ==
+                                          true) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green.withOpacity(
+                                              0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.circle,
+                                                color: Colors.green,
+                                                size: 8,
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                "Immediate",
+                                                style: TextStyle(
+                                                  color: Colors.green,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      if (user.role.toLowerCase() ==
+                                          'candidate') ...[
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.person_outline,
+                                          color: Colors.green,
+                                          size: 18,
+                                        ),
+                                      ] else if (user.role.toLowerCase() ==
+                                          'company') ...[
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.business,
+                                          color: Colors.purple,
+                                          size: 18,
+                                        ),
+                                      ] else if (user.role.toLowerCase() ==
+                                          'recruiter') ...[
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.how_to_reg,
+                                          color: Colors.blue,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  subtitle: Text(user.address),
+                                  // trailing: const Icon(Icons.person_outline),
+                                  onTap: () {
+                                    final slug = user.slug;
+
+                                    if (slug == null || slug.isEmpty) {
+                                      Get.snackbar(
+                                        'Error',
+                                        'This user has no public profile',
+                                      );
+                                      return;
+                                    }
+
+                                    if (user.role.toLowerCase() ==
+                                        'candidate') {
+                                      Get.to(
+                                        () => PublicViewCandidateScreen(
+                                          slug: slug,
+                                        ),
+                                      );
+                                    }
+                                    else if(user.role.toLowerCase() ==
+                                        'recruiter'){
+                                      Get.to(
+                                            () => RecruiterPublicViewScreen(
+                                          slug: slug,
+                                        ),
+                                      );
+                                    }
+                                    else {
+                                      Get.to(
+                                        () => PublicViewSeachScreen(slug: slug),
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+
+                          const Divider(height: 1),
+
+                          TextButton(
+                            onPressed: () {
+                              Get.to(() => PublicViewShowResultScreen());
+                            },
+                            child: const Text("Show All Results"),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+
             ListTileForNav(
               title: "Elevator Pitch & Resume",
+              onTap: () async =>await _handleElevatorPitch(),
+            ),
+            ListTileForNav(
+              title: "Jobs",
+              liconPath:
+                  "assets/icons/list.png", // Reusing list icon or suitable one
               onTap: () {
-                Get.to (()=> ElevatorResumeScreen ());
+                Get.to(() => const AllJobsScreen());
               },
             ),
             ListTileForNav(
               title: "Blogs",
               onTap: () {
-                Get.to (()=> BlogScreen());
+                Get.to(() => BlogScreen());
               },
             ),
 
@@ -76,28 +437,28 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/home.png",
                       title: "About Us",
                       onTap: () {
-                       Get.to(()=> AboutUs());
+                        Get.to(() => AboutUs());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/list.png",
                       title: "Privacy Policy",
                       onTap: () {
-                        Get.to(()=> PrivacyPolicy());
+                        Get.to(() => PrivacyPolicy());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/book-open-01.png",
                       title: "Terms & Conditions",
                       onTap: () {
-                        Get.to(()=> TermsandConditions());
+                        Get.to(() => TermsandConditions());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/Icon (5).png",
                       title: "Frequently Asked Questions",
                       onTap: () {
-                        Get.to(()=> FrequentlyQuestions());
+                        Get.to(() => FrequentlyQuestions());
                       },
                     ),
 
@@ -105,10 +466,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       liconPath: "assets/icons/contactus.png",
                       title: "Contact Us",
                       onTap: () {
-                        Get.to(()=> ContactUsScreen(member: EditProfileModel()));
+                        Get.to(
+                          () => ContactUsScreen(member: EditProfileModel()),
+                        );
                       },
                     ),
-                    
                   ],
                 ),
               ),
@@ -134,14 +496,31 @@ class _AppDrawerState extends State<AppDrawer> {
                   children: [
                     ListTileForNav(
                       liconPath: "assets/icons/home.png",
-                      title: "My Profile",
+                      title: "My EVP Profile",
                       onTap: () {
-                        Get.to(()=> PersonalInfoScreen());
+                        Get.back(); // Close drawer first
+                        Get.to(() => const CandidateDashboardScreen());
                       },
                     ),
                     ListTileForNav(
                       liconPath: "assets/icons/list.png",
-                      title: "My Plan",
+                      title: "Job History",
+                      onTap: () {
+                        Get.back(); // Close drawer first
+                        Get.to(() => const JobHistoryScreen());
+                      },
+                    ),
+                    ListTileForNav(
+                      liconPath: "assets/icons/book-open-01.png",
+                      title: "Payment History",
+                      onTap: () {
+                        Get.back(); // Close drawer first
+                        Get.to(() => const PaymentHistoryScreen());
+                      },
+                    ),
+                    ListTileForNav(
+                      liconPath: "assets/icons/list.png",
+                      title: "All Plans",
                       onTap: () {
                         Get.back();
                         Get.to(() => const MyPlanScreen());
@@ -154,6 +533,14 @@ class _AppDrawerState extends State<AppDrawer> {
                         // Close the drawer then navigate to Bookmark Jobs screen
                         Get.back();
                         Get.to(() => BookmarkJobsScreen());
+                      },
+                    ),
+                    ListTileForNav(
+                      liconPath: "assets/icons/changepass.png",
+                      title: "Change Password",
+                      onTap: () {
+                        Get.back(); // Close drawer first
+                        Get.to(() => ChangePasswordScreen());
                       },
                     ),
                   ],
@@ -212,7 +599,7 @@ class ListTileForNav extends StatelessWidget {
           : null,
       title: Text(
         title ?? '',
-        style: TextStyle(
+        style: const TextStyle(
           color: Color(0xff333333),
           fontSize: 16,
           fontWeight: FontWeight.w600,

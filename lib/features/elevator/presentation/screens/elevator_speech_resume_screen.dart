@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:karlfive/features/elevator/presentation/widgets/about_widget.dart';
-import 'package:karlfive/features/elevator/presentation/widgets/awards_widget.dart';
-import 'package:karlfive/features/elevator/presentation/widgets/contact_card.dart';
-import 'package:karlfive/features/elevator/presentation/widgets/education_widget.dart';
-import 'package:karlfive/features/elevator/presentation/widgets/experience_widget.dart';
-import 'package:karlfive/features/elevator/presentation/widgets/skill_widget.dart';
+import 'package:giveandtake/features/elevator/presentation/widgets/about_widget.dart';
+import 'package:giveandtake/features/elevator/presentation/widgets/awards_widget.dart';
+import 'package:giveandtake/features/elevator/presentation/widgets/contact_card.dart';
+import 'package:giveandtake/features/elevator/presentation/widgets/education_widget.dart';
+import 'package:giveandtake/features/elevator/presentation/widgets/experience_widget.dart';
+import 'package:giveandtake/features/elevator/presentation/widgets/skill_widget.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/title_with_edit_logo.dart';

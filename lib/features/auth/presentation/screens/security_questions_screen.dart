@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_logo.dart';
-import 'package:karlfive/core/common/widgets/form_error_message.dart';
-import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/core/common/widgets/app_logo.dart';
+import 'package:giveandtake/core/common/widgets/form_error_message.dart';
+import 'package:giveandtake/features/auth/data/models/security_questions_request_model.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 
 import '../../../../core/common/constants/app_images.dart';
+import '../../../../core/theme/app_buttoms.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SecurityQuestionsScreen extends StatefulWidget {
@@ -21,16 +22,19 @@ class SecurityQuestionsScreen extends StatefulWidget {
 class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
   final _authController = Get.find<AuthController>();
 
-  // This local state is now derived from the controller's state
-  List<Map<String, String>> questions = [];
+  // Use fixed 3 slots as per requirement
+  final List<String?> _selectedQuestions = [null, null, null];
+  final List<TextEditingController> _answerControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+  ];
 
   @override
   void initState() {
     super.initState();
-    // Reset controller state and trigger the fetch
     _authController.setLoading(false);
     _authController.setError('');
-    // Initial fetch
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _authController.getDefaultSecurityQuestions();
@@ -38,31 +42,38 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
     });
   }
 
-  int get answeredCount =>
-      questions.where((q) => q['answer']!.trim().isNotEmpty).length;
-
-  void _onAnswerChanged(String value, int index) {
-    setState(() {
-      questions[index]['answer'] = value;
-    });
+  @override
+  void dispose() {
+    for (var controller in _answerControllers) {
+      controller.dispose();
+    }
+    super.dispose();
   }
+
+  int get answeredCount {
+    int count = 0;
+    for (int i = 0; i < 3; i++) {
+      if (_selectedQuestions[i] != null &&
+          _answerControllers[i].text.trim().isNotEmpty) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  bool get isReadyToSubmit =>
+      _selectedQuestions.every((q) => q != null) &&
+      _answerControllers.every((c) => c.text.trim().isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        // Use a GetBuilder to react to updates from AuthController
         child: GetBuilder<AuthController>(
           builder: (controller) {
-            // Update local questions list when controller's list changes
-            if (questions.isEmpty && controller.securityQuestions.isNotEmpty) {
-              questions = controller.securityQuestions
-                  .map((q) => {'question': q.toString(), 'answer': ''})
-                  .toList();
-            }
-
-            if (controller.isLoading.value && questions.isEmpty) {
+            if (controller.isLoading.value &&
+                controller.securityQuestions.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -87,112 +98,61 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
-                        height: 160,
-                        width: 160,
+                        height: 120,
+                        width: 120,
                         child: AppLogo(images: AppImages.appLogoBlue),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "Set Up Your Security Questions",
+                    "Set Up Your 3 Security Questions",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "Add extra protection to your account by answering the security questions.",
+                    "Add extra protection to your account by choosing 3 security questions only you can answer.",
                     style: TextStyle(fontSize: 14, color: AppColors.textGrey),
                   ),
                   const SizedBox(height: 24),
-                  if (controller.errorMessage.value.isNotEmpty &&
-                      questions.isEmpty)
+
+                  if (controller.errorMessage.value.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: FormErrorMessage(
                         message: controller.errorMessage.value,
                       ),
                     ),
-                  ListView.builder(
-                    itemCount: questions.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      final question = questions[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              question['question']!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryBlue,
-                                fontSize: 15,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            TextFormField(
-                              initialValue: question['answer'],
-                              onChanged: (val) => _onAnswerChanged(val, index),
-                              decoration: InputDecoration(
-                                hintText: "Write Here",
-                                hintStyle: const TextStyle(
-                                  color: AppColors.textGrey,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
+
+                  // Slot 1
+                  _buildQuestionSlot(0, controller.securityQuestions),
+                  const SizedBox(height: 20),
+                  // Slot 2
+                  _buildQuestionSlot(1, controller.securityQuestions),
+                  const SizedBox(height: 20),
+                  // Slot 3
+                  _buildQuestionSlot(2, controller.securityQuestions),
+
+                  const SizedBox(height: 32),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(color: AppColors.primaryBlue),
+                      Expanded(
+                        child: SecondaryButton(
+                          onPressed: () => Navigator.pop(context),
+                          text: "Cancel",
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: answeredCount > 0
-                              ? AppColors.primaryBlue
-                              : AppColors.textGrey,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: PrimaryButton(
+                          onPressed:
+                              isReadyToSubmit && !controller.isLoading.value
+                              ? _showConfirmationDialog
+                              : null,
+                          isLoading: controller.isLoading.value,
+                          text: "Next",
                         ),
-                        onPressed:
-                            answeredCount > 0 && !controller.isLoading.value
-                            ? _showConfirmationDialog
-                            : null,
-                        child: controller.isLoading.value
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                "Next",
-                                style: TextStyle(color: Colors.white),
-                              ),
                       ),
                     ],
                   ),
@@ -203,6 +163,109 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildQuestionSlot(int index, List<dynamic> allQuestions) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButtonFormField<String>(
+              value: _selectedQuestions[index],
+              hint: const Text(
+                "Select a security question",
+                style: TextStyle(color: AppColors.textGrey, fontSize: 14),
+              ),
+              isExpanded: true,
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                color: AppColors.textGrey,
+              ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedQuestions[index] = newValue;
+                });
+              },
+              items: allQuestions.map<DropdownMenuItem<String>>((
+                dynamic question,
+              ) {
+                final questionStr = question.toString();
+                // Check if this question is selected in OTHER slots
+                bool isAlreadySelected = false;
+                for (int i = 0; i < _selectedQuestions.length; i++) {
+                  if (i != index && _selectedQuestions[i] == questionStr) {
+                    isAlreadySelected = true;
+                    break;
+                  }
+                }
+
+                return DropdownMenuItem<String>(
+                  value: questionStr,
+                  enabled: !isAlreadySelected,
+                  child: Text(
+                    questionStr,
+                    style: TextStyle(
+                      color: isAlreadySelected
+                          ? Colors.grey.shade400
+                          : Colors.black,
+                      fontSize: 14,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        if (_selectedQuestions[index] != null) ...[
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _answerControllers[index],
+            onChanged: (val) => setState(() {}),
+            decoration: InputDecoration(
+              hintText: "Write here (text only, max 50 characters)",
+              hintStyle: const TextStyle(
+                color: AppColors.textGrey,
+                fontSize: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: AppColors.primaryBlue),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 12,
+              ),
+            ),
+            maxLength: 50,
+            buildCounter:
+                (
+                  context, {
+                  required currentLength,
+                  required isFocused,
+                  maxLength,
+                }) => null,
+          ),
+        ],
+      ],
     );
   }
 
@@ -225,9 +288,9 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'You have answered $answeredCount security question${answeredCount > 1 ? 's' : ''}. Do you want to proceed?',
-                style: const TextStyle(fontSize: 14),
+              const Text(
+                'Are you sure you want to save these 3 security questions?',
+                style: TextStyle(fontSize: 14),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -271,24 +334,14 @@ class _SecurityQuestionsScreenState extends State<SecurityQuestionsScreen> {
   }
 
   void _submitSecurityAnswers() {
-    final answeredQuestions = questions
-        .where((q) => q['answer']!.trim().isNotEmpty)
-        .map(
-          (q) => SecurityQuestionAnswer(
-            question: q['question']!,
-            answer: q['answer']!,
-          ),
-        )
-        .toList();
-
-    if (answeredQuestions.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please answer at least one security question.'),
-          backgroundColor: Colors.red,
+    final List<SecurityQuestionAnswer> answeredQuestions = [];
+    for (int i = 0; i < 3; i++) {
+      answeredQuestions.add(
+        SecurityQuestionAnswer(
+          question: _selectedQuestions[i]!,
+          answer: _answerControllers[i].text.trim(),
         ),
       );
-      return;
     }
 
     _authController.submitSecurityAnswers(

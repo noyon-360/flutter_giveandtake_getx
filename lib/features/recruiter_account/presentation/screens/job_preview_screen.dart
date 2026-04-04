@@ -1,69 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:karlfive/features/recruiter_account/presentation/controller/country_city_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/career_stage_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/employment_type_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/experience_level_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/job_posting_expiration_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_controller/location_type_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_controller/career_stage_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_controller/employment_type_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_controller/experience_level_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_controller/job_posting_expiration_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_controller/location_type_controller.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../controller/job_posting_controller.dart';
 import '../controller/recruiter_controller.dart';
 
 class JobPreviewScreen extends StatelessWidget {
-
   final controller = Get.find<JobPostingController>();
   final LocationController locationController = Get.find<LocationController>();
   final EmploymentTypeController employmentTypeController =
-  Get.find<EmploymentTypeController>();
+      Get.find<EmploymentTypeController>();
   final ExperienceLevelController experienceController =
-  Get.find<ExperienceLevelController>();
+      Get.find<ExperienceLevelController>();
   final LocationTypeController locationTypeController =
-  Get.find<LocationTypeController>();
+      Get.find<LocationTypeController>();
   final CareerStageController careerStageController =
-  Get.find<CareerStageController>();
+      Get.find<CareerStageController>();
   final JobPostingExpirationController jobPostingExpirationController =
-  Get.find<JobPostingExpirationController>();
+      Get.find<JobPostingExpirationController>();
 
-
-  final RecruiterController recruiterController = Get.find<
-      RecruiterController>();
+  final RecruiterController recruiterController =
+      Get.find<RecruiterController>();
 
   late int vacanciesInt = int.tryParse(controller.vacancies.value) ?? 0;
 
   // Find category by name
-  late final selectedCategoryModel = recruiterController.category.firstWhereOrNull(
-        (c) => c.name == controller.selectedCategory.value,
-  );
+  late final selectedCategoryModel = recruiterController.category
+      .firstWhereOrNull((c) => c.name == controller.selectedCategory.value);
 
   // Extract category ID (or empty if null)
   late final categoryId = selectedCategoryModel?.id ?? '';
 
-
-
-
-  _submit() {
+  Future<void> _submit() async {
     recruiterController.createJobPost(
-        controller.jobTitle.value,
-        controller.jobDescriptionPlain.value,
-        '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
-        controller.vacanciesInt,
-        experienceController.selectedExperienceLevel.value,
-        '${jobPostingExpirationController.finalDeadlineDate.value}',
-        categoryId,
-        controller.selectedCategory.value,
-        controller.selectedRole.value,
-        controller.compensation.value,
-        controller.applicationRequirement,
-        controller.customQuestions,
-        employmentTypeController.getBackendValue(
-          employmentTypeController.selectedEmploymentType.value,
-        ),
-        controller.companyWebsite.value,
-        controller.selectedDate.value.toString(),
-        careerStageController.selectedCareerStage.value,
-        locationTypeController.getBackendValue(locationTypeController.selectedLocationType.value), controller.companyWebsite.value);
+      controller.jobTitle.value,
+      controller.jobDescriptionPlain.value,
+      '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
+      controller.vacanciesInt,
+      experienceController.selectedExperienceLevel.value,
+      '${jobPostingExpirationController.finalDeadlineDate.value}',
+      categoryId,
+      controller.selectedCategory.value,
+      controller.selectedRole.value,
+      controller.compensation.value,
+      controller.applicationRequirement,
+      controller.customQuestions,
+      employmentTypeController.getBackendValue(
+        employmentTypeController.selectedEmploymentType.value,
+      ),
+      controller.companyWebsite.value,
+      controller.selectedDate.value.toString(),
+      careerStageController.selectedCareerStage.value,
+      locationTypeController.getBackendValue(
+        locationTypeController.selectedLocationType.value,
+      ),
+      controller.companyWebsite.value,
+    );
   }
 
   JobPreviewScreen({super.key});
@@ -134,8 +132,7 @@ class JobPreviewScreen extends StatelessWidget {
 
               _previewBox(
                 "Compensation",
-                "${controller.selectedCurrency.value?.symbol ?? ''} ${controller
-                    .compensation.value}",
+                "${controller.selectedCurrency.value?.symbol ?? ''} ${controller.compensation.value}",
               ),
               _previewBox(
                 "Job Posting Expiration Date",
@@ -144,7 +141,6 @@ class JobPreviewScreen extends StatelessWidget {
                     .value,
               ),
               _previewBox("Company Website", controller.companyWebsite.value),
-
 
               const SizedBox(height: 20),
 
@@ -196,15 +192,17 @@ class JobPreviewScreen extends StatelessWidget {
               // ---------- PUBLISH BUTTON ----------
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    _submit();
+                  onPressed: () async {
+                    await _submit();
+                    controller.clearAllFieldsPreview();
                     // Get.back();
-                    // Get.snackbar(
-                    //   "Post Published",
-                    //   "Your job post has been successfully published!",
-                    //   snackPosition: SnackPosition.BOTTOM,
-                    // );
+                    Get.snackbar(
+                      "Post Published",
+                      "Your job post has been successfully published!",
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2B7FD0),
                     minimumSize: const Size(200, 50),
@@ -332,8 +330,7 @@ class JobPreviewScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 selected != null
-                    ? "Selected Date: ${selected.day}/${selected
-                    .month}/${selected.year}"
+                    ? "Selected Date: ${selected.day}/${selected.month}/${selected.year}"
                     : "No date selected",
                 style: const TextStyle(
                   fontSize: 15,
@@ -353,7 +350,7 @@ class JobPreviewScreen extends StatelessWidget {
               firstDay: DateTime(2000),
               lastDay: DateTime(2100),
               selectedDayPredicate: (day) =>
-              selected != null && isSameDay(day, selected),
+                  selected != null && isSameDay(day, selected),
               availableGestures: AvailableGestures.none,
               // disable swipe
               headerStyle: const HeaderStyle(
@@ -408,8 +405,7 @@ class JobPreviewScreen extends StatelessWidget {
     return Column(
       children: questions
           .map(
-            (q) =>
-            Container(
+            (q) => Container(
               width: double.infinity,
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.all(14),
@@ -427,7 +423,7 @@ class JobPreviewScreen extends StatelessWidget {
                 ),
               ),
             ),
-      )
+          )
           .toList(),
     );
   }

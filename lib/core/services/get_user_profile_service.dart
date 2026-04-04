@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:get/get.dart';
-import 'package:karlfive/core/base/base_controller.dart';
-import 'package:karlfive/core/network/services/auth_storage_service.dart';
-import 'package:karlfive/features/auth/domain/repo/auth_repo.dart';
+import 'package:giveandtake/core/base/base_controller.dart';
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/features/auth/domain/repo/auth_repo.dart';
 
 import '../../features/auth/data/models/user_model.dart';
 
@@ -40,7 +40,16 @@ class GetUserProfileService extends BaseController {
   Future<void> _storeUserDataToStorage(UserModel user) async {
     try {
       final userJson = json.encode(user.toJson());
-      await _authStorageService.storeUserData(userJson);
+      
+      // Store both the full user data JSON and the individual userId
+      await Future.wait([
+        _authStorageService.storeUserData(userJson),
+        _authStorageService.storeUserId(user.id), // Store userId separately for easy access
+      ]);
+      
+      print('✅ Stored user data to secure storage:');
+      print('   userId: ${user.id}');
+      print('   userData: ${userJson.substring(0, 50)}...');
     } catch (e) {
       print('Error storing user data: $e');
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/features/recruiter_account/presentation/widgets/searchable_bottom_sheet.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/widgets/searchable_bottom_sheet.dart';
 
 class SearchableDropdown extends StatelessWidget {
   final String title;

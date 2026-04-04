@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/core/validation/validators.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/core/theme/app_buttoms.dart';
-import 'package:karlfive/core/theme/app_colors.dart';
-import 'package:karlfive/core/theme/input_decoration_extensions.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/auth/presentation/controller/term_of_services_and_privacy_policy_controller.dart';
-import 'package:karlfive/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/core/theme/app_buttoms.dart';
+import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/auth/presentation/controller/term_of_services_and_privacy_policy_controller.dart';
+import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/features/create_job/presentation/controller/create_job_controller.dart';
+import 'package:giveandtake/features/create_job/presentation/widgets/searchable_widgets.dart';
 import '../../../../core/common/constants/app_images.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -23,12 +25,14 @@ class _SignupScreenState extends State<SignupScreen> {
   final controller = Get.put(TermOfServicesAndPrivacyPolicyController());
 
   final _authController = Get.find<AuthController>();
+  final CreateJobPostingController jobController = Get.put(
+    CreateJobPostingController(Get.find()),
+  );
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final FocusNode _firstNameFocus = FocusNode();
   final FocusNode _surnameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
-  final FocusNode _countryFocus = FocusNode();
   final FocusNode _phoneNumberFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
   final FocusNode _confirmPasswordFocus = FocusNode();
@@ -37,7 +41,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _firstNameTEController = TextEditingController();
   final TextEditingController _surnameTEController = TextEditingController();
   final TextEditingController _emailTEController = TextEditingController();
-  final TextEditingController _countryTEController = TextEditingController();
   final TextEditingController _phoneNumberTEController =
       TextEditingController();
   final TextEditingController _dateOfBirthTEController =
@@ -47,6 +50,9 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordTEController = TextEditingController();
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
+  final ValueNotifier<String> _selectedRole = ValueNotifier<String>(
+    'candidate',
+  );
 
   late TapGestureRecognizer _termsRecognizer;
   late TapGestureRecognizer _privacyRecognizer;
@@ -110,6 +116,7 @@ class _SignupScreenState extends State<SignupScreen> {
   void dispose() {
     _errorWorker.dispose(); // Dispose the error listener
     _obscurePassword.dispose();
+    _selectedRole.dispose();
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
     _signInRecognizer.dispose();
@@ -122,7 +129,6 @@ class _SignupScreenState extends State<SignupScreen> {
     _firstNameFocus.dispose();
     _surnameFocus.dispose();
     _emailFocus.dispose();
-    _countryFocus.dispose();
     _phoneNumberFocus.dispose();
     _passwordFocus.dispose();
     _dateOfBirthFocus.dispose();
@@ -141,14 +147,20 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    if (jobController.selectedCountry.value.isEmpty) {
+      _authController.setError('Please select your country');
+      return;
+    }
+
     _authController.register(
       firstName: _firstNameTEController.text.trim(),
       surname: _surnameTEController.text.trim(),
       email: _emailTEController.text.trim(),
       password: _passwordTEController.text,
       phoneNumber: _phoneNumberTEController.text.trim(),
-      address: _countryTEController.text.trim(),
+      address: jobController.selectedCountry.value,
       dateOfBirth: _dateOfBirthTEController.text,
+      role: _selectedRole.value, // Pass the selected role
     );
   }
 
@@ -315,153 +327,133 @@ class _SignupScreenState extends State<SignupScreen> {
                         Gap.h16,
 
                         //* <-----------------Country----------------->*//
-                        Text(
-                          'Country',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                        Obx(
+                          () => SearchableDropdownField(
+                            label: "Country",
+                            hintText: "Select country",
+                            items: jobController.filteredCountries,
+                            value: jobController.selectedCountry.value,
+                            onChanged: (value) {
+                              jobController.selectedCountry.value = value;
+                              jobController.fetchCities(
+                                value,
+                              ); // load cities for this country
+                            },
+                            isRequired: true,
+                            enabled: !jobController.isLoadingCountries.value,
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        TextFormField(
-                          controller: _countryTEController,
-                          focusNode: _countryFocus,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textBlack,
-                          ),
-                          decoration: context.primaryInputDecoration.copyWith(
-                            hintText: "Country",
-                            hintStyle: TextStyle(
-                              color: AppColors.textFieldLightGrey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter your country';
-                            }
-                            return null;
-                          },
-                          autofillHints: const [AutofillHints.email],
                         ),
 
                         Gap.h16,
 
                         //*<-------------Phone Number--------------->*//
-                        Text(
-                          'Phone Number',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextFormField(
-                          controller: _phoneNumberTEController,
-                          focusNode: _phoneNumberFocus,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textBlack,
-                          ),
-                          decoration: context.primaryInputDecoration.copyWith(
-                            hintText: "Enter Phone Number",
-                            hintStyle: TextStyle(
-                              color: AppColors.textFieldLightGrey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.phone_outlined,
-                              color: AppColors.textFieldLightGrey,
-                            ),
-                          ),
-                          validator: Validators.phone,
-                          autofillHints: const [AutofillHints.email],
-                        ),
-
-                        Gap.h16,
+                        // Text(
+                        //   'Phone Number',
+                        //   style: TextStyle(
+                        //     color: AppColors.textBlack,
+                        //     fontSize: 14,
+                        //     fontWeight: FontWeight.w700,
+                        //   ),
+                        // ),
+                        // SizedBox(height: 8),
+                        // TextFormField(
+                        //   controller: _phoneNumberTEController,
+                        //   focusNode: _phoneNumberFocus,
+                        //   keyboardType: TextInputType.emailAddress,
+                        //   textInputAction: TextInputAction.next,
+                        //   style: TextStyle(
+                        //     fontSize: 16,
+                        //     color: AppColors.textBlack,
+                        //   ),
+                        //   decoration: context.primaryInputDecoration.copyWith(
+                        //     hintText: "Enter Phone Number",
+                        //     hintStyle: TextStyle(
+                        //       color: AppColors.textFieldLightGrey,
+                        //       fontSize: 14,
+                        //       fontWeight: FontWeight.w400,
+                        //     ),
+                        //     prefixIcon: Icon(
+                        //       Icons.phone_outlined,
+                        //       color: AppColors.textFieldLightGrey,
+                        //     ),
+                        //   ),
+                        //   validator: Validators.phone,
+                        //   autofillHints: const [AutofillHints.email],
+                        // ),
+                   
 
                         //*<-------------Date of Birth--------------->*//
-                        Text(
-                          'Date of Birth',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextFormField(
-                          controller: _dateOfBirthTEController,
-                          focusNode: _dateOfBirthFocus,
-                          readOnly: true,
-                          textInputAction: TextInputAction.next,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textBlack,
-                          ),
-                          decoration: context.primaryInputDecoration.copyWith(
-                            hintText: "MM/DD/YYYY",
-                            hintStyle: TextStyle(
-                              color: AppColors.textFieldLightGrey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.calendar_today_outlined,
-                              color: AppColors.textFieldLightGrey,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please select your date of birth';
-                            }
-                            return null;
-                          },
-                          onTap: () async {
-                            // Close keyboard if open
-                            FocusScope.of(context).unfocus();
+                        // Text(
+                        //   'Date of Birth',
+                        //   style: TextStyle(
+                        //     color: AppColors.textBlack,
+                        //     fontSize: 14,
+                        //     fontWeight: FontWeight.w700,
+                        //   ),
+                        // ),
+                        // SizedBox(height: 8),
+                        // TextFormField(
+                        //   controller: _dateOfBirthTEController,
+                        //   focusNode: _dateOfBirthFocus,
+                        //   readOnly: true,
+                        //   textInputAction: TextInputAction.next,
+                        //   style: TextStyle(
+                        //     fontSize: 16,
+                        //     color: AppColors.textBlack,
+                        //   ),
+                        //   decoration: context.primaryInputDecoration.copyWith(
+                        //     hintText: "MM/DD/YYYY",
+                        //     hintStyle: TextStyle(
+                        //       color: AppColors.textFieldLightGrey,
+                        //       fontSize: 14,
+                        //       fontWeight: FontWeight.w400,
+                        //     ),
+                        //     prefixIcon: Icon(
+                        //       Icons.calendar_today_outlined,
+                        //       color: AppColors.textFieldLightGrey,
+                        //     ),
+                        //   ),
+                        //   validator: (value) {
+                        //     if (value == null || value.trim().isEmpty) {
+                        //       return 'Please select your date of birth';
+                        //     }
+                        //     return null;
+                        //   },
+                        //   onTap: () async {
+                        //     // Close keyboard if open
+                        //     FocusScope.of(context).unfocus();
 
-                            // Show date picker
-                            final DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime(2000, 1, 1),
-                              firstDate: DateTime(1950),
-                              lastDate: DateTime.now(),
-                              builder: (context, child) {
-                                return Theme(
-                                  data: Theme.of(context).copyWith(
-                                    colorScheme: ColorScheme.light(
-                                      primary: AppColors.primaryBlue,
-                                      onPrimary: AppColors.primaryWhite,
-                                      onSurface: AppColors.textBlack,
-                                    ),
-                                  ),
-                                  child: child!,
-                                );
-                              },
-                            );
+                        //     // Show date picker
+                        //     final DateTime? pickedDate = await showDatePicker(
+                        //       context: context,
+                        //       initialDate: DateTime(2000, 1, 1),
+                        //       firstDate: DateTime(1950),
+                        //       lastDate: DateTime.now(),
+                        //       builder: (context, child) {
+                        //         return Theme(
+                        //           data: Theme.of(context).copyWith(
+                        //             colorScheme: ColorScheme.light(
+                        //               primary: AppColors.primaryBlue,
+                        //               onPrimary: AppColors.primaryWhite,
+                        //               onSurface: AppColors.textBlack,
+                        //             ),
+                        //           ),
+                        //           child: child!,
+                        //         );
+                        //       },
+                        //     );
 
-                            if (pickedDate != null) {
-                              // Format the date as MM/DD/YYYY
-                              final formattedDate =
-                                  '${pickedDate.month.toString().padLeft(2, '0')}/'
-                                  '${pickedDate.day.toString().padLeft(2, '0')}/'
-                                  '${pickedDate.year}';
-                              _dateOfBirthTEController.text = formattedDate;
-                            }
-                          },
-                        ),
-
-                        Gap.h16,
+                        //     if (pickedDate != null) {
+                        //       // Format the date as MM/DD/YYYY
+                        //       final formattedDate =
+                        //           '${pickedDate.month.toString().padLeft(2, '0')}/'
+                        //           '${pickedDate.day.toString().padLeft(2, '0')}/'
+                        //           '${pickedDate.year}';
+                        //       _dateOfBirthTEController.text = formattedDate;
+                        //     }
+                        //   },
+                        // ),
+                     
 
                         //* <-----------------Password----------------->*//
                         Text(
@@ -644,7 +636,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         Gap.h16,
 
                         SecondaryButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _selectedRole.value = 'recruiter';
+                            _submit();
+                          },
                           text: "Join as a Recruiter",
                           width: double.infinity - 40,
                           textColor: AppColors.primaryBlue,
@@ -654,7 +649,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         Gap.h8,
 
                         SecondaryButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _selectedRole.value = 'company';
+                            _submit();
+                          },
                           text: "Join as a Company",
                           width: double.infinity - 40,
                           textColor: AppColors.primaryBlue,
@@ -665,7 +663,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text("Already Have An Account?"),
+                            Text("Already have an account?"),
                             GestureDetector(
                               onTap: () {
                                 Get.to(
@@ -674,7 +672,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 );
                               },
                               child: Text(
-                                "  Sign In Here",
+                                "  Sign in",
                                 style: TextStyle(
                                   color: AppColors.primaryLightBlue,
                                   fontWeight: FontWeight.bold,

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:intl/intl.dart';
-import 'package:karlfive/core/common/widgets/app_scaffold.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/country_city_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/controller/job_edit_controller.dart';
-import 'package:karlfive/features/recruiter_account/presentation/widgets/country_city_searchable_dropdown.dart';
+import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/job_edit_controller.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/widgets/country_city_searchable_dropdown.dart';
 
 import '../../../../core/theme/input_decoration_extensions.dart';
 import '../controller/job_controller/career_stage_controller.dart';
@@ -33,7 +33,6 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
   late LocationTypeController locationTypeController;
   late CareerStageController careerStageController;
   late JobPostingExpirationController jobPostingExpirationController;
-
 
   @override
   void initState() {
@@ -104,8 +103,6 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
           child: Text(text ?? "Not Provided"),
         );
 
-
-
         List<String>? parts = job.location?.split(",");
 
         String? city = parts?.first;
@@ -114,22 +111,20 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
         print("City: $city");
         print("Country: $country");
 
-
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ====== VIEW MODE ======
               if (!controller.isEditMode.value) ...[
-
-
                 title("Job Title"),
                 readonlyValue(job.title),
                 title("Category"),
                 readonlyValue(job.name),
                 title("Role"),
                 readonlyValue(job.role),
-                Row(mainAxisAlignment: MainAxisAlignment.start,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Column(
@@ -137,12 +132,10 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                         children: [
                           title("Country"),
                           Container(
-                            width:double.infinity,
+                            width: double.infinity,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: Colors.grey.shade300
-                              )
+                              border: Border.all(color: Colors.grey.shade300),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
@@ -153,19 +146,17 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                       ),
                     ),
 
-                    SizedBox(width: 6,),
+                    SizedBox(width: 6),
 
                     Expanded(
                       child: Column(
                         children: [
                           title("City"),
                           Container(
-                            width:double.infinity,
+                            width: double.infinity,
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                    color: Colors.grey.shade300
-                                )
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.grey.shade300),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
@@ -175,7 +166,6 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                         ],
                       ),
                     ),
-
                   ],
                 ),
                 title("Employment Type"),
@@ -208,9 +198,7 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                 ),
 
                 title("Company Website"),
-                readonlyValue(
-                  job.website_Url ?? "",
-                ),
+                readonlyValue(job.website_Url ?? ""),
                 const SizedBox(height: 50),
               ]
               // ====== EDIT MODE ======
@@ -312,7 +300,6 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                 ),
                 const SizedBox(height: 16),
 
-
                 // here add fetched country and city
                 CountryCitySearchableDropdown(controller: locationController),
 
@@ -357,14 +344,11 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   experienceLevelController.experienceLevels,
                 ),
 
-
                 _buildDropdown(
                   "Career Stage *",
                   careerStageController.selectedCareerStage,
                   careerStageController.careerStages,
                 ),
-
-
 
                 const SizedBox(height: 20),
 
@@ -526,19 +510,22 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ...controller.customQuestions.map(
-                      (q) => Padding(
+                  (q) => Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: TextFormField(
                       initialValue: q,
                       decoration: InputDecoration(
                         hintText: "Enter question",
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         border: OutlineInputBorder(), // default border
                         enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey,),
+                          borderSide: BorderSide(color: Colors.grey),
                         ),
                       ),
                       onChanged: (v) {
@@ -566,8 +553,7 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   ),
                 ),
 
-
-                SizedBox(height: 30,),
+                SizedBox(height: 30),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -585,7 +571,11 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                       ),
                       child: const Text(
                         "Cancel",
-                        style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     SizedBox(width: 30),
@@ -601,13 +591,17 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
 
                       child: const Text(
                         "Save",
-                        style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
                 ),
 
-                SizedBox(height: 50,)
+                SizedBox(height: 50),
               ],
             ],
           ),

@@ -91,7 +91,16 @@ class CustomQuestionsStep extends StatelessWidget {
                 height: 50,
                 width: 120,
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Store all questions in controller
+                    controller.customQuestion.value = [
+                      firstQuestionController.text.trim(),
+                      ...extraQuestionControllers
+                          .map((c) => c.text.trim())
+                          .where((q) => q.isNotEmpty)
+                    ];
+                    controller.nextStep();
+                  },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFF2B7FD0)),
                     shape: RoundedRectangleBorder(

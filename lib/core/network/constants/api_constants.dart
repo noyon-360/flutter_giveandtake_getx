@@ -10,6 +10,7 @@ class ApiConstants {
   //add by zafor end
 
   //static const String baseDomain = 'https://api.evpitch.com';
+  // static const String baseDomain = 'http://10.10.5.67:5001';//eshita
   // static const String baseDomain = 'http://10.10.5.53:5001';//eshita
   // static const String baseDomain = 'http://10.10.5.33:5001';//eshita
 
@@ -56,10 +57,25 @@ class ApiConstants {
   static CategoryEndpoints get category => CategoryEndpoints();
   static AlluserEndpoints get allusers => AlluserEndpoints();
   static CompanyAccountApi get company => CompanyAccountApi();
+  static ResumeEndpoints get resume => ResumeEndpoints();
+}
+
+class ResumeEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/create-resume';
+  final String getResume = '$_base/get-resume';
+  final String createResume = '$_base/create-resume';
 }
 
 class JobEndpoints {
-  String getJobs(int limit) => '${ApiConstants.baseUrl}/jobs?limit=$limit';
+  String getJobs(int page, int limit, {String? search}) {
+    String url = '${ApiConstants.baseUrl}/jobs?page=$page&limit=$limit';
+    if (search != null && search.isNotEmpty) {
+      url += '&search=${Uri.encodeQueryComponent(search)}';
+    }
+    return url;
+  }
+
+  final String applyJob = '${ApiConstants.baseUrl}/applied-jobs';
 }
 
 class RecruiterAccountApi {
@@ -72,6 +88,8 @@ class RecruiterAccountApi {
   final String getJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
   final String connectCompany =
       '${ApiConstants.baseUrl}/company/apply-for-company-employee';
+  final String leaveCompany =
+      '${ApiConstants.baseUrl}/company/recruiter-leave-company';
   final String follow = '${ApiConstants.baseUrl}/following/follow';
   //final String yourJob = '${ApiConstants.baseUrl}/jobs/recruiter/company';
 
@@ -81,14 +99,23 @@ class RecruiterAccountApi {
       '$_base/recruiter-account/$userId';
   String updateRecruiter(String userId) => '$_base/recruiter-account/$userId';
   String getSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId';
-  String updateSingleJob(String jobId) => '${ApiConstants.baseUrl}/jobs/update/$jobId';
-  String updateArchieveJob(String jobId) => '${ApiConstants.baseUrl}/jobs/$jobId/archive';
+  String updateSingleJob(String jobId) =>
+      '${ApiConstants.baseUrl}/jobs/update/$jobId';
+  String updateArchieveJob(String jobId) =>
+      '${ApiConstants.baseUrl}/jobs/$jobId/archive';
+  String getPublicView(String slug) =>
+      '${ApiConstants.baseUrl}/recruiter/recruiter-account/slug/$slug';
 }
 
 class ElevatorPitchVideo {
   static const String _base = '${ApiConstants.baseUrl}/elevator-pitch';
 
-  String uploadVideo(String userId) => '$_base/video?userId=$userId';
+  String uploadVideo(String userId) => '$_base/video/upload-url?userId=$userId';
+  
+  String completeVideoUpload(String userId) => '$_base/video/complete?userId=$userId';
+
+  String deleteVideo(String userId) => '$_base/video?userId=$userId';
+
 }
 
 /// [Authentication Endpoints]
@@ -171,11 +198,14 @@ class ContentEndpoints {
 
 // New payment endpoints
 class PaymentEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/payment';
+  static const String _base = '${ApiConstants.baseUrl}/payments';
 
   final String createPayment = '$_base/create-payment';
 
   final String confirmPayment = '$_base/confirm-payment';
+  
+  String getUserPayments(String userId, int page, int limit) =>
+      '$_base/user/$userId?page=$page&limit=$limit';
 }
 
 // PayPal endpoints
@@ -183,6 +213,7 @@ class PaypalEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/payments/paypal';
 
   final String createOrder = '$_base/create-order';
+  final String captureOrder = '$_base/capture-order';
 }
 
 // Subscription endpoints
@@ -201,37 +232,48 @@ class AlluserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/all';
   final String alluser = '$_base/user';
 }
+
 class CompanyAccountApi {
   static const String _base = '${ApiConstants.baseUrl}/company';
   final String createcompany = '$_base';
-    String fetchCompanyInfo(String userId) =>
-      '$_base/user/$userId';
+  String fetchCompanyInfo(String userId) => '$_base/user/$userId';
 
-    String fetchEmployee(String userId) =>
+  String fetchEmployee(String userId) =>
       '${ApiConstants.baseUrl}/company/company-employess/skills/$userId';
 
-      String fetchUpdateInfo(String userId) =>
-      '$_base/$userId';
+  String fetchUpdateInfo(String userId) => '$_base/$userId';
 
-      String manageJobs(String companyId) =>
+  String manageJobs(String companyId) =>
       '${ApiConstants.baseUrl}/all-jobs-for-company/company/$companyId';
 
-      final String connectRecruiter = '$_base/add-employee-to-company';
-      final String removeRecruiter = '$_base/remove-employee-to-company';
-      String archiveJobs(String jobId) =>
+  final String connectRecruiter = '$_base/add-employee-to-company';
+  final String removeRecruiter = '$_base/remove-employee-to-company';
+  String archiveJobs(String jobId) =>
       '${ApiConstants.baseUrl}/jobs/$jobId/archive';
-      String applicantJob(String jobId) =>
+  String applicantJob(String jobId) =>
       '${ApiConstants.baseUrl}/applied-jobs/job/$jobId';
-      final String candidateResume =
+  final String candidateResume =
       '${ApiConstants.baseUrl}/create-resume/get-resume/anjolie-reed';
-       String status(String jobId) =>
+  String status(String jobId) =>
       '${ApiConstants.baseUrl}/applied-jobs/$jobId/status';
 
-      String fetchResume(String candidateUserId) =>
+  String fetchResume(String candidateUserId) =>
       '${ApiConstants.baseUrl}/resume/user/$candidateUserId';
 
+  String updateRecCompany(String recId) =>
+      '${ApiConstants.baseUrl}/company/update-company-employee/$recId';
 
-      
+  final String getJobUsage = '${ApiConstants.baseUrl}/jobs/posting/usage';
+   String getAllSearchUser(String q) => '${ApiConstants.baseUrl}/fetch/all/users?q=$q';
+  //  String getPublicView(String slug) = '${ApiConstants.baseUrl}/company/companies/slug/$slug';
 
+     String getPublicView(String slug) =>
+      '${ApiConstants.baseUrl}/company/companies/slug/$slug';
+
+       String getPulicJobs(String companyId) =>
+      '${ApiConstants.baseUrl}/all-jobs/company/$companyId';
+
+        String getCandidatePublicView(String slug) =>
+      '${ApiConstants.baseUrl}/create-resume/get-resume/$slug';
 
 }

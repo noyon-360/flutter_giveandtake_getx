@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutx_core/core/debug_print.dart';
-import 'package:karlfive/core/network/network_result.dart';
+import 'package:giveandtake/core/network/network_result.dart';
 
-import 'package:karlfive/features/recruiter_account/data/models/get_company_response_model.dart';
-import 'package:karlfive/features/recruiter_account/data/models/get_job_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_company_response_model.dart';
+import 'package:giveandtake/features/recruiter_account/data/models/get_job_response_model.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
@@ -26,6 +26,9 @@ import '../models/job_create_request_model.dart';
 import '../models/job_create_response_model.dart';
 import '../models/job_update_request_model.dart';
 import '../models/job_update_response_model.dart';
+import '../models/leave_company_request_model.dart';
+import '../models/leave_company_response_model.dart';
+import '../models/public_view_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
 import '../models/your_job_response_model.dart';
 
@@ -59,11 +62,10 @@ class RepoImplementation extends Repo {
         final List<dynamic> jsonList = json as List<dynamic>;
         return jsonList
             .map(
-              (item) =>
-              GetCurrencyResponseModel.fromJson(
+              (item) => GetCurrencyResponseModel.fromJson(
                 item as Map<String, dynamic>,
               ),
-        )
+            )
             .toList();
       },
     );
@@ -71,7 +73,8 @@ class RepoImplementation extends Repo {
 
   @override
   NetworkResult<List<JobPostResponseModel>> createNewJobPost(
-      JobPostRequestModel request,) {
+    JobPostRequestModel request,
+  ) {
     return _apiClient.post(
       ApiConstants.recruiter.createJob,
       data: request.toJson(),
@@ -81,7 +84,7 @@ class RepoImplementation extends Repo {
           return json
               .map(
                 (e) => JobPostResponseModel.fromJson(e as Map<String, dynamic>),
-          )
+              )
               .toList();
         } else if (json is Map<String, dynamic>) {
           // Sometimes API returns a single object
@@ -98,13 +101,11 @@ class RepoImplementation extends Repo {
     return _apiClient.get<List<YourJobResponseModel>>(
       ApiConstants.recruiter.getJob,
       // fromJsonT: (json) => [YourJobResponseModel.fromJson(json)]);
-      fromJsonT: (json) =>
-          (json as List)
-              .map((item) => YourJobResponseModel.fromJson(item))
-              .toList(),
+      fromJsonT: (json) => (json as List)
+          .map((item) => YourJobResponseModel.fromJson(item))
+          .toList(),
     );
   }
-
 
   @override
   NetworkResult<GetSingleJobResponseModel> singleJob(String jobId) {
@@ -115,23 +116,29 @@ class RepoImplementation extends Repo {
     );
   }
 
-
   @override
   NetworkResult<JobUpdateResponseModel> singleJobUpdate(
-      UpdateJobRequest request, String jobId) {
+    UpdateJobRequest request,
+    String jobId,
+  ) {
     return _apiClient.patch(
-      ApiConstants.recruiter.updateSingleJob(jobId), data: request.toJson(),
-      fromJsonT: (json) => JobUpdateResponseModel.fromJson(json),);
+      ApiConstants.recruiter.updateSingleJob(jobId),
+      data: request.toJson(),
+      fromJsonT: (json) => JobUpdateResponseModel.fromJson(json),
+    );
   }
-
 
   @override
-  NetworkResult<ArchieveJobResponseModel>archieveJobUpdate(ArchieveJobRequestModel request, String jobId) {
+  NetworkResult<ArchieveJobResponseModel> archieveJobUpdate(
+    ArchieveJobRequestModel request,
+    String jobId,
+  ) {
     return _apiClient.patch(
-      ApiConstants.recruiter.updateArchieveJob(jobId), data: request.toJson(),
-      fromJsonT: (json) => ArchieveJobResponseModel.fromJson(json),);
+      ApiConstants.recruiter.updateArchieveJob(jobId),
+      data: request.toJson(),
+      fromJsonT: (json) => ArchieveJobResponseModel.fromJson(json),
+    );
   }
-
 
   @override
   NetworkResult<void> uploadVideo(String userId, FormData formData) {
@@ -152,11 +159,23 @@ class RepoImplementation extends Repo {
 
   @override
   NetworkResult<ConnectCompanyResponse> connectCompany(
-      ConnectCompanyRequest request,) {
+    ConnectCompanyRequest request,
+  ) {
     return _apiClient.post(
       ApiConstants.recruiter.connectCompany,
       data: request.toJson(),
       fromJsonT: (json) => ConnectCompanyResponse.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<LeaveCompanyResponseModel> leaveCompany(
+    LeaveCompanyRequestModel request,
+  ) {
+    return _apiClient.patch(
+      ApiConstants.recruiter.leaveCompany,
+      data: request.toJson(),
+      fromJsonT: (json) => LeaveCompanyResponseModel.fromJson(json),
     );
   }
 
@@ -171,7 +190,8 @@ class RepoImplementation extends Repo {
 
   @override
   NetworkResult<CreateRecruiterResponseModel> createRecruiter(
-      FormData formData,) {
+    FormData formData,
+  ) {
     return _apiClient.post(
       ApiConstants.recruiter.createRecruiterAccount,
       formData: formData,
@@ -189,10 +209,11 @@ class RepoImplementation extends Repo {
     );
   }
 
-
   @override
-  NetworkResult<UpdateRecruiterResponseModel> updateRecruiter(String userId,
-      FormData formData,) {
+  NetworkResult<UpdateRecruiterResponseModel> updateRecruiter(
+    String userId,
+    FormData formData,
+  ) {
     DPrint.log("Repo Impl : ${formData.toString()}");
     return _apiClient.patch(
       ApiConstants.recruiter.updateRecruiter(userId),
@@ -208,6 +229,14 @@ class RepoImplementation extends Repo {
       ApiConstants.recruiter.changePass,
       data: request.toJson(),
       fromJsonT: (json) => [],
+    );
+  }
+
+  NetworkResult<RecruiterPublicViewResponseModel> recruiterPublicView(String slug){
+    return _apiClient.get(
+      ApiConstants.recruiter.getPublicView(slug),
+      fromJsonT: (json) =>
+          RecruiterPublicViewResponseModel.fromJson(json as Map<String, dynamic>),
     );
   }
 }

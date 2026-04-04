@@ -2,11 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
-import 'package:karlfive/core/common/constants/app_images.dart';
-import 'package:karlfive/core/common/widgets/app_logo.dart';
-import 'package:karlfive/core/theme/app_buttoms.dart';
-import 'package:karlfive/features/auth/presentation/controller/auth_controller.dart';
-import 'package:karlfive/features/auth/presentation/widgets/otp_code_field.dart';
+import 'package:giveandtake/core/common/constants/app_images.dart';
+import 'package:giveandtake/core/common/widgets/app_logo.dart';
+import 'package:giveandtake/core/theme/app_buttoms.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+import 'package:giveandtake/features/auth/presentation/widgets/otp_code_field.dart';
 
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -66,7 +66,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               Gap.h8,
 
               Text(
-                'Enter your receive OTP',
+                'Enter the OTP sent to your email',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,

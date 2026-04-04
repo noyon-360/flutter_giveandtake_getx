@@ -19,7 +19,7 @@ class JobStepper extends StatelessWidget {
 
     return Obx(() {
       return SizedBox(
-        height: 90, // enough height for text under circles
+        height: 100, // enough height for text under circles
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
@@ -48,40 +48,47 @@ class JobStepper extends StatelessWidget {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () =>
-                          controller.currentStep.value = stepNumber,
-                          child: CircleAvatar(
-                            radius: 25,
-                            backgroundColor: circleColor,
-                            child: Text(
-                              '$stepNumber',
-                              style: TextStyle(
-                                color: isActive || isCompleted
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5.0),
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              // Only allow going back to previous/completed steps or current
+                              if (stepNumber <= controller.currentStep.value) {
+                                controller.currentStep.value = stepNumber;
+                              }
+                            },
+                            child: CircleAvatar(
+                              radius: 25,
+                              backgroundColor: circleColor,
+                              child: Text(
+                                '$stepNumber',
+                                style: TextStyle(
+                                  color: isActive || isCompleted
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        SizedBox(
-                          width: 90, // consistent width for each label
-                          child: Text(
-                            steps[index],
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: textColor,
-                              fontWeight: fontWeight,
-                              fontSize: 12,
+                          const SizedBox(height: 6),
+                          SizedBox(
+                            width: 90, // consistent width for each label
+                            child: Text(
+                              steps[index],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: textColor,
+                                fontWeight: fontWeight,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     if (index < steps.length - 1)
                       Padding(

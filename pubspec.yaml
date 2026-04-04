@@ -1,4 +1,4 @@
-name: karlfive
+name: giveandtake
 description: "A new Flutter project."
 
 publish_to: "none"
@@ -13,8 +13,7 @@ dependencies:
         sdk: flutter
     draggable_home: ^1.0.5
     cupertino_icons: ^1.0.8
-    flutter_stripe: ^12.0.2
-    webview_flutter: ^4.5.0
+    webview_flutter: ^4.13.0
     http: ^1.1.0
     http_auth: ^1.0.4
 
@@ -22,7 +21,7 @@ dependencies:
     get: ^4.7.3
 
     # UI
-    google_fonts: ^6.3.1
+    google_fonts: ^8.0.1
     flutx_core: ^1.1.1+1
     image_picker: ^1.2.0
     video_player: ^2.10.0
@@ -36,6 +35,8 @@ dependencies:
     table_calendar: ^3.0.9
     html_editor_enhanced: ^2.7.1
     dotted_border: ^2.0.0
+    permission_handler: ^12.0.1
+    open_filex: ^4.7.0
   
 
 
@@ -65,6 +66,7 @@ dependencies:
     # Formation
     font_awesome_flutter: ^10.10.0
     html: ^0.15.6
+    pdf: ^3.11.3
 
 
 

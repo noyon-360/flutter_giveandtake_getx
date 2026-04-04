@@ -1,12 +1,12 @@
-import 'package:karlfive/features/auth/data/models/auth_response_model.dart';
-import 'package:karlfive/features/auth/data/models/default_security_questions_response_model.dart';
-import 'package:karlfive/features/auth/data/models/login_request_model.dart';
-import 'package:karlfive/features/auth/data/models/otp_request_model_register.dart';
-import 'package:karlfive/features/auth/data/models/otp_response_model_register.dart';
-import 'package:karlfive/features/auth/data/models/reset_password_with_token_request_model.dart';
-import 'package:karlfive/features/auth/data/models/security_questions_request_model.dart';
-import 'package:karlfive/features/auth/data/models/security_questions_response_model.dart';
-import 'package:karlfive/features/auth/data/models/verify_security_answers_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/auth_response_model.dart';
+import 'package:giveandtake/features/auth/data/models/default_security_questions_response_model.dart';
+import 'package:giveandtake/features/auth/data/models/login_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/otp_request_model_register.dart';
+import 'package:giveandtake/features/auth/data/models/otp_response_model_register.dart';
+import 'package:giveandtake/features/auth/data/models/reset_password_with_token_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/security_questions_request_model.dart';
+import 'package:giveandtake/features/auth/data/models/security_questions_response_model.dart';
+import 'package:giveandtake/features/auth/data/models/verify_security_answers_request_model.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
@@ -75,9 +75,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  NetworkResult<OtpResponseModelRegister> otpVerifyRegister(
-    OtpRequestModelRegister request,
-  ) {
+  NetworkResult<void> otpVerifyRegister(
+      OtpVerifyRequestModel request,
+      ) {
     return _apiClient.post(
       ApiConstants.auth.otpVerifyRegister,
       data: request.toJson(),

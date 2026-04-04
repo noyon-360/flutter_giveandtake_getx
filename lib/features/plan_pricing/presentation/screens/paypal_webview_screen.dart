@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
 import '../services/paypal_services.dart';
 
 class PaypalWebViewScreen extends StatefulWidget {
   final String planTitle;
   final double amount;
   final String? orderId;
+  final String? approveUrl;
   final Function(String)? onFinish;
 
   const PaypalWebViewScreen({
@@ -14,6 +16,7 @@ class PaypalWebViewScreen extends StatefulWidget {
     required this.planTitle,
     required this.amount,
     this.orderId,
+    this.approveUrl,
     this.onFinish,
   }) : super(key: key);
 
@@ -44,6 +47,103 @@ class _PaypalWebViewScreenState extends State<PaypalWebViewScreen> {
 
     Future.delayed(Duration.zero, () async {
       try {
+        // If approveUrl is provided, use it directly (for PayPal button flow)
+        if (widget.approveUrl != null && widget.approveUrl!.isNotEmpty) {
+          print('✅ PayPal: Using provided approve URL: ${widget.approveUrl}');
+
+          setState(() {
+            checkoutUrl = widget.approveUrl;
+            // No executeUrl needed for the new flow as backend will handle capture
+          });
+
+          // Initialize WebViewController with the approve URL
+          if (checkoutUrl != null) {
+            print('🔵 PayPal: Initializing WebView with URL: $checkoutUrl');
+            _webViewController = WebViewController()
+              ..setJavaScriptMode(JavaScriptMode.unrestricted)
+              ..setNavigationDelegate(
+                NavigationDelegate(
+                  onPageStarted: (String url) {
+                    print('🔵 WebView: Page started loading: $url');
+                  },
+                  onPageFinished: (String url) {
+                    print('✅ WebView: Page finished loading: $url');
+                  },
+                  onWebResourceError: (WebResourceError error) {
+                    print('❌ WebView Error: ${error.description}');
+                    Get.snackbar(
+                      'WebView Error',
+                      error.description,
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.orange,
+                      colorText: Colors.white,
+                    );
+                  },
+                  onNavigationRequest: (NavigationRequest request) {
+                    print('🔵 Navigation: ${request.url}');
+
+                    // Check if user approved the payment
+                    if (request.url.contains(returnURL)) {
+                      final uri = Uri.parse(request.url);
+                      final token = uri.queryParameters['token'];
+                      final payerID = uri.queryParameters['PayerID'];
+
+                      print('✅ Payment approved!');
+                      print('   Token: $token');
+                      print('   PayerID: $payerID');
+
+                      // Use the orderId for success callback
+                      if (widget.orderId != null) {
+                        Get.back();
+                        Get.snackbar(
+                          'Success',
+                          'Payment completed successfully!',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.green,
+                          colorText: Colors.white,
+                        );
+                        if (widget.onFinish != null) {
+                          widget.onFinish!(widget.orderId!);
+                        }
+                      } else {
+                        Get.back();
+                        Get.snackbar(
+                          'Success',
+                          'Payment approved! Processing...',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.green,
+                          colorText: Colors.white,
+                        );
+                      }
+
+                      return NavigationDecision.prevent;
+                    }
+
+                    // Check if user cancelled the payment
+                    if (request.url.contains(cancelURL)) {
+                      print('⚠️ Payment cancelled by user');
+                      Get.back();
+                      Get.snackbar(
+                        'Cancelled',
+                        'Payment was cancelled',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                      return NavigationDecision.prevent;
+                    }
+
+                    return NavigationDecision.navigate;
+                  },
+                ),
+              )
+              ..loadRequest(Uri.parse(checkoutUrl!));
+
+            print('✅ WebView initialized successfully');
+            setState(() {});
+          }
+          return;
+        }
+
+        // Otherwise, use the old flow (create payment from scratch)
         print('🔵 PayPal: Getting access token...');
         accessToken = await services.getAccessToken();
 
