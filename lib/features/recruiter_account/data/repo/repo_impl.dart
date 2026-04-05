@@ -1,7 +1,9 @@
-import 'dart:convert';
-
+import 'dart:io';
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutx_core/core/debug_print.dart';
+import 'package:giveandtake/core/network/models/network_failure.dart';
+import 'package:giveandtake/core/network/models/network_success.dart';
 import 'package:giveandtake/core/network/network_result.dart';
 
 import 'package:giveandtake/features/recruiter_account/data/models/get_company_response_model.dart';
@@ -141,12 +143,99 @@ class RepoImplementation extends Repo {
   }
 
   @override
-  NetworkResult<void> uploadVideo(String userId, FormData formData) {
-    return _apiClient.post(
-      ApiConstants.elevatorPitchVideo.uploadVideo(userId),
-      formData: formData,
-      fromJsonT: (json) => [],
-    );
+  NetworkResult<void> uploadVideo(String userId, File videoFile) async {
+    try {
+      final fileName = videoFile.path.split('/').last;
+      final fileType = "video/mp4"; // Default to mp4 for video elevator pitch
+      final fileSize = videoFile.lengthSync();
+
+      // Step 1: Get the upload URL by sending metadata
+      final metadata = {
+        "fileName": fileName,
+        "fileType": fileType,
+        "fileSize": fileSize,
+      };
+
+      final urlResult = await _apiClient.post<Map<String, dynamic>>(
+        ApiConstants.elevatorPitchVideo.uploadVideo(userId),
+        data: metadata,
+        fromJsonT: (json) => json as Map<String, dynamic>,
+      );
+
+      return await urlResult.fold(
+        (fail) async => Left(fail),
+        (success) async {
+          final uploadUrl = success.data['uploadUrl'] ?? success.data['url'];
+          final fileKey = success.data['key'];
+          if (uploadUrl == null) {
+            return const Left(
+              ServerFailure(
+                message: "Could not retrieve upload URL from server",
+                statusCode: 500,
+              ),
+            );
+          }
+
+          // Step 2: Perform the actual file upload (usually a PUT request for pre-signed URLs)
+          try {
+            final uploadDio = Dio();
+            final uploadResponse = await uploadDio.put(
+              uploadUrl,
+              data: videoFile.openRead(),
+              options: Options(
+                headers: {
+                  "Content-Type": fileType,
+                  "Content-Length": fileSize.toString(),
+                },
+              ),
+            );
+
+            if (uploadResponse.statusCode != 200 &&
+                uploadResponse.statusCode != 201) {
+              return Left(
+                ServerFailure(
+                  message:
+                      "Video upload failed with status: ${uploadResponse.statusCode}",
+                  statusCode: uploadResponse.statusCode ?? 500,
+                ),
+              );
+            }
+
+            // Step 3: Notify server that upload is complete
+            final completeResult = await _apiClient.post(
+              ApiConstants.elevatorPitchVideo.completeVideoUpload(userId),
+              data: {"fileKey": fileKey},
+              fromJsonT: (json) => [],
+            );
+
+            return completeResult.fold(
+              (fail) => Left(fail),
+              (success) => Right(
+                NetworkSuccess(
+                  data: null,
+                  message: "Video uploaded successfully",
+                  statusCode: 200,
+                ),
+              ),
+            );
+          } catch (e) {
+            return Left(
+              ServerFailure(
+                message: "Error during file upload: $e",
+                statusCode: 500,
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      return Left(
+        ServerFailure(
+          message: "Failed to prepare video upload: $e",
+          statusCode: 500,
+        ),
+      );
+    }
   }
 
   @override

@@ -52,7 +52,6 @@
 //       elevatorPitch: [],
 //     );
 
-
 //     return Scaffold(
 //       backgroundColor: Colors.white,
 //       body: SingleChildScrollView(
@@ -103,8 +102,8 @@
 //                                 fit: BoxFit.cover,
 //                                 errorBuilder: (context, error, stackTrace) {
 //                                    return Container(
-//                                      height: 90, 
-//                                      width: 90, 
+//                                      height: 90,
+//                                      width: 90,
 //                                      color: Colors.grey.shade300,
 //                                      child: const Icon(Icons.person, size: 50, color: Colors.grey),
 //                                    );
@@ -208,7 +207,7 @@
 //                         ),
 //                       ],
 //                     ),
-              
+
 //               const Divider(),
 
 //               Padding(
@@ -257,29 +256,29 @@
 //                 // Placeholder experience matching image
 //                  _experienceItem(Experience(
 //                     company: "sdfg · sdfg",
-//                     position: "Jan 2026 - Present", 
+//                     position: "Jan 2026 - Present",
 //                     startDate: DateTime(2026, 1),
 //                     country: "Bangladesh",
 //                     // city: "",
 //                  )),
 //                   _experienceItem(Experience(
 //                     company: "N/A",
-//                     position: "N/A - Present", 
+//                     position: "N/A - Present",
 //                     country: "Bangladesh",
 //                  )),
 //                   _experienceItem(Experience(
 //                     company: "N/A",
-//                     position: "N/A - Present", 
+//                     position: "N/A - Present",
 //                     country: "Bangladesh",
 //                  )),
 //                   _experienceItem(Experience(
 //                     company: "N/A",
-//                     position: "N/A - Present", 
+//                     position: "N/A - Present",
 //                     country: "Bangladesh",
 //                  )),
 //                   _experienceItem(Experience(
 //                     company: "N/A",
-//                     position: "N/A - Present", 
+//                     position: "N/A - Present",
 //                     country: "Bangladesh",
 //                  )),
 //               ],
@@ -379,10 +378,10 @@
 //     } else {
 //        dateRange = e.position ?? ""; // Using position as date placeholder if needed or just N/A
 //     }
-    
+
 //     // Override logic to match image exactly if needed, but standard logic is safer
 //     // The image shows "Jan 2026 - Present" as subtitle, likely mapped from date or just text
-    
+
 //     return _infoItem(
 //       icon: Icons.work_outline,
 //       title: "${e.company ?? ""}", // Title is Company Name e.g. "sdfg . sdfg"
@@ -400,7 +399,7 @@
 //     if (e.startDate != null) {
 //          dateRange = "${_formatDate(e.startDate)} - ${e.graduationDate != null ? _formatDate(e.graduationDate) : "N/A"}";
 //     }
-    
+
 //     return _infoItem(
 //       icon: Icons.school_outlined,
 //       title:
@@ -450,8 +449,8 @@
 //                  // Title (Bold)
 //                  // Date Range (if passed as separate arg or reuse date)
 //                  // Location
-                 
-//                 if (subTitle != null) 
+
+//                 if (subTitle != null)
 //                  Container(
 //                   width: double.infinity,
 //                   padding:
@@ -462,11 +461,11 @@
 //                     borderRadius:
 //                         BorderRadius.circular(20),
 //                   ),
-//                   child: Text(subTitle, 
+//                   child: Text(subTitle,
 //                       style: const TextStyle(
 //                           color: Colors.black87,
 //                           fontSize: 13)),
-//                 ) else 
+//                 ) else
 //                 Container(
 //                   width: double.infinity,
 //                   padding:
@@ -482,7 +481,7 @@
 //                           color: Colors.black87,
 //                           fontSize: 13)),
 //                 ),
-                
+
 //                 const SizedBox(height: 8),
 //                 Row(
 //                    children: [
@@ -493,7 +492,7 @@
 //                         color: Colors.grey)),
 //                    ]
 //                 )
-                
+
 //               ],
 //             ),
 //           ),
@@ -524,15 +523,16 @@ class PublicViewCandidateScreen extends StatefulWidget {
       _PublicViewCandidateScreenState();
 }
 
-class _PublicViewCandidateScreenState
-    extends State<PublicViewCandidateScreen> {
-
+class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
   final controller = Get.find<CompanyDetailsController>();
 
   @override
   void initState() {
     super.initState();
-    controller.getCandidatePublicView(widget.slug);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.getCandidatePublicView(widget.slug);
+    });
   }
 
   @override
@@ -540,7 +540,6 @@ class _PublicViewCandidateScreenState
     return Scaffold(
       backgroundColor: Colors.white,
       body: Obx(() {
-
         /// ================= LOADING =================
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -563,21 +562,17 @@ class _PublicViewCandidateScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// ================= HEADER =================
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-
                   /// Banner
                   Container(
                     height: 180,
                     width: double.infinity,
                     color: Colors.grey.shade200,
-                    child: resume.banner != null &&
-                            resume.banner!.isNotEmpty
-                        ? Image.network(resume.banner!,
-                            fit: BoxFit.cover)
+                    child: resume.banner != null && resume.banner!.isNotEmpty
+                        ? Image.network(resume.banner!, fit: BoxFit.cover)
                         : null,
                   ),
 
@@ -593,8 +588,7 @@ class _PublicViewCandidateScreenState
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(14),
-                        child: resume.photo != null &&
-                                resume.photo!.isNotEmpty
+                        child: resume.photo != null && resume.photo!.isNotEmpty
                             ? Image.network(
                                 resume.photo!,
                                 height: 90,
@@ -605,9 +599,11 @@ class _PublicViewCandidateScreenState
                                 height: 90,
                                 width: 90,
                                 color: Colors.grey.shade300,
-                                child: const Icon(Icons.person,
-                                    size: 50,
-                                    color: Colors.grey),
+                                child: const Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
                               ),
                       ),
                     ),
@@ -619,47 +615,44 @@ class _PublicViewCandidateScreenState
 
               /// ================= NAME =================
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "${resume.firstName ?? ""} ${resume.lastName ?? ""}",
                       style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined,
-                            size: 16,
-                            color: Colors.grey),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           "${resume.country ?? ""}${resume.city != null && resume.city!.isNotEmpty ? ", ${resume.city}" : ""}",
-                          style: const TextStyle(
-                              color: Colors.grey),
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    if (resume.immediatelyAvailable ==
-                        true)
+                    if (resume.immediatelyAvailable == true)
                       const Row(
                         children: [
-                          Icon(Icons.circle,
-                              size: 10,
-                              color: Colors.green),
+                          Icon(Icons.circle, size: 10, color: Colors.green),
                           SizedBox(width: 6),
                           Text(
                             "Immediately Available",
                             style: TextStyle(
-                                color: Colors.green,
-                                fontWeight:
-                                    FontWeight.w600),
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -673,32 +666,25 @@ class _PublicViewCandidateScreenState
               _sectionTitle("About"),
               const Divider(),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  resume.aboutUs ??
-                      "No description provided",
-                  style: const TextStyle(
-                      color: Colors.grey),
+                  resume.aboutUs ?? "No description provided",
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ),
 
               const SizedBox(height: 30),
 
               /// ================= SKILLS =================
-              if (resume.skills != null &&
-                  resume.skills!.isNotEmpty) ...[
+              if (resume.skills != null && resume.skills!.isNotEmpty) ...[
                 _sectionTitle("Skills"),
                 const SizedBox(height: 12),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Wrap(
                     spacing: 12,
                     runSpacing: 12,
-                    children: resume.skills!
-                        .map((e) => _skillChip(e))
-                        .toList(),
+                    children: resume.skills!.map((e) => _skillChip(e)).toList(),
                   ),
                 ),
               ],
@@ -710,17 +696,11 @@ class _PublicViewCandidateScreenState
               _sectionTitle("Experience"),
               const SizedBox(height: 10),
 
-              if (data.experiences != null &&
-                  data.experiences!.isNotEmpty)
-                ...data.experiences!
-                    .map((e) => _experienceItem(e))
-                    .toList()
+              if (data.experiences != null && data.experiences!.isNotEmpty)
+                ...data.experiences!.map((e) => _experienceItem(e)).toList()
               else
                 const Padding(
-                  padding:
-                      EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: Text("No Experience Added"),
                 ),
 
@@ -731,17 +711,11 @@ class _PublicViewCandidateScreenState
               _sectionTitle("Education"),
               const SizedBox(height: 10),
 
-              if (data.education != null &&
-                  data.education!.isNotEmpty)
-                ...data.education!
-                    .map((e) => _educationItem(e))
-                    .toList()
+              if (data.education != null && data.education!.isNotEmpty)
+                ...data.education!.map((e) => _educationItem(e)).toList()
               else
                 const Padding(
-                  padding:
-                      EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: Text("No Education Added"),
                 ),
 
@@ -757,38 +731,35 @@ class _PublicViewCandidateScreenState
 
   Widget _sectionTitle(String title) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 20),
-      child: Text(title,
-          style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold)),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
   Widget _divider() {
     return const Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: 20),
       child: Divider(),
     );
   }
 
   Widget _skillChip(String title) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(
-              horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFFE7EDFF),
-        borderRadius:
-            BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(title,
-          style: const TextStyle(
-              color: Color(0xFF3F51B5),
-              fontWeight:
-                  FontWeight.w600)),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: Color(0xFF3F51B5),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -797,11 +768,11 @@ class _PublicViewCandidateScreenState
       leading: const Icon(Icons.work_outline),
       title: Text(e.company ?? ""),
       subtitle: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-              "${_formatDate(e.startDate)} - ${e.endDate != null ? _formatDate(e.endDate) : "Present"}"),
+            "${_formatDate(e.startDate)} - ${e.endDate != null ? _formatDate(e.endDate) : "Present"}",
+          ),
           Text(e.country ?? ""),
         ],
       ),
@@ -810,18 +781,15 @@ class _PublicViewCandidateScreenState
 
   Widget _educationItem(Education e) {
     return ListTile(
-      leading:
-          const Icon(Icons.school_outlined),
-      title: Text(
-          "${e.degree ?? ""}, ${e.fieldOfStudy ?? ""}"),
+      leading: const Icon(Icons.school_outlined),
+      title: Text("${e.degree ?? ""}, ${e.fieldOfStudy ?? ""}"),
       subtitle: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-              "${_formatDate(e.startDate)} - ${e.graduationDate != null ? _formatDate(e.graduationDate) : "N/A"}"),
-          Text(
-              "${e.city ?? ""}, ${e.country ?? ""}"),
+            "${_formatDate(e.startDate)} - ${e.graduationDate != null ? _formatDate(e.graduationDate) : "N/A"}",
+          ),
+          Text("${e.city ?? ""}, ${e.country ?? ""}"),
         ],
       ),
     );
@@ -830,8 +798,18 @@ class _PublicViewCandidateScreenState
   String _formatDate(DateTime? date) {
     if (date == null) return "N/A";
     const months = [
-      "Jan","Feb","Mar","Apr","May","Jun",
-      "Jul","Aug","Sep","Oct","Nov","Dec"
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     return "${months[date.month - 1]} ${date.year}";
   }

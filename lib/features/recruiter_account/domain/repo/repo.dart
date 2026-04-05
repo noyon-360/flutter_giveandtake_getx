@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/archieve_job_request_model.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/archieve_job_response_model.dart';
@@ -48,7 +49,7 @@ abstract class Repo {
   NetworkResult<List<JobPostResponseModel>> createNewJobPost(
     JobPostRequestModel request,
   );
-  NetworkResult<void> uploadVideo(String userId, FormData formData);
+  NetworkResult<void> uploadVideo(String userId, File videoFile);
   NetworkResult<void> deleteVideo(String userId);
   NetworkResult<CreateRecruiterResponseModel> createRecruiter(
     FormData formData,

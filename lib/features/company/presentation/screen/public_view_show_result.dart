@@ -173,24 +173,24 @@ class PublicViewShowResultScreen extends StatelessWidget {
                       return UserCard(
                         user: user,
                         onTap: () {
-                          if (user.slug.isNotEmpty) {
-                          if (user.role.toLowerCase() == 'candidate') {
-                            Get.to(
-                              () => PublicViewCandidateScreen(slug: user.slug),
+                          final slug = user.slug;
+
+                          if (slug == null || slug.isEmpty) {
+                            Get.snackbar(
+                              'Error',
+                              'This user has no public profile',
                             );
+                            return;
                           }
-                          else if(user.role.toLowerCase() == 'recruiter'){
-                            Get.to(
-                                  () => RecruiterPublicViewScreen(slug: user.slug),
-                            );
-                          }
-                          else {
-                            Get.to(
-                              () => PublicViewSeachScreen(slug: user.slug),
-                            );
-                          }
+
+                          final role = user.role.toLowerCase();
+
+                          if (role == 'candidate') {
+                            Get.to(() => PublicViewCandidateScreen(slug: slug));
+                          } else if (role == 'recruiter') {
+                            Get.to(() => RecruiterPublicViewScreen(slug: slug));
                           } else {
-                            Get.snackbar("Error", "User has no profile slug");
+                            Get.to(() => PublicViewSeachScreen(slug: slug));
                           }
                         },
                       );

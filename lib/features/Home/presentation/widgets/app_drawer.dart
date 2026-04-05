@@ -60,15 +60,14 @@ class _AppDrawerState extends State<AppDrawer> {
     // Clear search and load users after frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchController.clear();
-      
+
       // Clear previous search safely
       if (controller.searchQuery.value.isNotEmpty) {
         controller.clearSearch();
       }
 
       // Load users if not already loaded
-      if (controller.searchInfo.isEmpty &&
-          !controller.isLoading.value) {
+      if (controller.searchInfo.isEmpty && !controller.isLoading.value) {
         controller.fetchSearchUser("");
       }
     });
@@ -91,7 +90,8 @@ class _AppDrawerState extends State<AppDrawer> {
     final authController = Get.find<AuthController>();
 
     // 1. Guest: no access token → go to LoginScreen
-    final accessToken = await authController.authStorageService.getAccessToken();
+    final accessToken = await authController.authStorageService
+        .getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       Get.to(() => const LoginScreen());
       return;
@@ -135,8 +135,8 @@ class _AppDrawerState extends State<AppDrawer> {
             Get.to(() => CreateRecruiterAccount());
           },
           (res) {
-            final message =
-                (res.data['message'] as String? ?? '').toLowerCase();
+            final message = (res.data['message'] as String? ?? '')
+                .toLowerCase();
             DPrint.log('Recruiter fetch message: $message');
             if (message.contains('recruiter account not found')) {
               Get.to(() => CreateRecruiterAccount());
@@ -360,16 +360,14 @@ class _AppDrawerState extends State<AppDrawer> {
                                           slug: slug,
                                         ),
                                       );
-                                    }
-                                    else if(user.role.toLowerCase() ==
-                                        'recruiter'){
+                                    } else if (user.role.toLowerCase() ==
+                                        'recruiter') {
                                       Get.to(
-                                            () => RecruiterPublicViewScreen(
+                                        () => RecruiterPublicViewScreen(
                                           slug: slug,
                                         ),
                                       );
-                                    }
-                                    else {
+                                    } else {
                                       Get.to(
                                         () => PublicViewSeachScreen(slug: slug),
                                       );
@@ -398,7 +396,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
             ListTileForNav(
               title: "Elevator Pitch & Resume",
-              onTap: () async =>await _handleElevatorPitch(),
+              onTap: () async => await _handleElevatorPitch(),
             ),
             ListTileForNav(
               title: "Jobs",

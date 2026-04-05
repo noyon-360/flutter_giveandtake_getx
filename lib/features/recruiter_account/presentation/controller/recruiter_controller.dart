@@ -1,7 +1,6 @@
 import 'dart:developer' as DPrint;
 import 'dart:io';
-import 'package:get/get.dart' hide FormData, MultipartFile;
-import 'package:dio/dio.dart';
+import 'package:get/get.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 import 'package:giveandtake/features/company/presentation/screen/manage_job_req_screen.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/archieve_job_request_model.dart'
@@ -31,8 +30,6 @@ import '../../data/models/get_job_response_model.dart'
 import '../../data/models/get_recruiter_response_model.dart';
 import '../../data/models/job_create_request_model.dart';
 import '../models/job_model.dart';
-import 'package:http_parser/http_parser.dart';
-
 import '../widgets/populate_for_single_job_edit.dart';
 import 'job_controller/career_stage_controller.dart';
 import 'job_controller/employment_type_controller.dart';
@@ -499,36 +496,10 @@ class RecruiterController extends BaseController {
       return;
     }
 
+    DPrint.log('Starting video upload for userId: $userId, file: ${file.path}');
     try {
-      //Delete any existing video unconditionally
-      final deleteResult = await _recruiterRepo.deleteVideo(userId);
-      deleteResult.fold(
-        (fail) {
-          //DPrint.log('Failed to delete existing video: ${fail.message}');
-          Get.snackbar(
-            'Error',
-            'Could not delete previous video: ${fail.message}',
-          );
-          setLoading(false);
-          return;
-        },
-        (_) {
-          DPrint.log('Existing video deleted successfully');
-          uploadedVideoPath.value = '';
-          successVideoUploaded.value = false;
-        },
-      );
-
       //Upload new video
-      final formData = FormData.fromMap({
-        "videoFile": await MultipartFile.fromFile(
-          file.path,
-          filename: file.path.split('/').last,
-          contentType: MediaType('video', 'mp4'),
-        ),
-      });
-
-      final uploadResult = await _recruiterRepo.uploadVideo(userId, formData);
+      final uploadResult = await _recruiterRepo.uploadVideo(userId, file);
 
       uploadResult.fold(
         (fail) {
