@@ -243,8 +243,9 @@ class _RecruiterPublicViewScreenState extends State<RecruiterPublicViewScreen> {
                         );
 
                         return ElevatorPitchSection(
-                          videoUrl:
-                          "${ApiConstants.baseUrl}/elevator-pitch/stream/${user.elevatorPitch?.id ?? ''}",
+                          videoUrl: user.elevatorPitch?.id != null
+                              ? "${ApiConstants.baseUrl}/elevator-pitch/stream/${user.elevatorPitch!.id}"
+                              : null,
                           httpHeaders: {
                             "Custom-Header": "value",
                             if (_accessToken != null) ...{

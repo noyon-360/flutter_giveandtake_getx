@@ -176,14 +176,40 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                             borderRadius: BorderRadius.circular(4),
                             color: const Color(0xFF191919),
                           ),
-                          height: 200,
+                          height: 220,
                           width: double.infinity,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: VideoPlayerWidget(
-                              videoPath:
-                                  recruiterController.uploadedVideoPath.value,
-                            ),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: VideoPlayerWidget(
+                                  videoPath: recruiterController
+                                      .uploadedVideoPath
+                                      .value,
+                                ),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    recruiterController.deleteElevatorVideo();
+                                  },
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       } else {
@@ -283,71 +309,61 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                     ),
                   ),
 
-                  SizedBox(height: 10),
+                  SizedBox(height: 15),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        children: [
-                          SizedBox(height: 10),
-                          GestureDetector(
-                            onTap: imagePickerController.showPickerOptions,
-                            child: Obx(() {
-                              return Container(
-                                height: 130,
-                                width: 130,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Color(0xFFD9D9D9),
-                                ),
-                                child: Center(
-                                  child:
+                      GestureDetector(
+                        onTap: imagePickerController.showPickerOptions,
+                        child: Obx(() {
+                          return Container(
+                            height: 150,
+                            width: 150,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Color(0xFFD9D9D9),
+                            ),
+                            child:
+                                imagePickerController.selectedImage.value !=
+                                    null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    // same as container
+                                    child: Image.file(
                                       imagePickerController
-                                              .selectedImage
-                                              .value !=
-                                          null
-                                      ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          // same as container
-                                          child: Image.file(
-                                            imagePickerController
-                                                .selectedImage
-                                                .value!,
-                                            height: 130,
-                                            width: 130,
-                                            fit: BoxFit
-                                                .cover, // makes image fill the container
-                                          ),
-                                        )
-                                      : const Text(
-                                          'photo/recruiter logo',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                ),
-                              );
-                            }),
-                          ),
-
-                          SizedBox(height: 10),
-                        ],
+                                          .selectedImage
+                                          .value!,
+                                      height: 130,
+                                      width: 130,
+                                      fit: BoxFit
+                                          .cover, // makes image fill the container
+                                    ),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: const Text(
+                                      'photo/recruiter logo',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                          );
+                        }),
                       ),
 
-                      SizedBox(width: 15),
-
-                      Bio(
-                        descriptionTController: _descriptionTController,
-                        descriptionController: descriptionController,
-                      ),
+                      SizedBox(height: 10),
                     ],
+                  ),
+                  SizedBox(height: 15),
+                  Bio(
+                    descriptionTController: _descriptionTController,
+                    descriptionController: descriptionController,
                   ),
 
                   SizedBox(height: 14),
@@ -512,7 +528,9 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                           return;
                         }
 
-                        _submit();
+                        if (recruiterController.successVideoUploaded.value) {
+                          _submit();
+                        }
                       },
 
                       // onPressed: () {
@@ -642,7 +660,7 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _linkedINTEController,
                         focusNode: _linkedINFocusNode,
-                        keyboardType: TextInputType.name,
+                        //keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter URL here",
@@ -652,7 +670,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -667,7 +685,7 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _twitterTEController,
                         focusNode: _twitterFocusNode,
-                        keyboardType: TextInputType.name,
+                        //keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter URL here",
@@ -677,7 +695,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -692,7 +710,7 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _upworkTEController,
                         focusNode: _upworkFocusNode,
-                        keyboardType: TextInputType.name,
+                        //keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter URL here",
@@ -702,7 +720,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -717,7 +735,7 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _facebookTEController,
                         focusNode: _facebookFocusNode,
-                        keyboardType: TextInputType.name,
+                        //keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter URL here",
@@ -727,7 +745,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -742,7 +760,7 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _tiktokTEController,
                         focusNode: _tiktokFocusNode,
-                        keyboardType: TextInputType.name,
+                        //keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter URL here",
@@ -752,7 +770,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -767,7 +785,7 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _instaTEController,
                         focusNode: _instaFocusNode,
-                        keyboardType: TextInputType.name,
+                        //keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter URL here",
@@ -777,7 +795,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -792,7 +810,7 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _fiverrTEController,
                         focusNode: _fiverrFocusNode,
-                        keyboardType: TextInputType.name,
+                        //keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter URL here",
@@ -802,7 +820,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -817,7 +835,7 @@ class SocialLink extends StatelessWidget {
                       TextFormField(
                         controller: _companyTEController,
                         focusNode: _companyFocusNode,
-                        keyboardType: TextInputType.name,
+                        //keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: context.primaryInputDecoration.copyWith(
                           hintText: "Enter URL here",
@@ -827,7 +845,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        validator: Validators.url,
                       ),
                     ],
                   ),

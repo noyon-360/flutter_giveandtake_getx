@@ -32,30 +32,30 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? Stack(
-      alignment: Alignment.center,
-      children: [
-        AspectRatio(
-          aspectRatio: _controller.value.aspectRatio,
-          child: VideoPlayer(_controller),
-        ),
-        IconButton(
-          icon: Icon(
-            _controller.value.isPlaying
-                ? Icons.pause_circle
-                : Icons.play_circle,
-            color: Colors.white,
-            size: 40,
-          ),
-          onPressed: () {
-            setState(() {
-              _controller.value.isPlaying
-                  ? _controller.pause()
-                  : _controller.play();
-            });
-          },
-        ),
-      ],
-    )
+            alignment: Alignment.center,
+            children: [
+              AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: VideoPlayer(_controller),
+              ),
+              IconButton(
+                icon: Icon(
+                  _controller.value.isPlaying
+                      ? Icons.pause_circle
+                      : Icons.play_circle,
+                  color: Colors.white,
+                  size: 40,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _controller.value.isPlaying
+                        ? _controller.pause()
+                        : _controller.play();
+                  });
+                },
+              ),
+            ],
+          )
         : const Center(child: CircularProgressIndicator());
   }
 }

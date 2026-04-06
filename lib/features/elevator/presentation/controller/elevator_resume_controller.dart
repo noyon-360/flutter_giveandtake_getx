@@ -558,17 +558,23 @@ class ElevatorResumeController extends GetxController {
           },
         );
         
+        bool completeSuccess = false;
+        String completeError = '';
         completeResult.fold(
           (fail) {
             print('⚠️ Warning: Failed to confirm video completion: ${fail.message}');
-            // Don't fail the upload, just warn
-            print('Video is uploaded but completion confirmation failed. Server will process it.');
+            completeError = fail.message;
           },
           (success) {
             print('✅ Video completion confirmed successfully');
             print('Response: ${success.data}');
+            completeSuccess = true;
           },
         );
+
+        if (!completeSuccess) {
+          throw Exception(completeError);
+        }
         
         // Close loading
         if (Get.isDialogOpen ?? false) {

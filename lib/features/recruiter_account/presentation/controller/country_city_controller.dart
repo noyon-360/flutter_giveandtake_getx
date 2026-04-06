@@ -48,7 +48,7 @@ class LocationController extends GetxController {
           // Add authorization header if needed in future
           // 'Authorization': 'Bearer $token',
         },
-      ).timeout(const Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
