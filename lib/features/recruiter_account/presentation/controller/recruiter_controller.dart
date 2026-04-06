@@ -626,7 +626,18 @@ class RecruiterController extends BaseController {
           'Success',
           'Video uploaded successfully',
         );
-        Get.back();
+        if (Get.context != null) {
+          Navigator.of(Get.context!).pop();
+        }
+
+        // Small delay to allow backend to finish writing the video metadata before we fetch the profile
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        try {
+          await fetchProfile();
+        } catch (e) {
+          DPrint.log('Error refreshing profile: $e');
+        }
       } else {
         throw Exception(
           'Failed to upload video to storage. Status: ${uploadToStorageResponse.statusCode}',
@@ -659,7 +670,8 @@ class RecruiterController extends BaseController {
         (fail) {
           Get.snackbar('Error', 'Could not delete video: ${fail.message}');
         },
-        (_) {
+        (_) async {
+          await fetchProfile();
           uploadedVideoPath.value = '';
           successVideoUploaded.value = false;
           Get.snackbar('Success', 'Video deleted successfully');

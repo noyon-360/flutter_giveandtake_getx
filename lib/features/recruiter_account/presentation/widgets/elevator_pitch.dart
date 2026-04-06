@@ -5,12 +5,19 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/recruiter_controller.dart';
+import '../screens/video_upload_screen.dart';
 
 class ElevatorPitchSection extends StatefulWidget {
   final String? videoUrl;
   final Map<String, String>? httpHeaders;
+  final bool isOwnProfile;
 
-  const ElevatorPitchSection({super.key, this.videoUrl, this.httpHeaders});
+  const ElevatorPitchSection({
+    super.key,
+    this.videoUrl,
+    this.httpHeaders,
+    this.isOwnProfile = false,
+  });
 
   @override
   State<ElevatorPitchSection> createState() => _ElevatorPitchSectionState();
@@ -20,94 +27,136 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
   final recruiterController = Get.find<RecruiterController>();
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
+  bool _isInitialized = false;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _initializeVideo();
+  }
 
-    DPrint.log("Initial Video : -> ${widget.videoUrl}");
-    if (widget.videoUrl != null && widget.videoUrl!.isNotEmpty) {
-      _videoController =
-          VideoPlayerController.networkUrl(
-              Uri.parse(widget.videoUrl!),
-              formatHint: VideoFormat.hls,
-              videoPlayerOptions: VideoPlayerOptions(
-                mixWithOthers: true,
-                allowBackgroundPlayback: false,
-              ),
-              httpHeaders: widget.httpHeaders ?? {},
-            )
-            ..initialize()
-                .then((_) {
-                  _chewieController = ChewieController(
-                    videoPlayerController: _videoController!,
-                    autoPlay: false,
-                    looping: false,
-                    aspectRatio: _videoController!.value.aspectRatio,
-
-                    placeholder: Container(
-                      color: Colors.black,
-                      child: Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
-                    ),
-                    errorBuilder: (context, errorMessage) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              color: Colors.red,
-                              size: 48,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Failed to load video',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              errorMessage,
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                  setState(() {});
-                })
-                .catchError((error) {
-                  // Handle init failure (e.g., network/URL invalid)
-                  debugPrint('Video init error: $error'); // Log for debugging
-                  if (mounted) {
-                    setState(() {
-                      // Show error UI instead of spinner
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to load video: $error')),
-                    );
-                  }
-                });
+  @override
+  void didUpdateWidget(covariant ElevatorPitchSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.videoUrl != oldWidget.videoUrl) {
+      DPrint.log(
+          "Video URL changed: ${oldWidget.videoUrl} -> ${widget.videoUrl}");
+      _disposeControllers();
+      _initializeVideo();
     }
   }
 
   @override
   void dispose() {
-    _videoController?.dispose();
-    _chewieController?.dispose();
+    _disposeControllers();
     super.dispose();
   }
 
-  @override
+  void _disposeControllers() {
+    _chewieController?.dispose();
+    _videoController?.dispose();
+    _chewieController = null;
+    _videoController = null;
+    _isInitialized = false;
+    _errorMessage = null;
+  }
+
+  int _retryCount = 0;
+  final int _maxRetries = 5;
+
+  void _initializeVideo() {
+    DPrint.log("Initializing Video (Attempt ${_retryCount + 1}): -> ${widget.videoUrl}");
+    _errorMessage = null;
+    _isInitialized = false;
+
+    if (widget.videoUrl != null &&
+        widget.videoUrl!.isNotEmpty &&
+        !widget.videoUrl!.endsWith('/')) {
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.videoUrl!),
+        formatHint: VideoFormat.hls,
+        videoPlayerOptions: VideoPlayerOptions(
+          mixWithOthers: true,
+          allowBackgroundPlayback: false,
+        ),
+        httpHeaders: widget.httpHeaders ?? {},
+      )..initialize().then((_) {
+          if (!mounted) return;
+          DPrint.log("Video initialized successfully!");
+          _retryCount = 0; // Reset on success
+          _isInitialized = true;
+          _chewieController = ChewieController(
+            videoPlayerController: _videoController!,
+            autoPlay: false,
+            looping: false,
+            aspectRatio: _videoController!.value.aspectRatio,
+            placeholder: Container(
+              color: Colors.black,
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+            ),
+            errorBuilder: (context, errorMessage) {
+              return _buildErrorWidget(errorMessage);
+            },
+          );
+          setState(() {});
+        }).catchError((error) {
+          debugPrint('Video init error: $error');
+          if (!mounted) return;
+
+          // Auto-retry if initialization fails (often 404 during backend processing)
+          if (_retryCount < _maxRetries) {
+            _retryCount++;
+            setState(() {
+              _errorMessage = "Video is processing, please wait... (Attempt $_retryCount/$_maxRetries)";
+            });
+            DPrint.log("Retrying video initialization in 1 second... ($_retryCount/$_maxRetries)");
+            Future.delayed(const Duration(microseconds: 500), () {
+              if (mounted) {
+                _disposeControllers();
+                _initializeVideo();
+              }
+            });
+          } else {
+            setState(() {
+              _errorMessage = "Failed to load video after multiple attempts. It might still be processing.";
+            });
+          }
+        });
+    }
+  }
+
+  Widget _buildErrorWidget(String errorMessage) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.info_outline, color: Colors.white70, size: 40),
+          const SizedBox(height: 8),
+          const Text(
+            'Video is processing or failed to load',
+            style: TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: () {
+              _disposeControllers();
+              _initializeVideo();
+              setState(() {});
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white12,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Try Again'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -115,10 +164,10 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
         borderRadius: BorderRadius.circular(4),
         color: const Color(0xFF191919),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       width: double.infinity,
       child: Column(
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -132,86 +181,81 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
                   color: Colors.white,
                 ),
               ),
-
-              IconButton(
-                onPressed: () {
-                  recruiterController.deleteElevatorVideo();
-                },
-                icon: Icon(Icons.delete, color: Colors.white),
-              ),
+              if (widget.isOwnProfile &&
+                  widget.videoUrl != null &&
+                  widget.videoUrl!.isNotEmpty &&
+                  !widget.videoUrl!.endsWith('/'))
+                IconButton(
+                  onPressed: () {
+                    recruiterController.deleteElevatorVideo();
+                  },
+                  icon: const Icon(Icons.delete, color: Colors.white),
+                ),
             ],
           ),
           const SizedBox(height: 10),
-
-          //This prevents overflow
-          Expanded(
-            child: widget.videoUrl != null && widget.videoUrl!.isNotEmpty
-                ? _chewieController != null &&
-                          _videoController != null &&
-                          _videoController!.value.isInitialized
-                      ? Chewie(controller: _chewieController!)
-                      : const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        )
-                : const Text(
-                    "No pitch added yet.",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.white70,
-                      height: 1.4,
-                    ),
+          widget.videoUrl != null &&
+                  widget.videoUrl!.isNotEmpty &&
+                  !widget.videoUrl!.endsWith('/')
+              ? Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-          ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: _errorMessage != null
+                        ? _buildErrorWidget(_errorMessage!)
+                        : _chewieController != null && _isInitialized
+                            ? Chewie(controller: _chewieController!)
+                            : const Center(
+                                child: CircularProgressIndicator(
+                                    color: Colors.white),
+                              ),
+                  ),
+                )
+              : widget.isOwnProfile
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "No pitch added yet.",
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.white70,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Get.to(() => const VideoUploadScreen());
+                            },
+                            icon: const Icon(Icons.upload, color: Colors.white),
+                            label: const Text(
+                              "Upload New Video",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2B7FD0),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const Text(
+                      "No pitch added yet.",
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.white70,
+                        height: 1.4,
+                      ),
+                    ),
         ],
       ),
     );
   }
-
-  // Widget build(BuildContext context) {
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(4),
-  //       color: const Color(0xFF191919),
-  //     ),
-  //     padding: const EdgeInsets.all(16),
-  //     width: double.infinity,
-  //     child: Column(
-  //       mainAxisSize: MainAxisSize.min,
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         const Text(
-  //           "Elevator Pitch",
-  //           style: TextStyle(
-  //             fontSize: 18,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.white,
-  //           ),
-  //         ),
-  //         const SizedBox(height: 10),
-  //         if (widget.videoUrl != null && widget.videoUrl!.isNotEmpty)
-  //           _chewieController != null &&
-  //               _videoController != null &&
-  //               _videoController!.value.isInitialized
-  //               ? AspectRatio(
-  //             aspectRatio: _videoController!.value.aspectRatio,
-  //             child: Chewie(controller: _chewieController!),
-  //           )
-  //               : const Center(
-  //             child: CircularProgressIndicator(
-  //               color: Colors.white,
-  //             ),
-  //           )
-  //         else
-  //           const Text(
-  //             "No pitch added yet.",
-  //             style: TextStyle(
-  //               fontSize: 15,
-  //               color: Colors.white70,
-  //               height: 1.4,
-  //             ),
-  //           ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }
