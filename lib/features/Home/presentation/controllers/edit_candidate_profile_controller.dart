@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'dart:async';
-import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:get/get.dart';
@@ -10,10 +10,8 @@ import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 import 'package:giveandtake/core/network/services/secure_store_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+
 import '../../../company/data/model/candidate_resume_response_model.dart';
-import '../../../../core/network/api_client.dart'; // Ensure this matches actual location
-import '../../../elevator/presentation/controller/elevator_resume_controller.dart'; 
-import 'candidate_dashboard_controller.dart';
 
 class EditCandidateProfileController extends GetxController {
   final isLoading = false.obs;
@@ -65,14 +63,21 @@ class EditCandidateProfileController extends GetxController {
   final RxList<String> cities = <String>[].obs;
 
   final List<String> degrees = [
+    'BSc',
+    'B.Tech',
+    'B.A',
+    'B.Ed',
+    'B.Eng',
+    'LLB',
+    'LLM',
+    'M.B.A',
+    'MSc',
+    'M.Phil',
+    'M.Eng',
+    'Ph.D',
     'High School',
-    'Associate Degree',
-    "Bachelor's Degree",
-    "Master's Degree",
-    'PhD',
-    'Diploma',
-    'Certificate',
-    'Other'
+    'College',
+    'Sixth Form',
   ];
 
   @override

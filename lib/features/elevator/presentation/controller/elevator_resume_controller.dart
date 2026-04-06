@@ -16,7 +16,10 @@ import '../../../../core/network/constants/key_constants.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
 import '../../../../core/services/get_user_profile_service.dart';
+import '../../../Home/presentation/screen/candidate_dashboard_screen.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../company/presentation/screen/company_details_screen.dart';
+import '../../../recruiter_account/presentation/screens/recruiter_page.dart';
 import '../../data/models/upload_video_request_model.dart';
 import '../../data/models/upload_video_response_model.dart';
 
@@ -142,12 +145,21 @@ class ElevatorResumeController extends GetxController {
   ];
 
   final List<String> degrees = [
+    'BSc',
+    'B.Tech',
+    'B.A',
+    'B.Ed',
+    'B.Eng',
+    'LLB',
+    'LLM',
+    'M.B.A',
+    'MSc',
+    'M.Phil',
+    'M.Eng',
+    'Ph.D',
     'High School',
-    'Associate Degree',
-    'Bachelor\'s Degree',
-    'Master\'s Degree',
-    'Doctorate',
-    'Professional Certificate',
+    'College',
+    'Sixth Form',
   ];
 
   /// ================== FORM CONTROLLERS ==================
@@ -857,6 +869,13 @@ class ElevatorResumeController extends GetxController {
 
       print('User ID: ${user.id}, Email: ${user.email}');
 
+        final authStorageService = Get.isRegistered<AuthStorageService>()
+          ? Get.find<AuthStorageService>()
+          : AuthStorageService();
+        final userRole = (await authStorageService.getUserRole() ?? 'candidate')
+          .trim()
+          .toLowerCase();
+
       // Get about me as plain text
       final aboutMe = aboutMeQuillController.document.toPlainText().trim();
       print('About me text length: ${aboutMe.length}');
@@ -864,7 +883,7 @@ class ElevatorResumeController extends GetxController {
       // Prepare resume object
       print('Preparing resume data...');
       final resumeData = {
-        'type': 'candidate',
+        'type': userRole.isEmpty ? 'candidate' : userRole,
         'firstName': firstNameController.text.trim(),
         'lastName': surnameController.text.trim(),
         'email': emailController.text.trim(),
@@ -1045,10 +1064,10 @@ class ElevatorResumeController extends GetxController {
             duration: const Duration(seconds: 3),
           );
 
-          // Clear form and navigate back
+          // Clear form and navigate to role-based dashboard
           clearForm();
           Future.delayed(const Duration(seconds: 2), () {
-            Get.back();
+            _navigateToDashboardByRole();
           });
         } catch (e) {
           print('Error parsing success response: $e');
@@ -1059,10 +1078,10 @@ class ElevatorResumeController extends GetxController {
             colorText: Colors.white,
           );
 
-          // Clear form and navigate back
+          // Clear form and navigate to role-based dashboard
           clearForm();
           Future.delayed(const Duration(seconds: 2), () {
-            Get.back();
+            _navigateToDashboardByRole();
           });
         }
       } else {
@@ -1131,6 +1150,36 @@ class ElevatorResumeController extends GetxController {
     } finally {
       isUploadingResume.value = false;
       print('========== RESUME UPLOAD COMPLETED =========');
+    }
+  }
+
+  Future<void> _navigateToDashboardByRole() async {
+    final authStorageService = Get.isRegistered<AuthStorageService>()
+        ? Get.find<AuthStorageService>()
+        : AuthStorageService();
+
+    final role = (await authStorageService.getUserRole() ?? '')
+        .trim()
+        .toLowerCase();
+
+    if (role == 'candidate') {
+      Get.offAll(() => const CandidateDashboardScreen());
+      return;
+    }
+
+    if (role == 'company') {
+      Get.offAll(() => CompanyDetailsPage());
+      return;
+    }
+
+    if (role == 'recruiter') {
+      Get.offAll(() => const RecruiterPageScreen());
+      return;
+    }
+
+    // Fallback keeps old behavior when role is missing/unknown.
+    if (Get.key.currentState?.canPop() ?? false) {
+      Get.back();
     }
   }
 

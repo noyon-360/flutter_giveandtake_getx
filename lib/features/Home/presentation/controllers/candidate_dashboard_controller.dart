@@ -27,6 +27,7 @@ class CandidateDashboardController extends BaseController {
 
   final isLoadingResume = false.obs;
   final isLoadingJobs = false.obs;
+  final isDeletingVideo = false.obs;
 
   @override
   void onInit() {
@@ -180,6 +181,39 @@ class CandidateDashboardController extends BaseController {
       print(
         '💼 [CandidateDashboard] Applied jobs fetch completed (loading: false)',
       );
+    }
+  }
+
+  Future<void> deleteElevatorVideo() async {
+    if (isDeletingVideo.value) return;
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      Get.snackbar('Error', 'User ID not found. Please log in again.');
+      return;
+    }
+
+    isDeletingVideo.value = true;
+    try {
+      final result = await _apiClient.delete(
+        ApiConstants.elevatorPitchVideo.deleteVideo(userId),
+        fromJsonT: (json) => null,
+      );
+
+      result.fold(
+        (fail) {
+          Get.snackbar('Delete Failed', fail.message);
+        },
+        (success) async {
+          Get.snackbar('Success', 'Video deleted successfully.');
+
+          await fetchResume(userId);
+        },
+      );
+    } catch (e) {
+      Get.snackbar('Delete Failed', 'Could not delete video: $e');
+    } finally {
+      isDeletingVideo.value = false;
     }
   }
 }

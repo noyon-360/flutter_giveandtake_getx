@@ -42,6 +42,7 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   bool _isHelpExpanded = false;
   bool _isMoreExpanded = false;
+  bool _isLoggedIn = false;
 
   final _searchController = TextEditingController();
 
@@ -51,6 +52,7 @@ class _AppDrawerState extends State<AppDrawer> {
   void initState() {
     super.initState();
     controller = Get.find<CompanyDetailsController>();
+    _loadAuthStatus();
 
     // Sync text field with reactive searchQuery
     _searchController.addListener(() {
@@ -70,6 +72,16 @@ class _AppDrawerState extends State<AppDrawer> {
       if (controller.searchInfo.isEmpty && !controller.isLoading.value) {
         controller.fetchSearchUser("");
       }
+    });
+  }
+
+  Future<void> _loadAuthStatus() async {
+    final authController = Get.find<AuthController>();
+    final accessToken = await authController.authStorageService
+        .getAccessToken();
+    if (!mounted) return;
+    setState(() {
+      _isLoggedIn = accessToken != null && accessToken.isNotEmpty;
     });
   }
 
@@ -547,10 +559,16 @@ class _AppDrawerState extends State<AppDrawer> {
             ],
 
             ListTileForNav(
-              title: "Logout",
+              title: _isLoggedIn ? "Logout" : "Login",
               liconPath: "assets/icons/logout_icon_dawer.png",
               onTap: () {
-                Get.find<AuthController>().logout();
+                if (_isLoggedIn) {
+                  Get.find<AuthController>().logout();
+                  return;
+                }
+
+                Get.back();
+                Get.to(() => const LoginScreen());
               },
             ),
           ],

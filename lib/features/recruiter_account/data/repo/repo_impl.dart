@@ -1,11 +1,11 @@
 import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:giveandtake/core/network/models/network_failure.dart';
 import 'package:giveandtake/core/network/models/network_success.dart';
 import 'package:giveandtake/core/network/network_result.dart';
-
 import 'package:giveandtake/features/recruiter_account/data/models/get_company_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/get_job_response_model.dart';
 
@@ -32,7 +32,6 @@ import '../models/leave_company_request_model.dart';
 import '../models/leave_company_response_model.dart';
 import '../models/public_view_response_model.dart';
 import '../models/update_recruiter_response_model.dart';
-import '../models/your_job_response_model.dart';
 
 class RepoImplementation extends Repo {
   final ApiClient _apiClient;
@@ -241,8 +240,8 @@ class RepoImplementation extends Repo {
   @override
   NetworkResult<void> deleteVideo(String userId) {
     return _apiClient.delete(
-      ApiConstants.elevatorPitchVideo.uploadVideo(userId),
-      fromJsonT: (json) => [],
+      ApiConstants.elevatorPitchVideo.deleteVideo(userId),
+      fromJsonT: (json) => null,
     );
   }
 

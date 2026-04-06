@@ -83,9 +83,13 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
           final resumeData = controller.resumeData.value;
           final resume = resumeData?.resume;
           final elevatorPitches = resumeData?.elevatorPitch ?? [];
-          final hasElevatorPitch =
-              elevatorPitches.first.id!=null ||
-              elevatorPitches.first.video?.hlsUrl != null;
+            final firstPitch = elevatorPitches.isNotEmpty
+              ? elevatorPitches.first
+              : null;
+            final hasElevatorPitch =
+              firstPitch != null &&
+              ((firstPitch.id?.isNotEmpty ?? false) ||
+                (firstPitch.video?.hlsUrl?.isNotEmpty ?? false));
 
           // Log what's being displayed
           if (resumeData == null) {
@@ -301,47 +305,107 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: hasElevatorPitch
-                      ? Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFF999999),
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      ? Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: const Color(0xFF999999),
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
 
-                  //fetch elevated pitch e
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: const Color(0xFF191919),
-                    ),
-                    height: 280,
-                    width: double.infinity,
-                    child: Builder(
-                      builder: (context) {
-                        DPrint.log("DEBUG: VIDEO INFO CLEAN TEST");
-                        DPrint.log(
-                          "Video URL: ${ApiConstants.baseUrl}/elevator-pitch/stream/${elevatorPitches.first.id ?? ''}",
-                        );
+                              //fetch elevated pitch e
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  color: const Color(0xFF191919),
+                                ),
+                                height: 280,
+                                width: double.infinity,
+                                child: Builder(
+                                  builder: (context) {
+                                    DPrint.log("DEBUG: VIDEO INFO CLEAN TEST");
+                                    DPrint.log(
+                                      "Video URL: ${ApiConstants.baseUrl}/elevator-pitch/stream/${firstPitch.id ?? ''}",
+                                    );
 
-                        return ElevatorPitchSection(
-                          key: ValueKey(_accessToken),
-                          videoUrl:
-                              "${ApiConstants.baseUrl}/elevator-pitch/stream/${elevatorPitches.first.id ?? ''}",
-                              // "https://test.evpitch.com/api/v1/elevator-pitch/stream/69674f57f7f512dd8539b9a2",
-                          // httpHeaders: {
-                          //   "Custom-Header": "value",
-                          //   if (_accessToken != null) ...{
-                          //     "Authorization": "Bearer $_accessToken",
-                          //   },
-                          // },
-                        );
-                      },
-                    ),
-                  ),
-                )
+                                    return ElevatorPitchSection(
+                                      key: ValueKey(_accessToken),
+                                      videoUrl:
+                                          "${ApiConstants.baseUrl}/elevator-pitch/stream/${firstPitch.id ?? ''}",
+                                      // "https://test.evpitch.com/api/v1/elevator-pitch/stream/69674f57f7f512dd8539b9a2",
+                                      // httpHeaders: {
+                                      //   "Custom-Header": "value",
+                                      //   if (_accessToken != null) ...{
+                                      //     "Authorization": "Bearer $_accessToken",
+                                      //   },
+                                      // },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Obx(
+                                () => Material(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(18),
+                                    onTap: controller.isDeletingVideo.value
+                                        ? null
+                                        : () async {
+                                            final shouldDelete = await Get.dialog<bool>(
+                                              AlertDialog(
+                                                title: const Text('Delete Video'),
+                                                content: const Text(
+                                                  'Are you sure you want to delete your elevator video?',
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Get.back(result: false),
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Get.back(result: true),
+                                                    child: const Text('Delete'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+
+                                            if (shouldDelete == true) {
+                                              await controller.deleteElevatorVideo();
+                                            }
+                                          },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: controller.isDeletingVideo.value
+                                          ? const SizedBox(
+                                              width: 18,
+                                              height: 18,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : const Icon(
+                                              Icons.delete_outline,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
                       : GestureDetector(
                           onTap: () {
                             // Navigate to video upload screen

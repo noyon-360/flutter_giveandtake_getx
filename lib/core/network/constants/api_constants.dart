@@ -115,8 +115,10 @@ class ElevatorPitchVideo {
   static const String _base = '${ApiConstants.baseUrl}/elevator-pitch';
 
   String uploadVideo(String userId) => '$_base/video/upload-url?userId=$userId';
-  
+
   String completeVideoUpload(String userId) => '$_base/video/complete?userId=$userId';
+
+  String deleteVideo(String userId) => '$_base/video?userId=$userId';
 }
 
 /// [Authentication Endpoints]
