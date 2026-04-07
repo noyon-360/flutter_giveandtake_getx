@@ -99,6 +99,8 @@ class RecruiterController extends BaseController {
     CareerStageController(),
   );
 
+  final RxBool isVideoUploading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -492,14 +494,14 @@ class RecruiterController extends BaseController {
       return;
     }
 
-    setLoading(true);
+    isVideoUploading.value = true;
     setError('');
 
     final userId = await _authStorageService.getUserId();
     if (userId == null || userId.isEmpty) {
       setError('User ID not found. Please log in again.');
       Get.snackbar('Error', 'User ID not found. Please log in again.');
-      setLoading(false);
+      isVideoUploading.value = false;
       return;
     }
 
@@ -514,7 +516,7 @@ class RecruiterController extends BaseController {
           //   'Error',
           //   'Could not delete previous video: ${fail.message}',
           // );
-          setLoading(false);
+          isVideoUploading.value = false;
           return;
         },
         (_) {
@@ -653,12 +655,12 @@ class RecruiterController extends BaseController {
         'Maximum allowed video duration is 60 seconds for your plan',
       );
     } finally {
-      setLoading(false);
+      isVideoUploading.value = false;
     }
   }
 
   Future<void> deleteElevatorVideo() async {
-    setLoading(true);
+    isVideoUploading.value = true;
     try {
       final userId = await _authStorageService.getUserId();
       if (userId == null || userId.isEmpty) {
@@ -681,7 +683,7 @@ class RecruiterController extends BaseController {
     } catch (e) {
       Get.snackbar('Error', 'Something went wrong: $e');
     } finally {
-      setLoading(false);
+      isVideoUploading.value = false;
     }
   }
 

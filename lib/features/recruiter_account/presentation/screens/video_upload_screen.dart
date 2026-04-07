@@ -215,7 +215,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
             SizedBox(
               width: 250,
               child: ElevatedButton(
-                onPressed: recruiterController.isLoading.value
+                onPressed: recruiterController.isVideoUploading.value
                     ? null
                     : () => recruiterController.uploadVideo(
                         elevatorPitchController,
@@ -223,7 +223,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                 child: Obx(
                   () => Text(
-                    recruiterController.isLoading.value
+                    recruiterController.isVideoUploading.value
                         ? 'Uploading...'
                         : 'Upload Video',
                     style: const TextStyle(

@@ -185,11 +185,18 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
                   widget.videoUrl != null &&
                   widget.videoUrl!.isNotEmpty &&
                   !widget.videoUrl!.endsWith('/'))
-                IconButton(
-                  onPressed: () {
-                    recruiterController.deleteElevatorVideo();
-                  },
-                  icon: const Icon(Icons.delete, color: Colors.white),
+                Obx(
+                  () => IconButton(
+                    onPressed: recruiterController.isVideoUploading.value
+                        ? null
+                        : () => recruiterController.deleteElevatorVideo(),
+                    icon: Icon(
+                      Icons.delete,
+                      color: recruiterController.isVideoUploading.value
+                          ? Colors.grey
+                          : Colors.white,
+                    ),
+                  ),
                 ),
             ],
           ),
