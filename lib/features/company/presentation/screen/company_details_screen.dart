@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/features/company/presentation/screen/company_edit_profile.dart';
@@ -354,61 +352,46 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                       const SizedBox(height: 20),
 
                       // ----- Social Media -----
-             
                       buildSocialLinks(company),
 
                       const SizedBox(height: 20),
-
-                  
-                     
                     ],
                   ),
                 ),
 
                 /// ================= Elevator Pitch =================
-                sectionTitle("Elevator Pitch", canDelete: true),
-
-                SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFF999999),
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-
-                  //fetch elevated pitch e
-             
-
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: const Color(0xFF191919),
+                      color: Colors.white,
+                      border: Border.all(
+                        color: const Color(0xFF999999),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    height: 160,
-                    width: double.infinity,
-                    child: ElevatorPitchCompanySection(
+                    clipBehavior: Clip.antiAlias,
+                    child: ElevatorPitchSection(
+                      isOwnProfile: true, // Enable managing the pitch
                       videoUrl:
-                              "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
-                          httpHeaders: {
-                            "Custom-Header": "value",
-                            if (_accessToken != null) ...{
-                              "Authorization": "Bearer $_accessToken",
-                            },
-                          },
+                          "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
+                      httpHeaders: {
+                        "Custom-Header": "value",
+                        if (_accessToken != null) ...{
+                          "Authorization": "Bearer $_accessToken",
+                        },
+                      },
                     ),
                   ),
                 ),
-              
+
                 const SizedBox(height: 20),
                 SizedBox(height: 20),
 
                 /// ================= COMPANY DETAILS =================
                 infoTile("About us", stripHtmlTags(company.aboutUs)),
                 SizedBox(height: 20),
-              
 
                 /// ================= Employees =================
                 sectionTitle("Internal Recruiters"),
