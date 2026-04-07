@@ -65,13 +65,13 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
         backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: _refreshData,
-            tooltip: 'Refresh',
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.refresh, color: Colors.white),
+        //     onPressed: _refreshData,
+        //     tooltip: 'Refresh',
+        //   ),
+        // ],
       ),
       body: SafeArea(
         child: Obx(() {
