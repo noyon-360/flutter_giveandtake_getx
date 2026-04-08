@@ -41,7 +41,8 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
     super.didUpdateWidget(oldWidget);
     if (widget.videoUrl != oldWidget.videoUrl) {
       DPrint.log(
-          "Video URL changed: ${oldWidget.videoUrl} -> ${widget.videoUrl}");
+        "Video URL changed: ${oldWidget.videoUrl} -> ${widget.videoUrl}",
+      );
       _disposeControllers();
       _initializeVideo();
     }
@@ -66,65 +67,75 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
   final int _maxRetries = 5;
 
   void _initializeVideo() {
-    DPrint.log("Initializing Video (Attempt ${_retryCount + 1}): -> ${widget.videoUrl}");
+    DPrint.log(
+      "Initializing Video (Attempt ${_retryCount + 1}): -> ${widget.videoUrl}",
+    );
     _errorMessage = null;
     _isInitialized = false;
 
     if (widget.videoUrl != null &&
         widget.videoUrl!.isNotEmpty &&
         !widget.videoUrl!.endsWith('/')) {
-      _videoController = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl!),
-        formatHint: VideoFormat.hls,
-        videoPlayerOptions: VideoPlayerOptions(
-          mixWithOthers: true,
-          allowBackgroundPlayback: false,
-        ),
-        httpHeaders: widget.httpHeaders ?? {},
-      )..initialize().then((_) {
-          if (!mounted) return;
-          DPrint.log("Video initialized successfully!");
-          _retryCount = 0; // Reset on success
-          _isInitialized = true;
-          _chewieController = ChewieController(
-            videoPlayerController: _videoController!,
-            autoPlay: false,
-            looping: false,
-            aspectRatio: _videoController!.value.aspectRatio,
-            placeholder: Container(
-              color: Colors.black,
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+      _videoController =
+          VideoPlayerController.networkUrl(
+              Uri.parse(widget.videoUrl!),
+              formatHint: VideoFormat.hls,
+              videoPlayerOptions: VideoPlayerOptions(
+                mixWithOthers: true,
+                allowBackgroundPlayback: false,
               ),
-            ),
-            errorBuilder: (context, errorMessage) {
-              return _buildErrorWidget(errorMessage);
-            },
-          );
-          setState(() {});
-        }).catchError((error) {
-          debugPrint('Video init error: $error');
-          if (!mounted) return;
+              httpHeaders: widget.httpHeaders ?? {},
+            )
+            ..initialize()
+                .then((_) {
+                  if (!mounted) return;
+                  DPrint.log("Video initialized successfully!");
+                  _retryCount = 0; // Reset on success
+                  _isInitialized = true;
+                  _chewieController = ChewieController(
+                    videoPlayerController: _videoController!,
+                    autoPlay: false,
+                    looping: false,
+                    aspectRatio: _videoController!.value.aspectRatio,
+                    placeholder: Container(
+                      color: Colors.black,
+                      child: const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                    ),
+                    errorBuilder: (context, errorMessage) {
+                      return _buildErrorWidget(errorMessage);
+                    },
+                  );
+                  setState(() {});
+                })
+                .catchError((error) {
+                  debugPrint('Video init error: $error');
+                  if (!mounted) return;
 
-          // Auto-retry if initialization fails (often 404 during backend processing)
-          if (_retryCount < _maxRetries) {
-            _retryCount++;
-            setState(() {
-              _errorMessage = "Video is processing, please wait... (Attempt $_retryCount/$_maxRetries)";
-            });
-            DPrint.log("Retrying video initialization in 1 second... ($_retryCount/$_maxRetries)");
-            Future.delayed(const Duration(microseconds: 500), () {
-              if (mounted) {
-                _disposeControllers();
-                _initializeVideo();
-              }
-            });
-          } else {
-            setState(() {
-              _errorMessage = "Failed to load video after multiple attempts. It might still be processing.";
-            });
-          }
-        });
+                  // Auto-retry if initialization fails (often 404 during backend processing)
+                  if (_retryCount < _maxRetries) {
+                    _retryCount++;
+                    setState(() {
+                      _errorMessage =
+                          "Video is processing, please wait... (Attempt $_retryCount/$_maxRetries)";
+                    });
+                    DPrint.log(
+                      "Retrying video initialization in 1 second... ($_retryCount/$_maxRetries)",
+                    );
+                    Future.delayed(const Duration(microseconds: 500), () {
+                      if (mounted) {
+                        _disposeControllers();
+                        _initializeVideo();
+                      }
+                    });
+                  } else {
+                    setState(() {
+                      _errorMessage =
+                          "Failed to load video after multiple attempts. It might still be processing.";
+                    });
+                  }
+                });
     }
   }
 
@@ -216,51 +227,52 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
                     child: _errorMessage != null
                         ? _buildErrorWidget(_errorMessage!)
                         : _chewieController != null && _isInitialized
-                            ? Chewie(controller: _chewieController!)
-                            : const Center(
-                                child: CircularProgressIndicator(
-                                    color: Colors.white),
-                              ),
+                        ? Chewie(controller: _chewieController!)
+                        : const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 )
               : widget.isOwnProfile
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "No pitch added yet.",
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.white70,
-                              height: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              Get.to(() => const VideoUploadScreen());
-                            },
-                            icon: const Icon(Icons.upload, color: Colors.white),
-                            label: const Text(
-                              "Upload New Video",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2B7FD0),
-                            ),
-                          ),
-                        ],
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "No pitch added yet.",
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.white70,
+                          height: 1.4,
+                        ),
                       ),
-                    )
-                  : const Text(
-                      "No pitch added yet.",
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.white70,
-                        height: 1.4,
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Get.to(() => const VideoUploadScreen());
+                        },
+                        icon: const Icon(Icons.upload, color: Colors.white),
+                        label: const Text(
+                          "Upload New Video",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2B7FD0),
+                        ),
                       ),
-                    ),
+                    ],
+                  ),
+                )
+              : const Text(
+                  "No pitch added yet.",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white70,
+                    height: 1.4,
+                  ),
+                ),
         ],
       ),
     );
