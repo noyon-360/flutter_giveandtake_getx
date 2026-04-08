@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
+import '../../../Home/presentation/screen/home_screen.dart';
 import '../controller/applied_jobs_controller.dart';
 
 class JobHistoryScreen extends StatelessWidget {
@@ -19,7 +20,7 @@ class JobHistoryScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Get.back(),
+          onPressed: () => Get.to(()=>HomeScreen()),
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
         ),
         title: const Text(

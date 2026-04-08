@@ -144,7 +144,7 @@ class _CompanyInformationState extends State<CompanyInformation> {
                             Text(
                               user.emailAddress,
                               style: const TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: Colors.black87,
                               ),
                             ),

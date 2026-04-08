@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart' show DateFormat;
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/widgets/drawer.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../widgets/social_media.dart';
-import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 
 class RecruiterPageScreen extends StatefulWidget {
   const RecruiterPageScreen({super.key});

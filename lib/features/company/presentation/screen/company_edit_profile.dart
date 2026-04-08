@@ -112,10 +112,10 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
     final List<Honor> awards = widget.companyData.honors;
 
     // Fill text fields
-    controller.companyNameController.text = company.cname ;
-    controller.postalCodeController.text = company.zipcode ;
-    controller.emailController.text = company.cemail ;
-    controller.industryController.text = company.industry ;
+    controller.companyNameController.text = company.cname;
+    controller.postalCodeController.text = company.zipcode;
+    controller.emailController.text = company.cemail;
+    controller.industryController.text = company.industry;
     // controller.awardFields = honor.title.map((e) => {'title': e}).toList();
 
     // About Us
@@ -135,8 +135,8 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
     _descriptionTController.text = cleanAboutUs(company.aboutUs);
 
     // Country & City
-    jobController.selectedCountry.value = company.country ;
-    jobController.selectedCity.value = company.city ;
+    jobController.selectedCountry.value = company.country;
+    jobController.selectedCity.value = company.city;
 
     // Social Links
     final socialMap = {
@@ -151,9 +151,9 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
     };
 
     for (var link in company.sLink) {
-      final label = link.label.toLowerCase() ;
+      final label = link.label.toLowerCase();
       if (socialMap.containsKey(label)) {
-        socialMap[label]!.text = link.url ;
+        socialMap[label]!.text = link.url;
       }
     }
 
@@ -378,9 +378,11 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
 
                   SizedBox(width: 15),
 
-                  Bio(
-                    descriptionTController: _descriptionTController,
-                    descriptionController: descriptionController,
+                  Expanded(
+                    child: Bio(
+                      descriptionTController: _descriptionTController,
+                      descriptionController: descriptionController,
+                    ),
                   ),
                 ],
               ),
@@ -989,19 +991,17 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Expanded(
-                                child: GestureDetector(
-                                  onTap: () => controller.fetchUsers(),
-                                  child: AbsorbPointer(
-                                    child: CustomTextField(
-                                      label: index == 0
-                                          ? "Add Profiles of Recruiters"
-                                          : "Recruiter ${index + 1}",
-                                      hintText: "Tap to select recruiter",
-                                      controller:
-                                          controller.employeeControllers[index],
-                                      readOnly: true,
-                                    ),
+                              child: GestureDetector(
+                                onTap: () => controller.fetchUsers(),
+                                child: AbsorbPointer(
+                                  child: CustomTextField(
+                                    label: index == 0
+                                        ? "Add Profiles of Recruiters"
+                                        : "Recruiter ${index + 1}",
+                                    hintText: "Tap to select recruiter",
+                                    controller:
+                                        controller.employeeControllers[index],
+                                    readOnly: true,
                                   ),
                                 ),
                               ),
