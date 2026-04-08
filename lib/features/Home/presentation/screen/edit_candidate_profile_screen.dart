@@ -299,10 +299,7 @@ class EditCandidateProfileScreen extends StatelessWidget {
           hint: 'Select Country',
           items: controller.countries.toList(),
           value: controller.selectedCountry.value,
-          onChanged: (val) {
-            controller.selectedCountry.value = val;
-            controller.selectedCity.value = null; // Reset city
-          },
+          onChanged: controller.onCountryChanged,
         )),
         const SizedBox(height: 16),
         Obx(() => SearchableDropdown(
@@ -332,12 +329,7 @@ class EditCandidateProfileScreen extends StatelessWidget {
         TextField(
           controller: TextEditingController(
             text: controller.aboutMeQuillController.document.toPlainText(),
-          )..addListener(() {
-            // Update the quill controller when text changes
-            final text = TextEditingController(
-              text: controller.aboutMeQuillController.document.toPlainText(),
-            ).text;
-          }),
+          ),
           maxLines: 6,
           decoration: InputDecoration(
             hintText: 'Tell us about yourself...',
@@ -420,15 +412,83 @@ class EditCandidateProfileScreen extends StatelessWidget {
   }
 
   Widget _buildSkillsSection(EditCandidateProfileController controller) {
-    return Obx(() => _buildTagsSection('Add a skill (e.g. Java)', controller.skillsList, controller.addSkill, controller.removeSkill));
+    return Obx(() => _buildApiTagsSection(
+      hint: 'Select a skill',
+      options: controller.availableSkills.toList(),
+      tags: controller.skillsList.toList(),
+      onSelectedAdd: (value) => controller.addSkill(value),
+      onRemove: controller.removeSkill,
+      emptyMessage: 'No skill options available from API',
+    ));
   }
   
   Widget _buildLanguagesSection(EditCandidateProfileController controller) {
-    return Obx(() => _buildTagsSection('Add a language (e.g. English)', controller.languages, controller.addLanguage, controller.removeLanguage));
+    return Obx(() => _buildApiTagsSection(
+      hint: 'Select a language',
+      options: controller.availableLanguages.toList(),
+      tags: controller.languages.toList(),
+      onSelectedAdd: (value) => controller.addLanguage(value),
+      onRemove: controller.removeLanguage,
+      emptyMessage: 'No language options available from API',
+    ));
   }
 
   Widget _buildCertificationsSection(EditCandidateProfileController controller) {
     return Obx(() => _buildTagsSection('Add a certification', controller.certifications, controller.addCertification, controller.removeCertification));
+  }
+
+  Widget _buildApiTagsSection({
+    required String hint,
+    required List<String> options,
+    required List<String> tags,
+    required Function(String) onSelectedAdd,
+    required Function(String) onRemove,
+    required String emptyMessage,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: SearchableDropdown(
+                hint: hint,
+                items: options,
+                value: null,
+                onChanged: (value) {
+                  if (value != null && value.trim().isNotEmpty) {
+                    onSelectedAdd(value.trim());
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+        if (options.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              emptyMessage,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+          ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: tags
+              .map(
+                (tag) => Chip(
+                  label: Text(tag),
+                  onDeleted: () => onRemove(tag),
+                  backgroundColor: Colors.blue.shade50,
+                  deleteIconColor: Colors.red,
+                ),
+              )
+              .toList(),
+        ),
+      ],
+    );
   }
 
 

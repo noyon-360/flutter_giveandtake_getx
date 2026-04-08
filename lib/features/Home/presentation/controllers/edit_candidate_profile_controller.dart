@@ -61,6 +61,9 @@ class EditCandidateProfileController extends GetxController {
   // Data
   final RxList<String> countries = <String>[].obs;
   final RxList<String> cities = <String>[].obs;
+  final Map<String, List<String>> countryCityMap = {};
+  final RxList<String> availableSkills = <String>[].obs;
+  final RxList<String> availableLanguages = <String>[].obs;
 
   final List<String> degrees = [
     'BSc',
@@ -94,12 +97,21 @@ class EditCandidateProfileController extends GetxController {
 
     // Defer all reactive state updates to after the first frame to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadCountriesAndCities();
-      
       if (Get.arguments != null && Get.arguments is CandidateResumeResponseModel) {
         populateData(Get.arguments as CandidateResumeResponseModel);
       }
+
+      // Keep API-backed options loading, but do not block showing existing saved data.
+      _initializeFormData();
     });
+  }
+
+  Future<void> _initializeFormData() async {
+    await Future.wait([
+      _loadCountriesAndCities(),
+      _loadLanguageOptions(),
+      _loadSkillOptions(),
+    ]);
   }
 
   // Populate data from the dashboard's Resume object
@@ -113,6 +125,7 @@ class EditCandidateProfileController extends GetxController {
     
     selectedCountry.value = resume.country;
     selectedCity.value = resume.city;
+    _syncCitiesForSelectedCountry(resetSelectedCity: false);
     immediatelyAvailable.value = resume.immediatelyAvailable;
 
     // About Me - using 'aboutUs' field
@@ -166,13 +179,93 @@ class EditCandidateProfileController extends GetxController {
   }
 
   Future<void> _loadCountriesAndCities() async {
-    // This would typically fetch from API or a local JSON
-    // For now, I'll mock some data or ideally use the same source as ElevatorResumeController if available
-    // Assuming constant lists for now or fetched from a service. 
-    // I'll add some dummy data to ensure dropdowns work. 
-    // Ideally this comes from a shared service.
-    countries.addAll(['USA', 'UK', 'Canada', 'Australia', 'Germany', 'France', 'India', 'Japan']);
-    cities.addAll(['New York', 'London', 'Toronto', 'Sydney', 'Berlin', 'Paris', 'Mumbai', 'Tokyo']);
+    try {
+      final response = await http.get(Uri.parse('${ApiConstants.baseUrl}/countries'));
+
+      if (response.statusCode != 200) return;
+
+      final decoded = jsonDecode(response.body);
+      final data = decoded['data'] as List<dynamic>? ?? [];
+
+      countryCityMap.clear();
+      for (final item in data) {
+        final country = (item['country'] ?? '').toString().trim();
+        final rawCities = item['cities'] as List<dynamic>? ?? const [];
+        final cityNames = rawCities
+            .map((city) => city.toString().trim())
+            .where((city) => city.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+
+        if (country.isNotEmpty) {
+          countryCityMap[country] = cityNames;
+        }
+      }
+
+      countries.assignAll(countryCityMap.keys.toList()..sort());
+      _syncCitiesForSelectedCountry(resetSelectedCity: false);
+    } catch (_) {}
+  }
+
+  Future<void> _loadLanguageOptions() async {
+    try {
+      final response = await http.get(Uri.parse('${ApiConstants.baseUrl}/language'));
+
+      if (response.statusCode != 200) return;
+
+      final decoded = jsonDecode(response.body);
+      final data = decoded['data'] as List<dynamic>? ?? [];
+
+      final options = data
+          .map((item) => (item['name'] ?? '').toString().trim())
+          .where((name) => name.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+
+      availableLanguages.assignAll(options);
+    } catch (_) {}
+  }
+
+  Future<void> _loadSkillOptions() async {
+    try {
+      final response = await http.get(Uri.parse('${ApiConstants.baseUrl}/skill'));
+
+      if (response.statusCode != 200) return;
+
+      final decoded = jsonDecode(response.body);
+      final data = decoded['data'] as List<dynamic>? ?? [];
+
+      final options = data
+          .map((item) => (item['name'] ?? '').toString().trim())
+          .where((name) => name.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+
+      availableSkills.assignAll(options);
+    } catch (_) {}
+  }
+
+  void onCountryChanged(String? country) {
+    selectedCountry.value = country;
+    _syncCitiesForSelectedCountry();
+  }
+
+  void _syncCitiesForSelectedCountry({bool resetSelectedCity = true}) {
+    final country = selectedCountry.value;
+    if (country == null || country.isEmpty) {
+      cities.clear();
+      selectedCity.value = null;
+      return;
+    }
+
+    final matchedCities = countryCityMap[country] ?? const <String>[];
+    cities.assignAll(matchedCities);
+    if (resetSelectedCity) {
+      selectedCity.value = null;
+    }
   }
 
   // --- Image Pickers ---
