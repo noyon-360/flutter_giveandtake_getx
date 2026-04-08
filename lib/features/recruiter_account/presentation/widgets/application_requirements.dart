@@ -45,7 +45,7 @@ class ApplicationRequirementsWidget extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Valid visa for this job location?",
+                "Have you got a valid visa for this location?",
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               SizedBox(width: 30),

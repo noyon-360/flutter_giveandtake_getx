@@ -6,6 +6,8 @@ import 'package:giveandtake/features/company/presentation/controller/company_det
 import 'package:giveandtake/features/company_pricing/presentation/controllers/company_pricing_controller.dart';
 import 'package:giveandtake/features/create_job/presentation/controller/category_controller.dart';
 import 'package:giveandtake/features/job_listing/presentation/controller/job_listing_controller.dart';
+import 'package:giveandtake/features/messaging/presentation/controller/messaging_controller.dart';
+import 'package:giveandtake/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giveandtake/features/plan_pricing/presentation/controllers/paypal_controller.dart';
 import 'package:giveandtake/features/plan_pricing/presentation/controllers/plan_pricing_controller.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
@@ -49,6 +51,14 @@ void setupController() {
 
   // Home Controller
   Get.lazyPut<HomeController>(() => HomeController(Get.find()), fenix: true);
+  Get.lazyPut<NotificationsController>(
+    () => NotificationsController(Get.find(), Get.find(), Get.find()),
+    fenix: true,
+  );
+  Get.lazyPut<MessagingController>(
+    () => MessagingController(Get.find(), Get.find(), Get.find()),
+    fenix: true,
+  );
 
   // Category Controller
   Get.lazyPut<CategoryController>(

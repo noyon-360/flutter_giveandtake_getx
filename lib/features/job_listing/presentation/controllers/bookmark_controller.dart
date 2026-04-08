@@ -73,7 +73,7 @@ class BookmarkController extends GetxController {
       }
 
       final jobId = job['id']?.toString() ?? (raw['_id']?.toString() ?? raw['id']?.toString());
-      final url = '${ApiConstants.baseUrl}/bookmarks';
+      final url = ApiConstants.bookmarks.create;
 
       final payload = {
         'userId': userId,
@@ -126,7 +126,7 @@ class BookmarkController extends GetxController {
         dio.options.headers['Authorization'] = 'Bearer $token';
       }
 
-      final url = '${ApiConstants.baseUrl}/bookmarks/user/$userId';
+      final url = ApiConstants.bookmarks.user(userId);
 
       DPrint.log('📤 Bookmark GET -> $url');
       DPrint.log('Headers: ${dio.options.headers}');
@@ -144,9 +144,12 @@ class BookmarkController extends GetxController {
           if (responseData is Map<String, dynamic>) {
             if (responseData.containsKey('bookmarks')) {
               bookmarks = responseData['bookmarks'] as List<dynamic>;
-            } else if (responseData.containsKey('data') && responseData['data'] is Map<String, dynamic>) {
+            } else if (responseData.containsKey('data') &&
+                responseData['data'] is Map<String, dynamic>) {
               final inner = responseData['data'] as Map<String, dynamic>;
-              bookmarks = inner['bookmarks'] as List<dynamic>? ?? [];
+              bookmarks = inner['bookmarks'] as List<dynamic>? ??
+                  inner['data'] as List<dynamic>? ??
+                  [];
             }
           } else if (responseData is List) {
             bookmarks = responseData as List<dynamic>;
@@ -228,7 +231,7 @@ class BookmarkController extends GetxController {
       DPrint.log('  Extracted jobId: $jobId');
       DPrint.log('  Full job object: $job');
 
-      final url = '${ApiConstants.baseUrl}/bookmarks/update';
+      final url = ApiConstants.bookmarks.update;
 
       final payload = {
         'userId': userId,

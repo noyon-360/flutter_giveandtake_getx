@@ -1,6 +1,7 @@
 // features/recruiter_account/presentation/controller/job_edit_controller.dart
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:giveandtake/core/contracts/web/job_contract.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/get_single_job_response_model.dart'
     hide ApplicationRequirement, CustomQuestion;
 import 'package:giveandtake/features/recruiter_account/data/models/job_update_request_model.dart';
@@ -53,7 +54,7 @@ class JobEditController extends GetxController {
   RxString resumeStatus = 'Required'.obs;
   RxBool resumeVisible = true.obs;
 
-  String visa = 'Valid visa for this job location?';
+  String visa = JobPayloadBuilder.validVisaLabel;
   RxString visaStatus = 'Required'.obs;
   RxBool visaVisible = true.obs;
 
@@ -275,7 +276,8 @@ class JobEditController extends GetxController {
       name: selectedCategory.value,
       role: selectedRole.value,
       publishDate: publishNow.value
-          ? null
+          ? (job.value!.publishDate?.toIso8601String() ??
+                DateTime.now().toUtc().toIso8601String())
           : selectedPublishDate.value != null
           ? DateFormat('yyyy-MM-dd').format(selectedPublishDate.value!)
           : null,

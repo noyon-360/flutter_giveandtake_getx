@@ -112,10 +112,51 @@ class JobApplicationScreen extends StatelessWidget {
             }),
             const SizedBox(height: 16),
 
+            Obx(() {
+              if (!controller.shouldAskVisa) {
+                return const SizedBox.shrink();
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    controller.isVisaRequired
+                        ? 'Have you got a valid visa for this location? *'
+                        : 'Have you got a valid visa for this location?',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  RadioListTile<String>(
+                    value: 'Yes',
+                    groupValue: controller.visaOption.value,
+                    title: const Text('Yes'),
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (value) =>
+                        controller.visaOption.value = value ?? '',
+                  ),
+                  RadioListTile<String>(
+                    value: 'No',
+                    groupValue: controller.visaOption.value,
+                    title: const Text('No'),
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (value) =>
+                        controller.visaOption.value = value ?? '',
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                ],
+              );
+            }),
+
             // Resume Upload Section
             Obx(
               () => ResumeUploadSection(
                 selectedResume: controller.selectedResume.value,
+                existingResumeId: controller.existingResumeId,
                 onUpload: controller.pickResume,
                 onRemove: controller.removeResume,
                 onDownload: controller.downloadFile,
@@ -149,7 +190,10 @@ class JobApplicationScreen extends StatelessWidget {
                   onPressed: controller.isSubmittingApplication.value
                       ? null
                       : () {
-                          final jobId = jobData['_id']?.toString() ?? '';
+                          final jobId =
+                              jobData['_id']?.toString() ??
+                              jobData['id']?.toString() ??
+                              '';
                           final resumeId = jobData['resumeId']?.toString();
                           controller.submitApplication(
                             jobId,

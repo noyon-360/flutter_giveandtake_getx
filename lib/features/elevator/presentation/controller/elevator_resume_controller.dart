@@ -10,11 +10,13 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../../core/contracts/web/resume_contract.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/network/constants/key_constants.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
+import '../../../../core/services/media_crop_service.dart';
 import '../../../../core/services/get_user_profile_service.dart';
 import '../../../Home/presentation/screen/candidate_dashboard_screen.dart';
 import '../../../auth/data/models/user_model.dart';
@@ -25,6 +27,7 @@ import '../../data/models/upload_video_response_model.dart';
 
 class ElevatorResumeController extends GetxController {
   final ImagePicker _picker = ImagePicker();
+  final MediaCropService _mediaCropService = Get.find<MediaCropService>();
 
   /// ================== ABOUT ME (QUILL) ==================
   late final quill.QuillController aboutMeQuillController;
@@ -625,7 +628,10 @@ class ElevatorResumeController extends GetxController {
 
   Future<void> pickPhoto() async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      final image = await _mediaCropService.pickAndCropImage(
+        source: ImageSource.gallery,
+        preset: MediaCropPreset.avatar,
+      );
       if (image != null) {
         photoPath.value = image.path;
         Get.snackbar('Success', 'Photo selected successfully');
@@ -637,7 +643,10 @@ class ElevatorResumeController extends GetxController {
 
   Future<void> pickBannerImage() async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      final image = await _mediaCropService.pickAndCropImage(
+        source: ImageSource.gallery,
+        preset: MediaCropPreset.banner,
+      );
       if (image != null) {
         bannerImagePath.value = image.path;
         Get.snackbar('Success', 'Banner image selected successfully');
@@ -886,78 +895,6 @@ class ElevatorResumeController extends GetxController {
       final aboutMe = aboutMeQuillController.document.toPlainText().trim();
       print('About me text length: ${aboutMe.length}');
 
-      // Prepare resume object
-      print('Preparing resume data...');
-      final resumeData = {
-        'type': userRole.isEmpty ? 'candidate' : userRole,
-        'firstName': firstNameController.text.trim(),
-        'lastName': surnameController.text.trim(),
-        'email': emailController.text.trim(),
-        'country': selectedCountry.value,
-        'city': selectedCity.value,
-        'immediatelyAvailable': immediatelyAvailable.value,
-        'about': aboutMe,
-        'certifications': certifications.toList(),
-        'languages': languages.toList(),
-        'skills': skillsList.toList(),
-        'sLink': [
-          if (linkedinController.text.trim().isNotEmpty)
-            {'platform': 'LinkedIn', 'url': linkedinController.text.trim()},
-          if (twitterController.text.trim().isNotEmpty)
-            {'platform': 'Twitter', 'url': twitterController.text.trim()},
-          if (facebookController.text.trim().isNotEmpty)
-            {'platform': 'Facebook', 'url': facebookController.text.trim()},
-          if (tiktokController.text.trim().isNotEmpty)
-            {'platform': 'TikTok', 'url': tiktokController.text.trim()},
-          if (instagramController.text.trim().isNotEmpty)
-            {'platform': 'Instagram', 'url': instagramController.text.trim()},
-          if (upworkController.text.trim().isNotEmpty)
-            {'platform': 'Upwork', 'url': upworkController.text.trim()},
-          if (fiverrController.text.trim().isNotEmpty)
-            {'platform': 'Fiverr', 'url': fiverrController.text.trim()},
-          if (portfolioController.text.trim().isNotEmpty)
-            {'platform': 'Portfolio', 'url': portfolioController.text.trim()},
-        ],
-      };
-
-      // Prepare experiences array
-      final experiencesData = experienceList.map((exp) {
-        return {
-          'position': exp['jobTitle'] ?? '',
-          'company': exp['companyName'] ?? '',
-          'country': exp['country'] ?? '',
-          'city': exp['city'] ?? '',
-          'startDate': exp['startDate'] ?? '',
-          'endDate': exp['endDate'] ?? '',
-          'duration': exp['duration'] ?? '',
-          'presentlyWorkHere': exp['presentlyWorkHere'] ?? false,
-          'description': exp['description'] ?? '',
-        };
-      }).toList();
-
-      // Prepare education array
-      final educationData = educationList.map((edu) {
-        return {
-          'institution': edu['institution'] ?? '',
-          'degree': edu['degree'] ?? '',
-          'fieldOfStudy': edu['fieldOfStudy'] ?? '',
-          'country': edu['country'] ?? '',
-          'city': edu['city'] ?? '',
-          'startDate': edu['startDate'] ?? '',
-          'graduationDate': edu['graduationDate'] ?? '',
-          'presentlyAttendHere': edu['presentlyAttendHere'] ?? false,
-        };
-      }).toList();
-
-      // Prepare awards array
-      final awardsData = awardsList.map((award) {
-        return {
-          'title': award['title'] ?? '',
-          'year': award['year'] ?? '',
-          'description': award['description'] ?? '',
-        };
-      }).toList();
-
       // Get auth token
       print('Retrieving auth token...');
       final secureStore = SecureStoreServices();
@@ -976,6 +913,88 @@ class ElevatorResumeController extends GetxController {
       }
       print('Auth token retrieved successfully');
 
+      final payload = ResumePayloadBuilder.buildCreate(
+        CandidateResumeCreateInput(
+          userId: user.id,
+          type: userRole.isEmpty ? 'candidate' : userRole,
+          firstName: firstNameController.text.trim(),
+          lastName: surnameController.text.trim(),
+          email: emailController.text.trim(),
+          title: selectedTitle.value,
+          country: selectedCountry.value ?? '',
+          city: selectedCity.value ?? '',
+          zip: '',
+          aboutUs: aboutMe,
+          immediatelyAvailable: immediatelyAvailable.value,
+          skills: skillsList.toList(),
+          certifications: certifications.toList(),
+          languages: languages.toList(),
+          socialLinks: _buildResumeSocialLinks(),
+          experiences: experienceList
+              .where(
+                (exp) =>
+                    (exp['jobTitle'] ?? '').toString().trim().isNotEmpty ||
+                    (exp['companyName'] ?? '').toString().trim().isNotEmpty,
+              )
+              .map(
+                (exp) => CandidateExperienceInput(
+                  company: (exp['companyName'] ?? '').toString(),
+                  position: (exp['jobTitle'] ?? '').toString(),
+                  country: (exp['country'] ?? '').toString(),
+                  city: (exp['city'] ?? '').toString(),
+                  zip: (exp['zip'] ?? '').toString(),
+                  startDate: exp['startDate']?.toString(),
+                  endDate: exp['endDate']?.toString(),
+                  currentlyWorking: exp['presentlyWorkHere'] == true,
+                  jobDescription: (exp['description'] ?? '').toString(),
+                  jobCategory:
+                      (exp['jobCategory'] ?? selectedJobCategory.value ?? '')
+                          .toString(),
+                ),
+              )
+              .toList(),
+          educationList: educationList
+              .where(
+                (edu) =>
+                    (edu['institution'] ?? '').toString().trim().isNotEmpty ||
+                    (edu['degree'] ?? '').toString().trim().isNotEmpty,
+              )
+              .map(
+                (edu) => CandidateEducationInput(
+                  university: (edu['institution'] ?? '').toString(),
+                  degree: (edu['degree'] ?? '').toString(),
+                  fieldOfStudy: (edu['fieldOfStudy'] ?? '').toString(),
+                  country: (edu['country'] ?? '').toString(),
+                  city: (edu['city'] ?? '').toString(),
+                  startDate: edu['startDate']?.toString(),
+                  graduationDate: edu['graduationDate']?.toString(),
+                  currentlyStudying: edu['presentlyAttendHere'] == true,
+                ),
+              )
+              .toList(),
+          awardsAndHonors: awardsList
+              .where(
+                (award) =>
+                    (award['title'] ?? '').toString().trim().isNotEmpty ||
+                    (award['description'] ?? '').toString().trim().isNotEmpty,
+              )
+              .map(
+                (award) => CandidateAwardInput(
+                  title: (award['title'] ?? '').toString(),
+                  programeName: (award['issuer'] ?? '').toString(),
+                  programeDate:
+                      (award['date'] ?? award['year'] ?? '').toString(),
+                  description: (award['description'] ?? '').toString(),
+                ),
+              )
+              .toList(),
+          photo: photoPath.value == null ? null : File(photoPath.value!),
+          banner: bannerImagePath.value == null
+              ? null
+              : File(bannerImagePath.value!),
+        ),
+      );
+
       // Create multipart request
       final apiUrl = ApiConstants.resume.createResume;
       print('API URL: $apiUrl');
@@ -987,37 +1006,16 @@ class ElevatorResumeController extends GetxController {
       print('Authorization header added');
 
       // Add text fields - IMPORTANT: Match the exact field names from your Postman request
-      request.fields['userId'] = user.id;
-      request.fields['resume'] = jsonEncode(resumeData);
-      request.fields['experiences'] = jsonEncode(experiencesData);
-      request.fields['educationList'] = jsonEncode(educationData);
-      request.fields['awardsAndHonors'] = jsonEncode(awardsData);
+      request.fields.addAll(payload.fields);
 
       print('Resume data added to request');
-      print('  - UserId: ${user.id}');
-      print('  - Resume fields: ${resumeData.keys.toList()}');
-      print('  - Experiences count: ${experiencesData.length}');
-      print('  - Education count: ${educationData.length}');
-      print('  - Awards count: ${awardsData.length}');
+      print('  - UserId: ${payload.fields['userId']}');
+      print('  - Request fields: ${payload.fields.keys.toList()}');
 
-      // Add photo file if selected
-      if (photoPath.value != null) {
-        print('Adding photo file: ${photoPath.value}');
-        request.files.add(
-          await http.MultipartFile.fromPath('photo', photoPath.value!),
-        );
-      } else {
-        print('No photo selected');
-      }
-
-      // Add banner file if selected
-      if (bannerImagePath.value != null) {
-        print('Adding banner file: ${bannerImagePath.value}');
-        request.files.add(
-          await http.MultipartFile.fromPath('banner', bannerImagePath.value!),
-        );
-      } else {
-        print('No banner selected');
+      for (final entry in payload.files.entries) {
+        for (final file in entry.value) {
+          request.files.add(await http.MultipartFile.fromPath(entry.key, file.path));
+        }
       }
 
       print('All fields and files added. Sending request...');
@@ -1292,7 +1290,39 @@ class ElevatorResumeController extends GetxController {
       return;
     }
 
+    if (!isVideoUploaded.value) {
+      Get.snackbar(
+        'Elevator Pitch Required',
+        'Upload your elevator pitch before submitting your profile.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
     print('Validation passed, proceeding with resume save');
     saveResume();
+  }
+
+  List<ResumeSocialLinkInput> _buildResumeSocialLinks() {
+    final links = <ResumeSocialLinkInput>[];
+
+    void addLink(String label, TextEditingController controller) {
+      final url = controller.text.trim();
+      if (url.isEmpty) return;
+      links.add(ResumeSocialLinkInput(label: label, url: url));
+    }
+
+    addLink('LinkedIn', linkedinController);
+    addLink('Twitter', twitterController);
+    addLink('Facebook', facebookController);
+    addLink('TikTok', tiktokController);
+    addLink('Instagram', instagramController);
+    addLink('Upwork', upworkController);
+    addLink('Fiverr', fiverrController);
+    addLink('Portfolio', portfolioController);
+
+    return links;
   }
 }

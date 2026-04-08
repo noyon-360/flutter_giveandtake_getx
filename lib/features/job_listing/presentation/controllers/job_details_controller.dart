@@ -26,6 +26,15 @@ class JobDetailsController extends GetxController {
       print('Endpoint: ${ApiConstants.resume.getResume}');
       print('=====================================');
 
+      final requirements =
+          jobData['applicationRequirement'] as List<dynamic>? ?? [];
+      final isResumeRequired = requirements.any((requirement) {
+        if (requirement is! Map<String, dynamic>) return false;
+        final label = requirement['requirement']?.toString().trim().toLowerCase() ?? '';
+        final status = requirement['status']?.toString().trim().toLowerCase() ?? '';
+        return label == 'resume' && status == 'required';
+      });
+
       final response = await http.get(
         uri,
         headers: ApiConstants.authHeaders(token),
@@ -64,6 +73,8 @@ class JobDetailsController extends GetxController {
 
           // Resume exists, proceed to application
           Get.to(() => JobApplicationScreen(jobData: updatedJobData));
+        } else if (!isResumeRequired) {
+          Get.to(() => JobApplicationScreen(jobData: jobData));
         } else {
           // Resume is null, redirect to create resume
           print('========== NO RESUME FOUND ==========');

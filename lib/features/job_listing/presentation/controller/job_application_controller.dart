@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giveandtake/core/contracts/web/job_contract.dart';
 import 'package:giveandtake/core/network/constants/key_constants.dart';
 import 'package:giveandtake/core/network/services/secure_store_services.dart';
 import 'package:giveandtake/features/job_listing/data/models/job_application_request.dart';
 import 'package:giveandtake/features/job_listing/data/models/user_profile_model.dart';
+import 'package:giveandtake/features/job_listing/domain/repositories/job_application_repository.dart';
 import 'package:giveandtake/features/job_listing/domain/usecases/get_job_details_usecase.dart';
 import 'package:giveandtake/features/job_listing/domain/usecases/get_user_profile_usecase.dart';
 import 'package:giveandtake/features/job_listing/domain/usecases/submit_job_application_usecase.dart';
@@ -17,6 +19,7 @@ class JobApplicationController extends GetxController {
   final GetUserProfileUseCase _getUserProfileUseCase;
   final SubmitJobApplicationUseCase _submitJobApplicationUseCase;
   final GetJobDetailsUseCase _getJobDetailsUseCase;
+  final JobApplicationRepository _jobApplicationRepository = Get.find();
 
   JobApplicationController({
     required GetUserProfileUseCase getUserProfileUseCase,
@@ -31,7 +34,7 @@ class JobApplicationController extends GetxController {
   final RxBool isLoadingProfile = true.obs;
   final RxBool isSubmittingApplication = false.obs;
   final Rxn<PlatformFile> selectedResume = Rxn<PlatformFile>();
-  final RxString visaOption = 'Yes'.obs;
+  final RxString visaOption = ''.obs;
   final RxBool agreeToShareCV = true.obs;
 
   // Store jobData for navigation after successful submission
@@ -160,6 +163,50 @@ class JobApplicationController extends GetxController {
     selectedResume.value = null;
   }
 
+  String? get existingResumeId {
+    final value = jobData.value?['resumeId']?.toString();
+    if (value == null || value.trim().isEmpty) return null;
+    return value;
+  }
+
+  bool get shouldAskVisa {
+    final requirements =
+        jobData.value?['applicationRequirement'] as List<dynamic>? ?? [];
+    return requirements.any((requirement) {
+      if (requirement is! Map<String, dynamic>) return false;
+      final label = requirement['requirement']?.toString().trim().toLowerCase() ?? '';
+      return label == JobPayloadBuilder.validVisaLabel.toLowerCase();
+    });
+  }
+
+  bool get isVisaRequired {
+    final requirements =
+        jobData.value?['applicationRequirement'] as List<dynamic>? ?? [];
+    for (final requirement in requirements) {
+      if (requirement is! Map<String, dynamic>) continue;
+      final label = requirement['requirement']?.toString().trim().toLowerCase() ?? '';
+      if (label == JobPayloadBuilder.validVisaLabel.toLowerCase()) {
+        return requirement['status']?.toString().trim().toLowerCase() ==
+            'required';
+      }
+    }
+    return false;
+  }
+
+  bool get isResumeRequired {
+    final requirements =
+        jobData.value?['applicationRequirement'] as List<dynamic>? ?? [];
+    for (final requirement in requirements) {
+      if (requirement is! Map<String, dynamic>) continue;
+      final label = requirement['requirement']?.toString().trim().toLowerCase() ?? '';
+      if (label == 'resume') {
+        return requirement['status']?.toString().trim().toLowerCase() ==
+            'required';
+      }
+    }
+    return false;
+  }
+
   Future<void> downloadFile(PlatformFile file) async {
     try {
       // Check if the file has a path
@@ -229,6 +276,155 @@ class JobApplicationController extends GetxController {
   }
 
   Future<void> submitApplication(String jobId, {String? resumeId}) async {
+    isSubmittingApplication.value = true;
+
+    try {
+      final secureStore = SecureStoreServices();
+      final userId = await secureStore.retrieveData(KeyConstants.userId);
+
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'User ID not found. Please log in again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        isSubmittingApplication.value = false;
+        return;
+      }
+
+      if (shouldAskVisa && isVisaRequired && visaOption.value.trim().isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Please confirm whether you have a valid visa for this location.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        isSubmittingApplication.value = false;
+        return;
+      }
+
+      final answers = <Map<String, String>>[];
+      for (var q in customQuestions) {
+        final id = q['_id'] ?? q['id'] ?? q['question'];
+        if (id != null && answerControllers.containsKey(id.toString())) {
+          final answer = answerControllers[id.toString()]?.text.trim() ?? '';
+          if (answer.isNotEmpty) {
+            answers.add({
+              'question': q['question'] ?? '',
+              'ans': answer,
+            });
+          }
+        }
+      }
+
+      String? resolvedResumeId = resumeId ?? existingResumeId;
+      final pickedResume = selectedResume.value;
+      if (pickedResume != null) {
+        if (pickedResume.path == null || pickedResume.path!.isEmpty) {
+          Get.snackbar(
+            'Error',
+            'The selected resume file is not accessible.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+          isSubmittingApplication.value = false;
+          return;
+        }
+
+        final uploadResult = await _jobApplicationRepository.uploadResume(
+          file: File(pickedResume.path!),
+          userId: userId,
+        );
+
+        final uploadedResumeId = uploadResult.fold<String?>(
+          (failure) {
+            Get.snackbar(
+              'Error',
+              failure.message,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+            return null;
+          },
+          (success) => success.data,
+        );
+
+        if (uploadedResumeId == null || uploadedResumeId.isEmpty) {
+          isSubmittingApplication.value = false;
+          return;
+        }
+        resolvedResumeId = uploadedResumeId;
+      }
+
+      if (isResumeRequired &&
+          (resolvedResumeId == null || resolvedResumeId.isEmpty)) {
+        Get.snackbar(
+          'Error',
+          'Please upload or select a resume before submitting.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        isSubmittingApplication.value = false;
+        return;
+      }
+
+      final request = JobApplicationRequest(
+        jobId: jobId,
+        userId: userId,
+        resumeId: resolvedResumeId,
+        answer: answers.isNotEmpty ? answers : null,
+        hasValidVisa: shouldAskVisa && visaOption.value.trim().isNotEmpty
+            ? visaOption.value == 'Yes'
+            : null,
+      );
+
+      final result = await _submitJobApplicationUseCase.call(request);
+
+      result.fold(
+        (failure) {
+          Get.snackbar(
+            'Error',
+            failure.message,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        },
+        (success) {
+          Get.snackbar(
+            'Success',
+            'Application submitted successfully!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 2),
+          );
+
+          Future.delayed(const Duration(milliseconds: 800), () {
+            Get.offAll(() => const JobHistoryScreen());
+          });
+        },
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to submit application: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isSubmittingApplication.value = false;
+    }
+  }
+
+  Future<void> _legacySubmitApplication(String jobId, {String? resumeId}) async {
     print('========== SUBMIT APPLICATION CALLED ==========');
     print('JobId received: "$jobId"');
     print('JobId isEmpty: ${jobId.isEmpty}');
@@ -297,7 +493,6 @@ class JobApplicationController extends GetxController {
         jobId: jobId,
         userId: userId,
         resumeId: resumeId,
-        status: 'pending',
         answer: answers.isNotEmpty ? answers : null,
       );
 

@@ -496,7 +496,7 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                 Obx(
                   () => controller.visaVisible.value
                       ? RequirementItem(
-                          label: "Valid visa for this job location?",
+                          label: "Have you got a valid visa for this location?",
                           selectedStatus: controller.visaStatus,
                           onDelete: () => controller.removeRequirement('visa'),
                         )

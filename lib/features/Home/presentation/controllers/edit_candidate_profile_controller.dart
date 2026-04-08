@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:get/get.dart';
+import 'package:giveandtake/core/contracts/web/resume_contract.dart';
 import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/core/network/constants/key_constants.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
@@ -12,6 +14,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import '../../../company/data/model/candidate_resume_response_model.dart';
+import '../../../../core/services/media_crop_service.dart';
 
 class EditCandidateProfileController extends GetxController {
   final isLoading = false.obs;
@@ -50,6 +53,10 @@ class EditCandidateProfileController extends GetxController {
   final skillsList = <String>[].obs;
   final languages = <String>[].obs;
   final certifications = <String>[].obs;
+  final removedExperienceIds = <String>[].obs;
+  final removedEducationIds = <String>[].obs;
+  final removedAwardIds = <String>[].obs;
+  final Map<String, ResumeSocialLink> existingSocialLinksByLabel = {};
 
   // Media
   final Rx<String?> photoPath = Rx<String?>(null); // For new local file
@@ -64,6 +71,11 @@ class EditCandidateProfileController extends GetxController {
   final Map<String, List<String>> countryCityMap = {};
   final RxList<String> availableSkills = <String>[].obs;
   final RxList<String> availableLanguages = <String>[].obs;
+  final MediaCropService _mediaCropService = Get.find<MediaCropService>();
+  String _resumeId = '';
+  String _resumeType = 'candidate';
+  String _resumeTitle = '';
+  String _zipCode = '';
 
   final List<String> degrees = [
     'BSc',
@@ -133,9 +145,27 @@ class EditCandidateProfileController extends GetxController {
       aboutMeQuillController.document = Document()..insert(0, resume.aboutUs!);
     }
 
-    // Social Links - sLink is List<String>, need to parse or handle differently
-    // For now, we'll skip this as the structure doesn't match
-    // The API might return it differently than the model suggests
+    _resumeId = resume.id ?? '';
+    _resumeType = resume.type ?? 'candidate';
+    _resumeTitle = resume.title ?? '';
+    _zipCode = resume.zipCode ?? '';
+
+    existingSocialLinksByLabel
+      ..clear()
+      ..addEntries(
+        resume.sLink.map(
+          (link) => MapEntry(link.label.toLowerCase(), link),
+        ),
+      );
+
+    linkedinController.text = _linkUrl('linkedin');
+    twitterController.text = _linkUrl('twitter');
+    facebookController.text = _linkUrl('facebook');
+    tiktokController.text = _linkUrl('tiktok');
+    instagramController.text = _linkUrl('instagram');
+    upworkController.text = _linkUrl('upwork');
+    fiverrController.text = _linkUrl('fiverr');
+    portfolioController.text = _linkUrl('portfolio');
 
     // Lists
     skillsList.assignAll(resume.skills);
@@ -144,32 +174,38 @@ class EditCandidateProfileController extends GetxController {
 
     // Experience - from parent model
     experienceList.assignAll(data.experiences.map((e) => {
+      '_id': e.id,
       'jobTitle': e.position,
       'companyName': e.company,
       'country': e.country,
       'city': e.city,
-      'startDate': e.startDate?.toIso8601String().split('T')[0] ?? '',
-      'endDate': e.endDate?.toIso8601String().split('T')[0] ?? '',
-      'presentlyWorkHere': false, // Not in model
+      'zip': e.zip,
+      'jobCategory': e.jobCategory,
+      'startDate': _toMonthYearDisplay(e.startDate),
+      'endDate': _toMonthYearDisplay(e.endDate),
+      'presentlyWorkHere': e.endDate == null,
       'description': e.jobDescription,
     }).toList());
 
     // Education - from parent model
     educationList.assignAll(data.education.map((e) => {
+      '_id': e.id,
       'institution': e.instituteName,
       'degree': e.degree,
       'fieldOfStudy': e.fieldOfStudy,
       'country': e.country,
       'city': e.city,
-      'startDate': e.startDate?.toIso8601String().split('T')[0] ?? '',
-      'graduationDate': e.graduationDate?.toIso8601String().split('T')[0] ?? '',
-      'presentlyAttendHere': false, // Not in model
+      'startDate': _toMonthYearDisplay(e.startDate),
+      'graduationDate': _toMonthYearDisplay(e.graduationDate),
+      'presentlyAttendHere': e.graduationDate == null,
     }).toList());
 
     // Awards - from parent model
     awardsList.assignAll(data.awardsAndHonors.map((a) => {
+      '_id': a.id,
       'title': a.title,
-      'year': a.programeDate?.toIso8601String().split('T')[0] ?? '',
+      'issuer': a.programeName,
+      'year': a.programeDate?.toIso8601String().split('T').first ?? '',
       'description': a.description,
     }).toList());
 
@@ -268,20 +304,25 @@ class EditCandidateProfileController extends GetxController {
     }
   }
 
-  // --- Image Pickers ---
-  final ImagePicker _picker = ImagePicker();
-
   Future<void> pickPhoto() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final image = await _mediaCropService.pickAndCropImage(
+      source: ImageSource.gallery,
+      preset: MediaCropPreset.avatar,
+    );
     if (image != null) {
       photoPath.value = image.path;
+      networkPhotoUrl.value = null;
     }
   }
 
   Future<void> pickBanner() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final image = await _mediaCropService.pickAndCropImage(
+      source: ImageSource.gallery,
+      preset: MediaCropPreset.banner,
+    );
     if (image != null) {
       bannerPath.value = image.path;
+      networkBannerUrl.value = null;
     }
   }
 
@@ -301,6 +342,11 @@ class EditCandidateProfileController extends GetxController {
   }
 
   void removeExperience(int index) {
+    final item = experienceList[index];
+    final id = item['_id']?.toString();
+    if (id != null && id.isNotEmpty) {
+      removedExperienceIds.add(id);
+    }
     experienceList.removeAt(index);
   }
 
@@ -324,6 +370,11 @@ class EditCandidateProfileController extends GetxController {
   }
 
   void removeEducation(int index) {
+    final item = educationList[index];
+    final id = item['_id']?.toString();
+    if (id != null && id.isNotEmpty) {
+      removedEducationIds.add(id);
+    }
     educationList.removeAt(index);
   }
 
@@ -342,6 +393,11 @@ class EditCandidateProfileController extends GetxController {
   }
 
   void removeAward(int index) {
+    final item = awardsList[index];
+    final id = item['_id']?.toString();
+    if (id != null && id.isNotEmpty) {
+      removedAwardIds.add(id);
+    }
     awardsList.removeAt(index);
   }
 
@@ -391,88 +447,128 @@ class EditCandidateProfileController extends GetxController {
         return;
       }
 
-      // Prepare Data (Similar to ElevatorResumeController)
       final aboutMe = aboutMeQuillController.document.toPlainText().trim();
-
-      final resumeData = {
-        'firstName': firstNameController.text.trim(),
-        'lastName': surnameController.text.trim(),
-        'email': emailController.text.trim(),
-        'country': selectedCountry.value,
-        'city': selectedCity.value,
-        'immediatelyAvailable': immediatelyAvailable.value,
-        'about': aboutMe,
-        'certifications': certifications.toList(),
-        'languages': languages.toList(),
-        'skills': skillsList.toList(),
-        'sLink': [
-          if (linkedinController.text.trim().isNotEmpty) {'platform': 'LinkedIn', 'url': linkedinController.text.trim()},
-          if (twitterController.text.trim().isNotEmpty) {'platform': 'Twitter', 'url': twitterController.text.trim()},
-          if (facebookController.text.trim().isNotEmpty) {'platform': 'Facebook', 'url': facebookController.text.trim()},
-          if (tiktokController.text.trim().isNotEmpty) {'platform': 'TikTok', 'url': tiktokController.text.trim()},
-          if (instagramController.text.trim().isNotEmpty) {'platform': 'Instagram', 'url': instagramController.text.trim()},
-          if (upworkController.text.trim().isNotEmpty) {'platform': 'Upwork', 'url': upworkController.text.trim()},
-          if (fiverrController.text.trim().isNotEmpty) {'platform': 'Fiverr', 'url': fiverrController.text.trim()},
-          if (portfolioController.text.trim().isNotEmpty) {'platform': 'Portfolio', 'url': portfolioController.text.trim()},
-        ],
-      };
-
-      final experiencesData = experienceList.map((exp) => {
-        'position': exp['jobTitle'],
-        'company': exp['companyName'],
-        'country': exp['country'],
-        'city': exp['city'],
-        'startDate': exp['startDate'],
-        'endDate': exp['endDate'],
-        'presentlyWorkHere': exp['presentlyWorkHere'],
-        'description': exp['description'],
-      }).toList();
-
-      final educationData = educationList.map((edu) => {
-         'institution': edu['institution'],
-         'degree': edu['degree'],
-         'fieldOfStudy': edu['fieldOfStudy'],
-         'country': edu['country'],
-         'city': edu['city'],
-         'startDate': edu['startDate'],
-         'graduationDate': edu['graduationDate'],
-         'presentlyAttendHere': edu['presentlyAttendHere'],
-      }).toList();
-
-      final awardsData = awardsList.map((award) => {
-        'title': award['title'],
-        'year': award['year'],
-        'description': award['description'],
-      }).toList();
+      final payload = ResumePayloadBuilder.buildUpdate(
+        CandidateResumeUpdateInput(
+          resumeId: _resumeId,
+          userId: (await AuthStorageService().getUserId()) ?? '',
+          type: _resumeType,
+          firstName: firstNameController.text.trim(),
+          lastName: surnameController.text.trim(),
+          email: emailController.text.trim(),
+          title: _resumeTitle,
+          country: selectedCountry.value ?? '',
+          city: selectedCity.value ?? '',
+          zip: _zipCode,
+          aboutUs: aboutMe,
+          immediatelyAvailable: immediatelyAvailable.value,
+          skills: skillsList.toList(),
+          certifications: certifications.toList(),
+          languages: languages.toList(),
+          socialLinks: _buildSocialLinks(),
+          experiences: [
+            ...experienceList.map(
+              (exp) => CandidateExperienceInput(
+                id: exp['_id']?.toString(),
+                mutation: exp['_id'] == null
+                    ? WebMutationType.create
+                    : WebMutationType.update,
+                company: (exp['companyName'] ?? '').toString(),
+                position: (exp['jobTitle'] ?? '').toString(),
+                country: (exp['country'] ?? '').toString(),
+                city: (exp['city'] ?? '').toString(),
+                zip: (exp['zip'] ?? '').toString(),
+                startDate: exp['startDate']?.toString(),
+                endDate: exp['endDate']?.toString(),
+                currentlyWorking: exp['presentlyWorkHere'] == true,
+                jobDescription: (exp['description'] ?? '').toString(),
+                jobCategory: (exp['jobCategory'] ?? '').toString(),
+              ),
+            ),
+            ...removedExperienceIds.map(
+              (id) => CandidateExperienceInput(
+                id: id,
+                mutation: WebMutationType.delete,
+                company: '',
+                position: '',
+                country: '',
+                city: '',
+                zip: '',
+                jobDescription: '',
+                jobCategory: '',
+              ),
+            ),
+          ],
+          educationList: [
+            ...educationList.map(
+              (edu) => CandidateEducationInput(
+                id: edu['_id']?.toString(),
+                mutation: edu['_id'] == null
+                    ? WebMutationType.create
+                    : WebMutationType.update,
+                university: (edu['institution'] ?? '').toString(),
+                degree: (edu['degree'] ?? '').toString(),
+                fieldOfStudy: (edu['fieldOfStudy'] ?? '').toString(),
+                country: (edu['country'] ?? '').toString(),
+                city: (edu['city'] ?? '').toString(),
+                startDate: edu['startDate']?.toString(),
+                graduationDate: edu['graduationDate']?.toString(),
+                currentlyStudying: edu['presentlyAttendHere'] == true,
+              ),
+            ),
+            ...removedEducationIds.map(
+              (id) => CandidateEducationInput(
+                id: id,
+                mutation: WebMutationType.delete,
+                university: '',
+                degree: '',
+                fieldOfStudy: '',
+                country: '',
+                city: '',
+              ),
+            ),
+          ],
+          awardsAndHonors: [
+            ...awardsList.map(
+              (award) => CandidateAwardInput(
+                id: award['_id']?.toString(),
+                mutation: award['_id'] == null
+                    ? WebMutationType.create
+                    : WebMutationType.update,
+                title: (award['title'] ?? '').toString(),
+                programeName: (award['issuer'] ?? '').toString(),
+                programeDate: (award['year'] ?? '').toString(),
+                description: (award['description'] ?? '').toString(),
+              ),
+            ),
+            ...removedAwardIds.map(
+              (id) => CandidateAwardInput(
+                id: id,
+                mutation: WebMutationType.delete,
+                title: '',
+                programeName: '',
+                description: '',
+              ),
+            ),
+          ],
+          photo: photoPath.value == null ? null : File(photoPath.value!),
+          banner: bannerPath.value == null ? null : File(bannerPath.value!),
+        ),
+      );
 
 
       // Use MultipartRequest for PATCH
       // API Constraint: "PATCH https://api.evpitch.com/api/v1/create-resume/resume/update"
-      final uri = Uri.parse('${ApiConstants.baseUrl}/create-resume/resume/update');
+      final uri = Uri.parse(ApiConstants.resume.updateResume);
       final request = http.MultipartRequest('PATCH', uri);
       
       request.headers['Authorization'] = 'Bearer $token';
+      request.fields.addAll(payload.fields);
 
-      // Determine UserId - ideally passed or retrieved. 
-      // The previous controller got it from GetUserProfileService.
-      // I'll grab it safely if possible, or omit if the token handles it (usually API infers from token, but previous used userId field).
-      // Let's assume we need to pass userId if it was passed in create.
-      // Checking `CandidateDashboardController`, it uses `AuthStorageService().getUserId()`.
-      final userId = await AuthStorageService().getUserId();
-      if(userId != null) request.fields['userId'] = userId;
-
-
-      request.fields['resume'] = jsonEncode(resumeData);
-      request.fields['experiences'] = jsonEncode(experiencesData);
-      request.fields['educationList'] = jsonEncode(educationData);
-      request.fields['awardsAndHonors'] = jsonEncode(awardsData);
-
-      if (photoPath.value != null) {
-        request.files.add(await http.MultipartFile.fromPath('photo', photoPath.value!));
-      }
-
-      if (bannerPath.value != null) {
-        request.files.add(await http.MultipartFile.fromPath('banner', bannerPath.value!));
+      for (final entry in payload.files.entries) {
+        for (final file in entry.value) {
+          request.files.add(await http.MultipartFile.fromPath(entry.key, file.path));
+        }
       }
 
       final streamedResponse = await request.send();
@@ -517,5 +613,58 @@ class EditCandidateProfileController extends GetxController {
     certificationController.dispose();
     aboutMeQuillController.dispose();
     super.onClose();
+  }
+
+  String _toMonthYearDisplay(DateTime? value) {
+    if (value == null) return '';
+    return '${value.month.toString().padLeft(2, '0')}/${value.year}';
+  }
+
+  String _linkUrl(String label) =>
+      existingSocialLinksByLabel[label.toLowerCase()]?.url ?? '';
+
+  List<ResumeSocialLinkInput> _buildSocialLinks() {
+    final result = <ResumeSocialLinkInput>[];
+
+    void handleLink(String label, TextEditingController controller) {
+      final existing = existingSocialLinksByLabel[label.toLowerCase()];
+      final url = controller.text.trim();
+
+      if (url.isEmpty && existing != null) {
+        result.add(
+          ResumeSocialLinkInput(
+            id: existing.id,
+            label: existing.label,
+            url: existing.url,
+            mutation: WebMutationType.delete,
+          ),
+        );
+        return;
+      }
+
+      if (url.isEmpty) return;
+
+      result.add(
+        ResumeSocialLinkInput(
+          id: existing?.id,
+          label: label,
+          url: url,
+          mutation: existing == null
+              ? WebMutationType.create
+              : WebMutationType.update,
+        ),
+      );
+    }
+
+    handleLink('LinkedIn', linkedinController);
+    handleLink('Twitter', twitterController);
+    handleLink('Facebook', facebookController);
+    handleLink('TikTok', tiktokController);
+    handleLink('Instagram', instagramController);
+    handleLink('Upwork', upworkController);
+    handleLink('Fiverr', fiverrController);
+    handleLink('Portfolio', portfolioController);
+
+    return result;
   }
 }

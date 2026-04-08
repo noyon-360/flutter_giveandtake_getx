@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/base/base_controller.dart';
+import 'package:giveandtake/core/contracts/web/recruiter_company_contract.dart';
 import 'package:giveandtake/features/company/data/model/manage_job_response_model.dart';
 import 'package:giveandtake/features/company/data/model/recruiter_added_response_model.dart';
 import 'package:giveandtake/features/company/data/model/single_Company_response_model.dart';
 import 'package:giveandtake/features/company/domain/repo/company_repo.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/multiple_form_data_manager.dart';
@@ -442,11 +444,253 @@ class CompanyAccountController extends BaseController {
     String instagram,
     String fiverr,
     String companyWebsite,
+    String services,
+    String recruiters,
+  ) async {
+    setLoading(true);
+    setError('');
+
+    if (Get.isRegistered<RecruiterController>() &&
+        !Get.find<RecruiterController>().successVideoUploaded.value) {
+      setError('Upload elevator pitch before creating a company profile.');
+      Get.snackbar(
+        'Elevator Pitch Required',
+        'Please upload your elevator pitch before creating the company profile.',
+      );
+      setLoading(false);
+      return;
+    }
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User ID not found. Please log in again.');
+      Get.snackbar('Error', 'User ID not found.');
+      setLoading(false);
+      return;
+    }
+
+    final payload = CompanyPayloadBuilder.build(
+      CompanyAccountInput(
+        userId: userId,
+        cname: cname,
+        cemail: cemail,
+        aboutUs: aboutUs,
+        industry: industry,
+        country: country,
+        city: city,
+        zipcode: zipCode.toString(),
+        service: getServices(),
+        employeesId: _resolveEmployeeIds(),
+        awardsAndHonors: _buildCompanyHonors(),
+        socialLinks: _buildCompanySocialLinks(
+          linkedIn: linkedIn,
+          twitter: twitter,
+          upwork: upwork,
+          facebook: facebook,
+          tiktok: tiktok,
+          instagram: instagram,
+          fiverr: fiverr,
+          companyWebsite: companyWebsite,
+        ),
+        clogo: clogo,
+        banner: banner,
+      ),
+    );
+
+    final result = await _companyRepo.createCompany(await payload.toFormData());
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log("Create Company Failed: ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        DPrint.log("Company Created: ${success.message}");
+        Get.snackbar("Success", "Company created successfully!");
+        Get.off(() => CompanyDetailsPage());
+        setLoading(false);
+      },
+    );
+  }
+
+  Future<void> updateCompany(
+    String companyId,
+    File? banner,
+    File? clogo,
+    String cname,
+    String country,
+    String city,
+    int zipCode,
+    String cemail,
+    String aboutUs,
+    String industry,
+    String linkedIn,
+    String twitter,
+    String upwork,
+    String facebook,
+    String tiktok,
+    String instagram,
+    String fiverr,
+    String companyWebsite,
+    String services,
+    String recruiters,
+    String awardsJson,
+  ) async {
+    setLoading(true);
+    setError('');
+
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      setError('User ID not found. Please log in again.');
+      Get.snackbar('Error', 'User ID not found.');
+      setLoading(false);
+      return;
+    }
+
+    final payload = CompanyPayloadBuilder.build(
+      CompanyAccountInput(
+        userId: userId,
+        cname: cname,
+        cemail: cemail,
+        aboutUs: aboutUs,
+        industry: industry,
+        country: country,
+        city: city,
+        zipcode: zipCode.toString(),
+        service: getServices(),
+        employeesId: _resolveEmployeeIds(),
+        awardsAndHonors: _buildCompanyHonors(),
+        socialLinks: _buildCompanySocialLinks(
+          linkedIn: linkedIn,
+          twitter: twitter,
+          upwork: upwork,
+          facebook: facebook,
+          tiktok: tiktok,
+          instagram: instagram,
+          fiverr: fiverr,
+          companyWebsite: companyWebsite,
+        ),
+        clogo: clogo,
+        banner: banner,
+      ),
+    );
+
+    final result = await _companyRepo.updateCompanyInfo(
+      companyId,
+      await payload.toFormData(),
+    );
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        DPrint.log('Update Company: ${fail.message}');
+        setLoading(false);
+      },
+      (success) async {
+        DPrint.log('Update Company: ${success.message}');
+        Get.to(() => CompanyDetailsPage());
+        setLoading(false);
+        Get.snackbar('Success', success.message);
+      },
+    );
+  }
+
+  List<String> _resolveEmployeeIds() {
+    final ids = <String>{};
+    for (final controller in employeeControllers) {
+      final mappedId = employeeIdMap[controller];
+      if (mappedId != null && mappedId.isNotEmpty) {
+        ids.add(mappedId);
+        continue;
+      }
+
+      final rawText = controller.text.trim();
+      if (rawText.length >= 20 && !rawText.contains('@')) {
+        ids.add(rawText);
+      }
+    }
+    return ids.toList();
+  }
+
+  List<CompanyHonorInput> _buildCompanyHonors() {
+    return awardFields.map((fields) {
+      return CompanyHonorInput(
+        title: fields['title']?.text.trim() ?? '',
+        programeName: fields['issuer']?.text.trim() ?? '',
+        programeDate: fields['date']?.text.trim() ?? '',
+        description: fields['description']?.text.trim() ?? '',
+      );
+    }).where((item) {
+      return item.title.trim().isNotEmpty ||
+          item.programeName.trim().isNotEmpty ||
+          item.description.trim().isNotEmpty;
+    }).toList();
+  }
+
+  List<WebSocialLinkInput> _buildCompanySocialLinks({
+    required String linkedIn,
+    required String twitter,
+    required String upwork,
+    required String facebook,
+    required String tiktok,
+    required String instagram,
+    required String fiverr,
+    required String companyWebsite,
+  }) {
+    final links = <WebSocialLinkInput>[];
+
+    void addLink(String label, String value) {
+      if (value.trim().isEmpty) return;
+      links.add(WebSocialLinkInput(label: label, url: value.trim()));
+    }
+
+    addLink('LinkedIn', linkedIn);
+    addLink('Twitter', twitter);
+    addLink('Upwork', upwork);
+    addLink('Facebook', facebook);
+    addLink('TikTok', tiktok);
+    addLink('Instagram', instagram);
+    addLink('Fiverr', fiverr);
+    addLink('Website', companyWebsite);
+
+    return links;
+  }
+
+  Future<void> _legacyCreateCompanyScreen(
+    File banner,
+    File clogo,
+    String cname,
+    String country,
+    String city,
+    int zipCode,
+    String cemail,
+    String aboutUs,
+    String industry,
+    String linkedIn,
+    String twitter,
+    String upwork,
+    String facebook,
+    String tiktok,
+    String instagram,
+    String fiverr,
+    String companyWebsite,
     String services, // comma-separated
     String recruiters, // emails only, comma-separated
   ) async {
     setLoading(true);
     setError('');
+
+    if (Get.isRegistered<RecruiterController>() &&
+        !Get.find<RecruiterController>().successVideoUploaded.value) {
+      setError('Upload elevator pitch before creating a company profile.');
+      Get.snackbar(
+        'Elevator Pitch Required',
+        'Please upload your elevator pitch before creating the company profile.',
+      );
+      setLoading(false);
+      return;
+    }
 
     final userId = await _authStorageService.getUserId();
     if (userId == null || userId.isEmpty) {
@@ -548,7 +792,7 @@ class CompanyAccountController extends BaseController {
     );
   }
 
-  Future<void> updateCompany(
+  Future<void> _legacyUpdateCompany(
     String companyId,
     File? banner,
     File? clogo,

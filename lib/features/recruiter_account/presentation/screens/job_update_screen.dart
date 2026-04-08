@@ -1087,7 +1087,7 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                   if (!controller.visaVisible.value)
                     return const SizedBox.shrink();
                   return RequirementItem(
-                    label: "Valid visa for this job location?",
+                    label: "Have you got a valid visa for this location?",
 
                     //onChanged: (value) => controller.validVisaRequired.value = value,
                     selectedStatus: controller.visaStatus,

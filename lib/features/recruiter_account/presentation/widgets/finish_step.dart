@@ -75,7 +75,7 @@ class FinishStep extends StatelessWidget {
         experienceController.selectedExperienceLevel.value.isNotEmpty
             ? experienceController.selectedExperienceLevel.value
             : '',
-        '${jobPostingExpirationController.finalDeadlineDate.value}',
+        jobPostingExpirationController.selectedJobPostingExpiration.value,
         categoryId,
         controller.selectedCategory.value,
         controller.selectedRole.value,

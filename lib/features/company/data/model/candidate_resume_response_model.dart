@@ -66,7 +66,7 @@ class Resume {
   final String? email;
   final List<String> certifications;
   final List<String> languages;
-  final List<String> sLink;
+  final List<ResumeSocialLink> sLink;
   final List<String> skills;
   final bool immediatelyAvailable;
   final DateTime? createdAt;
@@ -121,7 +121,11 @@ class Resume {
               .toList() ??
           [],
       sLink: (json['sLink'] as List<dynamic>?)
-              ?.map((e) => e.toString())
+              ?.map(
+                (e) => ResumeSocialLink.fromJson(
+                  (e as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{},
+                ),
+              )
               .toList() ??
           [],
       skills: (json['skills'] as List<dynamic>?)
@@ -381,6 +385,32 @@ class Award {
       '__v': v,
     };
   }
+}
+
+class ResumeSocialLink {
+  final String? id;
+  final String label;
+  final String url;
+
+  ResumeSocialLink({
+    this.id,
+    required this.label,
+    required this.url,
+  });
+
+  factory ResumeSocialLink.fromJson(Map<String, dynamic> json) {
+    return ResumeSocialLink(
+      id: json['_id'] as String?,
+      label: json['label'] as String? ?? '',
+      url: json['url'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    if (id != null) '_id': id,
+    'label': label,
+    'url': url,
+  };
 }
 
 /* --------------------- ElevatorPitch (video) --------------------- */

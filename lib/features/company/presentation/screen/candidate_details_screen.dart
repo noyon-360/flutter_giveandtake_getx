@@ -338,19 +338,21 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                     spacing: 16,
                     children: resume.sLink.map((link) {
                       IconData icon = FontAwesomeIcons.globe;
-                      if (link.toLowerCase().contains("linkedin"))
+                      final label = link.label.toLowerCase();
+                      final url = link.url;
+                      if (label.contains("linkedin") || url.toLowerCase().contains("linkedin"))
                         icon = FontAwesomeIcons.linkedin;
-                      if (link.toLowerCase().contains("twitter") ||
-                          link.toLowerCase().contains("x.com")) {
+                      if (label.contains("twitter") ||
+                          url.toLowerCase().contains("x.com")) {
                         icon = FontAwesomeIcons.twitter;
                       }
-                      if (link.toLowerCase().contains("github"))
+                      if (label.contains("github"))
                         icon = FontAwesomeIcons.github;
-                      if (link.toLowerCase().contains("facebook"))
+                      if (label.contains("facebook"))
                         icon = FontAwesomeIcons.facebook;
 
                       return InkWell(
-                        onTap: () => launchUrl(Uri.parse(link)),
+                        onTap: () => launchUrl(Uri.parse(url)),
                         child: FaIcon(icon, size: 28, color: Colors.blue),
                       );
                     }).toList(),

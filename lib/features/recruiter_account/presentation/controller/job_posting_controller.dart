@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giveandtake/core/contracts/web/job_contract.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/get_currency_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
@@ -61,7 +62,7 @@ class JobPostingController extends GetxController {
   RxBool resumeVisible = true.obs; // <-- controls whether the row is shown
 
   RxString visaStatus = ''.obs;
-  String visa = 'Valid visa for this job location?';
+  String visa = JobPayloadBuilder.validVisaLabel;
   RxBool visaVisible = true.obs; // <-- controls whether the row is shown
 
   // Job Description (HTML) & Publish
@@ -117,10 +118,11 @@ class JobPostingController extends GetxController {
     // --- Application Requirements ---
     if (job.applicationRequirement != null) {
       for (var requirement in job.applicationRequirement!) {
-        if (requirement.requirement?.toLowerCase() == 'resume') {
+        final label = requirement.requirement?.trim().toLowerCase() ?? '';
+        if (label == 'resume') {
           resume = requirement.requirement ?? '';
           resumeStatus.value = requirement.status ?? 'Required';
-        } else if (requirement.requirement?.toLowerCase() == 'visa') {
+        } else if (label.contains('visa')) {
           visa = requirement.requirement ?? '';
           visaStatus.value = requirement.status ?? 'Required';
         }
@@ -262,8 +264,10 @@ class JobPostingController extends GetxController {
   }
 
   List<ApplicationRequirement> get applicationRequirement => [
-    ApplicationRequirement(requirement: resume, status: resumeStatus.value),
-    ApplicationRequirement(requirement: visa, status: visaStatus.value),
+    if (resumeVisible.value && resumeStatus.value.trim().isNotEmpty)
+      ApplicationRequirement(requirement: resume, status: resumeStatus.value),
+    if (visaVisible.value && visaStatus.value.trim().isNotEmpty)
+      ApplicationRequirement(requirement: visa, status: visaStatus.value),
   ];
 
   List<CustomQuestion> get customQuestions =>
@@ -386,7 +390,7 @@ class JobPostingController extends GetxController {
     resumeVisible.value = true;
     visaVisible.value = true;
     resume = 'Resume'; // reset text if modified
-    visa = 'Valid visa for this job location?';
+    visa = JobPayloadBuilder.validVisaLabel;
 
     // Custom Questions
     customQuestion.clear();
@@ -444,7 +448,7 @@ class JobPostingController extends GetxController {
     resumeVisible.value = true;
     visaVisible.value = true;
     resume = 'Resume'; // reset text if modified
-    visa = 'Valid visa for this job location?';
+    visa = JobPayloadBuilder.validVisaLabel;
 
     // Custom Questions
     customQuestion.clear();

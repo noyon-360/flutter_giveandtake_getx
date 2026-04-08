@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class ResumeUploadSection extends StatelessWidget {
   final PlatformFile? selectedResume;
+  final String? existingResumeId;
   final VoidCallback onUpload;
   final VoidCallback onRemove;
   final Function(PlatformFile) onDownload;
@@ -10,6 +11,7 @@ class ResumeUploadSection extends StatelessWidget {
   const ResumeUploadSection({
     super.key,
     required this.selectedResume,
+    this.existingResumeId,
     required this.onUpload,
     required this.onRemove,
     required this.onDownload,
@@ -28,6 +30,23 @@ class ResumeUploadSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
+        if (selectedResume == null &&
+            existingResumeId != null &&
+            existingResumeId!.trim().isNotEmpty)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green.shade200),
+            ),
+            child: const Text(
+              'Using your existing resume on file. Upload a new file only if you want to replace it for this application.',
+              style: TextStyle(fontSize: 13),
+            ),
+          ),
         if (selectedResume == null)
           InkWell(
             onTap: onUpload,

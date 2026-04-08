@@ -46,7 +46,7 @@ class ApplicationRequirementStep extends StatelessWidget {
           Obx(() {
             if (!controller.visaVisible.value) return const SizedBox.shrink();
             return _RequirementItem(
-              label: "Valid visa for this job location?",
+              label: "Have you got a valid visa for this location?",
 
               //onChanged: (value) => controller.validVisaRequired.value = value,
               selectedStatus: controller.visaStatus,

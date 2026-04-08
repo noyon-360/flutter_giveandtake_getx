@@ -41,10 +41,10 @@ class JobPreviewScreen extends StatelessWidget {
     recruiterController.createJobPost(
       controller.jobTitle.value,
       controller.jobDescriptionPlain.value,
-      '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
-      controller.vacanciesInt,
-      experienceController.selectedExperienceLevel.value,
-      '${jobPostingExpirationController.finalDeadlineDate.value}',
+        '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
+        controller.vacanciesInt,
+        experienceController.selectedExperienceLevel.value,
+      jobPostingExpirationController.selectedJobPostingExpiration.value,
       categoryId,
       controller.selectedCategory.value,
       controller.selectedRole.value,
@@ -172,10 +172,7 @@ class JobPreviewScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               _previewBox('Resume', controller.resumeStatus.value),
-              _previewBox(
-                'Valid visa for this job location?',
-                controller.visaStatus.value,
-              ),
+              _previewBox(controller.visa, controller.visaStatus.value),
 
               const SizedBox(height: 20),
 

@@ -3,6 +3,7 @@ class ApiConstants {
   // static const String baseDomain = 'http://10.10.5.33:5001';// soykot ip
   static const String baseDomain = 'https://test.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
+  static const String socketUrl = baseDomain;
 
   // add by zafor
   // static const String baseDomain = 'https://api.evpitch.com';
@@ -41,6 +42,8 @@ class ApiConstants {
 
   static UserEndpoints get user => UserEndpoints();
   static NotificationEndpoints get notification => NotificationEndpoints();
+  static MessagingEndpoints get messaging => MessagingEndpoints();
+  static BookmarkEndpoints get bookmarks => BookmarkEndpoints();
 
   static TeamEndpointcs get team => TeamEndpointcs();
   static LeagueEndpoints get league => LeagueEndpoints();
@@ -64,6 +67,9 @@ class ResumeEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/create-resume';
   final String getResume = '$_base/get-resume';
   final String createResume = '$_base/create-resume';
+  final String updateResume = '$_base/resume/update';
+  final String uploadResume = '${ApiConstants.baseUrl}/resume';
+  String userResumes(String userId) => '${ApiConstants.baseUrl}/resume/user/$userId';
 }
 
 class JobEndpoints {
@@ -160,9 +166,38 @@ class UserEndpoints {
 }
 
 class NotificationEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/notification';
+  static const String _base = '${ApiConstants.baseUrl}/notifications';
 
-  final String getnotifications = '$_base/getnotifications';
+  String list(String userId) => '$_base/$userId';
+  String markAllRead(String userId) => '$_base/read/$userId';
+  String markRead(String userId, String notificationId) =>
+      '$_base/$userId/read/$notificationId';
+}
+
+class MessagingEndpoints {
+  static const String _messageBase = '${ApiConstants.baseUrl}/message';
+  static const String _roomBase = '${ApiConstants.baseUrl}/message-room';
+
+  String rooms({
+    required String role,
+    required String userId,
+  }) => '$_roomBase/get-message-rooms?type=$role&userId=$userId';
+
+  String roomMessages({
+    required String roomId,
+    required int page,
+    required int limit,
+  }) => '$_messageBase/$roomId?page=$page&limit=$limit';
+
+  String get sendMessage => _messageBase;
+}
+
+class BookmarkEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/bookmarks';
+
+  String get create => _base;
+  String user(String userId) => '$_base/user/$userId';
+  String get update => '$_base/update';
 }
 
 class TeamEndpointcs {

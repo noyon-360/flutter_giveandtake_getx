@@ -13,6 +13,8 @@ import 'package:giveandtake/features/job_listing/data/repositories/job_applicati
 import 'package:giveandtake/features/job_listing/domain/repo/job_listing_repository.dart';
 import 'package:giveandtake/features/job_listing/domain/repo/user_profile_repository.dart';
 import 'package:giveandtake/features/job_listing/domain/repositories/job_application_repository.dart';
+import 'package:giveandtake/features/messaging/data/repositories/messaging_repository.dart';
+import 'package:giveandtake/features/notifications/data/repositories/notification_repository.dart';
 import 'package:giveandtake/features/plan_pricing/data/repositories/paypal_repository_impl.dart';
 import 'package:giveandtake/features/plan_pricing/domain/repositories/paypal_repository.dart';
 import 'package:giveandtake/features/recruiter_account/data/repo/repo_impl.dart';
@@ -56,6 +58,8 @@ void setupRepository() {
     () => JobApplicationRepositoryImpl(),
     fenix: true,
   );
+  Get.lazyPut<NotificationRepository>(() => NotificationRepository(), fenix: true);
+  Get.lazyPut<MessagingRepository>(() => MessagingRepository(), fenix: true);
   Get.lazyPut<CompanyRepository>(
     () => CompanyRepoImplementation(apiClient: Get.find()),
     fenix: true,

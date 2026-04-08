@@ -22,6 +22,7 @@ import 'package:giveandtake/features/recruiter_account/domain/repo/repo.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/upload_elevator_pitch.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
+import 'package:giveandtake/core/contracts/web/recruiter_company_contract.dart';
 import '../../../../core/base/base_controller.dart';
 import '../../../../core/network/services/multiple_form_data_manager.dart';
 import '../../../../core/network/services/secure_store_services.dart';
@@ -181,7 +182,7 @@ class RecruiterController extends BaseController {
     final String location,
     final int vacancy,
     final String experience,
-    final String deadline,
+    final String expirationDateDays,
     final String jobCategoryId,
     final String name,
     final String role,
@@ -212,7 +213,7 @@ class RecruiterController extends BaseController {
       location: location,
       vacancy: vacancy,
       experience: experience,
-      deadline: deadline,
+      expirationDateDays: expirationDateDays,
       jobCategoryId: jobCategoryId,
       name: name,
       role: role,
@@ -220,11 +221,10 @@ class RecruiterController extends BaseController {
       applicationRequirement: applicationRequirement,
       customQuestion: customQuestion,
       employementType: employementType,
-      websiteUrl: websiteUrl,
+      websiteUrl: website_Url.isNotEmpty ? website_Url : websiteUrl,
       publishDate: publishDate,
       careerStage: careerStage,
       locationType: locationType,
-      website_Url: website_Url,
     );
 
     final result = await _recruiterRepo.createNewJobPost(request);
@@ -711,6 +711,16 @@ class RecruiterController extends BaseController {
     setLoading(true);
     setError('');
 
+    if (!successVideoUploaded.value) {
+      setError('Upload an elevator pitch before creating your recruiter account.');
+      Get.snackbar(
+        'Elevator Pitch Required',
+        'Upload an elevator pitch before creating your recruiter account.',
+      );
+      setLoading(false);
+      return;
+    }
+
     final userId = await _authStorageService
         .getUserId(); // get logged-in userId
     DPrint.log('UserId: $userId');
@@ -721,53 +731,34 @@ class RecruiterController extends BaseController {
       return;
     }
 
-    // Build social links list
-    List<Map<String, String>> sLinks = [];
-    if (linkedIn.isNotEmpty) sLinks.add({"label": "LinkedIn", "url": linkedIn});
-    if (twitter.isNotEmpty) sLinks.add({"label": "Twitter", "url": twitter});
-    if (upwork.isNotEmpty) sLinks.add({"label": "Upwork", "url": upwork});
-    if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
-    if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
-    if (instagram.isNotEmpty)
-      sLinks.add({"label": "Instagram", "url": instagram});
-    if (fiverr.isNotEmpty) sLinks.add({"label": "Fiverr", "url": fiverr});
-    if (company.isNotEmpty) sLinks.add({"label": "Company", "url": company});
-
-    // Add all text + file fields
-    _multiFormDataManager.addImageFile(key: "banner", banner);
-    _multiFormDataManager.addImageFile(key: "photo", recruiterLogo);
-    _multiFormDataManager.addTextData("firstName", firstName);
-    _multiFormDataManager.addTextData("sureName", surname);
-    _multiFormDataManager.addTextData("emailAddress", emailAddress);
-    _multiFormDataManager.addTextData("phoneNumber", phoneNumber);
-    _multiFormDataManager.addTextData("title", title);
-    _multiFormDataManager.addTextData("bio", description);
-    _multiFormDataManager.addTextData("country", country);
-    _multiFormDataManager.addTextData("city", city);
-    _multiFormDataManager.addTextData("zipCode", zipCode.toString());
-
-    // Add userId here
-    _multiFormDataManager.addTextData("userId", userId);
-
-    // Optionally include companyId if your backend expects it
-    if (selectedCompany.value != null) {
-      DPrint.log("Recruiter controller -> ${selectedCompany.value}");
-      _multiFormDataManager.addTextData(
-        "companyId",
-        selectedCompany.value.toString(),
-      );
-    }
-
-    // Add social links
-    for (int i = 0; i < sLinks.length; i++) {
-      _multiFormDataManager.addTextData(
-        "sLink[$i][label]",
-        sLinks[i]["label"]!,
-      );
-      _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
-    }
-
-    final formRequest = await _multiFormDataManager.toFormDataAsync();
+    final payload = RecruiterPayloadBuilder.buildCreate(
+      RecruiterAccountInput(
+        userId: userId,
+        firstName: firstName,
+        sureName: surname,
+        title: title,
+        bio: description,
+        country: country,
+        city: city,
+        zipCode: zipCode.toString(),
+        emailAddress: emailAddress,
+        phoneNumber: phoneNumber,
+        companyId: selectedCompany.value,
+        socialLinks: _buildRecruiterLinks(
+          linkedIn: linkedIn,
+          twitter: twitter,
+          upwork: upwork,
+          facebook: facebook,
+          tiktok: tiktok,
+          instagram: instagram,
+          fiverr: fiverr,
+          company: company,
+        ),
+        photo: recruiterLogo,
+        banner: banner,
+      ),
+    );
+    final formRequest = await payload.toFormData();
 
     print(' Fields: ${formRequest.fields}');
     print(' Files: ${formRequest.files}');
@@ -851,61 +842,31 @@ class RecruiterController extends BaseController {
       return;
     }
 
-    _multiFormDataManager.clear();
-    // Build social links list
-    List<Map<String, String>> sLinks = [];
-    if (linkedIn.isNotEmpty) sLinks.add({"label": "LinkedIn", "url": linkedIn});
-    if (twitter.isNotEmpty) sLinks.add({"label": "Twitter", "url": twitter});
-    if (upwork.isNotEmpty) sLinks.add({"label": "Upwork", "url": upwork});
-    if (facebook.isNotEmpty) sLinks.add({"label": "Facebook", "url": facebook});
-    if (tiktok.isNotEmpty) sLinks.add({"label": "TikTok", "url": tiktok});
-    if (instagram.isNotEmpty) {
-      sLinks.add({"label": "Instagram", "url": instagram});
-    }
-    if (fiverr.isNotEmpty) {
-      sLinks.add({"label": "Fiverr", "url": fiverr});
-    }
-    if (company.isNotEmpty) {
-      sLinks.add({"label": "Company", "url": company});
-    }
-
-    // Add images only if selected
-    if (banner != null) {
-      _multiFormDataManager.addImageFile(key: "banner", banner);
-    }
-
-    if (recruiterLogo != null) {
-      _multiFormDataManager.addImageFile(key: "photo", recruiterLogo);
-    }
-
-    // Add text fields
-    _multiFormDataManager.addTextData("firstName", firstName);
-    _multiFormDataManager.addTextData("sureName", surname);
-    _multiFormDataManager.addTextData("title", title);
-    _multiFormDataManager.addTextData("bio", description);
-    _multiFormDataManager.addTextData("country", country);
-    _multiFormDataManager.addTextData("city", city);
-    _multiFormDataManager.addTextData("userId", userId);
-
-    // Add company ID (dropdown)
-    if (selectedCompany.value != null) {
-      DPrint.log("Recruiter controller -> ${selectedCompany.value}");
-      _multiFormDataManager.addTextData(
-        "companyId",
-        selectedCompany.value.toString(),
-      );
-    }
-
-    // Add social links as array
-    for (int i = 0; i < sLinks.length; i++) {
-      _multiFormDataManager.addTextData(
-        "sLink[$i][label]",
-        sLinks[i]["label"]!,
-      );
-      _multiFormDataManager.addTextData("sLink[$i][url]", sLinks[i]["url"]!);
-    }
-
-    final formRequest = await _multiFormDataManager.toFormDataAsync();
+    final payload = RecruiterPayloadBuilder.buildUpdate(
+      RecruiterAccountInput(
+        userId: userId,
+        firstName: firstName,
+        sureName: surname,
+        title: title,
+        bio: description,
+        country: country,
+        city: city,
+        companyId: selectedCompany.value,
+        socialLinks: _buildRecruiterLinks(
+          linkedIn: linkedIn,
+          twitter: twitter,
+          upwork: upwork,
+          facebook: facebook,
+          tiktok: tiktok,
+          instagram: instagram,
+          fiverr: fiverr,
+          company: company,
+        ),
+        photo: recruiterLogo,
+        banner: banner,
+      ),
+    );
+    final formRequest = await payload.toFormData();
 
     final result = await _recruiterRepo.updateRecruiter(userId, formRequest);
 
@@ -998,5 +959,35 @@ class RecruiterController extends BaseController {
     await secureStore.deleteData('password');
 
     Get.offAll(() => LoginScreen());
+  }
+
+  List<WebSocialLinkInput> _buildRecruiterLinks({
+    required String linkedIn,
+    required String twitter,
+    required String upwork,
+    required String facebook,
+    required String tiktok,
+    required String instagram,
+    required String fiverr,
+    required String company,
+  }) {
+    final links = <WebSocialLinkInput>[];
+
+    void add(String label, String url) {
+      final trimmed = url.trim();
+      if (trimmed.isEmpty) return;
+      links.add(WebSocialLinkInput(label: label, url: trimmed));
+    }
+
+    add('LinkedIn', linkedIn);
+    add('Twitter', twitter);
+    add('Upwork', upwork);
+    add('Facebook', facebook);
+    add('TikTok', tiktok);
+    add('Instagram', instagram);
+    add('Fiverr', fiverr);
+    add('Company', company);
+
+    return links;
   }
 }

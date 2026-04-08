@@ -3,17 +3,22 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/services/media_crop_service.dart';
+
 class ImageController extends GetxController {
   Rx<File?> selectedImage = Rx<File?>(null);
   RxString existingImageUrl = ''.obs;
-
-  final ImagePicker _picker = ImagePicker();
+  final MediaCropService _mediaCropService = Get.find<MediaCropService>();
 
   Future<void> pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source, imageQuality: 80);
+    final croppedFile = await _mediaCropService.pickAndCropImage(
+      source: source,
+      preset: MediaCropPreset.avatar,
+    );
 
-    if (pickedFile != null) {
-      selectedImage.value = File(pickedFile.path);
+    if (croppedFile != null) {
+      selectedImage.value = croppedFile;
+      existingImageUrl.value = '';
     }
   }
 

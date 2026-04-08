@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:giveandtake/core/contracts/web/job_application_contract.dart';
 
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/network/constants/key_constants.dart';
@@ -12,112 +15,158 @@ import '../models/job_application_request.dart';
 import '../models/job_application_response.dart';
 
 class JobApplicationRepositoryImpl implements JobApplicationRepository {
-  final SecureStoreServices _secureStoreServices = SecureStoreServices();
+  JobApplicationRepositoryImpl({SecureStoreServices? secureStoreServices})
+    : _secureStoreServices = secureStoreServices ?? SecureStoreServices();
+
+  final SecureStoreServices _secureStoreServices;
+
+  Future<Dio> _authorizedDio({bool isMultipart = false}) async {
+    final dio = Dio();
+    dio.options.headers.addAll({
+      'Accept': 'application/json',
+      'Content-Type': isMultipart ? 'multipart/form-data' : 'application/json',
+    });
+
+    final token = await _secureStoreServices.retrieveData(KeyConstants.accessToken);
+    if (token != null && token.isNotEmpty) {
+      dio.options.headers['Authorization'] = 'Bearer $token';
+    }
+    return dio;
+  }
 
   @override
-  NetworkResult<JobApplicationResponse> submitApplication(JobApplicationRequest request) async {
+  NetworkResult<String> uploadResume({
+    required File file,
+    required String userId,
+  }) async {
     try {
-      final dio = Dio();
-      
-      // Copy headers from the API client
-      dio.options.headers.addAll({
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      });
-      
-      // Add authorization header if available
-      final token = await _secureStoreServices.retrieveData(KeyConstants.accessToken);
-      if (token != null && token.isNotEmpty) {
-        dio.options.headers['Authorization'] = 'Bearer $token';
+      final dio = await _authorizedDio(isMultipart: true);
+      final payload = JobApplicationPayloadBuilder.buildResumeUpload(
+        ResumeUploadInput(
+          userId: userId,
+          file: file,
+        ),
+      );
+
+      final response = await dio.post(
+        ApiConstants.resume.uploadResume,
+        data: await payload.toFormData(),
+      );
+
+      final responseData = response.data;
+      final data = responseData is Map<String, dynamic>
+          ? responseData['data']
+          : null;
+      final resumeId =
+          (data is Map<String, dynamic> ? data['_id'] ?? data['id'] : null)
+              ?.toString();
+
+      if ((response.statusCode ?? 500) >= 200 &&
+          (response.statusCode ?? 500) < 300 &&
+          resumeId != null &&
+          resumeId.isNotEmpty) {
+        return Right(
+          NetworkSuccess(
+            data: resumeId,
+            message:
+                responseData is Map<String, dynamic> && responseData['message'] != null
+                ? responseData['message'].toString()
+                : 'Resume uploaded successfully',
+            statusCode: response.statusCode ?? 200,
+          ),
+        );
       }
 
-      // Debug: Print request details
-      print('========== JOB APPLICATION API REQUEST ==========');
-      print('Endpoint: ${ApiConstants.jobs.applyJob}');
-      print('Request Payload: ${request.toJson()}');
-      print('Headers: ${dio.options.headers}');
-      print('================================================');
+      return Left(
+        NetworkFailure(
+          message: responseData is Map<String, dynamic>
+              ? (responseData['message']?.toString() ??
+                    'Failed to upload resume')
+              : 'Failed to upload resume',
+          statusCode: response.statusCode ?? 400,
+        ),
+      );
+    } on DioException catch (e) {
+      return Left(
+        NetworkFailure(
+          message: e.response?.data is Map<String, dynamic>
+              ? (e.response?.data['message']?.toString() ??
+                    'Failed to upload resume')
+              : 'Failed to upload resume',
+          statusCode: e.response?.statusCode ?? 500,
+        ),
+      );
+    } catch (e) {
+      return Left(
+        NetworkFailure(
+          message: 'Failed to upload resume: $e',
+          statusCode: 500,
+        ),
+      );
+    }
+  }
 
+  @override
+  NetworkResult<JobApplicationResponse> submitApplication(
+    JobApplicationRequest request,
+  ) async {
+    try {
+      final dio = await _authorizedDio();
       final response = await dio.post(
         ApiConstants.jobs.applyJob,
         data: request.toJson(),
       );
 
       final responseData = response.data;
-      
-      // Debug: Print response details
-      print('========== JOB APPLICATION API RESPONSE ==========');
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: $responseData');
-      print('Response Type: ${responseData.runtimeType}');
-      print('==================================================');
-      
-      // Handle different response formats
-      // 1. Check if it's a wrapped response with status and data
       if (responseData is Map<String, dynamic>) {
-        final status = responseData['status'];
-        final message = responseData['message'] ?? 'Application submitted successfully';
-        
-        print('Response status: $status');
-        print('Response message: $message');
-        
-        // Success if status is 'success' or HTTP status code is 2xx
-        if (status == 'success' && responseData['data'] != null) {
-          final applicationData = JobApplicationResponse.fromJson(responseData['data']);
-          return Right(NetworkSuccess(
-            data: applicationData,
-            message: message,
-            statusCode: response.statusCode ?? 200,
-          ));
-        } else if ((response.statusCode ?? 200) >= 200 && (response.statusCode ?? 200) < 300) {
-          // If status code is 2xx, treat as success regardless of status field
-          final appData = responseData['data'] ?? responseData;
-          Map<String, dynamic> dataMap = {};
-          if (appData is Map) {
-            dataMap = Map<String, dynamic>.from(appData);
-          }
-          final applicationData = JobApplicationResponse.fromJson(dataMap);
-          return Right(NetworkSuccess(
-            data: applicationData,
-            message: message,
-            statusCode: response.statusCode ?? 200,
-          ));
-        } else {
-          return Left(NetworkFailure(
-            message: message,
-            statusCode: response.statusCode ?? 400,
-          ));
+        final statusCode = response.statusCode ?? 200;
+        final message = responseData['message']?.toString() ??
+            'Application submitted successfully';
+        final data = responseData['data'] is Map<String, dynamic>
+            ? responseData['data'] as Map<String, dynamic>
+            : <String, dynamic>{};
+
+        if (statusCode >= 200 && statusCode < 300) {
+          return Right(
+            NetworkSuccess(
+              data: JobApplicationResponse.fromJson(data),
+              message: message,
+              statusCode: statusCode,
+            ),
+          );
         }
-      } else {
-        // If response is not a map, return error
-        return Left(NetworkFailure(
+
+        return Left(
+          NetworkFailure(
+            message: message,
+            statusCode: statusCode,
+          ),
+        );
+      }
+
+      return Left(
+        NetworkFailure(
           message: 'Invalid response format',
           statusCode: response.statusCode ?? 400,
-        ));
-      }
+        ),
+      );
     } on DioException catch (e) {
-      print('========== JOB APPLICATION API ERROR (DioException) ==========');
-      print('Error Type: ${e.type}');
-      print('Error Message: ${e.message}');
-      print('Status Code: ${e.response?.statusCode}');
-      print('Response Data: ${e.response?.data}');
-      print('Stack Trace: ${e.stackTrace}');
-      print('===============================================================');
-      
-      return Left(NetworkFailure(
-        message: e.response?.data['message'] ?? 'Failed to submit application: ${e.message}',
-        statusCode: e.response?.statusCode ?? 500,
-      ));
-    } catch (e, stackTrace) {
-      print('========== JOB APPLICATION API ERROR (General) ==========');
-      print('Error: $e');
-      print('Stack Trace: $stackTrace');
-      print('=========================================================');
-      
-      return Left(NetworkFailure(
-        message: 'Failed to submit application: $e',
-        statusCode: 500,
-      ));
+      return Left(
+        NetworkFailure(
+          message: e.response?.data is Map<String, dynamic>
+              ? (e.response?.data['message']?.toString() ??
+                    'Failed to submit application')
+              : 'Failed to submit application',
+          statusCode: e.response?.statusCode ?? 500,
+        ),
+      );
+    } catch (e) {
+      return Left(
+        NetworkFailure(
+          message: 'Failed to submit application: $e',
+          statusCode: 500,
+        ),
+      );
     }
   }
 }

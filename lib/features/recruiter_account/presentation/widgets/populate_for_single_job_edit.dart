@@ -96,7 +96,7 @@ class JobFormController extends GetxController {
     final reqs = job.applicationRequirement ?? [];
     resumeVisible.value = reqs.any((r) => r.requirement == 'Resume');
     visaVisible.value = reqs.any(
-      (r) => r.requirement == 'Valid visa for this job location?',
+      (r) => r.requirement == 'Have you got a valid visa for this location?',
     );
 
     resumeStatus.value =
@@ -105,7 +105,7 @@ class JobFormController extends GetxController {
     visaStatus.value =
         reqs
             .firstWhereOrNull(
-              (r) => r.requirement == 'Valid visa for this job location?',
+              (r) => r.requirement == 'Have you got a valid visa for this location?',
             )
             ?.status ??
         'optional';
