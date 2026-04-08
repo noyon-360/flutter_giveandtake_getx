@@ -29,7 +29,7 @@ import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
 import '../../../profile_dasboard/presentation/screens/job_history.dart';
 import '../../../profile_dasboard/presentation/screens/payment_history.dart';
 import '../../../public_view/screens/public_view_candidate_screens.dart';
-import '../screen/candidate_dashboard_screen.dart';
+import '../screen/candidate_profile_screen.dart';
 import '../screens/my_plan_screen.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -506,10 +506,10 @@ class _AppDrawerState extends State<AppDrawer> {
                   children: [
                     ListTileForNav(
                       liconPath: "assets/icons/home.png",
-                      title: "My EVP Profile",
+                      title: "My Profile",
                       onTap: () {
                         Get.back(); // Close drawer first
-                        Get.to(() => const CandidateDashboardScreen());
+                        Get.to(() => const CandidateProfileScreen());
                       },
                     ),
                     ListTileForNav(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 import 'package:giveandtake/core/services/get_user_profile_service.dart';
-import 'package:giveandtake/features/Home/presentation/screen/candidate_dashboard_screen.dart';
+import 'package:giveandtake/features/Home/presentation/screen/candidate_profile_screen.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/profile_dasboard/presentation/screens/change_pass_screen.dart';
 import 'package:giveandtake/features/profile_dasboard/presentation/screens/job_history.dart';
@@ -49,7 +49,7 @@ class ProfileDashboardScreen extends StatelessWidget {
                       "assets/icons/personalinfo.png",
                       "View My Profile",
                       () {
-                        Get.to(() => const CandidateDashboardScreen());
+                        Get.to(() => const CandidateProfileScreen());
                       },
                     ),
 
