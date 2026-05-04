@@ -98,16 +98,31 @@ class _MyDrawerState extends State<MyDrawer> {
                 },
               ),
 
-              drawerTile(
-                icon: Icons.post_add,
-                title: "Connect with Company",
-                onTap: () {
-                  Navigator.pop(context);
-                  Future.delayed(const Duration(milliseconds: 150), () {
-                    Get.dialog(ConnectCompanyDialog());
-                  });
-                },
-              ),
+              Obx(() {
+                final isConnected =
+                    recruiterController.userInfo.value?.companyId != null;
+                return drawerTile(
+                  icon: Icons.post_add,
+                  title: "Connect with Company",
+                  color: isConnected ? Colors.grey : Colors.black,
+                  onTap: () {
+                    if (isConnected) {
+                      Get.snackbar(
+                        "Information",
+                        "You are already connected with a company",
+                        backgroundColor: Colors.redAccent,
+                        colorText: Colors.white,
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    } else {
+                      Navigator.pop(context);
+                      Future.delayed(const Duration(milliseconds: 150), () {
+                        Get.dialog(ConnectCompanyDialog());
+                      });
+                    }
+                  },
+                );
+              }),
 
               drawerTile(
                 icon: Icons.info_outline,

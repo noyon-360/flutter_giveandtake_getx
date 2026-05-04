@@ -321,8 +321,9 @@ class RecruiterController extends BaseController {
         DPrint.log("connect company success result : ${fail.message}");
         setLoading(false);
       },
-      (success) {
+      (success) async {
         DPrint.log("connect company success result : ${success.message}");
+        await fetchProfile();
         Get.back();
         setLoading(false);
       },
@@ -370,8 +371,9 @@ class RecruiterController extends BaseController {
         DPrint.log("leave company success result : ${fail.message}");
         setLoading(false);
       },
-      (success) {
+      (success) async {
         DPrint.log("leave company success result : ${success.message}");
+        await fetchProfile();
         Get.back();
         setLoading(false);
       },
