@@ -99,6 +99,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
   final CompanyImageController companyImageController = Get.put(
     CompanyImageController(),
   );
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // final ElevatorPitchController elevatorPitchController = Get.put(
   //   ElevatorPitchController(),
@@ -107,109 +108,118 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
   @override
   void initState() {
     super.initState();
-    final company = widget.companyData.companies.first;
-    // final honor = widget.companyData.honors.first;
-    final List<Honor> awards = widget.companyData.honors;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final company = widget.companyData.companies.first;
+      // final honor = widget.companyData.honors.first;
+      final List<Honor> awards = widget.companyData.honors;
 
-    // Fill text fields
-    controller.companyNameController.text = company.cname;
-    controller.postalCodeController.text = company.zipcode;
-    controller.emailController.text = company.cemail;
-    controller.industryController.text = company.industry;
-    // controller.awardFields = honor.title.map((e) => {'title': e}).toList();
+      // Fill text fields
+      controller.companyNameController.text = company.cname;
+      controller.postalCodeController.text = company.zipcode;
+      controller.emailController.text = company.cemail;
+      controller.industryController.text = company.industry;
+      // controller.awardFields = honor.title.map((e) => {'title': e}).toList();
 
-    // About Us
-    String cleanAboutUs(String? html) {
-      if (html == null || html.isEmpty) return '';
-      String text = html
-          .replaceAll('&amp;', '&')
-          .replaceAll('&lt;', '<')
-          .replaceAll('&gt;', '>')
-          .replaceAll('&quot;', '"')
-          .replaceAll('&#39;', "'")
-          .replaceAll(RegExp(r'<br\s*/?>'), '\n');
-      text = text.replaceAll(RegExp(r'<[^>]*>'), '');
-      return text.replaceAll(RegExp(r'\s+'), ' ').trim();
-    }
-
-    _descriptionTController.text = cleanAboutUs(company.aboutUs);
-
-    // Country & City
-    jobController.selectedCountry.value = company.country;
-    jobController.selectedCity.value = company.city;
-
-    // Social Links
-    final socialMap = {
-      "linkedin": _linkedINTEController,
-      "twitter": _twitterTEController,
-      "upwork": _upworkTEController,
-      "facebook": _facebookTEController,
-      "instagram": _instaTEController,
-      "tiktok": _tiktokTEController,
-      "fiverr": _fiverrTEController,
-      "website": _comapanyTEController, // or "company"
-    };
-
-    for (var link in company.sLink) {
-      final label = link.label.toLowerCase();
-      if (socialMap.containsKey(label)) {
-        socialMap[label]!.text = link.url;
+      // About Us
+      String cleanAboutUs(String? html) {
+        if (html == null || html.isEmpty) return '';
+        String text = html
+            .replaceAll('&amp;', '&')
+            .replaceAll('&lt;', '<')
+            .replaceAll('&gt;', '>')
+            .replaceAll('&quot;', '"')
+            .replaceAll('&#39;', "'")
+            .replaceAll(RegExp(r'<br\s*/?>'), '\n');
+        text = text.replaceAll(RegExp(r'<[^>]*>'), '');
+        return text.replaceAll(RegExp(r'\s+'), ' ').trim();
       }
-    }
 
-    // CRITICAL: Load existing banner & logo URLs
-    if (company.banner.isNotEmpty) {
-      bannerPickerController.existingImageUrl.value = company.banner;
-    }
-    if (company.clogo.isNotEmpty) {
-      imagePickerController.existingImageUrl.value = company.clogo;
-    }
+      _descriptionTController.text = cleanAboutUs(company.aboutUs);
 
-    // === SERVICES ===
-    controller.serviceControllers.clear();
-    if (company.service != null && company.service.isNotEmpty) {
-      for (var service in company.service) {
-        controller.serviceControllers.add(TextEditingController(text: service));
+      // Country & City
+      jobController.selectedCountry.value = company.country;
+      jobController.selectedCity.value = company.city;
+
+      // Social Links
+      final socialMap = {
+        "linkedin": _linkedINTEController,
+        "twitter": _twitterTEController,
+        "upwork": _upworkTEController,
+        "facebook": _facebookTEController,
+        "instagram": _instaTEController,
+        "tiktok": _tiktokTEController,
+        "fiverr": _fiverrTEController,
+        "website": _comapanyTEController, // or "company"
+      };
+
+      for (var link in company.sLink) {
+        final label = link.label.toLowerCase();
+        if (socialMap.containsKey(label)) {
+          socialMap[label]!.text = link.url;
+        }
       }
-    } else {
-      controller.serviceControllers.add(TextEditingController());
-    }
 
-    // === RECRUITERS ===
-    controller.employeeControllers.clear();
-    controller.employeeIdMap.clear();
-    if (company.employeesId != null && company.employeesId.isNotEmpty) {
-      for (var email in company.employeesId) {
-        controller.employeeControllers.add(TextEditingController(text: email));
+      // CRITICAL: Load existing banner & logo URLs
+      if (company.banner.isNotEmpty) {
+        bannerPickerController.existingImageUrl.value = company.banner;
       }
-    }
-    if (controller.employeeControllers.isEmpty) {
-      controller.employeeControllers.add(TextEditingController());
-    }
-
-    // === AWARDS & HONORS ===
-    controller.awardFields.clear();
-
-    if (awards.isNotEmpty) {
-      for (var award in awards) {
-        controller.awardFields.add({
-          'title': TextEditingController(text: award.title ?? ''),
-          'issuer': TextEditingController(
-            text: award.programeName ?? '',
-          ), // ← Use programeName
-          'date': TextEditingController(
-            text: award.programeDate != null
-                ? '${award.programeDate!.month.toString().padLeft(2, '0')}${award.programeDate!.year}'
-                : '',
-          ),
-          'description': TextEditingController(text: award.description ?? ''),
-        });
+      if (company.clogo.isNotEmpty) {
+        imagePickerController.existingImageUrl.value = company.clogo;
       }
-    } else {
-      controller.addAwardField(); // add one empty field
-    }
 
-    controller.awardFields.refresh();
+      // === SERVICES ===
+      controller.serviceControllers.clear();
+      if (company.service != null && company.service.isNotEmpty) {
+        for (var service in company.service) {
+          controller.serviceControllers.add(
+            TextEditingController(text: service),
+          );
+        }
+      } else {
+        controller.serviceControllers.add(TextEditingController());
+      }
+
+      // === RECRUITERS ===
+      controller.employeeControllers.clear();
+      controller.employeeIdMap.clear();
+      if (company.employeesId != null && company.employeesId.isNotEmpty) {
+        for (var email in company.employeesId) {
+          controller.employeeControllers.add(
+            TextEditingController(text: email),
+          );
+        }
+      }
+      if (controller.employeeControllers.isEmpty) {
+        controller.employeeControllers.add(TextEditingController());
+      }
+
+      // === AWARDS & HONORS ===
+      controller.awardFields.clear();
+
+      if (awards.isNotEmpty) {
+        for (var award in awards) {
+          controller.awardFields.add({
+            'title': TextEditingController(text: award.title ?? ''),
+            'issuer': TextEditingController(
+              text: award.programeName ?? '',
+            ), // ← Use programeName
+            'date': TextEditingController(
+              text: award.programeDate != null
+                  ? '${award.programeDate!.month.toString().padLeft(2, '0')}${award.programeDate!.year}'
+                  : '',
+            ),
+            'description': TextEditingController(text: award.description ?? ''),
+          });
+        }
+      } else {
+        controller.addAwardField(); // add one empty field
+      }
+
+      controller.awardFields.refresh();
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -245,7 +255,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: controller.formKey,
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
 
@@ -1271,7 +1281,7 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                     width: 150,
                     child: ElevatedButton(
                       onPressed: () async {
-                        if (!controller.formKey.currentState!.validate())
+                        if (!_formKey.currentState!.validate())
                           return;
                         if (controller.isLoading.value) return;
 
