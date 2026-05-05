@@ -71,7 +71,7 @@ class Company {
   final List<String> employeesId;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final ElevatorPitch elevatorPitch;
+  final ElevatorPitch? elevatorPitch;
 
   Company({
     required this.id,
@@ -91,7 +91,7 @@ class Company {
     required this.employeesId,
     required this.createdAt,
     required this.updatedAt,
-    required this.elevatorPitch,
+    this.elevatorPitch,
   });
 
   factory Company.fromJson(Map<String, dynamic> json) => Company(
@@ -114,7 +114,9 @@ class Company {
         employeesId: List<String>.from(json['employeesId']),
         createdAt: DateTime.parse(json['createdAt']),
         updatedAt: DateTime.parse(json['updatedAt']),
-        elevatorPitch: ElevatorPitch.fromJson(json['elevatorPitch']),
+        elevatorPitch: json['elevatorPitch'] != null
+            ? ElevatorPitch.fromJson(json['elevatorPitch'])
+            : null,
       );
 
  

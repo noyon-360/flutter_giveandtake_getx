@@ -372,16 +372,33 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: ElevatorPitchSection(
-                      isOwnProfile: true, // Enable managing the pitch
-                      videoUrl:
-                          "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch.id}",
-                      httpHeaders: {
-                        "Custom-Header": "value",
-                        if (_accessToken != null) ...{
-                          "Authorization": "Bearer $_accessToken",
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xFF191919),
+                      ),
+                      height: 280,
+                      width: double.infinity,
+                      child: ElevatorPitchSection(
+                        isOwnProfile: true, // Enable managing the pitch
+                        onDelete: () async {
+                          await Future.delayed(const Duration(milliseconds: 500));
+                          await controller.fetchCompanyProfile();
                         },
-                      },
+                        onUpload: () async {
+                          await Future.delayed(const Duration(milliseconds: 1000));
+                          await controller.fetchCompanyProfile();
+                        },
+                        videoUrl: company.elevatorPitch?.id != null
+                            ? "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch!.id}"
+                            : null,
+                        httpHeaders: {
+                          "Custom-Header": "value",
+                          if (_accessToken != null) ...{
+                            "Authorization": "Bearer $_accessToken",
+                          },
+                        },
+                      ),
                     ),
                   ),
                 ),

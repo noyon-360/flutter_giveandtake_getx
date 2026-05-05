@@ -11,12 +11,16 @@ class ElevatorPitchSection extends StatefulWidget {
   final String? videoUrl;
   final Map<String, String>? httpHeaders;
   final bool isOwnProfile;
+  final VoidCallback? onDelete;
+  final VoidCallback? onUpload;
 
   const ElevatorPitchSection({
     super.key,
     this.videoUrl,
     this.httpHeaders,
     this.isOwnProfile = false,
+    this.onDelete,
+    this.onUpload,
   });
 
   @override
@@ -200,7 +204,10 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
                   () => IconButton(
                     onPressed: recruiterController.isVideoUploading.value
                         ? null
-                        : () => recruiterController.deleteElevatorVideo(),
+                        : () async {
+                            await recruiterController.deleteElevatorVideo();
+                            widget.onDelete?.call();
+                          },
                     icon: Icon(
                       Icons.delete,
                       color: recruiterController.isVideoUploading.value
@@ -250,8 +257,9 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
-                        onPressed: () {
-                          Get.to(() => const VideoUploadScreen());
+                        onPressed: () async {
+                          await Get.to(() => const VideoUploadScreen());
+                          widget.onUpload?.call();
                         },
                         icon: const Icon(Icons.upload, color: Colors.white),
                         label: const Text(
