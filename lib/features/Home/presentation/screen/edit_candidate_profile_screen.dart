@@ -327,9 +327,7 @@ class EditCandidateProfileScreen extends StatelessWidget {
         const Text('About Me', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
         const SizedBox(height: 6),
         TextField(
-          controller: TextEditingController(
-            text: controller.aboutMeQuillController.document.toPlainText(),
-          ),
+          controller: controller.aboutMeController,
           maxLines: 6,
           decoration: InputDecoration(
             hintText: 'Tell us about yourself...',
@@ -337,7 +335,7 @@ class EditCandidateProfileScreen extends StatelessWidget {
             contentPadding: const EdgeInsets.all(12),
           ),
           onChanged: (text) {
-            // Update quill document
+            // Update quill document as well
             controller.aboutMeQuillController.document = Document()..insert(0, text);
           },
         ),
@@ -354,9 +352,15 @@ class EditCandidateProfileScreen extends StatelessWidget {
         const SizedBox(height: 12),
         _buildSocialField('Facebook', FontAwesomeIcons.facebook, controller.facebookController),
         const SizedBox(height: 12),
+        _buildSocialField('TikTok', FontAwesomeIcons.tiktok, controller.tiktokController),
+        const SizedBox(height: 12),
         _buildSocialField('Instagram', FontAwesomeIcons.instagram, controller.instagramController),
         const SizedBox(height: 12),
         _buildSocialField('Upwork', FontAwesomeIcons.upwork, controller.upworkController),
+        const SizedBox(height: 12),
+        _buildSocialField('Fiverr', Icons.business_center, controller.fiverrController),
+        const SizedBox(height: 12),
+        _buildSocialField('Portfolio', Icons.language, controller.portfolioController),
       ],
     );
   }

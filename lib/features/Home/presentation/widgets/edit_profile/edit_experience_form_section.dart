@@ -115,11 +115,9 @@ class EditExperienceFormSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    exp['startDate']?.toString().isEmpty ?? true
-                        ? 'MM/YYYY'
-                        : exp['startDate'],
+                    _formatDisplayDate(exp['startDate']),
                     style: TextStyle(
-                      color: exp['startDate']?.toString().isEmpty ?? true
+                      color: (exp['startDate']?.toString().isEmpty ?? true)
                           ? Colors.grey
                           : Colors.black,
                     ),
@@ -157,13 +155,11 @@ class EditExperienceFormSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    exp['endDate']?.toString().isEmpty ?? true
-                        ? 'MM/YYYY'
-                        : exp['endDate'],
+                    _formatDisplayDate(exp['endDate']),
                     style: TextStyle(
                       color: currentlyWorking
                           ? Colors.grey.shade400
-                          : (exp['endDate']?.toString().isEmpty ?? true
+                          : (_parseDate(exp['endDate'] as String?) == null
                                 ? Colors.grey
                                 : Colors.black),
                     ),
@@ -234,28 +230,90 @@ class EditExperienceFormSection extends StatelessWidget {
     });
   }
 
+  /// Parse date string to DateTime
+  DateTime? _parseDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return null;
+    try {
+      // Try YYYY-MM-DD format first
+      if (dateStr.contains('-')) {
+        return DateTime.parse(dateStr);
+      }
+      // Fallback for other formats
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Format DateTime to MM/YYYY display format
+  String _formatDateToDisplay(DateTime date) {
+    return '${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  /// Format DateTime to YYYY-MM-DD API format
+  String _formatDateToApi(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  /// Format date string for display (MM/YYYY)
+  String _formatDisplayDate(dynamic dateValue) {
+    if (dateValue == null || (dateValue is String && dateValue.isEmpty)) {
+      return 'MM/YYYY';
+    }
+    try {
+      final date = _parseDate(dateValue.toString());
+      if (date != null) {
+        return _formatDateToDisplay(date);
+      }
+      return dateValue.toString();
+    } catch (e) {
+      return 'MM/YYYY';
+    }
+  }
+
   /// Date picker for YYYY-MM-DD format (API requirement)
   Future<void> _selectDate(
     BuildContext context,
     Map<String, dynamic> exp,
     String dateField,
   ) async {
+    final controller = Get.find<EditCandidateProfileController>();
+    final startDateStr = exp['startDate'] as String?;
+    final endDateStr = exp['endDate'] as String?;
+
+    DateTime? initialDate = DateTime.now();
+    DateTime firstDate = DateTime(1990);
+    DateTime lastDate = DateTime.now().add(const Duration(days: 365 * 10));
+
+    // Parse existing dates
+    final startDate = _parseDate(startDateStr);
+    final endDate = _parseDate(endDateStr);
+
+    // If selecting end date, ensure it can't be before start date
+    if (dateField == 'endDate' && startDate != null) {
+      firstDate = startDate;
+      initialDate = endDate ?? DateTime.now();
+    } else if (dateField == 'startDate' && endDate != null) {
+      // If selecting start date when end date exists, limit last date to end date
+      lastDate = endDate;
+      initialDate = startDate ?? DateTime.now();
+    } else if (dateField == 'startDate') {
+      initialDate = startDate ?? DateTime.now();
+    } else if (dateField == 'endDate') {
+      initialDate = endDate ?? DateTime.now();
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1990),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
 
     if (picked != null) {
-      // Format as YYYY-MM-DD (ISO 8601 date format required by API)
-      final year = picked.year.toString();
-      final month = picked.month.toString().padLeft(2, '0');
-      final day = picked.day.toString().padLeft(2, '0');
-      final formattedDate = '$year-$month-$day';
-
+      final formattedDate = _formatDateToApi(picked);
       exp[dateField] = formattedDate;
-      Get.find<EditCandidateProfileController>().experienceList.refresh();
+      controller.experienceList.refresh();
     }
   }
 }

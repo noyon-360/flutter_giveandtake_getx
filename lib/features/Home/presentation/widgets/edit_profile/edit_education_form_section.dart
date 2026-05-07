@@ -31,12 +31,24 @@ class EditEducationFormSection extends StatelessWidget {
           children: [
             _buildLabel('Institution Name*'),
             const SizedBox(height: 8),
-            _buildTextField(
-              hint: 'Type your University/College/High School',
-              initialValue: edu['institution'],
-              onChanged: (val) {
-                edu['institution'] = val;
-                // No refresh needed for text field unless other widgets depend on it
+            Obx(
+              () {
+                // Get all universities from all countries for searching
+                final allUniversities = <String>[];
+                for (var universities in controller.universitiesByCountry.values) {
+                  allUniversities.addAll(universities);
+                }
+                allUniversities.sort();
+
+                return SearchableDropdown(
+                  hint: 'Select University/College/High School',
+                  items: allUniversities,
+                  value: edu['institution'],
+                  onChanged: (val) {
+                    edu['institution'] = val;
+                    controller.educationList.refresh();
+                  },
+                );
               },
             ),
 
@@ -149,11 +161,9 @@ class EditEducationFormSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      edu['startDate']?.toString().isEmpty ?? true
-                          ? 'MM/YYYY'
-                          : edu['startDate'],
+                      _formatDisplayDate(edu['startDate']),
                       style: TextStyle(
-                        color: edu['startDate']?.toString().isEmpty ?? true
+                        color: (_parseDate(edu['startDate'] as String?) == null)
                             ? Colors.grey
                             : Colors.black,
                       ),
@@ -195,15 +205,13 @@ class EditEducationFormSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      edu['graduationDate']?.toString().isEmpty ?? true
-                          ? 'MM/YYYY'
-                          : edu['graduationDate'],
+                      _formatDisplayDate(edu['graduationDate']),
                       style: TextStyle(
                         color: (edu['presentlyAttendHere'] == true)
                             ? Colors.grey.shade400
-                            : (edu['graduationDate']?.toString().isEmpty ?? true
-                                ? Colors.grey
-                                : Colors.black),
+                            : (_parseDate(edu['graduationDate'] as String?) == null
+                                  ? Colors.grey
+                                  : Colors.black),
                       ),
                     ),
                     Icon(
@@ -281,21 +289,84 @@ class EditEducationFormSection extends StatelessWidget {
     Map<String, dynamic> edu,
     String dateField,
   ) async {
+    final controller = Get.find<EditCandidateProfileController>();
+    final startDateStr = edu['startDate'] as String?;
+    final gradDateStr = edu['graduationDate'] as String?;
+
+    DateTime? initialDate = DateTime.now();
+    DateTime firstDate = DateTime(1990);
+    DateTime lastDate = DateTime.now().add(const Duration(days: 365 * 10));
+
+    // Parse existing dates
+    final startDate = _parseDate(startDateStr);
+    final gradDate = _parseDate(gradDateStr);
+
+    // If selecting graduation date, ensure it can't be before start date
+    if (dateField == 'graduationDate' && startDate != null) {
+      firstDate = startDate;
+      initialDate = gradDate ?? DateTime.now();
+    } else if (dateField == 'startDate' && gradDate != null) {
+      // If selecting start date when grad date exists, limit last date to grad date
+      lastDate = gradDate;
+      initialDate = startDate ?? DateTime.now();
+    } else if (dateField == 'startDate') {
+      initialDate = startDate ?? DateTime.now();
+    } else if (dateField == 'graduationDate') {
+      initialDate = gradDate ?? DateTime.now();
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1990),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
 
     if (picked != null) {
-      final year = picked.year.toString();
-      final month = picked.month.toString().padLeft(2, '0');
-      final day = picked.day.toString().padLeft(2, '0');
-      final formattedDate = '$year-$month-$day';
-
+      final formattedDate = _formatDateToApi(picked);
       edu[dateField] = formattedDate;
-      Get.find<EditCandidateProfileController>().educationList.refresh();
+      controller.educationList.refresh();
+    }
+  }
+
+  /// Parse date string to DateTime
+  DateTime? _parseDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return null;
+    try {
+      // Try YYYY-MM-DD format first
+      if (dateStr.contains('-')) {
+        return DateTime.parse(dateStr);
+      }
+      // Fallback for other formats
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Format DateTime to MM/YYYY display format
+  String _formatDateToDisplay(DateTime date) {
+    return '${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  /// Format DateTime to YYYY-MM-DD API format
+  String _formatDateToApi(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  /// Format date string for display (MM/YYYY)
+  String _formatDisplayDate(dynamic dateValue) {
+    if (dateValue == null || (dateValue is String && dateValue.isEmpty)) {
+      return 'MM/YYYY';
+    }
+    try {
+      final date = _parseDate(dateValue.toString());
+      if (date != null) {
+        return _formatDateToDisplay(date);
+      }
+      return dateValue.toString();
+    } catch (e) {
+      return 'MM/YYYY';
     }
   }
 }

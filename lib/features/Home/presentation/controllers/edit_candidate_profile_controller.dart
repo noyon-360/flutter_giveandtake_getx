@@ -13,8 +13,8 @@ import 'package:giveandtake/core/network/services/secure_store_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
-import '../../../company/data/model/candidate_resume_response_model.dart';
 import '../../../../core/services/media_crop_service.dart';
+import '../../../company/data/model/candidate_resume_response_model.dart';
 
 class EditCandidateProfileController extends GetxController {
   final isLoading = false.obs;
@@ -36,6 +36,7 @@ class EditCandidateProfileController extends GetxController {
 
   final languageController = TextEditingController();
   final certificationController = TextEditingController();
+  final aboutMeController = TextEditingController();
 
   // Quill Controller for About Me
   late QuillController aboutMeQuillController;
@@ -69,6 +70,8 @@ class EditCandidateProfileController extends GetxController {
   final RxList<String> countries = <String>[].obs;
   final RxList<String> cities = <String>[].obs;
   final Map<String, List<String>> countryCityMap = {};
+  final RxList<String> universities = <String>[].obs;
+  final Map<String, List<String>> universitiesByCountry = {};
   final RxList<String> availableSkills = <String>[].obs;
   final RxList<String> availableLanguages = <String>[].obs;
   final MediaCropService _mediaCropService = Get.find<MediaCropService>();
@@ -100,9 +103,9 @@ class EditCandidateProfileController extends GetxController {
     super.onInit();
     aboutMeQuillController = QuillController.basic();
     
-    // Add listener for word count
-    aboutMeQuillController.document.changes.listen((event) {
-      final text = aboutMeQuillController.document.toPlainText();
+    // Add listener for word count on aboutMeController
+    aboutMeController.addListener(() {
+      final text = aboutMeController.text;
       final words = text.trim().split(RegExp(r'\s+'));
       aboutMeWordCount.value = text.trim().isEmpty ? 0 : words.length;
     });
@@ -123,6 +126,7 @@ class EditCandidateProfileController extends GetxController {
       _loadCountriesAndCities(),
       _loadLanguageOptions(),
       _loadSkillOptions(),
+      _loadUniversities(),
     ]);
   }
 
@@ -142,6 +146,7 @@ class EditCandidateProfileController extends GetxController {
 
     // About Me - using 'aboutUs' field
     if (resume.aboutUs != null && resume.aboutUs!.isNotEmpty) {
+      aboutMeController.text = resume.aboutUs!;
       aboutMeQuillController.document = Document()..insert(0, resume.aboutUs!);
     }
 
@@ -181,8 +186,8 @@ class EditCandidateProfileController extends GetxController {
       'city': e.city,
       'zip': e.zip,
       'jobCategory': e.jobCategory,
-      'startDate': _toMonthYearDisplay(e.startDate),
-      'endDate': _toMonthYearDisplay(e.endDate),
+      'startDate': _toIsoDateFormat(e.startDate),
+      'endDate': _toIsoDateFormat(e.endDate),
       'presentlyWorkHere': e.endDate == null,
       'description': e.jobDescription,
     }).toList());
@@ -195,8 +200,8 @@ class EditCandidateProfileController extends GetxController {
       'fieldOfStudy': e.fieldOfStudy,
       'country': e.country,
       'city': e.city,
-      'startDate': _toMonthYearDisplay(e.startDate),
-      'graduationDate': _toMonthYearDisplay(e.graduationDate),
+      'startDate': _toIsoDateFormat(e.startDate),
+      'graduationDate': _toIsoDateFormat(e.graduationDate),
       'presentlyAttendHere': e.graduationDate == null,
     }).toList());
 
@@ -282,6 +287,53 @@ class EditCandidateProfileController extends GetxController {
 
       availableSkills.assignAll(options);
     } catch (_) {}
+  }
+
+  Future<void> _loadUniversities() async {
+    try {
+      print('🏫 Fetching universities from API...');
+      final url = '${ApiConstants.baseUrl}/university';
+      print('🔗 URL: $url');
+
+      final response = await http.get(Uri.parse(url));
+
+      print('📡 Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        
+        // Handle both direct array and wrapped object responses
+        List<dynamic> data = [];
+        if (responseBody is List) {
+          data = responseBody;
+        } else if (responseBody is Map && responseBody['data'] != null) {
+          data = responseBody['data'] as List<dynamic>;
+        }
+        
+        print('📦 Universities data: ${data.length} items');
+
+        universitiesByCountry.clear();
+
+        for (var university in data) {
+          final country = university['country'] as String?;
+          final name = university['name'] as String?;
+
+          if (country != null && name != null) {
+            if (!universitiesByCountry.containsKey(country)) {
+              universitiesByCountry[country] = [];
+            }
+            universitiesByCountry[country]!.add(name);
+          }
+        }
+
+        print('✅ Universities loaded for ${universitiesByCountry.length} countries');
+        print('   Total universities: ${data.length}');
+      } else {
+        print('❌ Failed to load universities - Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error fetching universities: $e');
+    }
   }
 
   void onCountryChanged(String? country) {
@@ -447,7 +499,7 @@ class EditCandidateProfileController extends GetxController {
         return;
       }
 
-      final aboutMe = aboutMeQuillController.document.toPlainText().trim();
+      final aboutMe = aboutMeController.text.trim();
       final payload = ResumePayloadBuilder.buildUpdate(
         CandidateResumeUpdateInput(
           resumeId: _resumeId,
@@ -597,6 +649,7 @@ class EditCandidateProfileController extends GetxController {
   }
 
   @override
+  @override
   void onClose() {
     firstNameController.dispose();
     surnameController.dispose();
@@ -611,13 +664,15 @@ class EditCandidateProfileController extends GetxController {
     portfolioController.dispose();
     languageController.dispose();
     certificationController.dispose();
+    aboutMeController.dispose();
     aboutMeQuillController.dispose();
     super.onClose();
   }
 
-  String _toMonthYearDisplay(DateTime? value) {
+  /// Convert DateTime to YYYY-MM-DD format for form storage
+  String _toIsoDateFormat(DateTime? value) {
     if (value == null) return '';
-    return '${value.month.toString().padLeft(2, '0')}/${value.year}';
+    return '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
   }
 
   String _linkUrl(String label) =>

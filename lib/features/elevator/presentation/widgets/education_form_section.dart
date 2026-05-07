@@ -28,11 +28,23 @@ class EducationFormSection extends StatelessWidget {
         children: [
           _buildLabel('Institution Name*'),
           const SizedBox(height: 8),
-          _buildTextField(
-            hint: 'Type your University/College/High School',
-            onChanged: (val) =>
-                controller.updateEducationField(index, 'institution', val),
-            // Need to ensure controller has this method or similar
+          Obx(
+            () {
+              // Get all universities from all countries for searching
+              final allUniversities = <String>[];
+              for (var universities in controller.universitiesByCountry.values) {
+                allUniversities.addAll(universities);
+              }
+              allUniversities.sort();
+
+              return SearchableDropdown(
+                hint: 'Select University/College/High School',
+                items: allUniversities,
+                value: controller.educationList[index]['institution'],
+                onChanged: (val) =>
+                    controller.updateEducationField(index, 'institution', val),
+              );
+            },
           ),
 
           const SizedBox(height: 16),
@@ -291,21 +303,118 @@ class EducationFormSection extends StatelessWidget {
     int index,
     String dateField,
   ) async {
+    final controller = Get.find<ElevatorResumeController>();
+    final edu = controller.educationList[index];
+    
+    DateTime? initialDate = DateTime.now();
+    DateTime firstDate = DateTime(1990);
+    DateTime lastDate = DateTime.now().add(const Duration(days: 365 * 10));
+
+    // If selecting graduation date, ensure it's not before start date
+    if (dateField == 'graduationDate' && edu['startDate'] != null) {
+      try {
+        final startDateStr = edu['startDate'] as String;
+        final parts = startDateStr.split('-');
+        if (parts.length == 3) {
+          final startDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+          firstDate = startDate; // Graduation date must be >= start date
+          initialDate = startDate;
+        }
+      } catch (e) {
+        print('Error parsing start date: $e');
+      }
+    }
+
+    // If selecting start date, ensure it's not after graduation date
+    if (dateField == 'startDate' && edu['graduationDate'] != null) {
+      try {
+        final gradDateStr = edu['graduationDate'] as String;
+        final parts = gradDateStr.split('-');
+        if (parts.length == 3) {
+          final gradDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+          lastDate = gradDate; // Start date must be <= graduation date
+          initialDate = gradDate;
+        }
+      } catch (e) {
+        print('Error parsing graduation date: $e');
+      }
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1990),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
 
     if (picked != null) {
+      // Validate: if setting graduation date, make sure it's not before start date
+      if (dateField == 'graduationDate' && edu['startDate'] != null) {
+        try {
+          final startDateStr = edu['startDate'] as String;
+          final parts = startDateStr.split('-');
+          if (parts.length == 3) {
+            final startDate = DateTime(
+              int.parse(parts[0]),
+              int.parse(parts[1]),
+              int.parse(parts[2]),
+            );
+            if (picked.isBefore(startDate)) {
+              Get.snackbar(
+                'Invalid Date',
+                'Graduation date cannot be before start date',
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+              );
+              return;
+            }
+          }
+        } catch (e) {
+          print('Error validating graduation date: $e');
+        }
+      }
+
+      // Validate: if setting start date, make sure it's not after graduation date
+      if (dateField == 'startDate' && edu['graduationDate'] != null) {
+        try {
+          final gradDateStr = edu['graduationDate'] as String;
+          final parts = gradDateStr.split('-');
+          if (parts.length == 3) {
+            final gradDate = DateTime(
+              int.parse(parts[0]),
+              int.parse(parts[1]),
+              int.parse(parts[2]),
+            );
+            if (picked.isAfter(gradDate)) {
+              Get.snackbar(
+                'Invalid Date',
+                'Start date cannot be after graduation date',
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+              );
+              return;
+            }
+          }
+        } catch (e) {
+          print('Error validating start date: $e');
+        }
+      }
+
       // Format as YYYY-MM-DD (ISO 8601 date format required by API)
       final year = picked.year.toString();
       final month = picked.month.toString().padLeft(2, '0');
       final day = picked.day.toString().padLeft(2, '0');
       final formattedDate = '$year-$month-$day';
 
-      Get.find<ElevatorResumeController>().updateEducationField(
+      controller.updateEducationField(
         index,
         dateField,
         formattedDate,

@@ -9,8 +9,10 @@ import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
 import 'package:giveandtake/features/Home/presentation/screen/home_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/video_upload_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../recruiter_account/presentation/widgets/elevator_pitch.dart';
+import '../../../recruiter_account/presentation/widgets/social_media.dart';
 import 'edit_candidate_profile_screen.dart';
 
 class CandidateDashboardScreen extends StatefulWidget {
@@ -32,16 +34,18 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
   void initState() {
     super.initState();
     print('🚀 [CandidateDashboardScreen] Screen initialized');
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final token = await Get.find<AuthStorageService>().getAccessToken();
-      if (mounted) {
-        setState(() {
-          _accessToken = token;
-        });
-      }
-      print('🔄 [CandidateDashboardScreen] Fetching dashboard data...');
-      controller.fetchDashboardData();
-    });
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    final token = await Get.find<AuthStorageService>().getAccessToken();
+    if (mounted) {
+      setState(() {
+        _accessToken = token;
+      });
+    }
+    print('🔄 [CandidateDashboardScreen] Fetching dashboard data...');
+    controller.fetchDashboardData();
   }
 
   Future<void> _refreshData() async {
@@ -103,9 +107,11 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
             print('   - Skills count: ${resume?.skills.length ?? 0}');
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(0),
-            child: Column(
+          return RefreshIndicator(
+            onRefresh: _refreshData,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(0),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ==================== BANNER & PROFILE PHOTO ====================
@@ -186,6 +192,41 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
                   ),
                 ),
 
+                const SizedBox(height: 16),
+
+                // ==================== SOCIAL MEDIA SECTION ====================
+                if (resume?.sLink != null && resume!.sLink.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: resume.sLink.where((link) => link.url.trim().isNotEmpty).map((link) {
+                        return GestureDetector(
+                          onTap: () async {
+                            final uri = Uri.parse(link.url.trim());
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(
+                                uri,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } else {
+                              Get.snackbar(
+                                "Error",
+                                "Could not open ${link.label}",
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                            }
+                          },
+                          child: Tooltip(
+                            message: link.label,
+                            child: SocialMedia(image: _getSocialIcon(link.label)),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+
                 const SizedBox(height: 24),
 
                 // ==================== CONTACT INFO SECTION ====================
@@ -203,10 +244,15 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: () {
+                        onPressed: () async {
                           // Navigate to edit candidate profile screen
-                          Get.to(() => const EditCandidateProfileScreen(), 
-                            arguments: controller.resumeData.value);
+                          await Get.to(
+                            () => const EditCandidateProfileScreen(), 
+                            arguments: controller.resumeData.value
+                          );
+                          // Refresh data when returning from edit screen
+                          print('🔄 [CandidateDashboardScreen] Returned from edit screen, refreshing...');
+                          await controller.fetchDashboardData();
                         },
                         icon: const Icon(
                           Icons.edit,
@@ -562,13 +608,304 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
                     ),
                   ),
 
+                const SizedBox(height: 32),
+
+                // ==================== CERTIFICATIONS SECTION ====================
+                if (resume?.certifications != null && resume!.certifications.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          "Certifications",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: resume.certifications.map((cert) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFDCEDFF),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                cert,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF1E40AF),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+
+                // ==================== LANGUAGES SECTION ====================
+                if (resume?.languages != null && resume!.languages.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          "Languages",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: resume.languages.map((lang) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F0FE),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                lang,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF1E40AF),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+
+                // ==================== EXPERIENCE SECTION ====================
+                if (resumeData?.experiences != null && resumeData!.experiences.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          "Experience",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ...resumeData.experiences.map((exp) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                exp.position,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                exp.company,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF666666),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              // Text(
+                              //   '${_formatDate(exp.startDate)} - ${exp.endDate != null ? _formatDate(exp.endDate) : "Present"}',
+                              //   style: const TextStyle(
+                              //     fontSize: 12,
+                              //     color: Color(0xFF999999),
+                              //   ),
+                              // ),
+                              if (exp.city.isNotEmpty || exp.country.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    '${exp.city.isNotEmpty ? exp.city : ""}, ${exp.country.isNotEmpty ? exp.country : ""}'.trim(),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF999999),
+                                    ),
+                                  ),
+                                ),
+                              if (exp.jobDescription.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Html(
+                                    data: exp.jobDescription,
+                                    style: {
+                                      "body": Style(
+                                        fontSize: FontSize(13),
+                                        color: const Color(0xFF4A5568),
+                                        lineHeight: const LineHeight(1.5),
+                                        margin: Margins.zero,
+                                        padding: HtmlPaddings.zero,
+                                      ),
+                                      "p": Style(
+                                        margin: Margins.zero,
+                                        padding: HtmlPaddings.zero,
+                                      ),
+                                    },
+                                  ),
+                                ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+
+                // ==================== EDUCATION SECTION ====================
+                if (resumeData?.education != null && resumeData!.education.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          "Education",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ...resumeData.education.map((edu) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                edu.degree,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                edu.instituteName,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF666666),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              if (edu.fieldOfStudy.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Text(
+                                    'Field of Study: ${edu.fieldOfStudy}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF999999),
+                                    ),
+                                  ),
+                                ),
+                              Text(
+                                '${_formatDate(edu.startDate)} - ${edu.graduationDate != null ? _formatDate(edu.graduationDate) : "Present"}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF999999),
+                                ),
+                              ),
+                              if (edu.city.isNotEmpty || edu.country.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    '${edu.city.isNotEmpty ? edu.city : ""}, ${edu.country.isNotEmpty ? edu.country : ""}'.trim(),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF999999),
+                                    ),
+                                  ),
+                                ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+
                 const SizedBox(height: 40),
               ],
+            ),
             ),
           );
         }),
       ),
     );
+  }
+
+  String _getSocialIcon(String label) {
+    switch (label.toLowerCase()) {
+      case 'linkedin':
+        return 'assets/icons/linkedin.png';
+      case 'twitter':
+        return 'assets/icons/twitter.png';
+      case 'upwork':
+        return 'assets/icons/upwork_logo_icon_168329.png';
+      case 'facebook':
+        return 'assets/icons/facebook.png';
+      case 'tiktok':
+        return 'assets/icons/tiktok.png';
+      case 'instagram':
+        return 'assets/icons/instagram.png';
+      case 'fiverr':
+        return 'assets/icons/Fiverr.png';
+      default:
+        return 'assets/icons/world.png';
+    }
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+    return '${date.month}/${date.year}';
   }
 
   Widget _buildInfoRow(String label, String value) {

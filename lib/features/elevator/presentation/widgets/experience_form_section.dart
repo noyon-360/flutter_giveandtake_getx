@@ -232,19 +232,114 @@ class ExperienceFormSection extends StatelessWidget {
   }
 
   /// Date picker for YYYY-MM-DD format (API requirement)
+  /// Validates that end date is not before start date
   Future<void> _selectDate(
     BuildContext context,
     Map<String, dynamic> exp,
     String dateField,
   ) async {
+    DateTime? initialDate = DateTime.now();
+    DateTime firstDate = DateTime(1990);
+    DateTime lastDate = DateTime.now().add(const Duration(days: 365 * 10));
+
+    // If selecting end date, ensure it's not before start date
+    if (dateField == 'endDate' && exp['startDate'] != null) {
+      try {
+        final startDateStr = exp['startDate'] as String;
+        final parts = startDateStr.split('-');
+        if (parts.length == 3) {
+          final startDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+          firstDate = startDate; // End date must be >= start date
+          initialDate = startDate;
+        }
+      } catch (e) {
+        print('Error parsing start date: $e');
+      }
+    }
+
+    // If selecting start date, ensure it's not after end date
+    if (dateField == 'startDate' && exp['endDate'] != null) {
+      try {
+        final endDateStr = exp['endDate'] as String;
+        final parts = endDateStr.split('-');
+        if (parts.length == 3) {
+          final endDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+          lastDate = endDate; // Start date must be <= end date
+          initialDate = endDate;
+        }
+      } catch (e) {
+        print('Error parsing end date: $e');
+      }
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1990),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
 
     if (picked != null) {
+      // Validate: if setting end date, make sure it's not before start date
+      if (dateField == 'endDate' && exp['startDate'] != null) {
+        try {
+          final startDateStr = exp['startDate'] as String;
+          final parts = startDateStr.split('-');
+          if (parts.length == 3) {
+            final startDate = DateTime(
+              int.parse(parts[0]),
+              int.parse(parts[1]),
+              int.parse(parts[2]),
+            );
+            if (picked.isBefore(startDate)) {
+              Get.snackbar(
+                'Invalid Date',
+                'End date cannot be before start date',
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+              );
+              return;
+            }
+          }
+        } catch (e) {
+          print('Error validating end date: $e');
+        }
+      }
+
+      // Validate: if setting start date, make sure it's not after end date
+      if (dateField == 'startDate' && exp['endDate'] != null) {
+        try {
+          final endDateStr = exp['endDate'] as String;
+          final parts = endDateStr.split('-');
+          if (parts.length == 3) {
+            final endDate = DateTime(
+              int.parse(parts[0]),
+              int.parse(parts[1]),
+              int.parse(parts[2]),
+            );
+            if (picked.isAfter(endDate)) {
+              Get.snackbar(
+                'Invalid Date',
+                'Start date cannot be after end date',
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+              );
+              return;
+            }
+          }
+        } catch (e) {
+          print('Error validating start date: $e');
+        }
+      }
+
       // Format as YYYY-MM-DD (ISO 8601 date format required by API)
       final year = picked.year.toString();
       final month = picked.month.toString().padLeft(2, '0');

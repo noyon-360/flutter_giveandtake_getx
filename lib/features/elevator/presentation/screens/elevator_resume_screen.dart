@@ -1005,37 +1005,73 @@ class ElevatorResumeScreen extends StatelessWidget {
               // ===================== SUBMIT BUTTON =====================
               Obx(() {
                 final isUploading = controller.isUploadingResume.value;
+                final hasVideo = controller.elevatorVideoPath.value.isNotEmpty;
 
-                return SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isUploading
-                        ? null
-                        : controller.onUploadElevatorPitchFirst,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 52),
-                      backgroundColor: isUploading ? Colors.grey : null,
-                    ),
-                    child: isUploading
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.grey,
+                return Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: (isUploading || !hasVideo)
+                            ? null
+                            : controller.onUploadElevatorPitchFirst,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 52),
+                          backgroundColor: (isUploading || !hasVideo) ? Colors.grey : null,
+                        ),
+                        child: isUploading
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.grey,
+                                      ),
+                                    ),
                                   ),
+                                  SizedBox(width: 12),
+                                  Text('Creating profile...'),
+                                ],
+                              )
+                            : Text(hasVideo ? 'Create Profile' : 'Upload Elevator Pitch First'),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Show warning if no video uploaded
+                    if (!hasVideo)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.red.shade300),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              color: Colors.red.shade700,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Please upload your Elevator Video Pitch© video before submitting the form.',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.red.shade700,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              SizedBox(width: 12),
-                              Text('Uploading resume...'),
-                            ],
-                          )
-                        : const Text('Upload Resume'),
-                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 );
               }),
               const SizedBox(height: 8),
@@ -1131,14 +1167,12 @@ class SearchableDropdown extends StatefulWidget {
   final List<String> items;
   final String? value;
   final Function(String?) onChanged;
-  final double maxHeight;
 
   const SearchableDropdown({
     required this.hint,
     required this.items,
     required this.value,
     required this.onChanged,
-    this.maxHeight = 200,
   });
 
   @override
@@ -1147,130 +1181,122 @@ class SearchableDropdown extends StatefulWidget {
 
 class _SearchableDropdownState extends State<SearchableDropdown> {
   late TextEditingController _searchController;
-  late List<String> _filteredItems;
+  bool _showDropdown = false;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController();
-    _filteredItems = widget.items;
+    _searchController = TextEditingController(text: widget.value ?? '');
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        setState(() => _showDropdown = false);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(SearchableDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value && widget.value != null) {
+      _searchController.text = widget.value!;
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        _showSearchDialog();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                widget.value ?? widget.hint,
-                style: TextStyle(
-                  color: widget.value == null ? Colors.grey : Colors.black,
-                ),
-              ),
+    final filtered = widget.items
+        .where((item) => item.toLowerCase().contains(_searchController.text.toLowerCase()))
+        .take(5)
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _searchController,
+          focusNode: _focusNode,
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      _searchController.clear();
+                      widget.onChanged(null);
+                      setState(() {});
+                    },
+                  )
+                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            Icon(Icons.arrow_drop_down, color: Colors.grey.shade600),
-          ],
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
+          onChanged: (query) {
+            setState(() {
+              _showDropdown = true; // Show dropdown whenever typing
+            });
+          },
+          onTap: () {
+            setState(() {
+              _showDropdown = true; // Show dropdown on focus, showing all items
+            });
+          },
         ),
-      ),
-    );
-  }
-
-  void _showSearchDialog() {
-    _searchController.clear();
-    _filteredItems = widget.items;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Search'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Search TextField
-                  TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search ${widget.hint.toLowerCase()}...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+        if (_showDropdown && filtered.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.white,
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: filtered.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () {
+                      _searchController.text = filtered[index];
+                      widget.onChanged(filtered[index]);
+                      setState(() {
+                        _showDropdown = false;
+                      });
+                      _focusNode.unfocus();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Text(
+                        filtered[index],
+                        style: const TextStyle(fontSize: 14),
                       ),
                     ),
-                    onChanged: (query) {
-                      setState(() {
-                        if (query.isEmpty) {
-                          _filteredItems = widget.items;
-                        } else {
-                          _filteredItems = widget.items
-                              .where(
-                                (item) => item.toLowerCase().contains(
-                                  query.toLowerCase(),
-                                ),
-                              )
-                              .toList();
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  // Filtered List
-                  Expanded(
-                    child: _filteredItems.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No results found',
-                              style: TextStyle(color: Colors.grey.shade600),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _filteredItems.length,
-                            itemBuilder: (context, index) {
-                              final item = _filteredItems[index];
-                              return ListTile(
-                                title: Text(item),
-                                onTap: () {
-                                  widget.onChanged(item);
-                                  Navigator.pop(context);
-                                },
-                                selected: widget.value == item,
-                                selectedTileColor: Colors.blue.shade100,
-                              );
-                            },
-                          ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-            ],
-          );
-        },
-      ),
+          ),
+      ],
     );
   }
 }

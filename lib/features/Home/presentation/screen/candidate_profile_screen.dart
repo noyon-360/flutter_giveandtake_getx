@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:giveandtake/core/network/api_client.dart';
 import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
-import 'package:giveandtake/features/Home/presentation/screen/edit_candidate_profile_screen.dart';
+import 'package:giveandtake/features/Home/presentation/screen/edit_basic_profile_screen.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/company/data/model/candidate_resume_response_model.dart';
 import 'package:giveandtake/features/profile_dasboard/presentation/controller/profile_controller.dart';
@@ -110,8 +110,8 @@ class _CandidateProfileScreenState extends State<CandidateProfileScreen> {
                     onPressed: () async {
                       if (resumeData == null) return;
                       await Get.to(
-                        () => const EditCandidateProfileScreen(),
-                        arguments: resumeData,
+                        () => const EditBasicProfileScreen(),
+                        arguments: resumeData.resume,
                       );
                       await _refreshProfile();
                     },

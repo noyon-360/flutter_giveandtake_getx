@@ -25,7 +25,7 @@ class EditAwardsFormSection extends StatelessWidget {
             initialValue: award['title'],
             decoration: const InputDecoration(
               labelText: 'Award Title*',
-              hintText: 'Write here',
+              hintText: 'Enter award title',
               border: OutlineInputBorder(),
             ),
             onChanged: (value) {
@@ -33,60 +33,30 @@ class EditAwardsFormSection extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          /* Program Name field removed or merged? Original had programName. 
-             But elevator controller awards map only has: title, year, description. 
-             Wait, ElevatorResumeController lines 928-933:
-               'title': award['title'] ?? '',
-               'year': award['year'] ?? '',
-               'description': award['description'] ?? '',
-             It DOES NOT include programName in the JSON sent to API!
-             The UI might have had it, but logic ignored it?
-             The screenshot also shows "Program Name" in UI (based on AwardsFormSection code).
-             But if API doesn't take it, maybe it's not needed. 
-             However, the user wants it to mirror functionality.
-             I'll include it in the map, but it might not be sent. 
-             Or maybe 'programName' IS 'title'? 
-             In ElevatorResumeScreen it had both.
-             I'll keep it to match UI. If API ignores it, so be it.
-          */
-          /*
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  initialValue: award['programName'],
-                  decoration: const InputDecoration(
-                    labelText: 'Program Name*',
-                    hintText: 'Write here',
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) {
-                    award['programName'] = value;
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              // ... Date picker
-            ],
+          TextFormField(
+            initialValue: award['issuer'],
+            decoration: const InputDecoration(
+              labelText: 'Issuing Organization',
+              hintText: 'Enter organization name',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              award['issuer'] = value;
+            },
           ),
-          */
-          // Wait, 'programName' was in AwardsFormSection code I read.
-          // But ElevatorResumeController resume object construction (lines 928) didn't use it.
-          // I will stick to what the controller was sending: Title, Year, Description.
-          // But I'll layout Date properly.
-          
+          const SizedBox(height: 16),
           GestureDetector(
             onTap: () => _selectDate(context, award),
             child: AbsorbPointer(
               child: TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Date (Year/Month)*', // Changed label to be generic
-                  hintText: 'Select date',
+                  labelText: 'Award Date',
+                  hintText: 'MM/YYYY',
                   suffixIcon: const Icon(Icons.calendar_today, size: 20),
                   border: const OutlineInputBorder(),
                 ),
                 controller: TextEditingController(
-                  text: selectedDate ?? '',
+                  text: _formatDisplayDate(award['year']),
                 ),
               ),
             ),
@@ -125,6 +95,40 @@ class EditAwardsFormSection extends StatelessWidget {
         ],
       );
     });
+  }
+
+  /// Parse date string to DateTime
+  DateTime? _parseDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return null;
+    try {
+      if (dateStr.contains('-')) {
+        return DateTime.parse(dateStr);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Format DateTime to MM/YYYY display format
+  String _formatDateToDisplay(DateTime date) {
+    return '${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  /// Format date string for display
+  String _formatDisplayDate(dynamic dateValue) {
+    if (dateValue == null || (dateValue is String && dateValue.isEmpty)) {
+      return 'Select date';
+    }
+    try {
+      final date = _parseDate(dateValue.toString());
+      if (date != null) {
+        return _formatDateToDisplay(date);
+      }
+      return dateValue.toString();
+    } catch (e) {
+      return 'Select date';
+    }
   }
 
   /// Date picker for YYYY-MM-DD format (API requirement)

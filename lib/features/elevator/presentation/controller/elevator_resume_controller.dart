@@ -96,6 +96,10 @@ class ElevatorResumeController extends GetxController {
   var cities = <String>[].obs;
   Map<String, List<String>> countryCityMap = {};
 
+  // Dynamic universities from API
+  var universities = <String>[].obs;
+  Map<String, List<String>> universitiesByCountry = {};
+
   final List<String> jobTitles = [
     'Software Engineer',
     'Product Manager',
@@ -193,6 +197,7 @@ class ElevatorResumeController extends GetxController {
     // Fetch dynamic data from APIs
     fetchCountriesWithCities();
     fetchLanguages();
+    fetchUniversities();
 
     // Load user profile data with delay to ensure service is ready
     Future.delayed(Duration.zero, () {
@@ -730,6 +735,53 @@ class ElevatorResumeController extends GetxController {
       }
     } catch (e) {
       print("❌ Error fetching languages: $e");
+    }
+  }
+
+  Future<void> fetchUniversities() async {
+    try {
+      print("🏫 Fetching universities from API...");
+      final url = '${ApiConstants.baseUrl}/university';
+      print("🔗 URL: $url");
+
+      final response = await http.get(Uri.parse(url));
+
+      print("📡 Response status: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        
+        // Handle both direct array and wrapped object responses
+        List<dynamic> data = [];
+        if (responseBody is List) {
+          data = responseBody;
+        } else if (responseBody is Map && responseBody['data'] != null) {
+          data = responseBody['data'] as List<dynamic>;
+        }
+        
+        print("📦 Universities data: ${data.length} items");
+
+        universitiesByCountry.clear();
+
+        for (var university in data) {
+          final country = university['country'] as String?;
+          final name = university['name'] as String?;
+
+          if (country != null && name != null) {
+            if (!universitiesByCountry.containsKey(country)) {
+              universitiesByCountry[country] = [];
+            }
+            universitiesByCountry[country]!.add(name);
+          }
+        }
+
+        print("✅ Universities loaded for ${universitiesByCountry.length} countries");
+        print("   Total universities: ${data.length}");
+      } else {
+        print("❌ Failed to load universities - Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("❌ Error fetching universities: $e");
     }
   }
 
