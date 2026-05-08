@@ -16,8 +16,8 @@ import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/network/constants/key_constants.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../../../../core/network/services/secure_store_services.dart';
-import '../../../../core/services/media_crop_service.dart';
 import '../../../../core/services/get_user_profile_service.dart';
+import '../../../../core/services/media_crop_service.dart';
 import '../../../Home/presentation/screen/candidate_dashboard_screen.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../company/presentation/screen/company_details_screen.dart';
@@ -681,7 +681,11 @@ class ElevatorResumeController extends GetxController {
       final url = '${ApiConstants.baseUrl}/countries';
       print("🔗 URL: $url");
 
-      final response = await http.get(Uri.parse(url));
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       print("📡 Response status: ${response.statusCode}");
 
@@ -714,7 +718,11 @@ class ElevatorResumeController extends GetxController {
       final url = '${ApiConstants.baseUrl}/language';
       print("🔗 URL: $url");
 
-      final response = await http.get(Uri.parse(url));
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       print("📡 Response status: ${response.statusCode}");
 
@@ -744,7 +752,11 @@ class ElevatorResumeController extends GetxController {
       final url = '${ApiConstants.baseUrl}/university';
       print("🔗 URL: $url");
 
-      final response = await http.get(Uri.parse(url));
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       print("📡 Response status: ${response.statusCode}");
 

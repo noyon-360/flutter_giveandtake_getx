@@ -221,7 +221,11 @@ class EditCandidateProfileController extends GetxController {
 
   Future<void> _loadCountriesAndCities() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.baseUrl}/countries'));
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      final response = await http.get(
+        Uri.parse('${ApiConstants.baseUrl}/countries'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       if (response.statusCode != 200) return;
 
@@ -251,7 +255,11 @@ class EditCandidateProfileController extends GetxController {
 
   Future<void> _loadLanguageOptions() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.baseUrl}/language'));
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      final response = await http.get(
+        Uri.parse('${ApiConstants.baseUrl}/language'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       if (response.statusCode != 200) return;
 
@@ -271,7 +279,11 @@ class EditCandidateProfileController extends GetxController {
 
   Future<void> _loadSkillOptions() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.baseUrl}/skill'));
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      final response = await http.get(
+        Uri.parse('${ApiConstants.baseUrl}/skill'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       if (response.statusCode != 200) return;
 
@@ -295,7 +307,11 @@ class EditCandidateProfileController extends GetxController {
       final url = '${ApiConstants.baseUrl}/university';
       print('🔗 URL: $url');
 
-      final response = await http.get(Uri.parse(url));
+      final token = await Get.find<AuthStorageService>().getAccessToken();
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       print('📡 Response status: ${response.statusCode}');
 

@@ -160,6 +160,7 @@ class JobApplicationScreen extends StatelessWidget {
                 onUpload: controller.pickResume,
                 onRemove: controller.removeResume,
                 onDownload: controller.downloadFile,
+                isLoading: controller.isPickingResume.value,
               ),
             ),
             const SizedBox(height: 16),

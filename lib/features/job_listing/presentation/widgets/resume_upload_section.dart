@@ -1,12 +1,15 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
-class ResumeUploadSection extends StatelessWidget {
+class ResumeUploadSection extends StatefulWidget {
   final PlatformFile? selectedResume;
   final String? existingResumeId;
-  final VoidCallback onUpload;
+  final Future<void> Function() onUpload;
   final VoidCallback onRemove;
   final Function(PlatformFile) onDownload;
+  final bool isLoading;
 
   const ResumeUploadSection({
     super.key,
@@ -15,7 +18,30 @@ class ResumeUploadSection extends StatelessWidget {
     required this.onUpload,
     required this.onRemove,
     required this.onDownload,
+    this.isLoading = false,
   });
+
+  @override
+  State<ResumeUploadSection> createState() => _ResumeUploadSectionState();
+}
+
+class _ResumeUploadSectionState extends State<ResumeUploadSection> {
+  bool _isProcessing = false;
+
+  Future<void> _onUploadTap() async {
+    // Prevent rapid/concurrent taps
+    if (_isProcessing || widget.isLoading) {
+      print('⚠️ File picker already in progress on ${Platform.operatingSystem}');
+      return;
+    }
+
+    _isProcessing = true;
+    try {
+      await widget.onUpload();
+    } finally {
+      _isProcessing = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +56,9 @@ class ResumeUploadSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        if (selectedResume == null &&
-            existingResumeId != null &&
-            existingResumeId!.trim().isNotEmpty)
+        if (widget.selectedResume == null &&
+            widget.existingResumeId != null &&
+            widget.existingResumeId!.trim().isNotEmpty)
           Container(
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 12),
@@ -47,28 +73,36 @@ class ResumeUploadSection extends StatelessWidget {
               style: TextStyle(fontSize: 13),
             ),
           ),
-        if (selectedResume == null)
+        if (widget.selectedResume == null)
           InkWell(
-            onTap: onUpload,
+            onTap: widget.isLoading ? null : () => _onUploadTap(),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
+                border: Border.all(color: widget.isLoading ? Colors.grey[300]! : Colors.grey),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Column(
+              child: Column(
                 children: [
-                  Icon(Icons.cloud_upload, size: 40, color: Colors.grey),
-                  SizedBox(height: 8),
-                  Text(
-                    'Click to upload resume',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  Text(
-                    'PDF, DOC, DOCX (max. 10MB)',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
+                  Icon(Icons.cloud_upload, size: 40, color: widget.isLoading ? Colors.grey[300] : Colors.grey),
+                  const SizedBox(height: 8),
+                  if (widget.isLoading)
+                    const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    Text(
+                      'Click to upload resume',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  if (!widget.isLoading)
+                    Text(
+                      'PDF, DOC, DOCX (max. 10MB)',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                 ],
               ),
             ),
@@ -90,13 +124,13 @@ class ResumeUploadSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selectedResume!.name,
+                        widget.selectedResume!.name,
                         style: const TextStyle(fontWeight: FontWeight.w500),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        '${(selectedResume!.size / 1024).toStringAsFixed(2)} KB',
+                        '${(widget.selectedResume!.size / 1024).toStringAsFixed(2)} KB',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -107,11 +141,11 @@ class ResumeUploadSection extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.download, color: Colors.green),
-                  onPressed: () => onDownload(selectedResume!),
+                  onPressed: () => widget.onDownload(widget.selectedResume!),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.red),
-                  onPressed: onRemove,
+                  onPressed: widget.onRemove,
                 ),
               ],
             ),

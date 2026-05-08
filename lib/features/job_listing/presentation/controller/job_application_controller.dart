@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -34,8 +35,12 @@ class JobApplicationController extends GetxController {
   final RxBool isLoadingProfile = true.obs;
   final RxBool isSubmittingApplication = false.obs;
   final Rxn<PlatformFile> selectedResume = Rxn<PlatformFile>();
+  final RxBool isPickingResume = false.obs;
   final RxString visaOption = ''.obs;
   final RxBool agreeToShareCV = true.obs;
+
+  // FilePicker can only handle one native request at a time on iOS.
+  static Future<FilePickerResult?>? _activeResumePickerRequest;
 
   // Store jobData for navigation after successful submission
   final Rxn<Map<String, dynamic>> jobData = Rxn<Map<String, dynamic>>();
@@ -147,15 +152,56 @@ class JobApplicationController extends GetxController {
   }
 
   Future<void> pickResume() async {
-    final result = await FilePicker.platform.pickFiles(
-      withData: false,
-      allowMultiple: false,
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'docx'],
-    );
+    if (_activeResumePickerRequest != null) {
+      print('⚠️ File picker already in progress, ignoring tap');
+      return;
+    }
 
-    if (result != null && result.files.isNotEmpty) {
-      selectedResume.value = result.files.first;
+    try {
+      isPickingResume.value = true;
+      print('🔄 Opening file picker on ${Platform.operatingSystem}...');
+
+      final pickerRequest = FilePicker.platform.pickFiles(
+        withData: false,
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx'],
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          print('⏱️ File picker timeout');
+          return null;
+        },
+      );
+      _activeResumePickerRequest = pickerRequest;
+      final result = await pickerRequest;
+
+      if (result != null && result.files.isNotEmpty) {
+        selectedResume.value = result.files.first;
+        print('✅ Resume selected: ${result.files.first.name}');
+      } else {
+        print('⚠️ No file selected or picker cancelled');
+      }
+    } catch (e) {
+      print('❌ Error picking resume: $e');
+      // Only show error if not a cancellation
+      if (!e.toString().contains('Cancelled') &&
+          !e.toString().contains('multiple_request')) {
+        Get.snackbar(
+          'Error',
+          'Failed to pick resume',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } finally {
+      // Add longer delay on iOS to ensure the platform channel fully closes
+      await Future.delayed(Duration(
+        milliseconds: Platform.isIOS ? 800 : 300,
+      ));
+      isPickingResume.value = false;
+      _activeResumePickerRequest = null;
     }
   }
 
