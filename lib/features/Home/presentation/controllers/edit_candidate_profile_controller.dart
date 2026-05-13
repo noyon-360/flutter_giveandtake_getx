@@ -195,7 +195,7 @@ class EditCandidateProfileController extends GetxController {
     // Education - from parent model
     educationList.assignAll(data.education.map((e) => {
       '_id': e.id,
-      'institution': e.instituteName,
+      'institution': e.instituteName.toString(),
       'degree': e.degree,
       'fieldOfStudy': e.fieldOfStudy,
       'country': e.country,

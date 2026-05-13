@@ -103,6 +103,16 @@ class JobApplicationController extends GetxController {
         },
         (success) {
           final jobModel = success.data;
+
+          // Update jobData.value with fresh data from the detailed fetch
+          // This ensures that application requirements and other fields are up-to-date
+          final currentData = jobData.value ?? {};
+          jobData.value = {
+            ...currentData,
+            ...jobModel.toJson(),
+            'raw': jobModel.toJson(),
+          };
+
           // jobModel.customQuestion is non-nullable List<CustomQuestionModel>
           if (jobModel.customQuestion.isNotEmpty) {
             final questionMaps = jobModel.customQuestion
@@ -217,20 +227,26 @@ class JobApplicationController extends GetxController {
 
   bool get shouldAskVisa {
     final requirements =
-        jobData.value?['applicationRequirement'] as List<dynamic>? ?? [];
+        jobData.value?['applicationRequirement'] as List<dynamic>? ??
+            jobData.value?['raw']?['applicationRequirement'] as List<dynamic>? ??
+            [];
     return requirements.any((requirement) {
       if (requirement is! Map<String, dynamic>) return false;
-      final label = requirement['requirement']?.toString().trim().toLowerCase() ?? '';
+      final label =
+          requirement['requirement']?.toString().trim().toLowerCase() ?? '';
       return label == JobPayloadBuilder.validVisaLabel.toLowerCase();
     });
   }
 
   bool get isVisaRequired {
     final requirements =
-        jobData.value?['applicationRequirement'] as List<dynamic>? ?? [];
+        jobData.value?['applicationRequirement'] as List<dynamic>? ??
+            jobData.value?['raw']?['applicationRequirement'] as List<dynamic>? ??
+            [];
     for (final requirement in requirements) {
       if (requirement is! Map<String, dynamic>) continue;
-      final label = requirement['requirement']?.toString().trim().toLowerCase() ?? '';
+      final label =
+          requirement['requirement']?.toString().trim().toLowerCase() ?? '';
       if (label == JobPayloadBuilder.validVisaLabel.toLowerCase()) {
         return requirement['status']?.toString().trim().toLowerCase() ==
             'required';
@@ -241,10 +257,13 @@ class JobApplicationController extends GetxController {
 
   bool get isResumeRequired {
     final requirements =
-        jobData.value?['applicationRequirement'] as List<dynamic>? ?? [];
+        jobData.value?['applicationRequirement'] as List<dynamic>? ??
+            jobData.value?['raw']?['applicationRequirement'] as List<dynamic>? ??
+            [];
     for (final requirement in requirements) {
       if (requirement is! Map<String, dynamic>) continue;
-      final label = requirement['requirement']?.toString().trim().toLowerCase() ?? '';
+      final label =
+          requirement['requirement']?.toString().trim().toLowerCase() ?? '';
       if (label == 'resume') {
         return requirement['status']?.toString().trim().toLowerCase() ==
             'required';

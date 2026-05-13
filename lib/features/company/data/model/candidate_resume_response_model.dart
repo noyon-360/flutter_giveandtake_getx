@@ -288,7 +288,12 @@ class Education {
     return Education(
       id: json['_id'] as String?,
       userId: json['userId'] as String?,
-      instituteName: json['instituteName'] as String? ?? '',
+      // Handle multiple possible keys from API (prefer non-empty university/instituteName)
+      instituteName: (json['university']?.toString().isNotEmpty == true)
+          ? json['university'] as String
+          : (json['instituteName']?.toString().isNotEmpty == true)
+              ? json['instituteName'] as String
+              : (json['universityName'] ?? json['institute_name'] ?? '') as String,
       city: json['city'] as String? ?? '',
       country: json['country'] as String? ?? '',
       degree: json['degree'] as String? ?? '',

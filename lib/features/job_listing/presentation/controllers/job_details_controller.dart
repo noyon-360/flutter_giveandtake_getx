@@ -27,11 +27,15 @@ class JobDetailsController extends GetxController {
       print('=====================================');
 
       final requirements =
-          jobData['applicationRequirement'] as List<dynamic>? ?? [];
+          jobData['applicationRequirement'] as List<dynamic>? ??
+          jobData['raw']?['applicationRequirement'] as List<dynamic>? ??
+          [];
       final isResumeRequired = requirements.any((requirement) {
         if (requirement is! Map<String, dynamic>) return false;
-        final label = requirement['requirement']?.toString().trim().toLowerCase() ?? '';
-        final status = requirement['status']?.toString().trim().toLowerCase() ?? '';
+        final label =
+            requirement['requirement']?.toString().trim().toLowerCase() ?? '';
+        final status =
+            requirement['status']?.toString().trim().toLowerCase() ?? '';
         return label == 'resume' && status == 'required';
       });
 

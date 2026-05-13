@@ -30,6 +30,10 @@ class EducationFormSection extends StatelessWidget {
           const SizedBox(height: 8),
           Obx(
             () {
+              // Access the education map
+              if (index >= controller.educationList.length) return const SizedBox();
+              final edu = controller.educationList[index];
+
               // Get all universities from all countries for searching
               final allUniversities = <String>[];
               for (var universities in controller.universitiesByCountry.values) {
@@ -40,7 +44,7 @@ class EducationFormSection extends StatelessWidget {
               return SearchableDropdown(
                 hint: 'Select University/College/High School',
                 items: allUniversities,
-                value: controller.educationList[index]['institution'],
+                value: edu['institution'],
                 onChanged: (val) =>
                     controller.updateEducationField(index, 'institution', val),
               );

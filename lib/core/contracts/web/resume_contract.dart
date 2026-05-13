@@ -128,7 +128,7 @@ class CandidateEducationInput {
   final bool currentlyStudying;
 
   Map<String, dynamic> toCreateJson() => {
-    'university': university,
+    'instituteName': university,
     'degree': degree,
     'fieldOfStudy': fieldOfStudy,
     'country': country,
@@ -142,7 +142,7 @@ class CandidateEducationInput {
   Map<String, dynamic> toUpdateJson() => {
     if (id != null) '_id': id,
     'type': id == null ? WebMutationType.create.wireValue : mutation.wireValue,
-    'university': university,
+    'instituteName': university,
     'degree': degree,
     'fieldOfStudy': fieldOfStudy,
     'country': country,

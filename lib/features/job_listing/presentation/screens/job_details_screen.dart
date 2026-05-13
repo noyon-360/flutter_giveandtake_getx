@@ -368,6 +368,7 @@ class JobDetailsScreen extends StatelessWidget {
                                   jobData['id'] ??
                                   '';
                               final applicationData = {
+                                ...jobData, // Include original data as base
                                 '_id': jobId, // Use _id as the primary key
                                 'id':
                                     jobId, // Also include id for backward compatibility
@@ -377,9 +378,11 @@ class JobDetailsScreen extends StatelessWidget {
                                 'customQuestion':
                                     raw['customQuestion'] ??
                                     [], // Include custom questions
+                                'applicationRequirement':
+                                    raw['applicationRequirement'] ??
+                                    [], // Include requirements
                                 'raw':
                                     raw, // Include raw data for complete job info
-                                ...jobData, // Include original data as fallback
                               };
 
                               controller.checkResumeAndApply(applicationData);

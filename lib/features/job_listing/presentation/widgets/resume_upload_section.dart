@@ -10,6 +10,7 @@ class ResumeUploadSection extends StatefulWidget {
   final VoidCallback onRemove;
   final Function(PlatformFile) onDownload;
   final bool isLoading;
+  final bool showTitle;
 
   const ResumeUploadSection({
     super.key,
@@ -19,6 +20,7 @@ class ResumeUploadSection extends StatefulWidget {
     required this.onRemove,
     required this.onDownload,
     this.isLoading = false,
+    this.showTitle = true,
   });
 
   @override
@@ -48,14 +50,16 @@ class _ResumeUploadSectionState extends State<ResumeUploadSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Upload Resume',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+        if (widget.showTitle) ...[
+          const Text(
+            'Upload Resume',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
+        ],
         if (widget.selectedResume == null &&
             widget.existingResumeId != null &&
             widget.existingResumeId!.trim().isNotEmpty)

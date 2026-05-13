@@ -1199,8 +1199,9 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
   @override
   void didUpdateWidget(SearchableDropdown oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value && widget.value != null) {
-      _searchController.text = widget.value!;
+    // Always update when value changes
+    if (oldWidget.value != widget.value) {
+      _searchController.text = widget.value ?? '';
     }
   }
 
@@ -1225,7 +1226,7 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
           controller: _searchController,
           focusNode: _focusNode,
           decoration: InputDecoration(
-            hintText: widget.hint,
+            hintText: _searchController.text.isEmpty ? widget.hint : null,
             prefixIcon: const Icon(Icons.search),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
@@ -1244,12 +1245,12 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
           ),
           onChanged: (query) {
             setState(() {
-              _showDropdown = true; // Show dropdown whenever typing
+              _showDropdown = query.isNotEmpty;
             });
           },
           onTap: () {
             setState(() {
-              _showDropdown = true; // Show dropdown on focus, showing all items
+              _showDropdown = true;
             });
           },
         ),

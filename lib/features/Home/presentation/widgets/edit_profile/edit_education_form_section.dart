@@ -23,32 +23,31 @@ class EditEducationFormSection extends StatelessWidget {
       child: Obx(() {
         // Access safely
         if (index >= controller.educationList.length) return const SizedBox();
-        
+
         final edu = controller.educationList[index];
+
+        // Access universitiesByCountry to make GetX track it
+        final _ = controller.universitiesByCountry.values;
+
+        // Get all universities from all countries for searching
+        final allUniversities = <String>[];
+        for (var universities in controller.universitiesByCountry.values) {
+          allUniversities.addAll(universities);
+        }
+        allUniversities.sort();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildLabel('Institution Name*'),
             const SizedBox(height: 8),
-            Obx(
-              () {
-                // Get all universities from all countries for searching
-                final allUniversities = <String>[];
-                for (var universities in controller.universitiesByCountry.values) {
-                  allUniversities.addAll(universities);
-                }
-                allUniversities.sort();
-
-                return SearchableDropdown(
-                  hint: 'Select University/College/High School',
-                  items: allUniversities,
-                  value: edu['institution'],
-                  onChanged: (val) {
-                    edu['institution'] = val;
-                    controller.educationList.refresh();
-                  },
-                );
+            SearchableDropdown(
+              hint: 'Select University/College/High School',
+              items: allUniversities,
+              value: edu['institution'],
+              onChanged: (val) {
+                edu['institution'] = val;
+                controller.educationList.refresh();
               },
             ),
 

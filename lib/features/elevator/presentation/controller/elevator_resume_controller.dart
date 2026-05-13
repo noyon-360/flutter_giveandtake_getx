@@ -812,7 +812,16 @@ class ElevatorResumeController extends GetxController {
   }
 
   void addEducation() {
-    educationList.add({'presentlyAttendHere': false});
+    educationList.add({
+      'institution': '',
+      'degree': '',
+      'fieldOfStudy': '',
+      'country': '',
+      'city': '',
+      'startDate': '',
+      'presentlyAttendHere': false,
+      'graduationDate': '',
+    });
   }
 
   // Update specific field in education item

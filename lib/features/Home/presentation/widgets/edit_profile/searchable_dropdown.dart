@@ -23,11 +23,13 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
   late TextEditingController _searchController;
   bool _showDropdown = false;
   final FocusNode _focusNode = FocusNode();
+  String? _previousValue;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.value ?? '');
+    _previousValue = widget.value;
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
         setState(() => _showDropdown = false);
@@ -38,8 +40,9 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
   @override
   void didUpdateWidget(SearchableDropdown oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value && widget.value != null) {
-      _searchController.text = widget.value!;
+    // Sync if the value passed from parent changed
+    if (oldWidget.value != widget.value) {
+      _searchController.text = widget.value ?? '';
     }
   }
 
@@ -52,6 +55,12 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    // Extra safety: if the controller text is out of sync with widget.value
+    // and the user is NOT currently focusing/typing, force sync it.
+    if (!_focusNode.hasFocus && _searchController.text != (widget.value ?? '')) {
+      _searchController.text = widget.value ?? '';
+    }
+
     final filtered = widget.items
         .where((item) => item.toLowerCase().contains(_searchController.text.toLowerCase()))
         .take(5)
@@ -64,7 +73,7 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
           controller: _searchController,
           focusNode: _focusNode,
           decoration: InputDecoration(
-            hintText: widget.hint,
+            hintText: _searchController.text.isEmpty ? widget.hint : null,
             prefixIcon: const Icon(Icons.search),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
@@ -83,12 +92,12 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
           ),
           onChanged: (query) {
             setState(() {
-              _showDropdown = true; // Show dropdown whenever typing
+              _showDropdown = query.isNotEmpty;
             });
           },
           onTap: () {
             setState(() {
-              _showDropdown = true; // Show dropdown on focus, showing all items
+              _showDropdown = true;
             });
           },
         ),

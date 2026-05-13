@@ -125,27 +125,63 @@ class JobApplicationScreen extends StatelessWidget {
                         ? 'Have you got a valid visa for this location? *'
                         : 'Have you got a valid visa for this location?',
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  RadioListTile<String>(
-                    value: 'Yes',
-                    groupValue: controller.visaOption.value,
-                    title: const Text('Yes'),
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (value) =>
-                        controller.visaOption.value = value ?? '',
+                  Row(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Radio<String>(
+                            value: 'Yes',
+                            groupValue: controller.visaOption.value,
+                            onChanged: (value) =>
+                                controller.visaOption.value = value ?? '',
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const Text('Yes', style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                      const SizedBox(width: 24),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Radio<String>(
+                            value: 'No',
+                            groupValue: controller.visaOption.value,
+                            onChanged: (value) =>
+                                controller.visaOption.value = value ?? '',
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const Text('No', style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ],
                   ),
-                  RadioListTile<String>(
-                    value: 'No',
-                    groupValue: controller.visaOption.value,
-                    title: const Text('No'),
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (value) =>
-                        controller.visaOption.value = value ?? '',
+                  const SizedBox(height: 24),
+                ],
+              );
+            }),
+
+            // Resume Upload Section Title
+            Obx(() {
+              final isRequired = controller.isResumeRequired;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isRequired ? 'Resume (Required)' : 'Resume',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
                   ),
+                  const SizedBox(height: 8),
                   const Divider(),
                   const SizedBox(height: 16),
                 ],
@@ -161,6 +197,7 @@ class JobApplicationScreen extends StatelessWidget {
                 onRemove: controller.removeResume,
                 onDownload: controller.downloadFile,
                 isLoading: controller.isPickingResume.value,
+                showTitle: false, // We handle the title above
               ),
             ),
             const SizedBox(height: 16),
