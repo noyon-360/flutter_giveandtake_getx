@@ -101,7 +101,6 @@ class JobPreviewScreen extends StatelessWidget {
               _previewBox("Job Category", controller.selectedCategory.value),
               _previewBox("Role", controller.selectedRole.value),
               _previewBox("Job Title", controller.jobTitle.value),
-              _previewBox("Department", controller.department.value),
               _previewBox(
                 "Country",
                 locationController.selectedCountry.toString(),
@@ -154,11 +153,8 @@ class JobPreviewScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // ---------- PUBLISH SETTINGS ----------
-              const SizedBox(height: 10),
-              _publishSwitch(controller.publishNow.value),
-
-              const SizedBox(height: 16),
+              // Publish-now toggle removed from preview (per UX feedback); the
+              // scheduled date is still shown when the post is not immediate.
               !controller.publishNow.value
                   ? _calendarSection(controller.selectedDate.value.toString())
                   : const SizedBox.shrink(),

@@ -927,50 +927,70 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     children: [
                       Container(
                         width: 150,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            final String currentBioHtml =
-                                await _htmlEditorController.getText();
-                            await reCruiController.updateRecruiter(
-                              companyImageController.selectedImage.value,
-                              // nullable banner
-                              imagePickerController.selectedImage.value,
-                              // nullable photo
-                              currentBioHtml, // ← This gets current HTML content,
-                              _firstNameTEController.text,
-                              _surNameTEController.text,
-                              widget.recruiterResponseModel.title,
-                              controller.selectedCountry.toString(),
-                              controller.selectedCity.toString(),
-                              _linkedINTEController.text,
-                              _twitterTEController.text,
-                              _upworkTEController.text,
-                              _facebookTEController.text,
-                              _tiktokTEController.text,
-                              _instaTEController.text,
-                              _fiverrTEController.text,
-                              _companyTEController.text,
-                            );
+                        child: Obx(() {
+                          final bool isSaving =
+                              reCruiController.isLoading.value;
+                          return ElevatedButton(
+                            onPressed: isSaving
+                                ? null
+                                : () async {
+                                    final String currentBioHtml =
+                                        await _htmlEditorController.getText();
+                                    await reCruiController.updateRecruiter(
+                                      companyImageController.selectedImage.value,
+                                      // nullable banner
+                                      imagePickerController.selectedImage.value,
+                                      // nullable photo
+                                      currentBioHtml, // ← This gets current HTML content,
+                                      _firstNameTEController.text,
+                                      _surNameTEController.text,
+                                      widget.recruiterResponseModel.title,
+                                      controller.selectedCountry.value ?? '',
+                                      controller.selectedCity.value ?? '',
+                                      _linkedINTEController.text,
+                                      _twitterTEController.text,
+                                      _upworkTEController.text,
+                                      _facebookTEController.text,
+                                      _tiktokTEController.text,
+                                      _instaTEController.text,
+                                      _fiverrTEController.text,
+                                      _companyTEController.text,
+                                    );
 
-                            if (reCruiController.errorMessage.value.isEmpty) {
-                              Get.back();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF2B7FD0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
+                                    if (reCruiController
+                                        .errorMessage.value.isEmpty) {
+                                      Get.back();
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF2B7FD0),
+                              disabledBackgroundColor: Color(0xFF2B7FD0)
+                                  .withOpacity(0.6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                            child: isSaving
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          );
+                        }),
                       ),
 
                       SizedBox(width: 10),

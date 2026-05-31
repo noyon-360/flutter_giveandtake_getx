@@ -8,6 +8,8 @@ import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/utils/debug_print.dart';
 import '../../../company_pricing/presentation/screens/plan_pricing_screen(company).dart';
+import '../../../notifications/presentation/controller/notifications_controller.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../recruiter_account/presentation/controller/recruiter_controller.dart';
 import '../../../recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../recruiter_account/presentation/screens/video_upload_screen.dart';
@@ -37,6 +39,14 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
   @override
   void initState() {
     super.initState();
+    // Eagerly resolve the notifications controller so its onInit runs after
+    // login (loads notifications + joins the user's socket room for live
+    // 'newNotification' / 'notificationCountUpdated' events).
+    if (!Get.isRegistered<NotificationsController>()) {
+      Get.put(NotificationsController(Get.find(), Get.find(), Get.find()));
+    } else {
+      Get.find<NotificationsController>();
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await controller.fetchCompanyProfile();
       await controller.fetchEmployee();
@@ -61,6 +71,10 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
         ),
         backgroundColor: const Color(0xFF2B7FD0),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          NotificationBell(iconColor: Colors.white),
+          const SizedBox(width: 4),
+        ],
       ),
       drawer: Drawer(
         backgroundColor: Colors.white,

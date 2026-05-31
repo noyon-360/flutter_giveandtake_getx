@@ -138,6 +138,9 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
 
       // Country & City
       jobController.selectedCountry.value = company.country;
+      // Populate the city list for the saved country so the City dropdown is
+      // enabled and the existing city can be edited / re-persisted.
+      jobController.fetchCities(company.country);
       jobController.selectedCity.value = company.city;
 
       // Social Links
@@ -1279,8 +1282,11 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                 children: [
                   Container(
                     width: 150,
-                    child: ElevatedButton(
-                      onPressed: () async {
+                    child: Obx(
+                      () => ElevatedButton(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : () async {
                         if (!_formKey.currentState!.validate())
                           return;
                         if (controller.isLoading.value) return;
@@ -1376,14 +1382,26 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      child: const Text(
-                        'Save',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: controller.isLoading.value
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text(
+                              'Save',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
                     ),
                   ),
 

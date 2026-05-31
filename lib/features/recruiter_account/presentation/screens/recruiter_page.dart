@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/features/notifications/presentation/controller/notifications_controller.dart';
+import 'package:giveandtake/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/widgets/drawer.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
@@ -33,6 +35,15 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
   @override
   void initState() {
     super.initState();
+    // Eagerly resolve the notifications controller so its onInit runs after
+    // login (loads notifications + joins the user's socket room for live
+    // 'newNotification' / 'notificationCountUpdated' events).
+    if (!Get.isRegistered<NotificationsController>()) {
+      Get.put(NotificationsController(Get.find(), Get.find(), Get.find()));
+    } else {
+      Get.find<NotificationsController>();
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final token = await Get.find<AuthStorageService>().getAccessToken();
       if (mounted) {
@@ -61,6 +72,10 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
         iconTheme: const IconThemeData(
           color: Colors.white,
         ), // <-- Drawer icon visible
+        actions: [
+          NotificationBell(iconColor: Colors.white),
+          const SizedBox(width: 4),
+        ],
       ),
       body: SafeArea(
         child: Obx(() {

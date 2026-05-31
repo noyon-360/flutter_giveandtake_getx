@@ -7,10 +7,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../data/model/company_applicant_list_response_model.dart';
 import '../widget/pdf_download_widget.dart';
 
 class CandidateDetailsScreen extends StatefulWidget {
-  const CandidateDetailsScreen({super.key});
+  /// The applicant whose details should be displayed.
+  final ApplicantListResponseModel applicant;
+
+  const CandidateDetailsScreen({super.key, required this.applicant});
 
   @override
   State<CandidateDetailsScreen> createState() => _CandidateDetailsScreenState();
@@ -24,17 +28,35 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await controller.fetchCandidate();
+      await _loadCandidateData();
     });
+  }
+
+  Future<void> _loadCandidateData() async {
+    final user = widget.applicant.user;
+
+    // Fetch the resume (PDF) for THIS applicant.
+    if (user.id.isNotEmpty) {
+      await controller.fetchResume(user.id);
+    }
+
+    // Fetch the elevator pitch / public profile for THIS applicant by slug.
+    if (user.slug.isNotEmpty) {
+      await controller.getCandidatePublicView(user.slug);
+    }
   }
 
   Future<void> _onRefresh() async {
     debugPrint("REFRESH TRIGGERED");
-    await controller.fetchCandidate();
+    await _loadCandidateData();
   }
 
   @override
   Widget build(BuildContext context) {
+    final applicant = widget.applicant;
+    final resume = applicant.resume;
+    final user = applicant.user;
+
     return AppScaffold(
       removePadding: true,
       appBar: AppBar(
@@ -58,17 +80,26 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final candidateData = controller.candidate.value;
-        final resumeData = controller.resume.value;
+        // Resume PDF list for THIS applicant.
+        final resumeData = controller.resume;
 
-        if (candidateData == null || candidateData.resume == null) {
-          return const Center(child: Text("No candidate data available"));
-        }
+        // Display values: prefer the embedded applicant resume, fall back to
+        // the applicant user object.
+        final photo = resume?.photo ?? '';
+        final fullName = [
+          resume?.firstName ?? '',
+          resume?.lastName ?? '',
+        ].where((e) => e.trim().isNotEmpty).join(' ').trim();
+        final displayName = fullName.isNotEmpty ? fullName : user.name;
+        final title = resume?.title ?? '';
+        final city = resume?.city ?? '';
+        final country = resume?.country ?? '';
+        final aboutUs = resume?.aboutUs ?? '';
+        final skills = resume?.skills ?? const <String>[];
 
-        final resume = candidateData.resume!;
-        final resumepdf = resumeData;
-
-        final elevatorPitches = candidateData.elevatorPitch;
+        // Elevator pitch comes from the public candidate view (fetched by slug).
+        final candidatePublic = controller.candidateView.value;
+        final elevatorPitches = candidatePublic?.elevatorPitch ?? const [];
         final hasElevatorPitch =
             elevatorPitches.isNotEmpty &&
             elevatorPitches.first.video?.hlsUrl != null;
@@ -103,13 +134,10 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                             CircleAvatar(
                               radius: 40,
                               backgroundColor: Colors.grey.shade200,
-                              backgroundImage:
-                                  resume.photo != null &&
-                                      resume.photo!.isNotEmpty
-                                  ? CachedNetworkImageProvider(resume.photo!)
+                              backgroundImage: photo.isNotEmpty
+                                  ? CachedNetworkImageProvider(photo)
                                   : null,
-                              child:
-                                  resume.photo == null || resume.photo!.isEmpty
+                              child: photo.isEmpty
                                   ? const Icon(
                                       Icons.person,
                                       size: 40,
@@ -125,18 +153,16 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "${resume.firstName ?? ''} ${resume.lastName ?? ''}"
-                                        .trim(),
+                                    displayName,
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  if (resume.title != null &&
-                                      resume.title!.isNotEmpty)
+                                  if (title.isNotEmpty)
                                     Text(
-                                      resume.title!,
+                                      title,
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: Colors.grey[700],
@@ -153,7 +179,7 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          "${resume.city ?? ''}${resume.city != null ? ', ' : ''}${resume.country ?? ''}",
+                                          "$city${city.isNotEmpty && country.isNotEmpty ? ', ' : ''}$country",
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: Colors.grey[600],
@@ -179,11 +205,11 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                               if (resumeData.isNotEmpty &&
                                   resumeData.first.file.isNotEmpty &&
                                   resumeData.first.file.first.url.isNotEmpty) {
-                                final fileUrl = resumepdf.first.file.first.url;
+                                final fileUrl = resumeData.first.file.first.url;
 
                                 downloadAndOpenPdf(
                                   fileUrl,
-                                  resumepdf.first.file.first.filename,
+                                  resumeData.first.file.first.filename,
                                 );
                               } else {
                                 Get.snackbar(
@@ -209,7 +235,7 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                 const SizedBox(height: 24),
 
                 // ==================== ABOUT ====================
-                if (resume.aboutUs != null && resume.aboutUs!.isNotEmpty) ...[
+                if (aboutUs.isNotEmpty) ...[
                   const Text(
                     "About",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -230,7 +256,7 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                       ],
                     ),
                     child: Text(
-                      resume.aboutUs!,
+                      aboutUs,
                       style: const TextStyle(
                         fontSize: 14,
                         height: 1.6,
@@ -285,7 +311,7 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                 const SizedBox(height: 24),
 
                 // ==================== SKILLS ====================
-                if (resume.skills.isNotEmpty) ...[
+                if (skills.isNotEmpty) ...[
                   const Text(
                     "Skills",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -308,7 +334,7 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                     child: Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: resume.skills.map((skill) {
+                      children: skills.map((skill) {
                         return Chip(
                           label: Text(
                             skill.trim(),
@@ -328,7 +354,7 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                   const SizedBox(height: 24),
                 ],
                 // ==================== SOCIAL LINKS ====================
-                if (resume.sLink.isNotEmpty) ...[
+                if (resume != null && resume.sLink.isNotEmpty) ...[
                   const Text(
                     "Social Links",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -337,10 +363,12 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                   Wrap(
                     spacing: 16,
                     children: resume.sLink.map((link) {
+                      final map = link is Map ? link : <String, dynamic>{};
+                      final label = (map['label'] ?? '').toString().toLowerCase();
+                      final url = (map['url'] ?? '').toString();
                       IconData icon = FontAwesomeIcons.globe;
-                      final label = link.label.toLowerCase();
-                      final url = link.url;
-                      if (label.contains("linkedin") || url.toLowerCase().contains("linkedin"))
+                      if (label.contains("linkedin") ||
+                          url.toLowerCase().contains("linkedin"))
                         icon = FontAwesomeIcons.linkedin;
                       if (label.contains("twitter") ||
                           url.toLowerCase().contains("x.com")) {
@@ -352,7 +380,9 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                         icon = FontAwesomeIcons.facebook;
 
                       return InkWell(
-                        onTap: () => launchUrl(Uri.parse(url)),
+                        onTap: url.isEmpty
+                            ? null
+                            : () => launchUrl(Uri.parse(url)),
                         child: FaIcon(icon, size: 28, color: Colors.blue),
                       );
                     }).toList(),

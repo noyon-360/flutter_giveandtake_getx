@@ -33,161 +33,172 @@ class CreateJobPostingScreen extends StatelessWidget {
         ),
       ),
       body: Obx(() {
+        // Only the initial loading gate reacts here; the form itself is built
+        // outside this Obx so typing in a TextField never rebuilds the fields
+        // (which would dismiss the keyboard on every keystroke).
         if (controller.isLoadingCountries.value ||
             categoryController.isLoading.value) {
           // || categoryController.isLoading.value
           return const Center(child: CircularProgressIndicator());
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        return _buildForm();
+      }),
+    );
+  }
+
+  Widget _buildForm() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _progressIndicator(),
+          const SizedBox(height: 20),
+          const Text(
+            "Keep candidates updated at every stage of their application journey with a single click.",
+            style: TextStyle(fontSize: 12, color: Colors.black),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            "Job Details",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+
+          Row(
             children: [
-              _progressIndicator(),
-              const SizedBox(height: 20),
-              const Text(
-                "Keep candidates updated at every stage of their application journey with a single click.",
-                style: TextStyle(fontSize: 12, color: Colors.black),
+              Expanded(
+                // Scoped Obx: rebuilds only this dropdown when the
+                // selected category changes, not the whole form.
+                child: Obx(() {
+                  return SearchableDropdownField(
+                    label: "Job Category",
+                    hintText: 'Select job category',
+                    items: categoryController.categories
+                        .map((c) => c.name)
+                        .toList(),
+                    value: categoryController.selectedCategory.value,
+                    onChanged: (value) {
+                      categoryController.selectedCategory.value = value;
+                      // Update roles based on selected category
+                      categoryController.updateRoles(value);
+                    },
+                  );
+                }),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                "Job Details",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Obx(() {
+                  return SearchableDropdownField(
+                    label: "Job Role",
+                    hintText: 'Select role',
+                    items: categoryController.roles,
+                    value: categoryController.selectedRole.value,
+                    onChanged: (value) {
+                      categoryController.selectedRole.value = value;
+                      // Only auto-fill Job Title if user hasn't typed manually
+                      if (!controller.jobTitleManuallyEdited.value) {
+                        controller.jobTitleController.text = value;
+                      }
+                    },
+                    enabled: categoryController.roles.isNotEmpty,
+                  );
+                }),
               ),
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: SearchableDropdownField(
-                      label: "Job Category",
-                      hintText: 'Select job category',
-                      items: categoryController.categories
-                          .map((c) => c.name)
-                          .toList(),
-                      value: categoryController.selectedCategory.value,
-                      onChanged: (value) {
-                        categoryController.selectedCategory.value = value;
-                        // Update roles based on selected category
-                        categoryController.updateRoles(value);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Obx(() {
-                      return SearchableDropdownField(
-                        label: "Job Role",
-                        hintText: 'Select role',
-                        items: categoryController.roles,
-                        value: categoryController.selectedRole.value,
-                        onChanged: (value) {
-                          categoryController.selectedRole.value = value;
-                          // Only auto-fill Job Title if user hasn't typed manually
-                          if (!controller.jobTitleManuallyEdited.value) {
-                            controller.jobTitleController.text = value;
-                          }
-                        },
-                        enabled: categoryController.roles.isNotEmpty,
-                      );
-                    }),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              /// Job Title
-              ///
-              CustomTextField(
-                label: "Job Title",
-                hintText: "Enter job title",
-                controller: controller.jobTitleController,
-                isRequired: true,
-                // onChanged: (text) {
-                //   // Mark as manually edited when user types
-                //   controller.jobTitleManuallyEdited.value = true;
-                // },
-              ),
-
-              // CustomTextField(
-              //   label: "Job Title",
-              //   hintText: "Enter job title",
-              //   controller: controller.jobTitleController,
-              //   isRequired: true,
-              // ),
-              CustomTextField(
-                label: "Department (Optional)",
-                hintText: "Enter department",
-                controller: controller.departmentController,
-                isRequired: false,
-              ),
-
-              const SizedBox(height: 16),
-
-              /// Country + City Section
-              CountryCitySelector(controller: controller),
-              const SizedBox(height: 16),
-
-              ///Job Category=Role selection
-
-              // JobCategoryRoleSelector(controller:   controller),
-              // const SizedBox(height: 16),
-
-              /// Employment Type
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomDropdownJobField(
-                      label: "Employment Type",
-                      hintText: 'Select employment type',
-                      items: [
-                        "Full-time",
-                        "Part-time",
-                        "Internship",
-                        "Contract",
-                        "Temporary",
-                        "Freelance",
-                        "Volunteer",
-                      ],
-                      isRequired: true,
-                      rxValue: controller.selectedEmploymentType,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: CustomDropdownJobField(
-                      label: "Experience Level",
-                      hintText: 'Select experience level',
-                      items: [
-                        "Entry Level",
-                        "Mid Level",
-                        "Senior Level",
-                        "Executive",
-                      ],
-                      isRequired: true,
-                      rxValue: controller.selectedEmploymentType,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              /// Compensation
-              CustomTextField(
-                label: "Compensation (Optional)",
-                hintText: "Enter compensation details",
-                controller: controller.compensationController,
-              ),
-
-              const SizedBox(height: 20),
-              _bottomButtons(),
             ],
           ),
-        );
-      }),
+
+          const SizedBox(height: 12),
+
+          /// Job Title
+          ///
+          CustomTextField(
+            label: "Job Title",
+            hintText: "Enter job title",
+            controller: controller.jobTitleController,
+            isRequired: true,
+            // onChanged: (text) {
+            //   // Mark as manually edited when user types
+            //   controller.jobTitleManuallyEdited.value = true;
+            // },
+          ),
+
+          // CustomTextField(
+          //   label: "Job Title",
+          //   hintText: "Enter job title",
+          //   controller: controller.jobTitleController,
+          //   isRequired: true,
+          // ),
+          CustomTextField(
+            label: "Department (Optional)",
+            hintText: "Enter department",
+            controller: controller.departmentController,
+            isRequired: false,
+          ),
+
+          const SizedBox(height: 16),
+
+          /// Country + City Section
+          CountryCitySelector(controller: controller),
+          const SizedBox(height: 16),
+
+          ///Job Category=Role selection
+
+          // JobCategoryRoleSelector(controller:   controller),
+          // const SizedBox(height: 16),
+
+          /// Employment Type
+          Row(
+            children: [
+              Expanded(
+                child: CustomDropdownJobField(
+                  label: "Employment Type",
+                  hintText: 'Select employment type',
+                  items: [
+                    "Full-time",
+                    "Part-time",
+                    "Internship",
+                    "Contract",
+                    "Temporary",
+                    "Freelance",
+                    "Volunteer",
+                  ],
+                  isRequired: true,
+                  rxValue: controller.selectedEmploymentType,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CustomDropdownJobField(
+                  label: "Experience Level",
+                  hintText: 'Select experience level',
+                  items: [
+                    "Entry Level",
+                    "Mid Level",
+                    "Senior Level",
+                    "Executive",
+                  ],
+                  isRequired: true,
+                  rxValue: controller.selectedEmploymentType,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          /// Compensation
+          CustomTextField(
+            label: "Compensation (Optional)",
+            hintText: "Enter compensation details",
+            controller: controller.compensationController,
+          ),
+
+          const SizedBox(height: 20),
+          _bottomButtons(),
+        ],
+      ),
     );
   }
 

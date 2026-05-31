@@ -139,7 +139,7 @@ class FakeSocketService extends SocketService {
   final List<String> leftRooms = <String>[];
 
   @override
-  void initialize() {}
+  Future<void> initialize() async {}
 
   @override
   void joinNotification(String userId) {

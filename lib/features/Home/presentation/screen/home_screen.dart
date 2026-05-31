@@ -6,6 +6,8 @@ import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../job_listing/presentation/screens/job_listing_screen.dart';
+import '../../../notifications/presentation/controller/notifications_controller.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/custom_searchbox.dart';
@@ -27,6 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // User profile is already fetched during login and stored in GetUserProfileService
     // No need to call API again here
+
+    // Eagerly resolve the notifications controller so its onInit runs right
+    // after login: it loads notifications and joins the user's socket room
+    // for live 'newNotification' / 'notificationCountUpdated' events.
+    if (!Get.isRegistered<NotificationsController>()) {
+      Get.put(NotificationsController(Get.find(), Get.find(), Get.find()));
+    } else {
+      Get.find<NotificationsController>();
+    }
   }
 
   // Helper method to launch email
@@ -100,6 +111,10 @@ class _HomeScreenState extends State<HomeScreen> {
         iconTheme: IconThemeData(color: AppColors.textBlack),
         centerTitle: true,
         title: Image.asset("assets/images/logo_transparent.png", height: 40),
+        actions: [
+          NotificationBell(iconColor: AppColors.textBlack),
+          const SizedBox(width: 4),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

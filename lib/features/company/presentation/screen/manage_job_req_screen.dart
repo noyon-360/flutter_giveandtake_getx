@@ -65,11 +65,13 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
         ),
       ),
       body: Obx(() {
-        if (recruiterController.isLoading.value) {
+        final jobs = companyAccountController.manageJobList;
+
+        // Show a spinner during the initial fetch (and any in-flight fetch)
+        // while we don't yet have any jobs to display.
+        if (companyAccountController.isLoading.value && jobs.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
-
-        final jobs = companyAccountController.manageJobList;
 
         if (jobs.isEmpty) {
           return const Center(child: Text("No jobs posted yet."));

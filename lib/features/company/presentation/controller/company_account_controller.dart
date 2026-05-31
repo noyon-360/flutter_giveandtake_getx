@@ -18,6 +18,7 @@ import '../../data/model/all_user_response_model.dart';
 import '../../data/model/recruiter_added_request_model.dart';
 import '../screen/company_details_screen.dart';
 import '../screen/company_screen.dart';
+import '../screen/employee_screen.dart';
 
 class CompanyAccountController extends BaseController {
   final CompanyRepository _companyRepo;
@@ -981,15 +982,28 @@ class CompanyAccountController extends BaseController {
       },
       (success) {
         DPrint.log("connect recruiter success: ${success.message}");
-        Get.to(() => CompanyDetailsPage());
 
         // Clear selected recruiters after success
         employeeControllers.clear();
         employeeIdMap.clear();
         employeeControllers.add(TextEditingController()); // keep one empty
 
-        // Get.back(); // close dialog
         setLoading(false);
+
+        // Close the "Add Company Recruiters" dialog if it is still open.
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+
+        Get.snackbar(
+          "Success",
+          "Recruiter added successfully",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        // Navigate to the internal recruiter screen.
+        Get.to(() => const CompanyEmployeesScreen());
       },
     );
   }

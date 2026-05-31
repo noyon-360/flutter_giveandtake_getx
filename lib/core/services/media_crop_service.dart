@@ -55,10 +55,16 @@ class MediaCropService {
     required ImageSource source,
     required MediaCropPreset preset,
   }) async {
-    final pickedFile = await _imagePicker.pickImage(
-      source: source,
-      imageQuality: 100,
-    );
+    XFile? pickedFile;
+    try {
+      pickedFile = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 100,
+      );
+    } catch (e, st) {
+      debugPrint('MediaCropService.pickAndCropImage pick failed: $e\n$st');
+      return null;
+    }
     if (pickedFile == null) return null;
 
     return cropImageFile(
@@ -73,39 +79,59 @@ class MediaCropService {
   }) async {
     final dimensions = presetDimensions[preset]!;
 
-    final cropped = await ImageCropper().cropImage(
-      sourcePath: file.path,
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 100,
-      aspectRatio: CropAspectRatio(
-        ratioX: dimensions.ratioX,
-        ratioY: dimensions.ratioY,
-      ),
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: dimensions.toolbarTitle,
-          toolbarColor: const Color(0xFF2B7FD0),
-          toolbarWidgetColor: const Color(0xFFFFFFFF),
-          hideBottomControls: false,
-          lockAspectRatio: true,
-          initAspectRatio: CropAspectRatioPreset.original,
+    CroppedFile? cropped;
+    try {
+      cropped = await ImageCropper().cropImage(
+        sourcePath: file.path,
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 100,
+        aspectRatio: CropAspectRatio(
+          ratioX: dimensions.ratioX,
+          ratioY: dimensions.ratioY,
         ),
-        IOSUiSettings(
-          title: dimensions.toolbarTitle,
-          aspectRatioLockEnabled: true,
-          rotateButtonsHidden: false,
-          rotateClockwiseButtonHidden: false,
-          resetAspectRatioEnabled: false,
-        ),
-      ],
-    );
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: dimensions.toolbarTitle,
+            toolbarColor: const Color(0xFF2B7FD0),
+            toolbarWidgetColor: const Color(0xFFFFFFFF),
+            hideBottomControls: false,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: dimensions.toolbarTitle,
+            aspectRatioLockEnabled: true,
+            rotateButtonsHidden: false,
+            rotateClockwiseButtonHidden: false,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+    } catch (e, st) {
+      // image_cropper can throw (e.g. plugin/UI errors on v11). Never let the
+      // crop step crash the app: fall back to the originally picked file so the
+      // user can still proceed with an (uncropped) image.
+      debugPrint('MediaCropService.cropImageFile crop failed: $e\n$st');
+      return _safeResize(file, preset: preset);
+    }
 
+    // User cancelled the cropper.
     if (cropped == null) return null;
 
-    return resizeCroppedFile(
-      File(cropped.path),
-      preset: preset,
-    );
+    return _safeResize(File(cropped.path), preset: preset);
+  }
+
+  /// Resizes [file] for [preset], but never throws: if resizing fails the
+  /// original file is returned so callers always receive a usable image.
+  Future<File?> _safeResize(
+    File file, {
+    required MediaCropPreset preset,
+  }) async {
+    try {
+      return await resizeCroppedFile(file, preset: preset);
+    } catch (e, st) {
+      debugPrint('MediaCropService._safeResize failed: $e\n$st');
+      return file.existsSync() ? file : null;
+    }
   }
 
   Future<File> resizeCroppedFile(

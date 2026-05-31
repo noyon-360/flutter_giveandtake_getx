@@ -142,7 +142,11 @@ class _CompanyApplicantsListScreenState
                               /// View Details
                               TextButton(
                                 onPressed: () {
-                                  Get.to(() => CandidateDetailsScreen());
+                                  Get.to(
+                                    () => CandidateDetailsScreen(
+                                      applicant: applicant,
+                                    ),
+                                  );
                                 },
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
@@ -196,28 +200,6 @@ class _CompanyApplicantsListScreenState
                             spacing: 10,
                             runSpacing: 10,
                             children: [
-                              _statusBtn(
-                                label: "Received",
-                                isActive:
-                                    applicant.status.toLowerCase() ==
-                                        "applied" ||
-                                    applicant.status.toLowerCase() == "pending",
-                                color: Colors.grey.shade300,
-                                textColor: Colors.black87,
-                                onTap:
-                                    applicant.status.toLowerCase() ==
-                                            "applied" ||
-                                        applicant.status.toLowerCase() ==
-                                            "pending"
-                                    ? () {
-                                        controller.statusUpdated(
-                                          applicantId: applicant.id,
-                                          status: "applied",
-                                        );
-                                      }
-                                    : null,
-                              ),
-
                               _statusBtn(
                                 label: "Shortlisted",
                                 isActive:
@@ -305,33 +287,60 @@ void _showCustomQuestionDialog({
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: answers.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            final ans = answers[index];
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ans.question ?? "Question ${index + 1}",
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(10),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: Get.height * 0.6),
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: answers.length,
+            separatorBuilder: (_, __) => const Divider(height: 24),
+            itemBuilder: (context, index) {
+              final ans = answers[index];
+              final questionText = (ans.question?.trim().isNotEmpty ?? false)
+                  ? ans.question!.trim()
+                  : "Question ${index + 1}";
+              final answerText = (ans.ans?.trim().isNotEmpty ?? false)
+                  ? ans.ans!.trim()
+                  : "No response";
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// QUESTION
+                  Text(
+                    "${index + 1}. $questionText",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
                   ),
-                  child: Text(ans.ans ?? "No response"),
-                ),
-              ],
-            );
-          },
+                  const SizedBox(height: 8),
+
+                  /// ANSWER
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Text(
+                      answerText,
+                      style: const TextStyle(fontSize: 14, height: 1.4),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text("Close"),
+        ),
+      ],
     ),
   );
 }

@@ -30,84 +30,105 @@ class _RecruiterDialogContentState extends State<RecruiterDialogContent> {
 
       content: SizedBox(
         width: 400, // Center dialog width
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Obx(() {
+          // Disable selection while an API call (fetch users / connect) runs.
+          final bool busy = controller.isLoading.value;
+
+          return Stack(
             children: [
-              // First recruiter field
-              GestureDetector(
-                onTap: controller.fetchUsers,
-                child: AbsorbPointer(
-                  child: CustomTextField(
-                    label: "Add Profiles of Recruiters",
-                    hintText: "Tap to select recruiter",
-                    controller: controller.employeeControllers[0],
-                    isRequired: true,
-                    readOnly: true,
-                  ),
-                ),
-              ),
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // First recruiter field
+                    GestureDetector(
+                      onTap: busy ? null : controller.fetchUsers,
+                      child: AbsorbPointer(
+                        child: CustomTextField(
+                          label: "Add Profiles of Recruiters",
+                          hintText: "Tap to select recruiter",
+                          controller: controller.employeeControllers[0],
+                          isRequired: true,
+                          readOnly: true,
+                        ),
+                      ),
+                    ),
 
-              const SizedBox(height: 14),
+                    const SizedBox(height: 14),
 
-              // Add more button
-              ElevatedButton(
-                onPressed: controller.addEmployee,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    side: const BorderSide(color: Colors.grey),
-                  ),
-                ),
-                child: const Text("Add More +"),
-              ),
+                    // Add more button
+                    ElevatedButton(
+                      onPressed: busy ? null : controller.addEmployee,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          side: const BorderSide(color: Colors.grey),
+                        ),
+                      ),
+                      child: const Text("Add More +"),
+                    ),
 
-              const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-              // Dynamic recruiter list
-              Obx(
-                () => Column(
-                  children: List.generate(
-                    controller.employeeControllers.length,
-                    (index) {
-                      if (index == 0) return const SizedBox.shrink();
+                    // Dynamic recruiter list
+                    Column(
+                      children: List.generate(
+                        controller.employeeControllers.length,
+                        (index) {
+                          if (index == 0) return const SizedBox.shrink();
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: controller.fetchUsers,
-                                child: AbsorbPointer(
-                                  child: CustomTextField(
-                                    label: "Recruiter ${index + 1}",
-                                    hintText: "Tap to select recruiter",
-                                    controller:
-                                        controller.employeeControllers[index],
-                                    readOnly: true,
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: busy ? null : controller.fetchUsers,
+                                    child: AbsorbPointer(
+                                      child: CustomTextField(
+                                        label: "Recruiter ${index + 1}",
+                                        hintText: "Tap to select recruiter",
+                                        controller: controller
+                                            .employeeControllers[index],
+                                        readOnly: true,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: busy
+                                      ? null
+                                      : () =>
+                                            controller.removeEmployeeField(index),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.close, color: Colors.red),
-                              onPressed: () =>
-                                  controller.removeEmployeeField(index),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
+
+              // Spinner overlay while the recruiter list (or connect) loads.
+              if (busy)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.white.withOpacity(0.6),
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+                ),
             ],
-          ),
-        ),
+          );
+        }),
       ),
 
       // -------- ACTION BUTTONS --------
@@ -118,17 +139,21 @@ class _RecruiterDialogContentState extends State<RecruiterDialogContent> {
           child: const Text("Cancel", style: TextStyle(color: Colors.red)),
         ),
 
-        // Add Button → PATCH API call
-        ElevatedButton(
-          onPressed: () async {
-            final employeeIds = controller.getSelectedEmployeeIds();
-            if (employeeIds.isEmpty) {
-              Get.snackbar("Error", "Select at least one recruiter");
-              return;
-            }
-            await controller.connectRecruiter(employeeIds);
-          },
-          child: const Text("Add"),
+        // Add Button → PATCH API call (disabled during any in-flight call)
+        Obx(
+          () => ElevatedButton(
+            onPressed: controller.isLoading.value
+                ? null
+                : () async {
+                    final employeeIds = controller.getSelectedEmployeeIds();
+                    if (employeeIds.isEmpty) {
+                      Get.snackbar("Error", "Select at least one recruiter");
+                      return;
+                    }
+                    await controller.connectRecruiter(employeeIds);
+                  },
+            child: const Text("Add"),
+          ),
         ),
       ],
     );
