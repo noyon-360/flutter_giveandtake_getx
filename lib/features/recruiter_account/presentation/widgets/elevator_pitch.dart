@@ -3,6 +3,7 @@ import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 
 import '../controller/recruiter_controller.dart';
 import '../screens/video_upload_screen.dart';
@@ -70,10 +71,7 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
   int _retryCount = 0;
   final int _maxRetries = 5;
 
-  void _initializeVideo() {
-    DPrint.log(
-      "Initializing Video (Attempt ${_retryCount + 1}): -> ${widget.videoUrl}",
-    );
+  Future<void> _initializeVideo() async {
     _errorMessage = null;
     _isInitialized = false;
 
@@ -81,19 +79,29 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
         widget.videoUrl!.isNotEmpty &&
         !widget.videoUrl!.endsWith('/')) {
       // iOS AVPlayer won't send the Authorization header on an HLS stream, so
-      // also pass the bearer token in the URL as ?token=... (the backend's
-      // master route accepts it). The nested playlist, AES key, and .ts
-      // segments are already authorised by their own ?t= token that the backend
-      // bakes into the playlist, so only the master URL needs this.
-      final headers = widget.httpHeaders ?? {};
-      final auth = headers['Authorization'];
-      String playbackUrl = widget.videoUrl!;
-      if (auth != null &&
-          auth.startsWith('Bearer ') &&
-          !playbackUrl.contains('token=')) {
-        final token = auth.substring('Bearer '.length);
-        playbackUrl += '${playbackUrl.contains('?') ? '&' : '?'}token=$token';
+      // pass the bearer token in the URL as ?token=... (the backend's master
+      // route accepts it). The nested playlist, AES key, and .ts segments are
+      // already authorised by their own ?t= token baked into the playlist.
+      // Read the token from storage directly so this works even if the screen
+      // didn't pass it via httpHeaders (or hadn't loaded it yet).
+      String? token;
+      final auth = widget.httpHeaders?['Authorization'];
+      if (auth != null && auth.startsWith('Bearer ')) {
+        token = auth.substring('Bearer '.length);
       }
+      if (token == null || token.isEmpty) {
+        token = await Get.find<AuthStorageService>().getAccessToken();
+      }
+      String playbackUrl = widget.videoUrl!;
+      if (token != null && token.isNotEmpty && !playbackUrl.contains('token=')) {
+        playbackUrl +=
+            '${playbackUrl.contains('?') ? '&' : '?'}token=$token';
+      }
+      DPrint.log(
+        "Initializing Video (Attempt ${_retryCount + 1}, hasToken: ${token != null && token.isNotEmpty}): -> $playbackUrl",
+      );
+
+      if (!mounted) return;
       _videoController =
           VideoPlayerController.networkUrl(
               Uri.parse(playbackUrl),
