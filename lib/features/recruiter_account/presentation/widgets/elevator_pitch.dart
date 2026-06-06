@@ -80,9 +80,23 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
     if (widget.videoUrl != null &&
         widget.videoUrl!.isNotEmpty &&
         !widget.videoUrl!.endsWith('/')) {
+      // iOS AVPlayer won't send the Authorization header on an HLS stream, so
+      // also pass the bearer token in the URL as ?token=... (the backend's
+      // master route accepts it). The nested playlist, AES key, and .ts
+      // segments are already authorised by their own ?t= token that the backend
+      // bakes into the playlist, so only the master URL needs this.
+      final headers = widget.httpHeaders ?? {};
+      final auth = headers['Authorization'];
+      String playbackUrl = widget.videoUrl!;
+      if (auth != null &&
+          auth.startsWith('Bearer ') &&
+          !playbackUrl.contains('token=')) {
+        final token = auth.substring('Bearer '.length);
+        playbackUrl += '${playbackUrl.contains('?') ? '&' : '?'}token=$token';
+      }
       _videoController =
           VideoPlayerController.networkUrl(
-              Uri.parse(widget.videoUrl!),
+              Uri.parse(playbackUrl),
               formatHint: VideoFormat.hls,
               videoPlayerOptions: VideoPlayerOptions(
                 mixWithOthers: true,
