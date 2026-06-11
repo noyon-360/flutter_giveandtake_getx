@@ -511,6 +511,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/network/constants/api_constants.dart';
 import '../../company/presentation/controller/company_details_controller.dart';
 import '../models/get_resume_public_view_response_model.dart';
 
@@ -612,6 +615,70 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
               ),
 
               const SizedBox(height: 60),
+
+              /// ====== SOCIAL + FOLLOW + SHARE (after profile image) ======
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _candidateSocialLinks(resume),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Obx(
+                          () => GestureDetector(
+                            onTap: controller.toggleFollow,
+                            child: Container(
+                              height: 42,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: controller.isFollowing.value
+                                    ? Colors.transparent
+                                    : const Color(0xFFE6F0FF),
+                                border: Border.all(color: Colors.blue.shade800),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                controller.isFollowing.value
+                                    ? 'Following'
+                                    : 'Follow',
+                                style: TextStyle(
+                                  color: Colors.blue.shade800,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: _shareProfile,
+                          child: Container(
+                            height: 42,
+                            width: 46,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.blue.shade800),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.share,
+                              color: Colors.blue.shade800,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
 
               /// ================= NAME =================
               Padding(
@@ -728,6 +795,52 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
   }
 
   /// ================= UI HELPERS =================
+
+  /// Opens the OS share sheet with this candidate's public profile link.
+  Future<void> _shareProfile() async {
+    final resume = controller.candidateView.value?.resume;
+    final name = resume != null
+        ? "${resume.firstName ?? ''} ${resume.lastName ?? ''}".trim()
+        : '';
+    final url = "${ApiConstants.webBaseUrl}/cp/${widget.slug}";
+    final text = name.isNotEmpty
+        ? "Check out $name on EVPitch:\n$url"
+        : "Check out this profile on EVPitch:\n$url";
+    await Share.share(text, subject: 'EVPitch profile');
+  }
+
+  /// Candidate social links (URLs only — rendered as generic link icons).
+  Widget _candidateSocialLinks(Resume resume) {
+    final links = resume.sLink
+        .where((l) => (l.url ?? '').trim().isNotEmpty)
+        .toList();
+    if (links.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: links.map((l) {
+        return GestureDetector(
+          onTap: () async {
+            final uri = Uri.parse(l.url!.trim());
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } else {
+              Get.snackbar('Error', 'Could not open ${l.url}');
+            }
+          },
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              border: Border.all(color: Colors.blue, width: 1),
+            ),
+            child: const Icon(Icons.link, color: Colors.blue, size: 22),
+          ),
+        );
+      }).toList(),
+    );
+  }
 
   Widget _sectionTitle(String title) {
     return Padding(

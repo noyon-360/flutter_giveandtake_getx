@@ -5,6 +5,10 @@ class ApiConstants {
   static const String baseUrl = '$baseDomain/api/v1';
   static const String socketUrl = baseDomain;
 
+  /// Public website base, used to build shareable profile links
+  /// (e.g. `$webBaseUrl/rp/<slug>` for a recruiter).
+  static const String webBaseUrl = 'https://evpitch.com';
+
   // add by zafor
   // static const String baseDomain = 'https://api.evpitch.com';
   // static const String baseDomain = 'http://10.10.5.88:5001'; // zafor
@@ -61,6 +65,21 @@ class ApiConstants {
   static AlluserEndpoints get allusers => AlluserEndpoints();
   static CompanyAccountApi get company => CompanyAccountApi();
   static ResumeEndpoints get resume => ResumeEndpoints();
+  static SearchEndpoints get search => SearchEndpoints();
+}
+
+/// Global search endpoints (people + jobs), mirroring the web frontend's
+/// GlobalSearch -> /all-users behaviour.
+class SearchEndpoints {
+  /// People search (candidate / recruiter / company). Returns the full filtered
+  /// list (no server pagination). `q` is URL-encoded.
+  String people(String q) =>
+      '${ApiConstants.baseUrl}/fetch/all/users?q=${Uri.encodeQueryComponent(q)}';
+
+  /// Job search. The backend reads the free-text param as `title` (NOT q/search)
+  /// and paginates server-side.
+  String jobs(String title, int page, int limit) =>
+      '${ApiConstants.baseUrl}/jobs?title=${Uri.encodeQueryComponent(title)}&page=$page&limit=$limit';
 }
 
 class ResumeEndpoints {

@@ -7,7 +7,7 @@ import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 import 'package:giveandtake/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giveandtake/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
-import 'package:giveandtake/features/recruiter_account/presentation/widgets/drawer.dart';
+import 'package:giveandtake/features/Home/presentation/widgets/app_drawer.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/widgets/elevator_pitch.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -59,7 +59,7 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      drawer: const MyDrawer(),
+      drawer: const AppDrawer(),
 
       appBar: AppBar(
         title: const Text(

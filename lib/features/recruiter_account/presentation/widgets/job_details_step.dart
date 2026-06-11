@@ -21,81 +21,98 @@ class JobDetailsStep extends StatefulWidget {
 class _JobDetailsStepState extends State<JobDetailsStep> {
   final controller = Get.find<JobPostingController>();
 
+  // Stable across rebuilds — created once in initState, NOT in build(), so
+  // typing no longer swaps the live controller/focus node and dismisses the
+  // keyboard on every keystroke.
+  final _formKey = GlobalKey<FormState>();
+
+  late final TextEditingController _jobTitleTEController;
+  late final FocusNode _jobTitleFocusNode;
+  late final TextEditingController _departmentTEController;
+  final FocusNode _departmentFocusNode = FocusNode();
+  late final TextEditingController _vacanciesTEController;
+  final FocusNode _vacanciesFocusNode = FocusNode();
+  late final TextEditingController _compensationTEController;
+  final FocusNode _compensationFocusNode = FocusNode();
+  late final TextEditingController _companyWebTEController;
+  final FocusNode _companyWebFocusNode = FocusNode();
+  late final Worker _roleWorker;
+
+  late final LocationController countryCityController;
+  late final EmploymentTypeController employeeController;
+  late final ExperienceLevelController experienceLevelController;
+  late final LocationTypeController locationTypeController;
+  late final CareerStageController careerStageController;
+  late final JobPostingExpirationController jobPostingExpirationController;
+
   @override
-  Widget build(BuildContext context) {
-    // Fetch currencies if not already fetched
-    // Load currencies if not already loaded
+  void initState() {
+    super.initState();
     if (controller.currencies.isEmpty) {
       controller.loadCurrenciesIfEmpty();
     }
-
-    final _formKey = GlobalKey<FormState>();
-
-    TextEditingController _jobTitleTEController = TextEditingController(
-      text: controller.selectedRole.value,
-    );
-
-    final FocusNode _jobTitleFocusNode = FocusNode();
-
-    TextEditingController _departmentTEController = TextEditingController(
-      text: controller.department.value,
-    );
-    final FocusNode _departmentFocusNode = FocusNode();
-
-    TextEditingController _vacanciesTEController = TextEditingController(
-      text: controller.vacancies.value.isNotEmpty
-          ? controller.vacancies.value
-          : '1', // default
-    );
-
-    final FocusNode _vacanciesFocusNode = FocusNode();
-
-    TextEditingController _compensationTEController = TextEditingController(
-      text: controller.compensation.value.isNotEmpty
-          ? controller.compensation.value
-          : '',
-    );
-    final FocusNode _compensationFocusNode = FocusNode();
-
-    TextEditingController _companyWebTEController = TextEditingController(
-      text: controller.companyWebsite.value.isNotEmpty
-          ? controller.companyWebsite.value
-          : '',
-    );
-    final FocusNode _companyWebFocusNode = FocusNode();
-
-    final LocationController countryCityController = Get.put(
-      LocationController(),
-    );
-
-    // Listen to selectedRole changes and auto-fill + update controller.jobTitle
-    ever(controller.selectedRole, (String role) {
-      if (role.isNotEmpty) {
-        _jobTitleTEController.text = role;
-        controller.jobTitle.value = role; //save it to controller
-      }
-    });
-
-    // Also set controller.vacancies.value if empty
     if (controller.vacancies.value.isEmpty) {
       controller.vacancies.value = '1';
     }
 
-    final EmploymentTypeController employeeController = Get.put(
-      EmploymentTypeController(),
+    _jobTitleTEController = TextEditingController(
+      text: controller.selectedRole.value,
     );
-    final ExperienceLevelController experienceLevelController = Get.put(
-      ExperienceLevelController(),
+    _jobTitleFocusNode = FocusNode();
+    _departmentTEController = TextEditingController(
+      text: controller.department.value,
     );
-    final LocationTypeController locationTypeController = Get.put(
-      LocationTypeController(),
+    _vacanciesTEController = TextEditingController(
+      text: controller.vacancies.value.isNotEmpty
+          ? controller.vacancies.value
+          : '1',
     );
-    final CareerStageController careerStageController = Get.put(
-      CareerStageController(),
+    _compensationTEController = TextEditingController(
+      text: controller.compensation.value,
     );
-    final JobPostingExpirationController jobPostingExpirationController =
-        Get.put(JobPostingExpirationController());
+    _companyWebTEController = TextEditingController(
+      text: controller.companyWebsite.value,
+    );
 
+    // Shared GetX singletons: Get.put returns the existing instance if already
+    // registered (by RecruiterController); FinishStep reads them via Get.find,
+    // so do NOT dispose these here.
+    countryCityController = Get.put(LocationController());
+    employeeController = Get.put(EmploymentTypeController());
+    experienceLevelController = Get.put(ExperienceLevelController());
+    locationTypeController = Get.put(LocationTypeController());
+    careerStageController = Get.put(CareerStageController());
+    jobPostingExpirationController = Get.put(JobPostingExpirationController());
+
+    // Auto-fill the job title from the selected role (one persistent worker;
+    // previously re-registered on every build and never disposed).
+    _roleWorker = ever(controller.selectedRole, (String role) {
+      if (role.isNotEmpty && _jobTitleTEController.text != role) {
+        _jobTitleTEController.text = role;
+        controller.jobTitle.value = role;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _roleWorker.dispose();
+    _jobTitleTEController.dispose();
+    _jobTitleFocusNode.dispose();
+    _departmentTEController.dispose();
+    _departmentFocusNode.dispose();
+    _vacanciesTEController.dispose();
+    _vacanciesFocusNode.dispose();
+    _compensationTEController.dispose();
+    _compensationFocusNode.dispose();
+    _companyWebTEController.dispose();
+    _companyWebFocusNode.dispose();
+    // Intentionally NOT disposing the shared GetX sub-controllers.
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -514,9 +531,12 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               Obx(
                 () => DropdownButtonFormField<String>(
                   isExpanded: true,
-                  value: employeeController.selectedEmploymentType.value.isEmpty
-                      ? null
-                      : employeeController.selectedEmploymentType.value,
+                  value:
+                      employeeController.employmentTypes.contains(
+                        employeeController.selectedEmploymentType.value,
+                      )
+                      ? employeeController.selectedEmploymentType.value
+                      : null,
                   decoration: context.primaryInputDecoration.copyWith(
                     hintText: '  Select employment type',
                     hintStyle: const TextStyle(
@@ -575,13 +595,14 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               Obx(
                 () => DropdownButtonFormField<String>(
                   isExpanded: true,
+                  // Guard against a stale/saved value (e.g. "mid") not in the
+                  // items, which crashes DropdownButton's assertion.
                   value:
-                      experienceLevelController
-                          .selectedExperienceLevel
-                          .value
-                          .isEmpty
-                      ? null
-                      : experienceLevelController.selectedExperienceLevel.value,
+                      experienceLevelController.experienceLevels.contains(
+                        experienceLevelController.selectedExperienceLevel.value,
+                      )
+                      ? experienceLevelController.selectedExperienceLevel.value
+                      : null,
                   decoration: InputDecoration(
                     hintText: '  Select experience level',
                     border: OutlineInputBorder(
@@ -640,9 +661,11 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                 () => DropdownButtonFormField<String>(
                   isExpanded: true,
                   value:
-                      locationTypeController.selectedLocationType.value.isEmpty
-                      ? null
-                      : locationTypeController.selectedLocationType.value,
+                      locationTypeController.locationTypes.contains(
+                        locationTypeController.selectedLocationType.value,
+                      )
+                      ? locationTypeController.selectedLocationType.value
+                      : null,
                   decoration: InputDecoration(
                     hintText: '  Select location type',
                     border: OutlineInputBorder(
@@ -701,9 +724,12 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
               Obx(
                 () => DropdownButtonFormField<String>(
                   isExpanded: true,
-                  value: careerStageController.selectedCareerStage.value.isEmpty
-                      ? null
-                      : careerStageController.selectedCareerStage.value,
+                  value:
+                      careerStageController.careerStages.contains(
+                        careerStageController.selectedCareerStage.value,
+                      )
+                      ? careerStageController.selectedCareerStage.value
+                      : null,
                   decoration: InputDecoration(
                     hintText: '  Select career stage',
                     border: OutlineInputBorder(

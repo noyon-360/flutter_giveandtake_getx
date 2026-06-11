@@ -1,8 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
 
 import '../di/service_locator.dart';
-import '../services/socket_service.dart';
 import 'hive_intialization.dart';
 
 class AppInitializer {
@@ -15,8 +13,11 @@ class AppInitializer {
 
     // StripeInitializer.intiStripe();
 
-    if (Get.isRegistered<SocketService>()) {
-      Get.find<SocketService>().initialize();
-    }
+    // NOTE: the socket is intentionally NOT initialized here. At first launch
+    // there is no access token yet, so an early socket would connect
+    // unauthenticated and never be rebuilt. It is instead created lazily by
+    // NotificationsController -> SocketService.joinNotification(userId) AFTER
+    // login, so the handshake always carries a valid token, and onConnect
+    // re-joins the room on every reconnect.
   }
 }

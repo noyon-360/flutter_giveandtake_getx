@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:intl/intl.dart';
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
@@ -56,8 +55,6 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
   @override
   Widget build(BuildContext context) {
     //controller.fetchJob(widget.jobId);
-
-    final htmlController = HtmlEditorController();
 
     return AppScaffold(
       appBar: AppBar(
@@ -188,7 +185,14 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                     border: Border.all(),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(job.description ?? "No description"),
+                  // Strip any HTML tags so the description shows as plain text.
+                  child: Text(() {
+                    final plain = (job.description ?? '')
+                        .replaceAll(RegExp(r'<[^>]*>'), ' ')
+                        .replaceAll(RegExp(r'\s+'), ' ')
+                        .trim();
+                    return plain.isEmpty ? 'No description' : plain;
+                  }()),
                 ),
                 title("Publish Date"),
                 readonlyValue(
@@ -357,21 +361,35 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                   "Job Description",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: HtmlEditor(
-                    controller: htmlController,
-                    htmlEditorOptions: HtmlEditorOptions(
-                      hint: "Describe the job...",
-                      initialText: controller.jobDescriptionHtml.value,
+                const SizedBox(height: 6),
+                TextField(
+                  controller: controller.jobDescriptionController,
+                  minLines: 8,
+                  maxLines: 14,
+                  keyboardType: TextInputType.multiline,
+                  textInputAction: TextInputAction.newline,
+                  onChanged: (value) =>
+                      controller.jobDescriptionHtml.value = value,
+                  decoration: InputDecoration(
+                    hintText: "Describe the job...",
+                    alignLabelWithHint: true,
+                    contentPadding: const EdgeInsets.all(14),
+                    filled: true,
+                    fillColor: const Color(0xFFFAFAFA),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
-                    callbacks: Callbacks(
-                      onChangeContent: (content) {
-                        controller.jobDescriptionHtml.value = content ?? '';
-                      },
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF2B7FD0),
+                        width: 1.5,
+                      ),
                     ),
                   ),
                 ),
@@ -618,7 +636,9 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
         const SizedBox(height: 6),
         Obx(
           () => DropdownButtonFormField<String>(
-            value: obs.value.isEmpty ? null : obs.value,
+            // Guard against a saved value that isn't one of the items (e.g.
+            // "mid"), which would otherwise crash DropdownButton's assertion.
+            value: items.contains(obs.value) ? obs.value : null,
             hint: Text("Select $label".toLowerCase()),
             decoration: _dropdownDecoration(),
             items: items

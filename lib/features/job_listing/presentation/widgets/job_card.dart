@@ -13,6 +13,9 @@ class JobCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEasyApply;
 
+  /// Apply is candidate-only — recruiters/companies pass false to hide it.
+  final bool canApply;
+
   const JobCard({
     super.key,
     required this.title,
@@ -24,6 +27,7 @@ class JobCard extends StatelessWidget {
     this.logoUrl,
     this.onTap,
     this.onEasyApply,
+    this.canApply = true,
   });
 
   @override
@@ -91,18 +95,25 @@ class JobCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                   OutlinedButton(
-                    onPressed: onEasyApply,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      side: const BorderSide(color: Colors.grey),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                      minimumSize: const Size(0, 32),
+                  if (canApply) ...[
+                    OutlinedButton(
+                      onPressed: onEasyApply,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.grey),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 0,
+                        ),
+                        minimumSize: const Size(0, 32),
+                      ),
+                      child: const Text("Apply", style: TextStyle(fontSize: 12)),
                     ),
-                    child: const Text("Apply", style: TextStyle(fontSize: 12)),
-                  ),
-                  const SizedBox(height: 4),
+                    const SizedBox(height: 4),
+                  ],
                   GestureDetector(
                     onTap: onTap,
                     child: const Text(

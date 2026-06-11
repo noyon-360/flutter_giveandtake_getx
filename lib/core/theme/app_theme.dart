@@ -10,7 +10,11 @@ class AppTheme {
     colorScheme: ColorScheme.light(primary: AppColors.primaryBlue),
     textTheme: GoogleFonts.interTextTheme(),
     appBarTheme: AppBarTheme(
-      iconTheme: IconThemeData(color: Colors.white),
+      // White-on-white made every default AppBar's back arrow / action icons
+      // invisible. Use black so they show on the white bar. Screens with a
+      // coloured AppBar set their own iconTheme, overriding this.
+      iconTheme: IconThemeData(color: Colors.black),
+      actionsIconTheme: IconThemeData(color: Colors.black),
       backgroundColor: Colors.white,
       titleTextStyle: TextStyle(
         fontSize: 24,

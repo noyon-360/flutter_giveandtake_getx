@@ -72,6 +72,10 @@ class JobPostingController extends GetxController {
   RxString jobDescriptionHtml = ''.obs;
   RxString jobDescriptionPlain = ''.obs;
 
+  /// Plain-text job-description field, shared by the create step and the edit
+  /// screen. We now store plain text (not HTML) so it renders cleanly.
+  final TextEditingController jobDescriptionController = TextEditingController();
+
   // counts
   RxInt characterCount = 0.obs;
   RxInt wordCount = 0.obs;
@@ -109,6 +113,8 @@ class JobPostingController extends GetxController {
     // Description
     jobDescriptionHtml.value = job.description ?? '';
     updateJobDescriptionHtml(job.description ?? '');
+    // Show the plain-text version in the editable field (strips legacy HTML).
+    jobDescriptionController.text = jobDescriptionPlain.value;
 
     // Publish Date & Flag
     publishNow.value =
@@ -352,6 +358,7 @@ class JobPostingController extends GetxController {
   // -----------------------------
   @override
   void onClose() {
+    jobDescriptionController.dispose();
     super.onClose();
   }
 
@@ -381,6 +388,7 @@ class JobPostingController extends GetxController {
     // Job Description
     jobDescriptionHtml.value = '';
     jobDescriptionPlain.value = '';
+    jobDescriptionController.clear();
     characterCount.value = 0;
     wordCount.value = 0;
 
@@ -439,6 +447,7 @@ class JobPostingController extends GetxController {
     // Job Description
     jobDescriptionHtml.value = '';
     jobDescriptionPlain.value = '';
+    jobDescriptionController.clear();
     characterCount.value = 0;
     wordCount.value = 0;
 

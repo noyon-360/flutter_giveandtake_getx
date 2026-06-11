@@ -12,6 +12,7 @@ import 'package:giveandtake/features/plan_pricing/presentation/controllers/paypa
 import 'package:giveandtake/features/plan_pricing/presentation/controllers/plan_pricing_controller.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:giveandtake/features/search/presentation/controller/search_controller.dart';
 
 void setupController() {
   // Auth Controller
@@ -75,4 +76,10 @@ void setupController() {
     fenix: true,
   );
   Get.lazyPut<LocationController>(() => LocationController(), fenix: true);
+
+  // Global search (drawer typeahead + full results screen)
+  Get.lazyPut<GlobalSearchController>(
+    () => GlobalSearchController(Get.find()),
+    fenix: true,
+  );
 }

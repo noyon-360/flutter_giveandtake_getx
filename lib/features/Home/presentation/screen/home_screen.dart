@@ -5,6 +5,7 @@ import 'package:giveandtake/core/services/get_user_profile_service.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../auth/presentation/controller/auth_controller.dart';
 import '../../../job_listing/presentation/screens/job_listing_screen.dart';
 import '../../../notifications/presentation/controller/notifications_controller.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
@@ -112,7 +113,12 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         title: Image.asset("assets/images/logo_transparent.png", height: 40),
         actions: [
-          NotificationBell(iconColor: AppColors.textBlack),
+          // Notification bell only after login
+          Obx(
+            () => Get.find<AuthController>().isLoggedIn.value
+                ? NotificationBell(iconColor: AppColors.textBlack)
+                : const SizedBox.shrink(),
+          ),
           const SizedBox(width: 4),
         ],
       ),

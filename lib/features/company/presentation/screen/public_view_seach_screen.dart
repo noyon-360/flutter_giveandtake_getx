@@ -123,6 +123,63 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ----- Social links + Follow + Share (after profile image) -----
+                    buildSocialLinks(company),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Obx(
+                          () => GestureDetector(
+                            onTap: controller.toggleFollow,
+                            child: Container(
+                              height: 42,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
+                              decoration: BoxDecoration(
+                                color: controller.isFollowing.value
+                                    ? Colors.transparent
+                                    : const Color(0xFFE6F0FF),
+                                border: Border.all(
+                                  color: Colors.blue.shade800,
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                controller.isFollowing.value
+                                    ? 'Following'
+                                    : 'Follow',
+                                style: TextStyle(
+                                  color: Colors.blue.shade800,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () => _showShareOptions(context, company),
+                          child: Container(
+                            height: 42,
+                            width: 46,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.blue.shade800),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.share,
+                              color: Colors.blue.shade800,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
                     Text(
                       company.cname,
                       style: const TextStyle(
@@ -146,93 +203,14 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                         Text(company.industry),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    buildSocialLinks(company),
-
-                    const SizedBox(height: 20),
-
-                    Row(
-                      children: [
-                        Obx(
-                          () => GestureDetector(
-                            onTap: controller.toggleFollow,
-                            child: Container(
-                              height: 40,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              decoration: BoxDecoration(
-                                color: controller.isFollowing.value
-                                    ? Colors.transparent
-                                    : const Color(0xFFE6F0FF), // light sky blue
-                                border: Border.all(
-                                  color: Colors.blue.shade800,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                  8,
-                                ), // square feel
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                controller.isFollowing.value
-                                    ? 'Following'
-                                    : 'Follow',
-                                style: TextStyle(
-                                  color: Colors.blue.shade800,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
                     const SizedBox(height: 24),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "About",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => _showShareOptions(context, company),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.share,
-                                  size: 18,
-                                  color: Colors.blue.shade800,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  "Share profile",
-                                  style: TextStyle(
-                                    color: Colors.blue.shade800,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                    const Text(
+                      "About",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Divider(),
                     const SizedBox(height: 8),
@@ -412,8 +390,8 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
   }
 
   void _showShareOptions(BuildContext context, Company company) {
-    // Generate the profile URL - adjust this to your actual URL structure
-    final String profileUrl = "https://yourapp.com/company/${widget.slug}";
+    // Public company profile link on the website.
+    final String profileUrl = "${ApiConstants.webBaseUrl}/cmp/${widget.slug}";
     final String shareText = "Check out ${company.cname} on our platform!";
 
     showModalBottomSheet(

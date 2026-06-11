@@ -8,7 +8,6 @@ import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 import 'package:giveandtake/features/auth/presentation/controller/remember_me_controller.dart';
 import 'package:giveandtake/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:giveandtake/features/auth/presentation/screens/signup_screen.dart';
-import 'package:giveandtake/features/auth/presentation/widgets/different_login_approach.dart';
 
 import '../../../../core/common/widgets/app_logo.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
@@ -297,29 +296,7 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
 
                         SizedBox(height: 32),
-
-                        Gap.h16,
-
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Or continue with',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.textFieldLightGrey,
-                              ),
-                            ),
-                            SizedBox(height: 16),
-
-                            DifferentLoginApproach(
-                              image1: AppImages.googleLogo,
-                              image2: AppImages.appleLogo,
-                            ),
-                          ],
-                        ),
+                        // Social sign-in (Google/Apple) removed — not wired up.
                       ],
                     ),
                   ),

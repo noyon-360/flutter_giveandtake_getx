@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutx_core/core/validation/validators.dart';
 import 'package:get/get.dart';
 import 'package:html/parser.dart' as html_parser;
-import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:giveandtake/core/theme/input_decoration_extensions.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/get_recruiter_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/company_image_controller.dart';
@@ -86,7 +86,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   final ScrollController _scrollController = ScrollController();
-  HtmlEditorController _htmlEditorController = HtmlEditorController();
 
   @override
   void initState() {
@@ -210,14 +209,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (recruiter.companyId != null && recruiter.companyId!.id.isNotEmpty) {
         reCruiController.selectedCompany.value = recruiter.companyId!.id;
       }
-
-      final htmlContent = widget.recruiterResponseModel.bio ?? '';
-
-      // Set HTML content (package expects HTML string)
-      _htmlEditorController.setText(htmlContent);
-
-      // Optional: Initialize approximate word count
-      final plainText = await _htmlEditorController.getText();
     });
   }
 
@@ -467,67 +458,64 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ),
 
                             SizedBox(height: 4),
-                            Container(
-                              height: 250,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: Color(0xFF999999),
-                                  width: 1,
-                                ),
+                            TextField(
+                              controller: _biocontroller,
+                              minLines: 6,
+                              maxLines: 10,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.newline,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF1A1A1A),
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: HtmlEditor(
-                                  controller: _htmlEditorController,
-                                  htmlEditorOptions: HtmlEditorOptions(
-                                    hint: "Write your company description...",
-                                    shouldEnsureVisible: false,
-                                    autoAdjustHeight: false,
-                                    adjustHeightForKeyboard: false,
-                                    initialText:
-                                        widget.recruiterResponseModel.bio,
+                              inputFormatters: [
+                                // Block input once the word limit is reached.
+                                TextInputFormatter.withFunction((
+                                  oldValue,
+                                  newValue,
+                                ) {
+                                  final newWords = descriptionController
+                                      .countWords(newValue.text);
+                                  if (newWords >
+                                      descriptionController.maxWords) {
+                                    return oldValue;
+                                  }
+                                  return newValue;
+                                }),
+                              ],
+                              onChanged: (value) {
+                                descriptionController.wordCount.value =
+                                    descriptionController.countWords(value);
+                              },
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: const Color(0xFFFAFAFA),
+                                hintText: "Write your company description...",
+                                hintStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFF787878),
+                                ),
+                                contentPadding: const EdgeInsets.all(14),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF999999),
+                                    width: 1,
                                   ),
-                                  htmlToolbarOptions: HtmlToolbarOptions(
-                                    toolbarPosition:
-                                        ToolbarPosition.aboveEditor,
-                                    toolbarType: ToolbarType.nativeExpandable,
-                                    defaultToolbarButtons: [
-                                      StyleButtons(),
-                                      FontSettingButtons(fontSizeUnit: true),
-                                      ListButtons(listStyles: true),
-                                      ParagraphButtons(),
-                                      InsertButtons(
-                                        link: true,
-                                        picture: true,
-                                        video: true,
-                                      ),
-                                      OtherButtons(
-                                        codeview: true,
-                                        undo: true,
-                                        redo: true,
-                                        fullscreen: true,
-                                      ),
-                                    ],
-                                    customToolbarButtons:
-                                        [], // you can add more if needed
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF999999),
+                                    width: 1,
                                   ),
-                                  callbacks: Callbacks(
-                                    onChangeContent: (String? content) {
-                                      // Live word count (approximate)
-                                      if (content != null) {
-                                        final plain = content
-                                            .replaceAll(RegExp(r'<[^>]*>'), ' ')
-                                            .replaceAll(RegExp(r'\s+'), ' ')
-                                            .trim();
-                                        final words = plain
-                                            .split(' ')
-                                            .where((w) => w.isNotEmpty)
-                                            .length;
-                                        descriptionController.wordCount.value =
-                                            words;
-                                      }
-                                    },
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF2B7FD0),
+                                    width: 1.5,
                                   ),
                                 ),
                               ),
@@ -934,32 +922,48 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             onPressed: isSaving
                                 ? null
                                 : () async {
-                                    final String currentBioHtml =
-                                        await _htmlEditorController.getText();
-                                    await reCruiController.updateRecruiter(
-                                      companyImageController.selectedImage.value,
-                                      // nullable banner
-                                      imagePickerController.selectedImage.value,
-                                      // nullable photo
-                                      currentBioHtml, // ← This gets current HTML content,
-                                      _firstNameTEController.text,
-                                      _surNameTEController.text,
-                                      widget.recruiterResponseModel.title,
-                                      controller.selectedCountry.value ?? '',
-                                      controller.selectedCity.value ?? '',
-                                      _linkedINTEController.text,
-                                      _twitterTEController.text,
-                                      _upworkTEController.text,
-                                      _facebookTEController.text,
-                                      _tiktokTEController.text,
-                                      _instaTEController.text,
-                                      _fiverrTEController.text,
-                                      _companyTEController.text,
-                                    );
+                                    // Re-entry guard + instant disable: flip the
+                                    // loading flag synchronously BEFORE the async
+                                    // getText() round-trip so the button can't be
+                                    // tapped again into duplicate PATCH submits.
+                                    if (reCruiController.isLoading.value) return;
+                                    reCruiController.setLoading(true);
+                                    try {
+                                      final String currentBioHtml =
+                                          _biocontroller.text.trim();
+                                      await reCruiController.updateRecruiter(
+                                        companyImageController
+                                            .selectedImage.value,
+                                        // nullable banner
+                                        imagePickerController.selectedImage.value,
+                                        // nullable photo
+                                        currentBioHtml, // ← current HTML content
+                                        _firstNameTEController.text,
+                                        _surNameTEController.text,
+                                        widget.recruiterResponseModel.title,
+                                        controller.selectedCountry.value ?? '',
+                                        controller.selectedCity.value ?? '',
+                                        _linkedINTEController.text,
+                                        _twitterTEController.text,
+                                        _upworkTEController.text,
+                                        _facebookTEController.text,
+                                        _tiktokTEController.text,
+                                        _instaTEController.text,
+                                        _fiverrTEController.text,
+                                        _companyTEController.text,
+                                      );
 
-                                    if (reCruiController
-                                        .errorMessage.value.isEmpty) {
-                                      Get.back();
+                                      if (reCruiController
+                                          .errorMessage.value.isEmpty) {
+                                        Get.back();
+                                      }
+                                    } finally {
+                                      // updateRecruiter already clears loading on
+                                      // both branches; this only fires if
+                                      // getText() threw before that.
+                                      if (reCruiController.isLoading.value) {
+                                        reCruiController.setLoading(false);
+                                      }
                                     }
                                   },
                             style: ElevatedButton.styleFrom(

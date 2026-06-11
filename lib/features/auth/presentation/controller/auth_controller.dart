@@ -26,6 +26,7 @@ import 'package:giveandtake/features/auth/presentation/screens/security_question
 import 'package:giveandtake/features/auth/presentation/screens/set_new_password_screen.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
 import 'package:giveandtake/features/elevator/presentation/screens/elevator_resume_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
 
@@ -193,6 +194,11 @@ class AuthController extends BaseController {
             userId: success.data.user.id,
             userRole: user.role,
           );
+          // Populate the shared profile so the drawer header shows the
+          // recruiter's name / photo instead of the "Your account" placeholder.
+          try {
+            Get.find<GetUserProfileService>().setUserInfo(user);
+          } catch (_) {}
 
           if (rememberMeController!.rememberMe.value) {
             final secureStore = SecureStoreServices();
@@ -209,36 +215,16 @@ class AuthController extends BaseController {
           );
 
           try {
-            final userId = success.data.user.id;
-            final recruiterEndpoint =
-                ApiConstants.recruiter.fetchRecruiterInfo(userId);
-
-            final recruiterResult = await ApiClient().get(
-              recruiterEndpoint,
-              fromJsonT: (json) => json as Map<String, dynamic>,
-            );
-
-            // Close loading overlay
+            // Route on a real recruiter profile, not the always-null message.
+            final hasProfile =
+                await Get.find<RecruiterController>().hasRecruiterProfile();
             if (Get.isDialogOpen ?? false) Get.back();
-
-            recruiterResult.fold(
-              (fail) {
-                // API error → assume account not set up yet
-                DPrint.log('Recruiter fetch failed: ${fail.message}');
-                Get.offAll(() => CreateRecruiterAccount());
-              },
-              (res) {
-                final message =
-                    (res.data['message'] as String? ?? '').toLowerCase();
-                DPrint.log('Recruiter fetch message: $message');
-
-                if (message.contains('recruiter account not found')) {
-                  Get.offAll(() => CreateRecruiterAccount());
-                } else {
-                  Get.offAll(() => const RecruiterPageScreen());
-                }
-              },
-            );
+            DPrint.log('Recruiter hasProfile: $hasProfile');
+            if (hasProfile) {
+              Get.offAll(() => const RecruiterPageScreen());
+            } else {
+              Get.offAll(() => CreateRecruiterAccount());
+            }
           } catch (e) {
             // Close loading overlay on exception
             if (Get.isDialogOpen ?? false) Get.back();
@@ -252,6 +238,11 @@ class AuthController extends BaseController {
             userId: success.data.user.id,
             userRole: user.role,
           );
+          // Populate the shared profile so the drawer header shows the
+          // account's name / photo instead of the "Your account" placeholder.
+          try {
+            Get.find<GetUserProfileService>().setUserInfo(user);
+          } catch (_) {}
 
           if (rememberMeController!.rememberMe.value) {
             final secureStore = SecureStoreServices();

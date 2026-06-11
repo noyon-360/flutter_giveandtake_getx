@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/bottomNavbar/controllers/bottom_nav_controller.dart';
 import '../controller/notifications_controller.dart';
 
 class NotificationsScreen extends StatelessWidget {
@@ -18,6 +19,19 @@ class NotificationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () {
+            // Pushed as its own route -> pop it. Otherwise it's the bottom-nav
+            // tab (nothing to pop), so fall back to the Home tab.
+            if (Navigator.canPop(context)) {
+              Get.back();
+            } else if (Get.isRegistered<BottomNavController>()) {
+              Get.find<BottomNavController>().changeIndex(0);
+            }
+          },
+        ),
         title: Obx(
           () => Text('Notifications (${controller.unreadCount.value})'),
         ),
@@ -30,7 +44,6 @@ class NotificationsScreen extends StatelessWidget {
                   : controller.markAllRead,
               child: Text(
                 controller.isMarking.value ? 'Marking...' : 'Mark All Read',
-                style: const TextStyle(color: Colors.white),
               ),
             ),
           ),

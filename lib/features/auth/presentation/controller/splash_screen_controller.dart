@@ -1,9 +1,8 @@
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/bottomNavbar/screens/dashboard_screen.dart';
-import 'package:giveandtake/core/network/api_client.dart';
-import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_page.dart';
@@ -55,34 +54,19 @@ class SplashController extends GetxController {
     }
 
     try {
-      final recruiterEndpoint =
-          ApiConstants.recruiter.fetchRecruiterInfo(userId);
-
-      final recruiterResult = await ApiClient().get(
-        recruiterEndpoint,
-        fromJsonT: (json) => json as Map<String, dynamic>,
-      );
-
-      recruiterResult.fold(
-        (fail) {
-          // API error → assume account not set up yet
-          DPrint.log('Recruiter fetch failed: ${fail.message}');
-          Get.offAll(() => CreateRecruiterAccount());
-        },
-        (res) {
-          final message =
-              (res.data['message'] as String? ?? '').toLowerCase();
-          DPrint.log('Recruiter fetch message: $message');
-
-          if (message.contains('recruiter account not found')) {
-            Get.offAll(() => CreateRecruiterAccount());
-          } else {
-            Get.offAll(() => const RecruiterPageScreen());
-          }
-        },
-      );
+      // Route on whether a real, populated recruiter profile exists — not on a
+      // (structurally always-null) message string, which previously sent
+      // profile-less users to the dashboard on cold relaunch.
+      final hasProfile =
+          await Get.find<RecruiterController>().hasRecruiterProfile();
+      DPrint.log('Recruiter hasProfile: $hasProfile');
+      if (hasProfile) {
+        Get.offAll(() => const RecruiterPageScreen());
+      } else {
+        Get.offAll(() => CreateRecruiterAccount());
+      }
     } catch (e) {
-      DPrint.log('Recruiter fetch error: $e');
+      DPrint.log('Recruiter routing error: $e');
       Get.offAll(() => CreateRecruiterAccount());
     }
   }

@@ -11,6 +11,8 @@ import 'package:giveandtake/features/auth/presentation/controller/auth_controlle
 import 'package:giveandtake/features/auth/presentation/controller/term_of_services_and_privacy_policy_controller.dart';
 import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
 import 'package:giveandtake/features/create_job/presentation/controller/create_job_controller.dart';
+import 'package:giveandtake/features/home_static_screens/presentation/screen/Terms_screen.dart';
+import 'package:giveandtake/features/home_static_screens/presentation/screen/privacy_policy.dart';
 import 'package:giveandtake/features/create_job/presentation/widgets/searchable_widgets.dart';
 import '../../../../core/common/constants/app_images.dart';
 
@@ -53,6 +55,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final ValueNotifier<String> _selectedRole = ValueNotifier<String>(
     'candidate',
   );
+  final ValueNotifier<bool> _ageConfirmed = ValueNotifier<bool>(false);
 
   late TapGestureRecognizer _termsRecognizer;
   late TapGestureRecognizer _privacyRecognizer;
@@ -98,12 +101,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
     _termsRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        Get.to('page');
+        Get.to(() => TermsandConditions());
       };
 
     _privacyRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        Get.to('');
+        Get.to(() => PrivacyPolicy());
       };
 
     _signInRecognizer = TapGestureRecognizer()
@@ -117,6 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _errorWorker.dispose(); // Dispose the error listener
     _obscurePassword.dispose();
     _selectedRole.dispose();
+    _ageConfirmed.dispose();
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
     _signInRecognizer.dispose();
@@ -131,6 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _emailFocus.dispose();
     _phoneNumberFocus.dispose();
     _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
     _dateOfBirthFocus.dispose();
     super.dispose();
   }
@@ -147,10 +152,48 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    // Password strength — matches the web frontend rules: at least 10
+    // characters with an uppercase, a lowercase, a number and a special char.
+    final pwd = _passwordTEController.text;
+    final strongPassword = pwd.length >= 10 &&
+        RegExp(r'[A-Z]').hasMatch(pwd) &&
+        RegExp(r'[a-z]').hasMatch(pwd) &&
+        RegExp(r'\d').hasMatch(pwd) &&
+        RegExp(r'''[!@#$%^&*()_+\-=\[\]{};:'"\\|,.<>/?]''').hasMatch(pwd);
+    if (!strongPassword) {
+      _authController.setError(
+        'Password must be at least 10 characters and include an uppercase '
+        'letter, a lowercase letter, a number and a special character.',
+      );
+      return;
+    }
+
     if (jobController.selectedCountry.value.isEmpty) {
       _authController.setError('Please select your country');
       return;
     }
+
+    // Terms & Conditions must be accepted before registering (web parity).
+    if (!controller.privacy.value) {
+      _authController.setError('Please accept the Terms & Conditions');
+      return;
+    }
+
+    // Age confirmation (web parity): the "16+" checkbox stands in for DOB.
+    if (!_ageConfirmed.value) {
+      _authController.setError(
+        'Please confirm you are 16 years of age or older',
+      );
+      return;
+    }
+
+    // Send a DOB exactly 16 years ago (yyyy-MM-dd), like the web frontend, so
+    // the backend's age requirement is satisfied.
+    final dobDate = DateTime.now().subtract(const Duration(days: 365 * 16));
+    final dob =
+        '${dobDate.year.toString().padLeft(4, '0')}-'
+        '${dobDate.month.toString().padLeft(2, '0')}-'
+        '${dobDate.day.toString().padLeft(2, '0')}';
 
     _authController.register(
       firstName: _firstNameTEController.text.trim(),
@@ -159,7 +202,7 @@ class _SignupScreenState extends State<SignupScreen> {
       password: _passwordTEController.text,
       phoneNumber: _phoneNumberTEController.text.trim(),
       address: jobController.selectedCountry.value,
-      dateOfBirth: _dateOfBirthTEController.text,
+      dateOfBirth: dob,
       role: _selectedRole.value, // Pass the selected role
     );
   }
@@ -215,12 +258,15 @@ class _SignupScreenState extends State<SignupScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         //* <----------------- First name ----------------->*//
-                        Text(
-                          'First Name',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                        ValueListenableBuilder<String>(
+                          valueListenable: _selectedRole,
+                          builder: (context, role, _) => Text(
+                            role == 'company' ? 'Company Name' : 'First Name',
+                            style: TextStyle(
+                              color: AppColors.textBlack,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                         SizedBox(height: 8),
@@ -252,12 +298,17 @@ class _SignupScreenState extends State<SignupScreen> {
 
                         Gap.h16,
 
-                        Text(
-                          'Surname',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                        ValueListenableBuilder<String>(
+                          valueListenable: _selectedRole,
+                          builder: (context, role, _) => Text(
+                            role == 'company'
+                                ? 'Company Suffix (optional)'
+                                : 'Surname',
+                            style: TextStyle(
+                              color: AppColors.textBlack,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                         SizedBox(height: 8),
@@ -290,12 +341,19 @@ class _SignupScreenState extends State<SignupScreen> {
                         Gap.h16,
 
                         //* <-----------------Email----------------->*//
-                        Text(
-                          'Email',
-                          style: TextStyle(
-                            color: AppColors.textBlack,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                        ValueListenableBuilder<String>(
+                          valueListenable: _selectedRole,
+                          builder: (context, role, _) => Text(
+                            role == 'recruiter'
+                                ? 'Recruiter Email'
+                                : role == 'company'
+                                ? 'Company Email'
+                                : 'Personal Email',
+                            style: TextStyle(
+                              color: AppColors.textBlack,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                         SizedBox(height: 8),
@@ -553,6 +611,39 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
 
                         SizedBox(height: 8),
+                        // Age confirmation (web parity)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            ValueListenableBuilder<bool>(
+                              valueListenable: _ageConfirmed,
+                              builder: (context, checked, _) => Checkbox(
+                                value: checked,
+                                activeColor: AppColors.primaryBlue,
+                                checkColor: AppColors.primaryWhite,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                side: BorderSide(
+                                  color: AppColors.textGrey,
+                                  width: 1,
+                                ),
+                                onChanged: (v) =>
+                                    _ageConfirmed.value = v ?? false,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                'I confirm I am 16 years of age or older',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textBlack,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           //crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,48 +706,76 @@ class _SignupScreenState extends State<SignupScreen> {
 
                         SizedBox(height: 16),
 
-                        Obx(
-                          () => PrimaryButton(
-                            isLoading: _authController.isLoading.value,
-                            onPressed: () {
-                              _submit();
-                            },
-                            text: "Sign Up",
-                          ),
-                        ),
-
-                        Gap.h32,
-
-                        Gap.h16,
-
-                        // DifferentLoginApproach(
-                        //   image1: AppImages.googleLogo,
-                        //   image2: AppImages.appleLogo,
-                        // ),
-                        Gap.h16,
-
-                        SecondaryButton(
-                          onPressed: () {
-                            _selectedRole.value = 'recruiter';
-                            _submit();
+                        // Role-aware actions (web parity): the PRIMARY button
+                        // submits with the CURRENT role; the secondary buttons
+                        // only SWITCH the role/form — they do NOT submit. The
+                        // user picks a role, fills the form, then taps the
+                        // primary button.
+                        ValueListenableBuilder<String>(
+                          valueListenable: _selectedRole,
+                          builder: (context, role, _) {
+                            String labelFor(String r) => r == 'recruiter'
+                                ? 'Recruiter'
+                                : r == 'company'
+                                ? 'Company'
+                                : 'Candidate';
+                            final others = const [
+                              'candidate',
+                              'recruiter',
+                              'company',
+                            ].where((r) => r != role).toList();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Obx(
+                                  () => PrimaryButton(
+                                    isLoading: _authController.isLoading.value,
+                                    onPressed: () => _submit(),
+                                    text: "Sign up as a ${labelFor(role)}",
+                                  ),
+                                ),
+                                Gap.h16,
+                                Center(
+                                  child: Text(
+                                    'Prefer a different role?',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.textGrey,
+                                    ),
+                                  ),
+                                ),
+                                Gap.h8,
+                                // Stacked full-width (like the old design),
+                                // not side-by-side — avoids cramped wrapped text.
+                                for (var i = 0; i < others.length; i++) ...[
+                                  if (i > 0) Gap.h8,
+                                  SecondaryButton(
+                                    width: double.infinity,
+                                    height: 48,
+                                    textColor: AppColors.primaryBlue,
+                                    // Switch the role/form only — no submit.
+                                    onPressed: () {
+                                      _selectedRole.value = others[i];
+                                      _authController.setError('');
+                                    },
+                                    text: "Sign up as a ${labelFor(others[i])}",
+                                  ),
+                                ],
+                                Gap.h8,
+                                Center(
+                                  child: Text(
+                                    'Currently selected: '
+                                    '${labelFor(role).toLowerCase()}. '
+                                    'Submit to continue.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textGrey,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
                           },
-                          text: "Join as a Recruiter",
-                          width: double.infinity - 40,
-                          textColor: AppColors.primaryBlue,
-                          height: 48,
-                        ),
-
-                        Gap.h8,
-
-                        SecondaryButton(
-                          onPressed: () {
-                            _selectedRole.value = 'company';
-                            _submit();
-                          },
-                          text: "Join as a Company",
-                          width: double.infinity - 40,
-                          textColor: AppColors.primaryBlue,
-                          height: 48,
                         ),
                         Gap.h32,
                         Row(

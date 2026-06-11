@@ -14,6 +14,9 @@ class ContactUsScreen extends StatelessWidget {
 
   ContactUsScreen({super.key, required this.member});
 
+  // Brand colour reused across the screen.
+  static const Color _primary = Color(0xFF2B7FD0);
+
   // Create text editing controllers
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
@@ -34,33 +37,51 @@ class ContactUsScreen extends StatelessWidget {
           member.email; // if address not available, show email
     if (phoneNumberController.text.isEmpty)
       phoneNumberController.text = member.phone;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
         title: const Text(
           "Contact Us",
           style: TextStyle(
-            color: Color(0xFF4D4D4D),
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
+            color: Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
           ),
         ),
-        centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(
-            top: 22,
-            left: 24,
-            right: 24,
-            bottom: 24,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Intro
+              const Text(
+                'Get in touch',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                "Fill out the form and we'll get back to you shortly.",
+                style: TextStyle(fontSize: 13, color: Color(0xFF757575)),
+              ),
+              const SizedBox(height: 22),
+
               // First + Last Name
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: _buildTextField(
@@ -69,7 +90,7 @@ class ContactUsScreen extends StatelessWidget {
                       controller: firstNameController,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: _buildTextField(
                       label: "Last Name*",
@@ -79,7 +100,7 @@ class ContactUsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
 
               // Address
               _buildTextField(
@@ -87,15 +108,16 @@ class ContactUsScreen extends StatelessWidget {
                 hintText: "Enter your address",
                 controller: addressController,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
 
               // Phone
               _buildTextField(
                 label: "Phone Number",
                 hintText: "Enter Phone Number",
                 controller: phoneNumberController,
+                keyboardType: TextInputType.phone,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
 
               // Subject
               _buildTextField(
@@ -103,175 +125,125 @@ class ContactUsScreen extends StatelessWidget {
                 hintText: "Enter subject",
                 controller: subjectController,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
 
-              // Your Company (large height)
+              // Message
               _buildTextField(
                 label: "Your message",
                 hintText: "Tell us how we can help you",
-                maxLines: 8,
+                maxLines: 6,
                 controller: yourCompanyController,
               ),
-              const SizedBox(height: 43),
+              const SizedBox(height: 28),
 
-              // Contact Information section
+              // Contact Information card
               Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF7FAFF),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE6F0FA)),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Contact Information',
                       style: TextStyle(
-                        color: Color(0xFF424242),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A1A),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 16),
-
-                    // Email
-                    Row(
-                      children: [
-                        Image.asset(
-                          "assets/icons/contactus_mail.png",
-                          width: 35,
-                          height: 35,
-                        ),
-                        const SizedBox(width: 51),
-                        const Text(
-                          'example@gmail.com',
-                          style: TextStyle(
-                            color: Color(0xFF424242),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
+                    _contactRow(
+                      "assets/icons/contactus_mail.png",
+                      'Email',
+                      'example@gmail.com',
                     ),
-                    const SizedBox(height: 26),
-
-                    // Phone
-                    Row(
-                      children: [
-                        Image.asset(
-                          "assets/icons/contactus_phone.png",
-                          width: 35,
-                          height: 35,
-                        ),
-                        const SizedBox(width: 51),
-                        const Text(
-                          '+880 1234 567890',
-                          style: TextStyle(
-                            color: Color(0xFF424242),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
+                    _contactRow(
+                      "assets/icons/contactus_phone.png",
+                      'Phone',
+                      '+880 1234 567890',
                     ),
-                    const SizedBox(height: 26),
-
-                    // Address
-                    Row(
-                      children: [
-                        Image.asset(
-                          "assets/icons/contactus_location.png",
-                          width: 35,
-                          height: 35,
-                        ),
-                        const SizedBox(width: 51),
-                        const Text(
-                          '123, Main Street, Dhaka',
-                          style: TextStyle(
-                            color: Color(0xFF424242),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
+                    _contactRow(
+                      "assets/icons/contactus_location.png",
+                      'Address',
+                      '123, Main Street, Dhaka',
                     ),
-                    const SizedBox(height: 26),
-
-                    // Time
-                    Row(
-                      children: [
-                        Image.asset(
-                          "assets/icons/contactus_clock.png",
-                          width: 35,
-                          height: 35,
-                        ),
-                        const SizedBox(width: 51),
-                        const Text(
-                          'www.example.com',
-                          style: TextStyle(
-                            color: Color(0xFF424242),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
+                    _contactRow(
+                      "assets/icons/contactus_clock.png",
+                      'Website',
+                      'www.example.com',
                     ),
-                    const SizedBox(height: 26),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 43),
+              const SizedBox(height: 20),
 
               // Error / Success message
               Obx(() {
                 if (controller.errorMessage.isNotEmpty) {
-                  return Text(
-                    controller.errorMessage.value,
-                    style: const TextStyle(color: Colors.red),
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      controller.errorMessage.value,
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                    ),
                   );
                 }
                 if (controller.successMessage.isNotEmpty) {
-                  return Text(
-                    controller.successMessage.value,
-                    style: const TextStyle(color: Colors.green),
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      controller.successMessage.value,
+                      style: const TextStyle(
+                        color: Color(0xFF10B287),
+                        fontSize: 13,
+                      ),
+                    ),
                   );
                 }
-                return const SizedBox();
+                return const SizedBox.shrink();
               }),
 
-              const SizedBox(height: 10),
-
-              // Submit Button
-              Align(
-                alignment: Alignment.center,
-                child: Obx(
-                  () => SizedBox(
-                    height: 39,
-                    width: 342,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2B7FD0),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+              // Submit Button — full width and responsive
+              Obx(
+                () => SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primary,
+                      disabledBackgroundColor: const Color(0xFF9DC3E6),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : _submitForm,
-                      child: controller.isLoading.value
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                              "Send Message",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
                     ),
+                    onPressed: controller.isLoading.value ? null : _submitForm,
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : const Text(
+                            "Send Message",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
               ),
-              const SizedBox(height: 170),
             ],
           ),
         ),
@@ -305,11 +277,49 @@ class ContactUsScreen extends StatelessWidget {
     );
   }
 
+  // A single contact-info line: icon + caption + value.
+  Widget _contactRow(String asset, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        children: [
+          Image.asset(asset, width: 38, height: 38),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xFF90A0B0),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Color(0xFF333333),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Reusable TextField Builder with controller
   Widget _buildTextField({
     required String label,
     required String hintText,
     int maxLines = 1,
+    TextInputType? keyboardType,
     required TextEditingController controller,
   }) {
     return Column(
@@ -319,36 +329,38 @@ class ContactUsScreen extends StatelessWidget {
           label,
           style: const TextStyle(
             color: Color(0xFF2A2A2A),
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 8),
         TextFormField(
           controller: controller,
+          keyboardType: keyboardType,
           style: const TextStyle(
-            color: Color(0xFF2A2A2A),
-            fontSize: 12,
+            color: Color(0xFF1A1A1A),
+            fontSize: 14,
             fontWeight: FontWeight.w400,
           ),
           maxLines: maxLines,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: const TextStyle(color: Color(0xFF787878), fontSize: 10),
+            hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 13),
             isDense: true,
+            alignLabelWithHint: true,
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
+              horizontal: 14,
+              vertical: 14,
             ),
             enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Color(0xFF484848)),
-              borderRadius: BorderRadius.circular(6),
+              borderSide: const BorderSide(color: Color(0xFFE2E2E2)),
+              borderRadius: BorderRadius.circular(10),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Color(0xFF484848)),
-              borderRadius: BorderRadius.circular(6),
+              borderSide: const BorderSide(color: _primary, width: 1.5),
+              borderRadius: BorderRadius.circular(10),
             ),
-            fillColor: Colors.white,
+            fillColor: const Color(0xFFFAFBFC),
             filled: true,
           ),
         ),

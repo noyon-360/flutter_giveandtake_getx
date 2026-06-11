@@ -81,6 +81,33 @@ class RecruiterController extends BaseController {
 
   RecruiterController(this._recruiterRepo, this._authStorageService);
 
+  /// Returns true only when a real, populated recruiter profile exists for the
+  /// stored user. Used by app-launch / login / drawer routing to decide
+  /// form-vs-dashboard. A 404 (no account) or an empty/partial payload -> false.
+  ///
+  /// This replaces the previous, structurally-broken check that inspected
+  /// `res.data['message']` (always null in the success branch), which caused a
+  /// profile-less user to be routed to the dashboard ("No recruiter data found")
+  /// on cold relaunch.
+  Future<bool> hasRecruiterProfile() async {
+    final userId = await _authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) return false;
+    final result = await ApiClient().get(
+      ApiConstants.recruiter.fetchRecruiterInfo(userId),
+      fromJsonT: (json) =>
+          json is Map<String, dynamic> ? json : <String, dynamic>{},
+    );
+    return result.fold(
+      (_) => false, // 404 / failure -> no profile yet
+      (res) {
+        final data = res.data;
+        return data.isNotEmpty &&
+            ((data['_id'] ?? data['id']) != null) &&
+            (data['firstName'] as String? ?? '').trim().isNotEmpty;
+      },
+    );
+  }
+
   final Rxn<FetchRecruiterResponseModel> userInfo =
       Rxn<FetchRecruiterResponseModel>();
 

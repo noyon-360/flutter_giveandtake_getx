@@ -14,6 +14,12 @@ class SocketService {
   String? _authToken;
   Future<void>? _initFuture;
 
+  // Tracked so room membership can be re-emitted on every (re)connect —
+  // socket.io drops rooms on disconnect and reconnection is enabled, so a
+  // network blip would otherwise silently remove the user from the room.
+  String? _notificationUserId;
+  final Set<String> _joinedRooms = {};
+
   io.Socket? get socket => _socket;
 
   bool get isConnected => _socket?.connected ?? false;
@@ -29,6 +35,17 @@ class SocketService {
     if (_socket != null) return;
     _authToken = await _authStorage.getAccessToken();
     _socket = _createSocket();
+    // Fires on the first connect AND every reconnect. Re-emitting the room
+    // joins here is what keeps notifications flowing after a network blip.
+    _socket!.onConnect((_) {
+      final uid = _notificationUserId;
+      if (uid != null && uid.isNotEmpty) {
+        _socket!.emit('joinNotification', uid);
+      }
+      for (final r in _joinedRooms) {
+        _socket!.emit('joinRoom', r);
+      }
+    });
     _socket!.connect();
   }
 
@@ -41,16 +58,28 @@ class SocketService {
 
   void joinNotification(String userId) {
     if (userId.trim().isEmpty) return;
-    initialize().then((_) => _socket?.emit('joinNotification', userId));
+    _notificationUserId = userId; // re-joined automatically on every reconnect
+    initialize().then((_) {
+      if (_socket?.connected ?? false) {
+        _socket!.emit('joinNotification', userId);
+      }
+      // else: onConnect re-emits it once the socket connects.
+    });
   }
 
   void joinRoom(String roomId) {
     if (roomId.trim().isEmpty) return;
-    initialize().then((_) => _socket?.emit('joinRoom', roomId));
+    _joinedRooms.add(roomId); // re-joined automatically on every reconnect
+    initialize().then((_) {
+      if (_socket?.connected ?? false) {
+        _socket!.emit('joinRoom', roomId);
+      }
+    });
   }
 
   void leaveRoom(String roomId) {
     if (roomId.trim().isEmpty) return;
+    _joinedRooms.remove(roomId);
     _socket?.emit('leaveRoom', roomId);
   }
 

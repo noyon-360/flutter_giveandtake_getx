@@ -243,10 +243,12 @@ class AllJobsScreen extends GetView<AllJobsController> {
                   );
                 }
 
+                final canApply = controller.canApply;
                 return SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
                     final job = controller.jobList[index];
                     return JobCard(
+                      canApply: canApply,
                       title: job.title,
                       company: job.companyId?.cname ?? "Unknown",
                       location: job.location,

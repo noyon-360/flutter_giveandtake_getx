@@ -11,7 +11,7 @@ import '../../../company_pricing/presentation/screens/plan_pricing_screen(compan
 import '../controller/recruiter_controller.dart';
 import '../screens/edit_profile_page.dart';
 import '../screens/public_view_screen.dart';
-import 'connect_with_company_dialog.dart';
+import '../screens/connect_with_company_page.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -117,7 +117,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     } else {
                       Navigator.pop(context);
                       Future.delayed(const Duration(milliseconds: 150), () {
-                        Get.dialog(ConnectCompanyDialog());
+                        Get.to(() => ConnectCompanyPage());
                       });
                     }
                   },

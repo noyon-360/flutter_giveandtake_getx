@@ -18,15 +18,35 @@ class ApplicationModel {
   });
 
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
-    final job = json['jobId'] as Map<String, dynamic>?;
-    final company = job != null
-        ? job['companyId'] as Map<String, dynamic>?
+    // jobId / companyId / recruiterId may arrive populated (Map) or as a bare
+    // id (String) when not populated — guard the casts either way.
+    final job = json['jobId'] is Map
+        ? Map<String, dynamic>.from(json['jobId'] as Map)
         : null;
+    final company = job != null && job['companyId'] is Map
+        ? Map<String, dynamic>.from(job['companyId'] as Map)
+        : null;
+    final recruiter = job != null && job['recruiterId'] is Map
+        ? Map<String, dynamic>.from(job['recruiterId'] as Map)
+        : null;
+
+    // Mirror the web: prefer the recruiter's name, fall back to the company
+    // name, and only then to a placeholder — so the column is never blank.
+    String resolvedCompany = '';
+    if (recruiter != null) {
+      final first = (recruiter['firstName'] ?? '').toString().trim();
+      final sure = (recruiter['sureName'] ?? '').toString().trim();
+      resolvedCompany = '$first $sure'.trim();
+    }
+    if (resolvedCompany.isEmpty) {
+      resolvedCompany = (company?['cname'] ?? '').toString().trim();
+    }
+    if (resolvedCompany.isEmpty) resolvedCompany = 'Unknown Company';
 
     return ApplicationModel(
       id: json['_id'] ?? '',
       jobTitle: job?['title'] ?? '',
-      companyName: company?['cname'] ?? '',
+      companyName: resolvedCompany,
       appliedDate: json['createdAt']?.toString().split('T').first ?? '',
       status: json['status'] ?? '',
       createdAt: json['createdAt'] ?? '',

@@ -153,11 +153,9 @@ class JobPreviewScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Publish-now toggle removed from preview (per UX feedback); the
-              // scheduled date is still shown when the post is not immediate.
-              !controller.publishNow.value
-                  ? _calendarSection(controller.selectedDate.value.toString())
-                  : const SizedBox.shrink(),
+              // Publish-now toggle removed from preview (per UX feedback);
+              // the scheduled date is always shown here.
+              _calendarSection(controller.selectedDate.value.toString()),
 
               const SizedBox(height: 30),
 
@@ -271,31 +269,6 @@ class JobPreviewScreen extends StatelessWidget {
           color: Colors.black87,
           height: 1.5,
         ),
-      ),
-    );
-  }
-
-  Widget _publishSwitch(bool publishNow) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            "Publish Now",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          Switch(
-            value: publishNow,
-            onChanged: (_) {},
-            activeColor: const Color(0xFF2B7FD0),
-          ),
-        ],
       ),
     );
   }

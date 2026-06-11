@@ -19,6 +19,8 @@ import 'package:giveandtake/features/plan_pricing/data/repositories/paypal_repos
 import 'package:giveandtake/features/plan_pricing/domain/repositories/paypal_repository.dart';
 import 'package:giveandtake/features/recruiter_account/data/repo/repo_impl.dart';
 import 'package:giveandtake/features/recruiter_account/domain/repo/repo.dart';
+import 'package:giveandtake/features/search/data/repo/search_repository_impl.dart';
+import 'package:giveandtake/features/search/domain/repo/search_repository.dart';
 
 void setupRepository() {
   Get.lazyPut<AuthRepository>(
@@ -62,6 +64,11 @@ void setupRepository() {
   Get.lazyPut<MessagingRepository>(() => MessagingRepository(), fenix: true);
   Get.lazyPut<CompanyRepository>(
     () => CompanyRepoImplementation(apiClient: Get.find()),
+    fenix: true,
+  );
+
+  Get.lazyPut<SearchRepository>(
+    () => SearchRepositoryImpl(apiClient: Get.find()),
     fenix: true,
   );
 }

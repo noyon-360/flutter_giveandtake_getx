@@ -274,6 +274,40 @@ class CompanyAccountController extends BaseController {
     );
   }
 
+  /// Resolve a company's stored recruiter ids (raw ObjectIds) to recruiter
+  /// NAMES for display, and register each controller in [employeeIdMap] so the
+  /// ids round-trip correctly through updateCompany (no existing recruiter is
+  /// dropped on save). Falls back to the raw id if a name can't be resolved.
+  ///
+  /// Uses assignAll for a single atomic list swap at the end, so there is no
+  /// empty window where a rebuild could RangeError on employeeControllers[0].
+  Future<void> prefillRecruiters(List<String> employeeIds) async {
+    employeeIdMap.clear();
+    if (employeeIds.isEmpty) {
+      employeeControllers.assignAll([TextEditingController()]);
+      return;
+    }
+
+    final byId = <String, AllUserResponseModel>{};
+    final result = await _companyRepo.fetchAllUsers();
+    result.fold((_) {}, (s) {
+      for (final u in s.data) {
+        byId[u.id] = u;
+      }
+    });
+
+    final ctrls = <TextEditingController>[];
+    for (final id in employeeIds) {
+      final u = byId[id];
+      final ctrl = TextEditingController(
+        text: (u != null && u.name.isNotEmpty) ? u.name : id,
+      );
+      employeeIdMap[ctrl] = id; // keep the id so save round-trips correctly
+      ctrls.add(ctrl);
+    }
+    employeeControllers.assignAll(ctrls);
+  }
+
   // BottomSheet to select any user
   void _showUserBottomSheet() {
     final searchController = TextEditingController();

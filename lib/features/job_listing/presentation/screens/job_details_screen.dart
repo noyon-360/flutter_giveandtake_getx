@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
 
+import '../../../../core/network/services/auth_storage_service.dart';
 import '../controllers/bookmark_controller.dart';
 import '../controllers/job_details_controller.dart';
 
@@ -70,7 +71,7 @@ class JobDetailsScreen extends StatelessWidget {
           children: [
             // ================== TOP BANNER ==================
             Container(
-              height: 250,
+              height: 160,
               width: double.infinity,
               decoration: const BoxDecoration(
                 image: DecorationImage(
@@ -82,13 +83,12 @@ class JobDetailsScreen extends StatelessWidget {
                 color: Colors.black.withOpacity(0.6), // Dark overlay
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
-                  vertical: 40,
+                  vertical: 20,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 40),
                     const Text(
                       'Browse Jobs',
                       style: TextStyle(
@@ -116,7 +116,7 @@ class JobDetailsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20.0,
-                vertical: 24.0,
+                vertical: 16.0,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +126,7 @@ class JobDetailsScreen extends StatelessWidget {
                   // Job Header (Logo + Title + Info)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.grey.shade200),
@@ -219,7 +219,7 @@ class JobDetailsScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 12),
                         // Tags (Full Time etc)
                         Wrap(
                           spacing: 8,
@@ -251,12 +251,12 @@ class JobDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Job Description
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.grey.shade200),
@@ -290,12 +290,21 @@ class JobDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Buttons
-                  Container(
+                  // Save Job / Apply Now — candidates & guests only.
+                  // Recruiters and companies can't apply, so hide the actions.
+                  FutureBuilder<String?>(
+                    future: AuthStorageService().getUserRole(),
+                    builder: (context, roleSnap) {
+                      final role = roleSnap.data;
+                      if (role == 'recruiter' || role == 'company') {
+                        return const SizedBox.shrink();
+                      }
+                      return Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.grey.shade200),
@@ -407,14 +416,16 @@ class JobDetailsScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                      );
+                    },
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Job Overview
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.grey.shade200),
@@ -431,7 +442,7 @@ class JobDetailsScreen extends StatelessWidget {
                             color: Colors.black,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         _buildOverviewRow('Experience', experience),
                         _buildOverviewRow('Positions', positions),
                         _buildOverviewRow('Application Published', posted),
@@ -444,12 +455,12 @@ class JobDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Application Requirements
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.grey.shade200),
@@ -504,7 +515,7 @@ class JobDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),

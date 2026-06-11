@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:intl/intl.dart';
 import '../controller/job_posting_controller.dart';
 import '../controller/job_controller/job_posting_expiration_controller.dart';
@@ -11,7 +10,6 @@ class JobDescriptionStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<JobPostingController>();
-    final htmlController = HtmlEditorController();
     final jobPostingExpirationController = Get.put(JobPostingExpirationController());
     jobPostingExpirationController.calculateDeadline(controller.selectedDate.value);
 
@@ -32,44 +30,34 @@ class JobDescriptionStep extends StatelessWidget {
               const SizedBox(height: 12),
 
 
-              // HTML Editor
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: HtmlEditor(
-                  controller: htmlController,
-                  htmlEditorOptions: HtmlEditorOptions(
-                    hint: "Describe the job role...",
-                    initialText: controller.jobDescriptionHtml.value,
-                    autoAdjustHeight: false,
-                    adjustHeightForKeyboard: false,
+              // Plain-text job description
+              TextField(
+                controller: controller.jobDescriptionController,
+                minLines: 8,
+                maxLines: 14,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                onChanged: (value) => controller.updateJobDescriptionHtml(value),
+                decoration: InputDecoration(
+                  hintText: "Describe the job role...",
+                  alignLabelWithHint: true,
+                  contentPadding: const EdgeInsets.all(14),
+                  filled: true,
+                  fillColor: const Color(0xFFFAFAFA),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
-                  htmlToolbarOptions: const HtmlToolbarOptions(
-                    defaultToolbarButtons: [
-                      StyleButtons(),
-                      FontButtons(),
-                      ListButtons(),
-                      ParagraphButtons(),
-                      InsertButtons(),
-                      OtherButtons(),
-                    ],
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
-                  otherOptions: const OtherOptions(height: 250),
-                  callbacks: Callbacks(
-                    onChangeContent: (String? changed) {
-                      final html = changed ?? '';
-                      controller.updateJobDescriptionHtml(html);
-
-                      // Compute plain text by stripping HTML tags
-                      final plainText = html.replaceAll(RegExp(r'<[^>]*>'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
-
-                      // Update counts
-                      controller.characterCount.value = plainText.length;
-                      controller.wordCount.value = plainText.isEmpty ? 0 : plainText.split(RegExp(r'\s+')).length;
-                    },
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF2B7FD0),
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),

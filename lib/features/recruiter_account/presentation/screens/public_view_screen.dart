@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
@@ -119,7 +120,83 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+
+                // ----- Social Media (moved to top) -----
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: (user.sLink)
+                      .map(
+                        (link) => GestureDetector(
+                          onTap: () async {
+                            final Uri url = Uri.parse(link.url ?? '');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } else {
+                              Get.snackbar(
+                                'Error',
+                                'Could not open ${link.url}',
+                              );
+                            }
+                          },
+                          child: SocialMedia(image: _getSocialIcon(link.label)),
+                        ),
+                      )
+                      .toList(),
+                ),
+
+                const SizedBox(height: 16),
+
+                // ----- Follow + Share (after profile image) -----
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2B7FD0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Follow',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    InkWell(
+                      onTap: _shareProfile,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        height: 42,
+                        width: 46,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFF2B7FD0)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.share,
+                          color: Color(0xFF2B7FD0),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
 
                 // ----- Basic Info -----
                 Column(
@@ -163,52 +240,6 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
                 ),
 
                 const SizedBox(height: 20),
-
-                // ----- Social Media -----
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: (user.sLink)
-                      .map(
-                        (link) => GestureDetector(
-                          onTap: () async {
-                            final Uri url = Uri.parse(link.url ?? '');
-                            if (await canLaunchUrl(url)) {
-                              await launchUrl(
-                                url,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            } else {
-                              Get.snackbar(
-                                'Error',
-                                'Could not open ${link.url}',
-                              );
-                            }
-                          },
-                          child: SocialMedia(image: _getSocialIcon(link.label)),
-                        ),
-                      )
-                      .toList(),
-                ),
-
-                SizedBox(height: 20),
-
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B7FD0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    'Follow',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
 
                 Divider(color: Color(0xFF999999)),
 
@@ -260,6 +291,20 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
         }),
       ),
     );
+  }
+
+  /// Opens the OS share sheet with this recruiter's public profile link.
+  Future<void> _shareProfile() async {
+    final user = recruiterController.userInfo.value;
+    final name = user != null
+        ? "${user.firstName} ${user.sureName}".trim()
+        : '';
+    final slug = user?.slug ?? '';
+    final url = "${ApiConstants.webBaseUrl}/rp/$slug";
+    final text = name.isNotEmpty
+        ? "Check out $name on EVPitch:\n$url"
+        : "Check out this profile on EVPitch:\n$url";
+    await Share.share(text, subject: 'EVPitch profile');
   }
 
   String _getSocialIcon(String? label) {

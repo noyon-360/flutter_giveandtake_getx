@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../../../core/network/network_result.dart';
+import '../../../../core/network/services/auth_storage_service.dart';
 import '../../data/models/job_listing_response_model.dart';
 import '../../data/models/job_model.dart';
 import '../../domain/usecases/get_jobs_usecase.dart';
@@ -14,7 +15,14 @@ class AllJobsController extends GetxController {
   var isLoading = false.obs;
   var isMoreLoading = false.obs;
   var jobList = <JobModel>[].obs;
-  
+
+  // Current user role — gates the Apply button (candidates/guests only).
+  final role = Rxn<String>();
+  bool get canApply {
+    final r = role.value;
+    return r != 'recruiter' && r != 'company';
+  }
+
   // Pagination
   var currentPage = 1.obs;
   var totalPages = 1.obs;
@@ -29,6 +37,7 @@ class AllJobsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _loadRole();
     // Debounce search input
     _debounceWorker = debounce(searchText, (callback) {
       if (callback.length > 2 || callback.isEmpty) {
@@ -38,7 +47,11 @@ class AllJobsController extends GetxController {
     
     fetchJobs();
   }
-  
+
+  Future<void> _loadRole() async {
+    role.value = await AuthStorageService().getUserRole();
+  }
+
   @override
   void onClose() {
     _debounceWorker?.dispose();

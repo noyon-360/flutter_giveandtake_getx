@@ -36,6 +36,11 @@ class EditBasicProfileController extends GetxController {
   final Rx<String?> selectedCountry = Rx<String?>(null);
   final Rx<String?> selectedCity = Rx<String?>(null);
 
+  // Saved location to pre-select, applied deterministically once BOTH the
+  // country list and the resume data are available (no arbitrary delays).
+  String _pendingCountry = '';
+  String _pendingCity = '';
+
   // Media
   final Rx<String?> photoPath = Rx<String?>(null); // For new local file
   final Rx<String?> networkPhotoUrl = Rx<String?>(null); // For existing URL
@@ -75,18 +80,22 @@ class EditBasicProfileController extends GetxController {
         final data = jsonDecode(response.body);
         final List<dynamic> countryList = data['data'] ?? [];
         
-        countries.value = [];
+        final loaded = <String>[];
         countryCityMap.clear();
-        
+
         for (var country in countryList) {
           final countryName = country['country'] as String?;
           final citiesList = country['cities'] as List<dynamic>?;
-          
+
           if (countryName != null) {
-            countries.value.add(countryName);
+            loaded.add(countryName);
             countryCityMap[countryName] = citiesList?.cast<String>() ?? [];
           }
         }
+        // assignAll fires reactivity (a plain .value.add does NOT), so the
+        // dropdowns and the contains() guard never observe a stale list.
+        countries.assignAll(loaded);
+        _applyPendingLocation(); // re-select saved values once data is ready
       }
     } catch (e) {
       print('Error loading countries: $e');
@@ -123,10 +132,25 @@ class EditBasicProfileController extends GetxController {
     }
   }
 
+  /// User-initiated country change from the dropdown: switch the city list and
+  /// clear the previously-selected city (correct for a genuine change).
   void updateCitiesForCountry(String country) {
     selectedCountry.value = country;
-    cities.value = countryCityMap[country] ?? [];
+    cities.assignAll(countryCityMap[country] ?? []);
     selectedCity.value = null;
+  }
+
+  /// Deterministically pre-select the saved country/city once the country list
+  /// is loaded. Safe to call multiple times (idempotent); does NOT clear the
+  /// city like updateCitiesForCountry does.
+  void _applyPendingLocation() {
+    if (_pendingCountry.isEmpty || countries.isEmpty) return;
+    if (!countries.contains(_pendingCountry)) return;
+    selectedCountry.value = _pendingCountry;
+    cities.assignAll(countryCityMap[_pendingCountry] ?? []);
+    if (_pendingCity.isNotEmpty && cities.contains(_pendingCity)) {
+      selectedCity.value = _pendingCity;
+    }
   }
 
   void populateData(dynamic data) {
@@ -176,18 +200,13 @@ class EditBasicProfileController extends GetxController {
       
       print('✅ [EditBasicProfile] Data populated successfully');
       
-      // Set selected values for dropdowns after a delay for countries to load
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (country.isNotEmpty && countries.contains(country)) {
-          print('🌍 [EditBasicProfile] Setting country: $country');
-          selectedCountry.value = country;
-          updateCitiesForCountry(country);
-          if (city.isNotEmpty) {
-            print('🏙️ [EditBasicProfile] Setting city: $city');
-            selectedCity.value = city;
-          }
-        }
-      });
+      // Store the saved location; apply it deterministically once both the
+      // country list and the resume data are ready (whichever finishes last
+      // calls _applyPendingLocation). No arbitrary 500ms race, and the saved
+      // city is no longer wiped by updateCitiesForCountry.
+      _pendingCountry = country;
+      _pendingCity = city;
+      _applyPendingLocation();
     } catch (e) {
       print('❌ Error populating data: $e');
     }
@@ -231,8 +250,15 @@ class EditBasicProfileController extends GetxController {
           firstName: firstNameController.text.trim(),
           lastName: lastNameController.text.trim(),
           email: emailController.text.trim(),
-          country: selectedCountry.value ?? '',
-          city: selectedCity.value ?? '',
+          // Fall back to the saved text value if the dropdown selection is
+          // somehow still null, so a name-only edit never submits empty
+          // strings and wipes the existing country/city.
+          country: (selectedCountry.value ?? '').isNotEmpty
+              ? selectedCountry.value!
+              : countryController.text.trim(),
+          city: (selectedCity.value ?? '').isNotEmpty
+              ? selectedCity.value!
+              : cityController.text.trim(),
           // Keep other fields as they were
           title: '',
           zip: '',

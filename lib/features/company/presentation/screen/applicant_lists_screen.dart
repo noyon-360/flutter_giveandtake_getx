@@ -195,6 +195,32 @@ class _CompanyApplicantsListScreenState
 
                           const Divider(height: 24),
 
+                          /// CURRENT STATUS (read-only). The backend has no
+                          /// "Received" status, so the default/empty state is
+                          /// shown as "Application received" and is never a
+                          /// selectable button.
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                "Status: ${_displayStatus(applicant.status)}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+
                           /// STATUS BUTTONS
                           Wrap(
                             spacing: 10,
@@ -273,6 +299,27 @@ Widget _infoRow(String label, String value) {
   );
 }
 
+/// Maps a backend application status to a friendly label. The backend has no
+/// "Received" status, so the default/empty/pending state is presented as
+/// "Application received" (never a selectable transition).
+String _displayStatus(String s) {
+  final v = s.toLowerCase().trim();
+  if (v.isEmpty ||
+      v == 'received' ||
+      v == 'application received' ||
+      v == 'pending' ||
+      v == 'applied' ||
+      v == 'review' ||
+      v == 'reviewing') {
+    return 'Application received';
+  }
+  if (v == 'shortlisted' || v == 'accept' || v == 'accepted') {
+    return 'Shortlisted';
+  }
+  if (v == 'rejected' || v == 'reject') return 'Unsuccessful';
+  return s;
+}
+
 void _showCustomQuestionDialog({
   required BuildContext context,
   required List<Answer> answers,
@@ -281,59 +328,61 @@ void _showCustomQuestionDialog({
     context: context,
     builder: (context) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text(
-        "Custom Question Answers",
-        style: TextStyle(fontWeight: FontWeight.bold),
+      title: Text(
+        "Custom Question Answers (${answers.length})",
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: Get.height * 0.6),
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: answers.length,
-            separatorBuilder: (_, __) => const Divider(height: 24),
-            itemBuilder: (context, index) {
-              final ans = answers[index];
-              final questionText = (ans.question?.trim().isNotEmpty ?? false)
-                  ? ans.question!.trim()
-                  : "Question ${index + 1}";
-              final answerText = (ans.ans?.trim().isNotEmpty ?? false)
-                  ? ans.ans!.trim()
-                  : "No response";
+        // Bounded height so the ListView has a real extent and scrolls,
+        // instead of the previous shrinkWrap+maxFinite combo that overflowed.
+        height: (Get.height * 0.6).clamp(200.0, Get.height * 0.7),
+        child: answers.isEmpty
+            ? const Center(child: Text("No answers submitted"))
+            : ListView.separated(
+                itemCount: answers.length,
+                separatorBuilder: (_, __) => const Divider(height: 24),
+                itemBuilder: (context, index) {
+                  final ans = answers[index];
+                  final questionText =
+                      (ans.question?.trim().isNotEmpty ?? false)
+                      ? ans.question!.trim()
+                      : "Question ${index + 1}";
+                  final answerText = (ans.ans?.trim().isNotEmpty ?? false)
+                      ? ans.ans!.trim()
+                      : "No response";
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// QUESTION
-                  Text(
-                    "${index + 1}. $questionText",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// QUESTION
+                      Text(
+                        "${index + 1}. $questionText",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
 
-                  /// ANSWER
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Text(
-                      answerText,
-                      style: const TextStyle(fontSize: 14, height: 1.4),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
+                      /// ANSWER
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Text(
+                          answerText,
+                          style: const TextStyle(fontSize: 14, height: 1.4),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
       ),
       actions: [
         TextButton(

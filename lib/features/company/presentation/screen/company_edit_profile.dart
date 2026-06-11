@@ -183,18 +183,14 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
       }
 
       // === RECRUITERS ===
-      controller.employeeControllers.clear();
-      controller.employeeIdMap.clear();
-      if (company.employeesId != null && company.employeesId.isNotEmpty) {
-        for (var email in company.employeesId) {
-          controller.employeeControllers.add(
-            TextEditingController(text: email),
-          );
-        }
-      }
-      if (controller.employeeControllers.isEmpty) {
-        controller.employeeControllers.add(TextEditingController());
-      }
+      // Resolve the stored recruiter ids (raw ObjectIds) to NAMES for display,
+      // and register each controller in employeeIdMap so the ids round-trip on
+      // save (previously the raw 24-char ids were shown and only survived save
+      // by accident via a length heuristic). Async resolver -> rebuild the
+      // non-reactive first field on completion.
+      controller.prefillRecruiters(company.employeesId).whenComplete(() {
+        if (mounted) setState(() {});
+      });
 
       // === AWARDS & HONORS ===
       controller.awardFields.clear();

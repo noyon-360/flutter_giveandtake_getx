@@ -18,19 +18,12 @@ class _EditBasicProfileScreenState extends State<EditBasicProfileScreen> {
   @override
   void initState() {
     super.initState();
+    // The controller's onInit() already loads the country list + fresh resume
+    // data (dashboard data, with Get.arguments as a fallback) and pre-selects
+    // the saved country/city deterministically. The previous post-frame
+    // populateData re-applied stale arguments after a 500ms delay and could
+    // overwrite the user's edits, so it has been removed.
     controller = Get.put(EditBasicProfileController());
-    
-    // Load countries first, then populate data
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Wait a bit for countries to load
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      final resumeData = Get.arguments;
-      if (resumeData != null) {
-        print('📝 [EditBasicProfile] Populating data: $resumeData');
-        controller.populateData(resumeData);
-      }
-    });
   }
 
   @override

@@ -1,4 +1,5 @@
 // features/recruiter_account/presentation/controller/job_edit_controller.dart
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:giveandtake/core/contracts/web/job_contract.dart';
@@ -43,6 +44,16 @@ class JobEditController extends GetxController {
   // var selectedCareerStage = ''.obs;
   var selectedCurrency = Rxn<GetCurrencyResponseModel>();
   var jobDescriptionHtml = ''.obs;
+
+  /// Plain-text job description field (stores plain text now, not HTML).
+  final TextEditingController jobDescriptionController = TextEditingController();
+
+  @override
+  void onClose() {
+    jobDescriptionController.dispose();
+    super.onClose();
+  }
+
   var publishNow = true.obs;
   Rx<DateTime?> selectedPublishDate = Rx<DateTime?>(null);
 
@@ -104,7 +115,13 @@ class JobEditController extends GetxController {
     department.value = j.department ?? '';
     vacancies.value = j.vacancy?.toString() ?? '1';
     compensation.value = j.compensation ?? '';
-    jobDescriptionHtml.value = j.description ?? '';
+    // Strip any legacy HTML so the field shows (and saves) clean plain text.
+    final plainDescription = (j.description ?? '')
+        .replaceAll(RegExp(r'<[^>]*>'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    jobDescriptionHtml.value = plainDescription;
+    jobDescriptionController.text = plainDescription;
     companyWebsite.value = j.website_Url ?? '';
 
     // === LOCATION: Use LocationController as source of truth ===

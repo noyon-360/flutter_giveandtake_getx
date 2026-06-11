@@ -83,19 +83,24 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
         // Resume PDF list for THIS applicant.
         final resumeData = controller.resume;
 
-        // Display values: prefer the embedded applicant resume, fall back to
-        // the applicant user object.
-        final photo = resume?.photo ?? '';
+        // The applicant-list endpoint does NOT embed the full resume, so
+        // `applicant.resume` is usually null and the header rendered blank.
+        // Prefer the public candidate view fetched by slug (which DOES carry
+        // the profile fields), falling back to the embedded resume.
+        final profile = controller.candidateView.value?.resume;
+        final photo = profile?.photo ?? resume?.photo ?? '';
         final fullName = [
-          resume?.firstName ?? '',
-          resume?.lastName ?? '',
+          profile?.firstName ?? resume?.firstName ?? '',
+          profile?.lastName ?? resume?.lastName ?? '',
         ].where((e) => e.trim().isNotEmpty).join(' ').trim();
         final displayName = fullName.isNotEmpty ? fullName : user.name;
-        final title = resume?.title ?? '';
-        final city = resume?.city ?? '';
-        final country = resume?.country ?? '';
-        final aboutUs = resume?.aboutUs ?? '';
-        final skills = resume?.skills ?? const <String>[];
+        final title = profile?.title ?? resume?.title ?? '';
+        final city = profile?.city ?? resume?.city ?? '';
+        final country = profile?.country ?? resume?.country ?? '';
+        final aboutUs = profile?.aboutUs ?? resume?.aboutUs ?? '';
+        final skills = (profile != null && profile.skills.isNotEmpty)
+            ? profile.skills
+            : (resume?.skills ?? const <String>[]);
 
         // Elevator pitch comes from the public candidate view (fetched by slug).
         final candidatePublic = controller.candidateView.value;

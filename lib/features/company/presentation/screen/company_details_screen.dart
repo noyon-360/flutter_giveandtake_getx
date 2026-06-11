@@ -58,6 +58,34 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
     await controller.fetchEmployee();
   }
 
+  void _confirmRemoveRecruiter(String employeeId, String name) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text("Remove Recruiter"),
+        content: Text(
+          name.isNotEmpty
+              ? "Are you sure you want to remove $name from your internal recruiters?"
+              : "Are you sure you want to remove this recruiter?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              controller.removeRecruiter(employeeId);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
+  }
+
   String? _accessToken;
 
   @override
@@ -602,7 +630,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                       padding: const EdgeInsets.only(right: 12),
                                       child: GestureDetector(
                                         onTap: () =>
-                                            controller.removeRecruiter(e.id),
+                                            _confirmRemoveRecruiter(e.id, e.name),
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 10,

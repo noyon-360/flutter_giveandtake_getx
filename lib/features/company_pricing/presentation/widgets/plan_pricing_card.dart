@@ -46,7 +46,7 @@ class PlanPricingCard extends StatelessWidget {
                 title,
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   color: Colors.black,
                   fontWeight: FontWeight.w700,
                 ),
@@ -59,7 +59,7 @@ class PlanPricingCard extends StatelessWidget {
                 '\$${monthlyPrice.toStringAsFixed(2)} per Job Advert (30 Days Post)',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 12,
                   color: Color(0xff8593A3),
                   fontWeight: FontWeight.w700,
                 ),
@@ -187,7 +187,7 @@ class PlanPricingCard extends StatelessWidget {
                       '\$${monthlyPrice.toStringAsFixed(2)} per month/',
                       textAlign: TextAlign.start,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 14,
                         color: Colors.black,
                         fontWeight: FontWeight.w600,
                         height: 1.2,
@@ -197,7 +197,7 @@ class PlanPricingCard extends StatelessWidget {
                       '\$${(yearlyPrice ?? (monthlyPrice * 12)).toStringAsFixed(2)} per annum',
                       textAlign: TextAlign.start,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 14,
                         color: Colors.black,
                         fontWeight: FontWeight.w600,
                         height: 1.2,
@@ -248,7 +248,7 @@ class PlanPricingCard extends StatelessWidget {
                           child: Text(
                             entry.value.trim(),
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 12,
                               color: Colors.black87,
                               fontWeight: FontWeight.w500,
                               height: 1.3,
