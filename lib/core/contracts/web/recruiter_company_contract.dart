@@ -61,6 +61,7 @@ class CompanyHonorInput {
   Map<String, dynamic> toJson() => {
     'title': title,
     'programeName': programeName,
+    'issuer': programeName,
     'programeDate': normalizeMonthYearToIso(programeDate),
     'description': description,
   };
@@ -165,6 +166,10 @@ class CompanyPayloadBuilder {
     payload.putField('employeesId', jsonEncode(input.employeesId));
     payload.putField(
       'AwardsAndHonors',
+      encodeJsonList(input.awardsAndHonors.map((item) => item.toJson()).toList()),
+    );
+    payload.putField(
+      'honors',
       encodeJsonList(input.awardsAndHonors.map((item) => item.toJson()).toList()),
     );
     payload.putField(

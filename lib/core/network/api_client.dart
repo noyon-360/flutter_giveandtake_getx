@@ -199,7 +199,11 @@ class ApiClient {
       // Set headers for FormData if applicable
       if (isFormData) {
         options.headers ??= {};
+        options.headers!.remove('Content-Type');
         options.headers!.addAll(ApiConstants.multipartHeaders);
+        options.contentType = Headers.multipartFormDataContentType;
+        options.headers![Headers.contentTypeHeader] =
+            Headers.multipartFormDataContentType;
       }
 
       if (kDebugMode) {

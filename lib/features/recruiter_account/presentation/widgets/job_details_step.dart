@@ -10,6 +10,7 @@ import '../controller/job_controller/employment_type_controller.dart';
 import '../controller/job_controller/experience_level_controller.dart';
 import '../controller/job_posting_controller.dart';
 import 'country_city_searchable_dropdown.dart';
+import 'currency_picker_sheet.dart';
 
 class JobDetailsStep extends StatefulWidget {
   const JobDetailsStep({super.key});
@@ -795,73 +796,11 @@ class _JobDetailsStepState extends State<JobDetailsStep> {
                       return;
                     }
 
-                    final selected =
-                        await showModalBottomSheet<GetCurrencyResponseModel>(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (ctx) {
-                            final searchController = TextEditingController();
-                            final filteredCurrencies =
-                                RxList<GetCurrencyResponseModel>(
-                                  controller.currencies,
-                                );
-
-                            return Padding(
-                              padding: EdgeInsets.only(
-                                bottom: MediaQuery.of(ctx).viewInsets.bottom,
-                              ),
-                              child: Column(
-                                children: [
-                                  TextField(
-                                    controller: searchController,
-                                    decoration: const InputDecoration(
-                                      prefixIcon: Icon(Icons.search),
-                                      hintText: 'Search currency',
-                                    ),
-                                    onChanged: (value) {
-                                      filteredCurrencies.assignAll(
-                                        controller.currencies
-                                            .where(
-                                              (c) =>
-                                                  c.currencyName
-                                                      .toLowerCase()
-                                                      .contains(
-                                                        value.toLowerCase(),
-                                                      ) ||
-                                                  c.symbol
-                                                      .toLowerCase()
-                                                      .contains(
-                                                        value.toLowerCase(),
-                                                      ) ||
-                                                  c.code.toLowerCase().contains(
-                                                    value.toLowerCase(),
-                                                  ),
-                                            )
-                                            .toList(),
-                                      );
-                                    },
-                                  ),
-                                  Obx(
-                                    () => Expanded(
-                                      child: ListView.builder(
-                                        itemCount: filteredCurrencies.length,
-                                        itemBuilder: (_, index) {
-                                          final c = filteredCurrencies[index];
-                                          return ListTile(
-                                            title: Text(
-                                              '${c.currencyName} (${c.symbol})',
-                                            ),
-                                            onTap: () => Navigator.pop(ctx, c),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
+                    final selected = await showCurrencyPickerSheet(
+                      context,
+                      currencies: controller.currencies,
+                      selectedCurrency: controller.selectedCurrency.value,
+                    );
 
                     if (selected != null) {
                       controller.selectedCurrency.value = selected;

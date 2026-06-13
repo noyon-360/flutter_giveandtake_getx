@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:get/get.dart';
 import 'package:giveandtake/core/contracts/web/job_contract.dart';
+import 'package:giveandtake/core/utils/quill_html_converter.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/get_category_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/get_currency_response_model.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
@@ -72,9 +74,10 @@ class JobPostingController extends GetxController {
   RxString jobDescriptionHtml = ''.obs;
   RxString jobDescriptionPlain = ''.obs;
 
-  /// Plain-text job-description field, shared by the create step and the edit
-  /// screen. We now store plain text (not HTML) so it renders cleanly.
-  final TextEditingController jobDescriptionController = TextEditingController();
+  /// Rich-text job description editor, shared by the create step and the
+  /// edit screen.
+  late final quill.QuillController jobDescriptionQuillController =
+      quill.QuillController.basic();
 
   // counts
   RxInt characterCount = 0.obs;
@@ -113,8 +116,9 @@ class JobPostingController extends GetxController {
     // Description
     jobDescriptionHtml.value = job.description ?? '';
     updateJobDescriptionHtml(job.description ?? '');
-    // Show the plain-text version in the editable field (strips legacy HTML).
-    jobDescriptionController.text = jobDescriptionPlain.value;
+    jobDescriptionQuillController.document = QuillHtmlConverter.htmlToDocument(
+      job.description,
+    );
 
     // Publish Date & Flag
     publishNow.value =
@@ -253,6 +257,8 @@ class JobPostingController extends GetxController {
     }
 
     loadCurrenciesIfEmpty();
+
+    jobDescriptionQuillController.addListener(_onJobDescriptionChanged);
   }
 
   // add a remove method
@@ -353,12 +359,24 @@ class JobPostingController extends GetxController {
     return words.length;
   }
 
+  /// Keeps the plain-text/HTML fields and counters in sync with the Quill
+  /// editor's content.
+  void _onJobDescriptionChanged() {
+    final plain = jobDescriptionQuillController.document.toPlainText().trim();
+    jobDescriptionPlain.value = plain;
+    jobDescriptionHtml.value = QuillHtmlConverter.documentToHtml(
+      jobDescriptionQuillController.document,
+    );
+    characterCount.value = plain.length;
+    wordCount.value = _countWords(plain);
+  }
+
   // -----------------------------
   // Clean-up
   // -----------------------------
   @override
   void onClose() {
-    jobDescriptionController.dispose();
+    jobDescriptionQuillController.dispose();
     super.onClose();
   }
 
@@ -388,7 +406,7 @@ class JobPostingController extends GetxController {
     // Job Description
     jobDescriptionHtml.value = '';
     jobDescriptionPlain.value = '';
-    jobDescriptionController.clear();
+    jobDescriptionQuillController.clear();
     characterCount.value = 0;
     wordCount.value = 0;
 
@@ -447,7 +465,7 @@ class JobPostingController extends GetxController {
     // Job Description
     jobDescriptionHtml.value = '';
     jobDescriptionPlain.value = '';
-    jobDescriptionController.clear();
+    jobDescriptionQuillController.clear();
     characterCount.value = 0;
     wordCount.value = 0;
 

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../controller/job_posting_controller.dart';
 import '../controller/job_controller/job_posting_expiration_controller.dart';
+import 'job_description_editor.dart';
 
 class JobDescriptionStep extends StatelessWidget {
   const JobDescriptionStep({super.key});
@@ -30,36 +31,9 @@ class JobDescriptionStep extends StatelessWidget {
               const SizedBox(height: 12),
 
 
-              // Plain-text job description
-              TextField(
-                controller: controller.jobDescriptionController,
-                minLines: 8,
-                maxLines: 14,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.newline,
-                onChanged: (value) => controller.updateJobDescriptionHtml(value),
-                decoration: InputDecoration(
-                  hintText: "Describe the job role...",
-                  alignLabelWithHint: true,
-                  contentPadding: const EdgeInsets.all(14),
-                  filled: true,
-                  fillColor: const Color(0xFFFAFAFA),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF2B7FD0),
-                      width: 1.5,
-                    ),
-                  ),
-                ),
+              // Rich-text job description
+              JobDescriptionEditor(
+                controller: controller.jobDescriptionQuillController,
               ),
 
               const SizedBox(height: 8),

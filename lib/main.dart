@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
 import 'package:get/get.dart';
 import 'package:giveandtake/core/init/app_initializer.dart';
 import 'package:giveandtake/core/theme/app_theme.dart';
@@ -22,6 +24,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'GiveAndTake',
       theme: AppTheme.light,
+      localizationsDelegates: const [
+        ...GlobalMaterialLocalizations.delegates,
+        GlobalWidgetsLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en')],
       home: SplashScreen(),
     );
   }

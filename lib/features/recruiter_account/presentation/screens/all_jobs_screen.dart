@@ -6,6 +6,7 @@ import 'package:giveandtake/features/recruiter_account/presentation/screens/sing
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../company/presentation/screen/applicant_lists_screen.dart';
 import '../../data/models/archieve_job_request_model.dart';
+import '../../data/models/get_job_response_model.dart';
 import '../controller/recruiter_controller.dart';
 import 'applicants_list_screen.dart';
 import 'job_preview_screen.dart';
@@ -34,6 +35,7 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         // leading: IconButton(
         //   icon: const Icon(
         //     Icons.arrow_back_ios_new,
@@ -130,6 +132,10 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
                         onPressed: () =>
                             Get.to(() => JobDetailEditScreen(jobId: job.id)),
                       ),
+
+                      const Spacer(),
+
+                      _approvalBadge(job),
 
                       const Spacer(),
 
@@ -233,6 +239,48 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _approvalBadge(YourJobResponseModel job) {
+    final status = job.jobApprove.trim().toLowerCase();
+    final bool isApproved = status == 'approved';
+    final bool isDenied = status == 'denied' || status == 'deny';
+
+    final String label;
+    final Color backgroundColor;
+    final Color foregroundColor;
+
+    if (isApproved) {
+      label = 'Approve';
+      backgroundColor = const Color(0xFFDDF3E2);
+      foregroundColor = const Color(0xFF1F8A46);
+    } else if (isDenied) {
+      label = 'Deny';
+      backgroundColor = const Color(0xFFFCE0E0);
+      foregroundColor = const Color(0xFFC23A3A);
+    } else {
+      label = 'Pending';
+      backgroundColor = const Color(0xFFFFF1D6);
+      foregroundColor = const Color(0xFFB7791F);
+    }
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 86),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        style: TextStyle(
+          color: foregroundColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

@@ -69,7 +69,7 @@ class FinishStep extends StatelessWidget {
     void submit() async {
       await recruiterController.createJobPost(
         controller.jobTitle.value,
-        controller.jobDescriptionPlain.value,
+        controller.jobDescriptionHtml.value,
         '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
         controller.vacanciesInt,
         experienceController.selectedExperienceLevel.value.isNotEmpty

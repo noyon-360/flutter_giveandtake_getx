@@ -22,6 +22,11 @@ class CompanyImageController extends GetxController {
     }
   }
 
+  void clearSelection() {
+    selectedImage.value = null;
+    existingImageUrl.value = '';
+  }
+
   void showPickerOptions() {
     Get.bottomSheet(
       Container(

@@ -1,8 +1,9 @@
 // features/recruiter_account/presentation/controller/job_edit_controller.dart
-import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:giveandtake/core/contracts/web/job_contract.dart';
+import 'package:giveandtake/core/utils/quill_html_converter.dart';
 import 'package:giveandtake/features/recruiter_account/data/models/get_single_job_response_model.dart'
     hide ApplicationRequirement, CustomQuestion;
 import 'package:giveandtake/features/recruiter_account/data/models/job_update_request_model.dart';
@@ -45,12 +46,13 @@ class JobEditController extends GetxController {
   var selectedCurrency = Rxn<GetCurrencyResponseModel>();
   var jobDescriptionHtml = ''.obs;
 
-  /// Plain-text job description field (stores plain text now, not HTML).
-  final TextEditingController jobDescriptionController = TextEditingController();
+  /// Rich-text job description editor.
+  late final quill.QuillController jobDescriptionQuillController =
+      quill.QuillController.basic();
 
   @override
   void onClose() {
-    jobDescriptionController.dispose();
+    jobDescriptionQuillController.dispose();
     super.onClose();
   }
 
@@ -96,6 +98,12 @@ class JobEditController extends GetxController {
     careerStageController = Get.find<CareerStageController>();
 
     ever(recruiterController.singleJob, (_) => _populateFromJob());
+
+    jobDescriptionQuillController.addListener(() {
+      jobDescriptionHtml.value = QuillHtmlConverter.documentToHtml(
+        jobDescriptionQuillController.document,
+      );
+    });
   }
 
   Future<void> fetchJob(String jobId) async {
@@ -115,13 +123,10 @@ class JobEditController extends GetxController {
     department.value = j.department ?? '';
     vacancies.value = j.vacancy?.toString() ?? '1';
     compensation.value = j.compensation ?? '';
-    // Strip any legacy HTML so the field shows (and saves) clean plain text.
-    final plainDescription = (j.description ?? '')
-        .replaceAll(RegExp(r'<[^>]*>'), ' ')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-    jobDescriptionHtml.value = plainDescription;
-    jobDescriptionController.text = plainDescription;
+    final descriptionHtml = j.description ?? '';
+    jobDescriptionHtml.value = descriptionHtml;
+    jobDescriptionQuillController.document =
+        QuillHtmlConverter.htmlToDocument(descriptionHtml);
     companyWebsite.value = j.website_Url ?? '';
 
     // === LOCATION: Use LocationController as source of truth ===
@@ -257,16 +262,30 @@ class JobEditController extends GetxController {
     selectedRole.value = '';
   }
 
+  String _resolveSelectedCategoryId() {
+    final selected = recruiterController.category.firstWhereOrNull(
+      (category) => category.name == selectedCategory.value,
+    );
+    final resolvedId = selected?.id?.trim();
+    if (resolvedId != null && resolvedId.isNotEmpty) {
+      return resolvedId;
+    }
+    return job.value?.jobCategoryId?.trim() ?? '';
+  }
+
   Future<void> saveJob() async {
     if (job.value == null) return;
 
     final loc = Get.find<LocationController>();
+    final jobCategoryId = _resolveSelectedCategoryId();
 
     final updatedJob = UpdateJobRequest(
       id: job.value!.id!,
       userId: job.value?.user?.id,
       title: jobTitle.value.trim(),
-      description: jobDescriptionHtml.value,
+      description: QuillHtmlConverter.documentToHtml(
+        jobDescriptionQuillController.document,
+      ),
       department: department.value,
       website_Url: companyWebsite.value.trim(),
       vacancy: int.tryParse(vacancies.value) ?? 1,
@@ -290,6 +309,7 @@ class JobEditController extends GetxController {
         careerStageController.selectedCareerStage.value,
       ),
 
+      jobCategoryId: jobCategoryId,
       name: selectedCategory.value,
       role: selectedRole.value,
       publishDate: publishNow.value

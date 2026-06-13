@@ -14,6 +14,8 @@ import '../controller/job_controller/job_posting_expiration_controller.dart';
 import '../controller/job_controller/location_type_controller.dart';
 import '../controller/job_posting_controller.dart';
 import '../widgets/country_city_searchable_dropdown.dart';
+import '../widgets/currency_picker_sheet.dart';
+import '../widgets/job_description_editor.dart';
 import '../widgets/recuired_item.dart';
 
 class JobUpdateScreen extends StatefulWidget {
@@ -611,71 +613,11 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                     return;
                   }
 
-                  final selected =
-                      await showModalBottomSheet<GetCurrencyResponseModel>(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (ctx) {
-                          final searchController = TextEditingController();
-                          final filteredCurrencies =
-                              RxList<GetCurrencyResponseModel>(
-                                controller.currencies,
-                              );
-
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              bottom: MediaQuery.of(ctx).viewInsets.bottom,
-                            ),
-                            child: Column(
-                              children: [
-                                TextField(
-                                  controller: searchController,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.search),
-                                    hintText: 'Search currency',
-                                  ),
-                                  onChanged: (value) {
-                                    filteredCurrencies.assignAll(
-                                      controller.currencies
-                                          .where(
-                                            (c) =>
-                                                c.currencyName
-                                                    .toLowerCase()
-                                                    .contains(
-                                                      value.toLowerCase(),
-                                                    ) ||
-                                                c.symbol.toLowerCase().contains(
-                                                  value.toLowerCase(),
-                                                ) ||
-                                                c.code.toLowerCase().contains(
-                                                  value.toLowerCase(),
-                                                ),
-                                          )
-                                          .toList(),
-                                    );
-                                  },
-                                ),
-                                Obx(
-                                  () => Expanded(
-                                    child: ListView.builder(
-                                      itemCount: filteredCurrencies.length,
-                                      itemBuilder: (_, index) {
-                                        final c = filteredCurrencies[index];
-                                        return ListTile(
-                                          title: Text(
-                                            '${c.currencyName} (${c.symbol})',
-                                          ),
-                                          onTap: () => Navigator.pop(ctx, c),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
+                  final selected = await showCurrencyPickerSheet(
+                    context,
+                    currencies: controller.currencies,
+                    selectedCurrency: controller.selectedCurrency.value,
+                  );
 
                   if (selected != null) {
                     controller.selectedCurrency.value = selected;
@@ -840,37 +782,9 @@ class _JobUpdateScreenState extends State<JobUpdateScreen> {
                     ),
                     const SizedBox(height: 6),
 
-                    // Plain-text job description
-                    TextField(
-                      controller: controller.jobDescriptionController,
-                      minLines: 8,
-                      maxLines: 14,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.newline,
-                      onChanged: (value) =>
-                          controller.updateJobDescriptionHtml(value),
-                      decoration: InputDecoration(
-                        hintText: "Describe the job role...",
-                        alignLabelWithHint: true,
-                        contentPadding: const EdgeInsets.all(14),
-                        filled: true,
-                        fillColor: const Color(0xFFFAFAFA),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF2B7FD0),
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
+                    // Rich-text job description
+                    JobDescriptionEditor(
+                      controller: controller.jobDescriptionQuillController,
                     ),
 
                     const SizedBox(height: 8),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 
 import 'package:giveandtake/features/recruiter_account/presentation/controller/country_city_controller.dart';
@@ -40,7 +41,7 @@ class JobPreviewScreen extends StatelessWidget {
   Future<void> _submit() async {
     recruiterController.createJobPost(
       controller.jobTitle.value,
-      controller.jobDescriptionPlain.value,
+      controller.jobDescriptionHtml.value,
         '${locationController.selectedCity.value ?? ''}, ${locationController.selectedCountry.value ?? ''}',
         controller.vacanciesInt,
         experienceController.selectedExperienceLevel.value,
@@ -149,7 +150,7 @@ class JobPreviewScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              _descriptionBox(controller.jobDescriptionPlain.value),
+              _descriptionBox(controller.jobDescriptionHtml.value),
 
               const SizedBox(height: 20),
 
@@ -262,14 +263,28 @@ class JobPreviewScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Text(
-        value.isNotEmpty ? value : "No job description added.",
-        style: const TextStyle(
-          fontSize: 15,
-          color: Colors.black87,
-          height: 1.5,
-        ),
-      ),
+      child: value.trim().isEmpty
+          ? const Text(
+              "No job description added.",
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.black87,
+                height: 1.5,
+              ),
+            )
+          : Html(
+              data: value,
+              style: {
+                "body": Style(
+                  margin: Margins.zero,
+                  padding: HtmlPaddings.zero,
+                  fontSize: FontSize(15),
+                  color: Colors.black87,
+                  lineHeight: LineHeight(1.5),
+                ),
+                "p": Style(margin: Margins.only(bottom: 12)),
+              },
+            ),
     );
   }
 

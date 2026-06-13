@@ -117,6 +117,7 @@ class CompanyRepoImplementation extends CompanyRepository {
       formData: formData,
       fromJsonT: (json) =>
           UpdateCompanyResponseModel.fromJson(json as Map<String, dynamic>),
+      isFormData: true,
     );
   }
 

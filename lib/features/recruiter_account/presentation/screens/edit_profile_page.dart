@@ -16,6 +16,7 @@ import '../controller/description_controller.dart';
 import '../controller/image_controller.dart';
 import '../controller/recruiter_controller.dart';
 import '../controller/upload_elevator_pitch.dart';
+import '../widgets/cropped_image_picker_card.dart';
 import '../widgets/country_city_searchable_dropdown.dart';
 import '../widgets/select_company.dart';
 
@@ -91,6 +92,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     final recruiter = widget.recruiterResponseModel;
+    companyImageController.clearSelection();
+    imagePickerController.clearSelection();
 
     // Text fields
     final plainBio = htmlToPlainText(recruiter.bio);
@@ -203,6 +206,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         );
       }
       // Now it's 100% safe – build phase is finished
+      reCruiController.selectedCompany.value = recruiter.companyId?.id;
       controller.selectedCountry.value = recruiter.country ?? '';
       controller.selectedCity.value = recruiter.city ?? '';
 
@@ -224,9 +228,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: AppScaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Get.back(),
+          ),
           title: Text('Edit Profile', style: TextStyle(color: Colors.white)),
           backgroundColor: const Color(0xFF2B7FD0),
           elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -246,128 +255,43 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           top: 0,
                           left: 0,
                           right: 0,
-                          child: GestureDetector(
-                            onTap: companyImageController.showPickerOptions,
-                            child: Obx(() {
-                              final file =
-                                  companyImageController.selectedImage.value;
-                              final url =
-                                  companyImageController.existingImageUrl.value;
-                              return Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4),
-                                  color: Color(0xFF191919),
-                                ),
-                                height: 150,
-                                child: file != null
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.file(
-                                          file,
-                                          width: double.infinity,
-                                          height: 150,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                    : url.isNotEmpty
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          url,
-                                          width: double.infinity,
-                                          height: 150,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                    : Column(
-                                        children: [
-                                          SizedBox(height: 20),
-                                          SizedBox(
-                                            height: 18,
-                                            width: 18,
-                                            child: Image.asset(
-                                              'assets/icons/gallery.png',
-                                            ),
-                                          ),
-                                          SizedBox(height: 7),
-                                          Text(
-                                            'Edit Company Banner',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          SizedBox(height: 9.5),
-                                          Text(
-                                            'Choose file',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                              );
-                            }),
-                          ),
+                          child: Obx(() {
+                            final file = companyImageController.selectedImage.value;
+                            final url =
+                                companyImageController.existingImageUrl.value;
+                            return CroppedImagePickerCard(
+                              onTap: companyImageController.showPickerOptions,
+                              file: file,
+                              imageUrl: url,
+                              height: 150,
+                              borderRadius: 10,
+                              editLabel: 'Change banner',
+                              placeholderTitle: 'Upload banner image',
+                              placeholderSubtitle: 'Cropped to 1584 x 396',
+                              backgroundColor: const Color(0xFF191919),
+                              placeholderForegroundColor: Colors.white,
+                            );
+                          }),
                         ),
                         Positioned(
                           left: 20,
                           bottom: 30,
-                          child: GestureDetector(
-                            onTap: imagePickerController.showPickerOptions,
-                            child: Obx(() {
-                              final file =
-                                  imagePickerController.selectedImage.value;
-                              final url =
-                                  imagePickerController.existingImageUrl.value;
-                              return Container(
-                                height: 110,
-                                width: 110,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Color(0xFFD9D9D9),
-                                ),
-                                child: Center(
-                                  child: file != null
-                                      ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Image.file(
-                                            file,
-                                            height: 110,
-                                            width: 110,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )
-                                      : url.isNotEmpty
-                                      ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Image.network(
-                                            url,
-                                            height: 110,
-                                            width: 110,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )
-                                      : const Text(
-                                          'photo/recruiter logo',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                ),
-                              );
-                            }),
-                          ),
+                          child: Obx(() {
+                            final file = imagePickerController.selectedImage.value;
+                            final url =
+                                imagePickerController.existingImageUrl.value;
+                            return CroppedImagePickerCard(
+                              onTap: imagePickerController.showPickerOptions,
+                              file: file,
+                              imageUrl: url,
+                              width: 110,
+                              height: 110,
+                              borderRadius: 12,
+                              editLabel: 'Change',
+                              placeholderTitle: 'Profile image',
+                              placeholderSubtitle: 'Cropped to 250 x 250',
+                            );
+                          }),
                         ),
                       ],
                     ),

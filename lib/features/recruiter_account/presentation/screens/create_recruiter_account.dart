@@ -12,6 +12,7 @@ import '../controller/description_controller.dart';
 import '../controller/recruiter_controller.dart';
 import '../controller/upload_elevator_pitch.dart';
 import '../widgets/bio.dart';
+import '../widgets/cropped_image_picker_card.dart';
 import '../widgets/country_city_searchable_dropdown.dart';
 import '../widgets/name.dart';
 import '../widgets/phone_number.dart';
@@ -78,6 +79,13 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
   final ElevatorPitchController elevatorPitchController = Get.put(
     ElevatorPitchController(),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    bannerPickerController.clearSelection();
+    imagePickerController.clearSelection();
+  }
 
   _submit() {
     recruiterController.createRecruiterScreen(
@@ -266,46 +274,18 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(10),
-                      child: GestureDetector(
-                        onTap: bannerPickerController.showPickerOptions,
-                        child: Obx(() {
-                          return Container(
-                            height: 150,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Color(0xFFD9D9D9),
-                            ),
-                            child: Center(
-                              child:
-                                  bannerPickerController.selectedImage.value !=
-                                      null
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      // same as container
-                                      child: Image.file(
-                                        bannerPickerController
-                                            .selectedImage
-                                            .value!,
-                                        width: double.infinity,
-                                        height: 150,
-                                        fit: BoxFit
-                                            .cover, // makes image fill the container
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Company banner',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                            ),
-                          );
-                        }),
-                      ),
+                      child: Obx(() {
+                        return CroppedImagePickerCard(
+                          onTap: bannerPickerController.showPickerOptions,
+                          file: bannerPickerController.selectedImage.value,
+                          imageUrl: bannerPickerController.existingImageUrl.value,
+                          height: 150,
+                          borderRadius: 8,
+                          editLabel: 'Change banner',
+                          placeholderTitle: 'Company banner',
+                          placeholderSubtitle: 'Cropped to 1584 x 396',
+                        );
+                      }),
                     ),
                   ),
 
@@ -315,47 +295,19 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GestureDetector(
-                        onTap: imagePickerController.showPickerOptions,
-                        child: Obx(() {
-                          return Container(
-                            height: 150,
-                            width: 150,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Color(0xFFD9D9D9),
-                            ),
-                            child:
-                                imagePickerController.selectedImage.value !=
-                                    null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    // same as container
-                                    child: Image.file(
-                                      imagePickerController
-                                          .selectedImage
-                                          .value!,
-                                      height: 130,
-                                      width: 130,
-                                      fit: BoxFit
-                                          .cover, // makes image fill the container
-                                    ),
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: const Text(
-                                      'photo/recruiter logo',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                          );
-                        }),
-                      ),
+                      Obx(() {
+                        return CroppedImagePickerCard(
+                          onTap: imagePickerController.showPickerOptions,
+                          file: imagePickerController.selectedImage.value,
+                          imageUrl: imagePickerController.existingImageUrl.value,
+                          width: 150,
+                          height: 150,
+                          borderRadius: 8,
+                          editLabel: 'Change',
+                          placeholderTitle: 'Photo / recruiter logo',
+                          placeholderSubtitle: 'Cropped to 250 x 250',
+                        );
+                      }),
 
                       SizedBox(height: 10),
                     ],

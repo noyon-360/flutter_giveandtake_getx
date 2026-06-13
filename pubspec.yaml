@@ -11,6 +11,8 @@ environment:
 dependencies:
     flutter:
         sdk: flutter
+    flutter_localizations:
+        sdk: flutter
     draggable_home: ^1.0.5
     cupertino_icons: ^1.0.8
     webview_flutter: ^4.13.0

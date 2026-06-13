@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
@@ -12,6 +13,7 @@ import '../controller/job_controller/employment_type_controller.dart';
 import '../controller/job_controller/experience_level_controller.dart';
 import '../controller/job_controller/job_posting_expiration_controller.dart';
 import '../controller/job_controller/location_type_controller.dart';
+import '../widgets/job_description_editor.dart';
 import '../widgets/recuired_item.dart';
 
 class JobDetailEditScreen extends StatefulWidget {
@@ -185,14 +187,21 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                     border: Border.all(),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  // Strip any HTML tags so the description shows as plain text.
-                  child: Text(() {
-                    final plain = (job.description ?? '')
-                        .replaceAll(RegExp(r'<[^>]*>'), ' ')
-                        .replaceAll(RegExp(r'\s+'), ' ')
-                        .trim();
-                    return plain.isEmpty ? 'No description' : plain;
-                  }()),
+                  child: (job.description ?? '').trim().isEmpty
+                      ? const Text('No description')
+                      : Html(
+                          data: job.description!,
+                          style: {
+                            "body": Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                              fontSize: FontSize(14),
+                              lineHeight: LineHeight(1.5),
+                              color: Colors.black87,
+                            ),
+                            "p": Style(margin: Margins.only(bottom: 12)),
+                          },
+                        ),
                 ),
                 title("Publish Date"),
                 readonlyValue(
@@ -359,39 +368,12 @@ class _JobDetailEditScreenState extends State<JobDetailEditScreen> {
                 // Job Description Editor
                 const Text(
                   "Job Description",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
-                TextField(
-                  controller: controller.jobDescriptionController,
-                  minLines: 8,
-                  maxLines: 14,
-                  keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.newline,
-                  onChanged: (value) =>
-                      controller.jobDescriptionHtml.value = value,
-                  decoration: InputDecoration(
-                    hintText: "Describe the job...",
-                    alignLabelWithHint: true,
-                    contentPadding: const EdgeInsets.all(14),
-                    filled: true,
-                    fillColor: const Color(0xFFFAFAFA),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF2B7FD0),
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
+                JobDescriptionEditor(
+                  controller: controller.jobDescriptionQuillController,
+                  placeholder: "Describe the job...",
                 ),
 
                 const SizedBox(height: 20),

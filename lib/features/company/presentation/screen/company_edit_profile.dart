@@ -16,6 +16,7 @@ import '../../../recruiter_account/presentation/controller/recruiter_controller.
 import '../../../recruiter_account/presentation/controller/upload_elevator_pitch.dart';
 
 import '../../../recruiter_account/presentation/widgets/bio.dart';
+import '../../../recruiter_account/presentation/widgets/cropped_image_picker_card.dart';
 
 import '../../data/model/single_Company_response_model.dart';
 import '../../data/model/update_company_response_model.dart';
@@ -108,6 +109,8 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
   @override
   void initState() {
     super.initState();
+    bannerPickerController.clearSelection();
+    imagePickerController.clearSelection();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final company = widget.companyData.companies.first;
       // final honor = widget.companyData.honors.first;
@@ -281,40 +284,18 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(10),
-                  child: GestureDetector(
-                    onTap: bannerPickerController.showPickerOptions,
-                    child: Obx(() {
-                      return Container(
-                        height: 150,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Color(0xFFD9D9D9),
-                        ),
-                        child: Center(
-                          child:
-                              bannerPickerController.selectedImage.value != null
-                              ? Image.file(
-                                  bannerPickerController.selectedImage.value!,
-                                  fit: BoxFit.cover,
-                                )
-                              : bannerPickerController
-                                    .existingImageUrl
-                                    .value
-                                    .isNotEmpty
-                              ? Image.network(
-                                  bannerPickerController.existingImageUrl.value,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: 150,
-                                  errorBuilder: (_, __, ___) =>
-                                      const Text('Failed to load banner'),
-                                )
-                              : const Text('Company banner'),
-                        ),
-                      );
-                    }),
-                  ),
+                  child: Obx(() {
+                    return CroppedImagePickerCard(
+                      onTap: bannerPickerController.showPickerOptions,
+                      file: bannerPickerController.selectedImage.value,
+                      imageUrl: bannerPickerController.existingImageUrl.value,
+                      height: 150,
+                      borderRadius: 8,
+                      editLabel: 'Change banner',
+                      placeholderTitle: 'Company banner',
+                      placeholderSubtitle: 'Cropped to 1584 x 396',
+                    );
+                  }),
                 ),
               ),
 
@@ -338,48 +319,19 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                   Column(
                     children: [
                       SizedBox(height: 10),
-                      GestureDetector(
-                        onTap: imagePickerController.showPickerOptions,
-                        child: Obx(() {
-                          return Container(
-                            height: 130,
-                            width: 130,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Color(0xFFD9D9D9),
-                            ),
-                            child: Center(
-                              child:
-                                  imagePickerController.selectedImage.value !=
-                                      null
-                                  ? Image.file(
-                                      imagePickerController
-                                          .selectedImage
-                                          .value!,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : imagePickerController
-                                        .existingImageUrl
-                                        .value
-                                        .isNotEmpty
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        imagePickerController
-                                            .existingImageUrl
-                                            .value,
-                                        width: 130,
-                                        height: 130,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Text('Failed to load logo'),
-                                      ),
-                                    )
-                                  : const Text('Company logo'),
-                            ),
-                          );
-                        }),
-                      ),
+                      Obx(() {
+                        return CroppedImagePickerCard(
+                          onTap: imagePickerController.showPickerOptions,
+                          file: imagePickerController.selectedImage.value,
+                          imageUrl: imagePickerController.existingImageUrl.value,
+                          width: 130,
+                          height: 130,
+                          borderRadius: 8,
+                          editLabel: 'Change',
+                          placeholderTitle: 'Company logo',
+                          placeholderSubtitle: 'Cropped to 250 x 250',
+                        );
+                      }),
 
                       SizedBox(height: 10),
                     ],
@@ -1361,12 +1313,6 @@ class _CompanyEditAccountPageState extends State<CompanyEditAccountPage> {
                             "", // recruiters (handled by employeeIdMap)
                             awardsJson,
                           );
-
-                          Get.snackbar(
-                            "Success",
-                            "Company updated successfully!",
-                          );
-                          Get.off(() => CompanyDetailsPage());
                         } catch (e) {
                           debugPrint("Save Error: $e");
                           Get.snackbar("Error", "Failed to update company: $e");

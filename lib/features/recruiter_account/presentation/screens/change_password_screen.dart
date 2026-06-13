@@ -48,6 +48,7 @@ class _ChangePasswordScreenState extends State<ChangePassword> {
         title: Text('Change Password', style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF2B7FD0),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
