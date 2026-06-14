@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../job_listing/presentation/controllers/job_details_controller.dart';
 import '../../../job_listing/presentation/screens/job_details_screen.dart';
+import '../../../public_view/widgets/public_profile_action_row.dart';
 import '../../../recruiter_account/presentation/widgets/social_media.dart';
 import '../../data/model/public_view_search_response_model.dart';
 import '../controller/company_details_controller.dart';
@@ -44,23 +45,37 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          'Public view',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF2B7FD0),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: SafeArea(
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        final data = controller.publicView.value;
-        if (data == null || data.companies.isEmpty) {
-          return const Center(child: Text("No company data found"));
-        }
+          final data = controller.publicView.value;
+          if (data == null || data.companies.isEmpty) {
+            return const Center(child: Text("No company data found"));
+          }
 
-        final company = data.companies.first;
-        final honors = data.honors;
-        final jobs = controller
-            .pubJobs; // this should be RxList<PublicViewJobsResponseModel>
+          final company = data.companies.first;
+          final honors = data.honors;
+          final jobs = controller
+              .pubJobs; // this should be RxList<PublicViewJobsResponseModel>
 
-        return SingleChildScrollView(
-          child: Column(
+          return SingleChildScrollView(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ---------------- COVER IMAGE ----------------
@@ -82,11 +97,11 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                     ),
                   ),
                   Positioned(
-                    bottom: -40,
+                    bottom: -48,
                     left: 16,
                     child: Container(
-                      width: 80,
-                      height: 80,
+                      width: 96,
+                      height: 96,
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -112,10 +127,25 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                       ),
                     ),
                   ),
+                  Positioned(
+                    bottom: -45,
+                    left: 128,
+                    right: 16,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Obx(
+                        () => PublicProfileActionRow(
+                          isFollowing: controller.isFollowing.value,
+                          onFollow: controller.toggleFollow,
+                          onShare: () => _showShareOptions(context, company),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 58),
 
               // ---------------- COMPANY INFO ----------------
               Padding(
@@ -125,61 +155,7 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                   children: [
                     // ----- Social links + Follow + Share (after profile image) -----
                     buildSocialLinks(company),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Obx(
-                          () => GestureDetector(
-                            onTap: controller.toggleFollow,
-                            child: Container(
-                              height: 42,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                              ),
-                              decoration: BoxDecoration(
-                                color: controller.isFollowing.value
-                                    ? Colors.transparent
-                                    : const Color(0xFFE6F0FF),
-                                border: Border.all(
-                                  color: Colors.blue.shade800,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                controller.isFollowing.value
-                                    ? 'Following'
-                                    : 'Follow',
-                                style: TextStyle(
-                                  color: Colors.blue.shade800,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: () => _showShareOptions(context, company),
-                          child: Container(
-                            height: 42,
-                            width: 46,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.blue.shade800),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.share,
-                              color: Colors.blue.shade800,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
                     Text(
                       company.cname,
                       style: const TextStyle(
@@ -205,17 +181,6 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    const Text(
-                      "About",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    Text(company.aboutUs),
-                    const SizedBox(height: 34),
                     sectionTitle("Elevator Pitch"),
                     const SizedBox(height: 12),
                     Container(
@@ -230,6 +195,17 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                             "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch?.id ?? ""}",
                       ),
                     ),
+                    const SizedBox(height: 34),
+                    const Text(
+                      "About",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(company.aboutUs),
                     const SizedBox(height: 34),
                     sectionTitle("Company Jobs"),
                     const SizedBox(height: 12),
@@ -383,9 +359,10 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                     ),
               const SizedBox(height: 24),
             ],
-          ),
-        );
-      }),
+            ),
+          );
+        }),
+      ),
     );
   }
 

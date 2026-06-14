@@ -176,6 +176,8 @@ class JobModel {
       'id': id,
       'title': title,
       'company': companyId?.cname ?? recruiterId?.fullName ?? 'Unknown Company',
+      'postedBySlug': companyId?.slug ?? recruiterId?.slug ?? '',
+      'postedByType': companyId != null ? 'company' : 'recruiter',
       'location': location,
       'duration': employementType.replaceAll('-', ' ').toUpperCase(),
       'salary': salaryRange,

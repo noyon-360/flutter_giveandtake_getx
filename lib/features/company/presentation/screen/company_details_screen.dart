@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/common/widgets/app_scaffold.dart';
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/utils/debug_print.dart';
+import '../../../Home/presentation/widgets/app_drawer.dart';
 import '../../../company_pricing/presentation/screens/plan_pricing_screen(company).dart';
 import '../../../notifications/presentation/controller/notifications_controller.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
@@ -104,7 +105,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
           const SizedBox(width: 4),
         ],
       ),
-      drawer: Drawer(
+      drawer: const AppDrawer(),
+/*      drawer: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
           padding: EdgeInsets.zero, // Very important!
@@ -242,7 +244,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
             ),
           ],
         ),
-      ),
+      ),*/
 
       body: Obx(() {
         if (controller.isLoading.value) {

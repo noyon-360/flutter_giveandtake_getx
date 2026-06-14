@@ -11,6 +11,7 @@ class RecruiterModel {
   final String? city;
   final String? zipCode;
   final String? emailAddress;
+  final String slug;
   final List<SocialLinkModel> sLink;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -28,6 +29,7 @@ class RecruiterModel {
     this.city,
     this.zipCode,
     this.emailAddress,
+    required this.slug,
     required this.sLink,
     required this.createdAt,
     required this.updatedAt,
@@ -47,6 +49,7 @@ class RecruiterModel {
       city: json['city'] as String?,
       zipCode: json['zipCode'] as String?,
       emailAddress: json['emailAddress'] as String?,
+      slug: json['slug'] ?? '',
       sLink:
           (json['sLink'] as List<dynamic>?)
               ?.map((e) => SocialLinkModel.fromJson(e as Map<String, dynamic>))
@@ -75,6 +78,7 @@ class RecruiterModel {
       'city': city,
       'zipCode': zipCode,
       'emailAddress': emailAddress,
+      'slug': slug,
       'sLink': sLink.map((e) => e.toJson()).toList(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),

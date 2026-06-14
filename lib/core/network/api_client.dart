@@ -407,6 +407,12 @@ class ApiClient {
   Future<Options> _addAuthHeader(Options? options) async {
     options ??= Options();
 
+    final skipAuth = options.headers?['X-Skip-Auth'] == true;
+    if (skipAuth) {
+      options.headers?.remove('X-Skip-Auth');
+      return options;
+    }
+
     final accessToken = await _secureStoreServices.retrieveData(
       KeyConstants.accessToken,
     );

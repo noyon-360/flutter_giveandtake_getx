@@ -19,6 +19,9 @@ class SearchRepositoryImpl implements SearchRepository {
   }) {
     return apiClient.get(
       ApiConstants.search.people(q),
+      options: Options(
+        headers: {'X-Skip-Auth': true},
+      ),
       cancelToken: cancelToken,
       // Same parser as the existing CompanyRepoImplementation.fetchSearchUser.
       fromJsonT: (json) => (json as List<dynamic>? ?? [])

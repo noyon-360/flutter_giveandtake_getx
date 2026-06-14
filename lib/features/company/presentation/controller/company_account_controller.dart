@@ -150,14 +150,23 @@ class CompanyAccountController extends BaseController {
   }
 
   // --- Employees ---
+  void ensureEmployeeController() {
+    if (employeeControllers.isEmpty) {
+      employeeControllers.add(TextEditingController());
+    }
+  }
+
   void addEmployee() {
+    ensureEmployeeController();
     employeeControllers.add(TextEditingController());
   }
 
   // Remove employee field
   void removeEmployeeField(int index) {
-    if (employeeControllers.length > 1) {
-      employeeControllers[index].dispose();
+    if (employeeControllers.length > 1 &&
+        index > 0 &&
+        index < employeeControllers.length) {
+      employeeIdMap.remove(employeeControllers[index]);
       employeeControllers.removeAt(index);
     }
   }
@@ -1024,7 +1033,7 @@ class CompanyAccountController extends BaseController {
 
         setLoading(false);
 
-        // Close the "Add Company Recruiters" dialog if it is still open.
+        // Close the legacy dialog if it is still open.
         if (Get.isDialogOpen ?? false) {
           Get.back();
         }
@@ -1037,7 +1046,7 @@ class CompanyAccountController extends BaseController {
         );
 
         // Navigate to the internal recruiter screen.
-        Get.to(() => const CompanyEmployeesScreen());
+        Get.off(() => const CompanyEmployeesScreen());
       },
     );
   }

@@ -320,9 +320,12 @@ class RepoImplementation extends Repo {
     );
   }
 
-  NetworkResult<RecruiterPublicViewResponseModel> recruiterPublicView(String slug){
+  NetworkResult<RecruiterPublicViewResponseModel> recruiterPublicView(String slug) {
     return _apiClient.get(
       ApiConstants.recruiter.getPublicView(slug),
+      options: Options(
+        headers: {'X-Skip-Auth': true},
+      ),
       fromJsonT: (json) =>
           RecruiterPublicViewResponseModel.fromJson(json as Map<String, dynamic>),
     );

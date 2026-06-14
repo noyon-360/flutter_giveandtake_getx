@@ -12,6 +12,7 @@ class JobCard extends StatelessWidget {
   final String? logoUrl;
   final VoidCallback? onTap;
   final VoidCallback? onEasyApply;
+  final VoidCallback? onCompanyTap;
 
   /// Apply is candidate-only — recruiters/companies pass false to hide it.
   final bool canApply;
@@ -27,6 +28,7 @@ class JobCard extends StatelessWidget {
     this.logoUrl,
     this.onTap,
     this.onEasyApply,
+    this.onCompanyTap,
     this.canApply = true,
   });
 
@@ -81,12 +83,15 @@ class JobCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      company,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.primaryBlue,
-                        fontWeight: FontWeight.w500,
+                    GestureDetector(
+                      onTap: onCompanyTap,
+                      child: Text(
+                        company,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.primaryBlue,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],

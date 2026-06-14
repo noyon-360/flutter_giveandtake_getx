@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
+import 'package:giveandtake/features/company/data/model/manage_job_response_model.dart';
 import 'package:giveandtake/features/job_listing/presentation/screens/job_details_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 
@@ -170,7 +171,14 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
                                   () => JobDetailEditScreen(jobId: job.id),
                                 ),
                               ),
-                              const Spacer(),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: _approvalBadge(job),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
                               Obx(() {
                                 return ElevatedButton(
                                   onPressed: () async {
@@ -246,6 +254,52 @@ class _ManageJobPostScreenState extends State<ManageJobPostScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _approvalBadge(ManageJobResponseModel job) {
+    final bool isApproved = job.adminApprove;
+    final status = job.jobApprove.trim().toLowerCase();
+    final bool isDenied =
+        !isApproved && (status == 'denied' || status == 'deny');
+
+    final String label;
+    final Color backgroundColor;
+    final Color foregroundColor;
+
+    if (isApproved) {
+      label = 'Admin Approved';
+      backgroundColor = const Color(0xFFDDF3E2);
+      foregroundColor = const Color(0xFF1F8A46);
+    } else if (isDenied) {
+      label = 'Admin Denied';
+      backgroundColor = const Color(0xFFFCE0E0);
+      foregroundColor = const Color(0xFFC23A3A);
+    } else {
+      label = 'Admin Pending';
+      backgroundColor = const Color(0xFFFFF1D6);
+      foregroundColor = const Color(0xFFB7791F);
+    }
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 110),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: foregroundColor,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

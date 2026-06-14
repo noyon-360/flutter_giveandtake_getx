@@ -19,7 +19,7 @@ class AllJobsController extends GetxController {
   // Current user role — gates the Apply button (candidates/guests only).
   final role = Rxn<String>();
   bool get canApply {
-    final r = role.value;
+    final r = role.value?.trim().toLowerCase();
     return r != 'recruiter' && r != 'company';
   }
 
@@ -49,7 +49,7 @@ class AllJobsController extends GetxController {
   }
 
   Future<void> _loadRole() async {
-    role.value = await AuthStorageService().getUserRole();
+    role.value = (await AuthStorageService().getUserRole())?.trim().toLowerCase();
   }
 
   @override

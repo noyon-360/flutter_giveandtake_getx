@@ -6,6 +6,7 @@ import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../auth/presentation/controller/auth_controller.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../job_listing/presentation/screens/job_listing_screen.dart';
 import '../../../notifications/presentation/controller/notifications_controller.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
@@ -24,6 +25,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GetUserProfileService _profileService = Get.find();
   final HomeController _homeController = Get.find();
+  final AuthController _authController = Get.find();
 
   @override
   void initState() {
@@ -113,11 +115,29 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         title: Image.asset("assets/images/logo_transparent.png", height: 40),
         actions: [
-          // Notification bell only after login
           Obx(
-            () => Get.find<AuthController>().isLoggedIn.value
+            () => _authController.isLoggedIn.value
                 ? NotificationBell(iconColor: AppColors.textBlack)
-                : const SizedBox.shrink(),
+                : Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Center(
+                      child: TextButton(
+                        onPressed: () => Get.to(() => const LoginScreen()),
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(0, 36),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
           ),
           const SizedBox(width: 4),
         ],

@@ -26,20 +26,23 @@ class ApplicantListResponseModel {
     return ApplicantListResponseModel(
       id: json["_id"] ?? "",
       jobId: json["jobId"]?.toString() ?? "",
-      user: User.fromJson(json["userId"] ?? {}),
+      user: json["userId"] is Map<String, dynamic>
+          ? User.fromJson(json["userId"])
+          : User.empty(json["userId"]?.toString() ?? ""),
       status: json["status"] ?? "",
       answer: (json["answer"] as List?)
-              ?.map((e) => Answer.fromJson(e))
-              .toList() 
-              ?? [],
-      resumeId: json["resumeId"] == null
-          ? null
-          : ResumeId.fromJson(json["resumeId"]),
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => Answer.fromJson(e))
+              .toList() ??
+          [],
+      resumeId: json["resumeId"] is Map<String, dynamic>
+          ? ResumeId.fromJson(json["resumeId"])
+          : null,
       createdAt: json["createdAt"] ?? "",
       updatedAt: json["updatedAt"] ?? "",
-      resume: json["resume"] == null
-          ? null
-          : Resume.fromJson(json["resume"]),
+      resume: json["resume"] is Map<String, dynamic>
+          ? Resume.fromJson(json["resume"])
+          : null,
     );
   }
 }
@@ -57,6 +60,10 @@ class User {
     required this.slug,
     required this.avatarUrl,
   });
+
+  factory User.empty(String id) {
+    return User(id: id, name: "", email: "", slug: "", avatarUrl: "");
+  }
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(

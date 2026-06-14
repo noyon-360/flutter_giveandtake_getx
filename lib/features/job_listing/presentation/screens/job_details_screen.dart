@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/features/company/presentation/screen/public_view_seach_screen.dart';
 import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
+import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_public_view.dart';
 
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../controllers/bookmark_controller.dart';
@@ -35,6 +37,11 @@ class JobDetailsScreen extends StatelessWidget {
         : isRecruiterJob
         ? raw['recruiterId']['photo'] as String?
         : null;
+    final String postedBySlug = isCompanyJob
+        ? (raw['companyId']?['slug']?.toString() ?? '')
+        : isRecruiterJob
+        ? (raw['recruiterId']?['slug']?.toString() ?? '')
+        : '';
 
     final String? location =
         raw['location'] as String? ?? jobData['location'] as String?;
@@ -180,12 +187,37 @@ class JobDetailsScreen extends StatelessWidget {
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
-                                      Text(
-                                        company ?? 'Unknown Company',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
+                                      GestureDetector(
+                                        onTap: postedBySlug.isEmpty
+                                            ? null
+                                            : () {
+                                                if (isCompanyJob) {
+                                                  Get.to(
+                                                    () => PublicViewSeachScreen(
+                                                      slug: postedBySlug,
+                                                    ),
+                                                  );
+                                                  return;
+                                                }
+
+                                                if (isRecruiterJob) {
+                                                  Get.to(
+                                                    () =>
+                                                        RecruiterPublicViewScreen(
+                                                          slug: postedBySlug,
+                                                        ),
+                                                  );
+                                                }
+                                              },
+                                        child: Text(
+                                          company ?? 'Unknown Company',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: postedBySlug.isEmpty
+                                                ? Colors.black87
+                                                : AppColors.primaryBlue,
+                                          ),
                                         ),
                                       ),
                                       if (location != null &&
@@ -298,7 +330,7 @@ class JobDetailsScreen extends StatelessWidget {
                   FutureBuilder<String?>(
                     future: AuthStorageService().getUserRole(),
                     builder: (context, roleSnap) {
-                      final role = roleSnap.data;
+                      final role = roleSnap.data?.trim().toLowerCase();
                       if (role == 'recruiter' || role == 'company') {
                         return const SizedBox.shrink();
                       }

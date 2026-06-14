@@ -42,6 +42,11 @@ class RecruiterPublicViewResponseModel {
   });
 
   factory RecruiterPublicViewResponseModel.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic value) {
+      if (value == null) return DateTime.now();
+      return DateTime.tryParse(value.toString()) ?? DateTime.now();
+    }
+
     return RecruiterPublicViewResponseModel(
       id: json['_id'] ?? '',
       userId: json['userId'] ?? '',
@@ -50,7 +55,7 @@ class RecruiterPublicViewResponseModel {
       photo: json['photo'] ?? '',
       title: json['title'] ?? '',
       firstName: json['firstName'] ?? '',
-      sureName: json['sureName'] ?? '',
+      sureName: json['sureName'] ?? json['lastName'] ?? '',
       country: json['country'] ?? '',
       city: json['city'] ?? '',
       zipCode: json['zipCode'] ?? '',
@@ -60,8 +65,8 @@ class RecruiterPublicViewResponseModel {
           ?.map((e) => SocialLink.fromJson(e))
           .toList() ??
           [],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: parseDate(json['createdAt']),
+      updatedAt: parseDate(json['updatedAt']),
       company: json['companyId'] != null
           ? Company.fromJson(json['companyId'])
           : null,

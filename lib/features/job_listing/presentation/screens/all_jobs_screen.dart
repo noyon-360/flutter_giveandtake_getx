@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/network/api_client.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/features/company/presentation/screen/public_view_seach_screen.dart';
 
 import '../../../Home/presentation/screen/home_screen.dart';
 import '../../data/repo/job_listing_repository_impl.dart';
@@ -9,6 +10,7 @@ import '../../domain/repo/job_listing_repository.dart';
 import '../../domain/usecases/get_jobs_usecase.dart';
 import '../controller/all_jobs_controller.dart';
 import '../controllers/job_details_controller.dart';
+import '../../../recruiter_account/presentation/screens/recruiter_public_view.dart';
 import '../widgets/job_card.dart';
 import 'job_details_screen.dart';
 
@@ -46,7 +48,7 @@ class AllJobsScreen extends GetView<AllJobsController> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () {
-            Get.to(() => const HomeScreen()); // since you're using GetX
+            Get.back();
           },
         ),
         backgroundColor: Color(0xFF2B7FD0),
@@ -247,18 +249,42 @@ class AllJobsScreen extends GetView<AllJobsController> {
                 return SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
                     final job = controller.jobList[index];
+                    final jobData = job.toDisplayMap();
                     return JobCard(
                       canApply: canApply,
                       title: job.title,
-                      company: job.companyId?.cname ?? "Unknown",
+                      company:
+                          jobData['company']?.toString() ?? "Unknown Company",
                       location: job.location,
                       duration: job.employementType,
                       salary: job.salaryRange,
                       timePosted: job.timePostedFormatted,
-                      logoUrl: job.companyId?.clogo,
+                      logoUrl: jobData['logoUrl'] as String?,
+                      onCompanyTap: () {
+                        final slug =
+                            (jobData['postedBySlug'] ?? '').toString();
+                        final type =
+                            (jobData['postedByType'] ?? '').toString();
+
+                        if (slug.isEmpty) {
+                          Get.snackbar(
+                            'Unavailable',
+                            'This public profile is not available.',
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                          return;
+                        }
+
+                        if (type == 'company') {
+                          Get.to(() => PublicViewSeachScreen(slug: slug));
+                          return;
+                        }
+
+                        Get.to(() => RecruiterPublicViewScreen(slug: slug));
+                      },
                       onTap: () {
                         Get.to(
-                          () => JobDetailsScreen(jobData: job.toDisplayMap()),
+                          () => JobDetailsScreen(jobData: jobData),
                         );
                       },
                       onEasyApply: () {

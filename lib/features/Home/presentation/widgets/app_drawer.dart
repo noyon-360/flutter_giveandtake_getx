@@ -8,6 +8,7 @@ import 'package:giveandtake/features/auth/data/models/user_model.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
+import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
 import 'package:giveandtake/features/elevator/presentation/controller/resume_check_controller.dart';
 import 'package:giveandtake/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:giveandtake/features/home_static_screens/presentation/screen/contact_us_screen.dart';
@@ -66,6 +67,7 @@ class _AppDrawerState extends State<AppDrawer> {
   bool _isLoggedIn = false;
   String? _role; // candidate / recruiter / company — drives the My Account flow
   GetUserProfileService? _profileService;
+  late final AuthController _authController;
 
   final _searchController = TextEditingController();
 
@@ -74,6 +76,7 @@ class _AppDrawerState extends State<AppDrawer> {
   @override
   void initState() {
     super.initState();
+    _authController = Get.find<AuthController>();
     controller = Get.find<GlobalSearchController>();
     try {
       _profileService = Get.find<GetUserProfileService>();
@@ -95,10 +98,8 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   Future<void> _loadAuthStatus() async {
-    final authController = Get.find<AuthController>();
-    final accessToken = await authController.authStorageService
-        .getAccessToken();
-    final role = await authController.authStorageService.getUserRole();
+    final accessToken = await _authController.authStorageService.getAccessToken();
+    final role = await _authController.authStorageService.getUserRole();
     if (!mounted) return;
     setState(() {
       _isLoggedIn = accessToken != null && accessToken.isNotEmpty;
@@ -111,6 +112,11 @@ class _AppDrawerState extends State<AppDrawer> {
     _searchController.dispose();
     super.dispose();
   }
+
+  bool get _effectiveIsLoggedIn => _authController.isLoggedIn.value || _isLoggedIn;
+
+  String get _effectiveRole =>
+      (_profileService?.userInfoRx.value?.role ?? _role ?? '').toLowerCase();
 
   /// Handles the "Elevator Pitch & Resume" button with role-based navigation:
   ///  - Guest (no token)  → LoginScreen
@@ -192,7 +198,7 @@ class _AppDrawerState extends State<AppDrawer> {
   /// Picks the menu items for the logged-in user's role. Candidate is the
   /// default (and the fallback for an unknown role).
   List<Widget> _accountTilesForRole() {
-    switch ((_role ?? '').toLowerCase()) {
+    switch (_effectiveRole) {
       case 'recruiter':
         return _recruiterTiles();
       case 'company':
@@ -362,7 +368,7 @@ class _AppDrawerState extends State<AppDrawer> {
         title: "Add Company Recruiters",
         onTap: () {
           Get.back();
-          Get.dialog(RecruiterDialogContent(), barrierDismissible: false);
+          Get.to(() => const RecruiterDialogContent());
         },
       ),
       ListTileForNav(
@@ -452,7 +458,7 @@ class _AppDrawerState extends State<AppDrawer> {
       onPressed: () => Get.back(),
     );
 
-    if (!_isLoggedIn) {
+    if (!_effectiveIsLoggedIn) {
       return Container(
         padding: const EdgeInsets.fromLTRB(16, 8, 8, 12),
         child: Column(
@@ -500,8 +506,7 @@ class _AppDrawerState extends State<AppDrawer> {
       final name = (user?.name ?? '').trim().isNotEmpty == true
           ? user!.name
           : 'Your account';
-      final email = user?.email ?? '';
-      final avatarUrl = user?.profileImage;
+      final avatarUrl = _resolveHeaderAvatarUrl(user);
       final role = (user?.role ?? '').trim();
       final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
 
@@ -543,18 +548,6 @@ class _AppDrawerState extends State<AppDrawer> {
                           color: Color(0xFF1A3E74),
                         ),
                       ),
-                      if (email.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          email,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF777777),
-                          ),
-                        ),
-                      ],
                       if (role.isNotEmpty) ...[
                         const SizedBox(height: 6),
                         _roleBadge(role),
@@ -607,6 +600,32 @@ class _AppDrawerState extends State<AppDrawer> {
     }
   }
 
+  String? _resolveHeaderAvatarUrl(UserModel? user) {
+    final role = (user?.role ?? '').toLowerCase();
+
+    if (role == 'company' && Get.isRegistered<CompanyDetailsController>()) {
+      final companyInfo = Get.find<CompanyDetailsController>().userInfo.value;
+      final companies = companyInfo?.companies ?? const [];
+      if (companies.isNotEmpty && companies.first.clogo.trim().isNotEmpty) {
+        return companies.first.clogo.trim();
+      }
+    }
+
+    if (role == 'recruiter' && Get.isRegistered<RecruiterController>()) {
+      final recruiter = Get.find<RecruiterController>().userInfo.value;
+      if (recruiter != null && recruiter.photo.trim().isNotEmpty) {
+        return recruiter.photo.trim();
+      }
+    }
+
+    final profileImage = user?.profileImage?.trim();
+    if (profileImage != null && profileImage.isNotEmpty) {
+      return profileImage;
+    }
+
+    return null;
+  }
+
   /// Small uppercase label that introduces a group of drawer items.
   Widget _sectionHeader(String label) {
     return Padding(
@@ -625,7 +644,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
+    return Obx(() => Drawer(
       backgroundColor: AppColors.primaryWhite,
       child: SafeArea(
         child: ListView(
@@ -664,6 +683,20 @@ class _AppDrawerState extends State<AppDrawer> {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    if (controller.peopleError.value.isNotEmpty &&
+                        users.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            controller.peopleError.value,
+                            style: const TextStyle(color: Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       );
                     }
 
@@ -817,11 +850,6 @@ class _AppDrawerState extends State<AppDrawer> {
             // ── BROWSE ──────────────────────────────────────────────
             _sectionHeader("Browse"),
             // Elevator Pitch & Resume is candidate-facing — hide it for recruiters.
-            if ((_role ?? '').toLowerCase() != 'recruiter')
-              ListTileForNav(
-                title: "Elevator Pitch & Resume",
-                onTap: () async => await _handleElevatorPitch(),
-              ),
             ListTileForNav(
               title: "Jobs",
               liconPath:
@@ -838,7 +866,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             // ── MY ACCOUNT (after login only — role-specific flow) ──
-            if (_isLoggedIn) ...[
+            if (_effectiveIsLoggedIn) ...[
               _sectionHeader("My Account"),
               ..._accountTilesForRole(),
             ],
@@ -874,7 +902,7 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             // Auth-only: shown after login
-            if (_isLoggedIn)
+            if (_effectiveIsLoggedIn)
               ListTileForNav(
                 liconPath: "assets/icons/contactus.png",
                 title: "Contact Us",
@@ -892,14 +920,14 @@ class _AppDrawerState extends State<AppDrawer> {
 
             // ── Auth action ─────────────────────────────────────────
             ListTileForNav(
-              title: _isLoggedIn ? "Logout" : "Login",
+              title: _effectiveIsLoggedIn ? "Logout" : "Login",
               liconPath: "assets/icons/logout_icon_dawer.png",
-              titleColor: _isLoggedIn
+              titleColor: _effectiveIsLoggedIn
                   ? AppColors.deleteButtonBackground
                   : AppColors.primaryBlue,
               onTap: () {
-                if (_isLoggedIn) {
-                  Get.find<AuthController>().logout();
+                if (_effectiveIsLoggedIn) {
+                  _authController.logout();
                   return;
                 }
 
@@ -910,7 +938,7 @@ class _AppDrawerState extends State<AppDrawer> {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

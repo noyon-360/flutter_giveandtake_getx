@@ -4,6 +4,7 @@ class CompanyModel {
   final String? clogo;
   final String? banner;
   final String? aboutUs;
+  final String slug;
   final String cname;
   final String country;
   final String city;
@@ -22,6 +23,7 @@ class CompanyModel {
     this.clogo,
     this.banner,
     this.aboutUs,
+    required this.slug,
     required this.cname,
     required this.country,
     required this.city,
@@ -42,6 +44,7 @@ class CompanyModel {
       clogo: json['clogo'],
       banner: json['banner'],
       aboutUs: json['aboutUs'],
+      slug: json['slug'] ?? '',
       cname: json['cname'] ?? '',
       country: json['country'] ?? '',
       city: json['city'] ?? '',
@@ -79,6 +82,7 @@ class CompanyModel {
       'clogo': clogo,
       'banner': banner,
       'aboutUs': aboutUs,
+      'slug': slug,
       'cname': cname,
       'country': country,
       'city': city,

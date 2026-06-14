@@ -60,6 +60,25 @@ class _CustomTextFieldState extends State<CustomTextField> {
   }
 
   @override
+  void didUpdateWidget(covariant CustomTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller == widget.controller) return;
+
+    if (_isLocalController) {
+      _controller.dispose();
+    }
+
+    if (widget.controller != null) {
+      _controller = widget.controller!;
+      _isLocalController = false;
+    } else {
+      _controller = TextEditingController();
+      _isLocalController = true;
+    }
+  }
+
+  @override
   void dispose() {
     if (_isLocalController) _controller.dispose();
     super.dispose();

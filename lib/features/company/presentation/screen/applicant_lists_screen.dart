@@ -83,10 +83,14 @@ class _CompanyApplicantsListScreenState
                 }
 
                 if (controller.venue.isEmpty) {
-                  return const Center(
+                  final message = controller.errorMessage.value.isNotEmpty
+                      ? controller.errorMessage.value
+                      : "No applications found";
+                  return Center(
                     child: Text(
-                      "No applications found",
-                      style: TextStyle(color: Colors.black54),
+                      message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.black54),
                     ),
                   );
                 }

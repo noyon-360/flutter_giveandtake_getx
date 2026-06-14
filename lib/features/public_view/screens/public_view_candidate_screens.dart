@@ -516,6 +516,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/network/constants/api_constants.dart';
 import '../../company/presentation/controller/company_details_controller.dart';
 import '../models/get_resume_public_view_response_model.dart';
+import '../widgets/public_profile_action_row.dart';
 
 class PublicViewCandidateScreen extends StatefulWidget {
   final String slug;
@@ -542,26 +543,40 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Obx(() {
-        /// ================= LOADING =================
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          'Public view',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF2B7FD0),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: SafeArea(
+        child: Obx(() {
+          /// ================= LOADING =================
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        /// ================= ERROR =================
-        if (controller.errorMessage.value.isNotEmpty) {
-          return Center(child: Text(controller.errorMessage.value));
-        }
+          /// ================= ERROR =================
+          if (controller.errorMessage.value.isNotEmpty) {
+            return Center(child: Text(controller.errorMessage.value));
+          }
 
-        final data = controller.candidateView.value;
+          final data = controller.candidateView.value;
 
-        if (data == null || data.resume == null) {
-          return const Center(child: Text("No Data Found"));
-        }
+          if (data == null || data.resume == null) {
+            return const Center(child: Text("No Data Found"));
+          }
 
-        final resume = data.resume!;
+          final resume = data.resume!;
 
-        return SingleChildScrollView(
+          return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -571,7 +586,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                 children: [
                   /// Banner
                   Container(
-                    height: 180,
+                    height: 200,
                     width: double.infinity,
                     color: Colors.grey.shade200,
                     child: resume.banner != null && resume.banner!.isNotEmpty
@@ -581,26 +596,30 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
 
                   /// Profile Image
                   Positioned(
-                    bottom: -45,
-                    left: 20,
+                    bottom: -48,
+                    left: 16,
                     child: Container(
+                      width: 96,
+                      height: 96,
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(.15),
+                            blurRadius: 6,
+                          ),
+                        ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(6),
                         child: resume.photo != null && resume.photo!.isNotEmpty
                             ? Image.network(
                                 resume.photo!,
-                                height: 90,
-                                width: 90,
                                 fit: BoxFit.cover,
                               )
                             : Container(
-                                height: 90,
-                                width: 90,
                                 color: Colors.grey.shade300,
                                 child: const Icon(
                                   Icons.person,
@@ -611,69 +630,33 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                       ),
                     ),
                   ),
+                  Positioned(
+                    bottom: -45,
+                    left: 128,
+                    right: 16,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Obx(
+                        () => PublicProfileActionRow(
+                          isFollowing: controller.isFollowing.value,
+                          onFollow: controller.toggleFollow,
+                          onShare: _shareProfile,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
 
-              const SizedBox(height: 60),
+              const SizedBox(height: 58),
 
               /// ====== SOCIAL + FOLLOW + SHARE (after profile image) ======
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _candidateSocialLinks(resume),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Obx(
-                          () => GestureDetector(
-                            onTap: controller.toggleFollow,
-                            child: Container(
-                              height: 42,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                              ),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: controller.isFollowing.value
-                                    ? Colors.transparent
-                                    : const Color(0xFFE6F0FF),
-                                border: Border.all(color: Colors.blue.shade800),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                controller.isFollowing.value
-                                    ? 'Following'
-                                    : 'Follow',
-                                style: TextStyle(
-                                  color: Colors.blue.shade800,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: _shareProfile,
-                          child: Container(
-                            height: 42,
-                            width: 46,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.blue.shade800),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.share,
-                              color: Colors.blue.shade800,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -789,8 +772,9 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
               const SizedBox(height: 40),
             ],
           ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
@@ -829,13 +813,14 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
             }
           },
           child: Container(
-            width: 40,
-            height: 40,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              border: Border.all(color: Colors.blue, width: 1),
+              color: const Color(0xFFF3F8FF),
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(color: const Color(0xFF8ABAF0), width: 1),
             ),
-            child: const Icon(Icons.link, color: Colors.blue, size: 22),
+            child: const Icon(Icons.link, color: Color(0xFF2B7FD0), size: 18),
           ),
         );
       }).toList(),

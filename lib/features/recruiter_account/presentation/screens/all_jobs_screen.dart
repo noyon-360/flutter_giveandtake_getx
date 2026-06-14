@@ -133,11 +133,16 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
                             Get.to(() => JobDetailEditScreen(jobId: job.id)),
                       ),
 
-                      const Spacer(),
+                      const SizedBox(width: 8),
 
-                      _approvalBadge(job),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: _approvalBadge(job),
+                        ),
+                      ),
 
-                      const Spacer(),
+                      const SizedBox(width: 8),
 
                       /// Archive / Unarchive
                       Obx(() {
@@ -244,31 +249,32 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
   }
 
   Widget _approvalBadge(YourJobResponseModel job) {
+    final bool isApproved = job.adminApprove;
     final status = job.jobApprove.trim().toLowerCase();
-    final bool isApproved = status == 'approved';
-    final bool isDenied = status == 'denied' || status == 'deny';
+    final bool isDenied =
+        !isApproved && (status == 'denied' || status == 'deny');
 
     final String label;
     final Color backgroundColor;
     final Color foregroundColor;
 
     if (isApproved) {
-      label = 'Approve';
+      label = 'Admin Approved';
       backgroundColor = const Color(0xFFDDF3E2);
       foregroundColor = const Color(0xFF1F8A46);
     } else if (isDenied) {
-      label = 'Deny';
+      label = 'Admin Denied';
       backgroundColor = const Color(0xFFFCE0E0);
       foregroundColor = const Color(0xFFC23A3A);
     } else {
-      label = 'Pending';
+      label = 'Admin Pending';
       backgroundColor = const Color(0xFFFFF1D6);
       foregroundColor = const Color(0xFFB7791F);
     }
 
     return Container(
-      constraints: const BoxConstraints(minWidth: 86),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      constraints: const BoxConstraints(minWidth: 110),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
@@ -276,9 +282,12 @@ class _AllJobsScreenState extends State<AllJobsScreen> {
       alignment: Alignment.center,
       child: Text(
         label,
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: foregroundColor,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
       ),

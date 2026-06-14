@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
+import 'package:giveandtake/features/company/presentation/screen/public_view_seach_screen.dart';
 import '../controller/job_listing_controller.dart';
+import '../../../recruiter_account/presentation/screens/recruiter_public_view.dart';
 import '../widgets/job_card.dart';
 import 'job_application_screen.dart';
 
@@ -135,6 +137,26 @@ class JobListingScreen extends StatelessWidget {
                     salary: job['salary'] ?? 'Salary not specified',
                     timePosted: job['timePosted'] ?? 'Unknown',
                     logoUrl: job['logoUrl'] as String?,
+                    onCompanyTap: () {
+                      final slug = (job['postedBySlug'] ?? '').toString();
+                      final type = (job['postedByType'] ?? '').toString();
+
+                      if (slug.isEmpty) {
+                        Get.snackbar(
+                          'Unavailable',
+                          'This public profile is not available.',
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                        return;
+                      }
+
+                      if (type == 'company') {
+                        Get.to(() => PublicViewSeachScreen(slug: slug));
+                        return;
+                      }
+
+                      Get.to(() => RecruiterPublicViewScreen(slug: slug));
+                    },
                     onTap: () => controller.onJobTap(job),
                     onEasyApply: () =>
                         Get.to(() => JobApplicationScreen(jobData: job)),

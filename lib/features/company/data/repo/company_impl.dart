@@ -195,20 +195,28 @@ class CompanyRepoImplementation extends CompanyRepository {
     String jobId,
   ) async {
     return _apiClient.get(
-      ApiConstants.company.applicantJob(jobId), // → /api/v1/all/users
+      ApiConstants.company.applicantJob(jobId),
       fromJsonT: (json) {
-        // Critical Fix: Extract 'data' array from response
+        if (json == null) return <ApplicantListResponseModel>[];
+
         if (json is Map<String, dynamic> && json.containsKey('data')) {
-          final List<dynamic> dataList = json['data'];
+          final data = json['data'];
+          if (data is! List) return <ApplicantListResponseModel>[];
+          final List<dynamic> dataList = data;
           return dataList
-              .map((item) => ApplicantListResponseModel.fromJson(item))
-              .toList();
-        } else {
-          // Fallback: if backend sends raw list (unlikely)
-          return (json as List)
+              .whereType<Map<String, dynamic>>()
               .map((item) => ApplicantListResponseModel.fromJson(item))
               .toList();
         }
+
+        if (json is List) {
+          return json
+              .whereType<Map<String, dynamic>>()
+              .map((item) => ApplicantListResponseModel.fromJson(item))
+              .toList();
+        }
+
+        return <ApplicantListResponseModel>[];
       },
     );
   }
@@ -282,6 +290,9 @@ class CompanyRepoImplementation extends CompanyRepository {
   NetworkResult<List<SeachAllUserResponseModel>> fetchSearchUser( String q) {
     return _apiClient.get(
       ApiConstants.company.getAllSearchUser(q),
+      options: Options(
+        headers: {'X-Skip-Auth': true},
+      ),
       fromJsonT: (json) => (json as List<dynamic>? ?? [])
           .where((item) => item != null) // ← remove nulls
           .map(
@@ -343,3 +354,4 @@ class CompanyRepoImplementation extends CompanyRepository {
     );
   }
 }
+

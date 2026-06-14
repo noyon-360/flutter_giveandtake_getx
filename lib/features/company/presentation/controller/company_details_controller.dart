@@ -235,10 +235,13 @@ class CompanyDetailsController extends BaseController {
   Future<void> fetchApplicantList() async {
     if (jobId.isEmpty) return;
     setLoading(true);
+    setError("");
+    venue.clear();
     final result = await _companyRepo.applicantJob(jobId.value);
 
     result.fold(
       (fail) {
+        setError(fail.message);
         setLoading(false);
       },
       (success) {

@@ -2,9 +2,9 @@ import 'dart:developer' as DPrint;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/features/public_view/widgets/public_profile_action_row.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -68,7 +68,7 @@ class _RecruiterPublicViewScreenState extends State<RecruiterPublicViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -88,6 +88,10 @@ class _RecruiterPublicViewScreenState extends State<RecruiterPublicViewScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
+          if (recruiterController.errorMessage.value.isNotEmpty) {
+            return Center(child: Text(recruiterController.errorMessage.value));
+          }
+
           if (recruiterController.publicView.value == null) {
             return const Center(child: Text("No recruiter data found."));
           }
@@ -99,54 +103,87 @@ class _RecruiterPublicViewScreenState extends State<RecruiterPublicViewScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: SizedBox(
-                    height: 300,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: 200,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
+                Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.bottomLeft,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 200,
+                      child: user.banner.isNotEmpty
+                          ? Image.network(
+                              user.banner,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: Colors.grey.shade300,
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  size: 40,
+                                ),
+                              ),
+                            )
+                          : Container(
                               color: Colors.grey.shade300,
-                              image: user.banner.isNotEmpty
-                                  ? DecorationImage(
-                                      image: NetworkImage(user.banner),
-                                      fit: BoxFit.cover,
-                                    )
-                                  : null,
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                size: 40,
+                              ),
                             ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 20,
-                          bottom: 30,
-                          child: Container(
-                            height: 130,
-                            width: 130,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.white, width: 2),
-                              color: Colors.grey.shade300,
-                              image: user.photo.isNotEmpty
-                                  ? DecorationImage(
-                                      image: NetworkImage(user.photo),
-                                      fit: BoxFit.cover,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
+                    Positioned(
+                      bottom: -48,
+                      left: 16,
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(.15),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: user.photo.isNotEmpty
+                              ? Image.network(
+                                  user.photo,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: Colors.grey.shade300,
+                                    alignment: Alignment.center,
+                                    child: const Icon(Icons.person, size: 32),
+                                  ),
+                                )
+                              : Container(
+                                  color: Colors.grey.shade300,
+                                  alignment: Alignment.center,
+                                  child: const Icon(Icons.person, size: 32),
+                                ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: -45,
+                      left: 128,
+                      right: 16,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: PublicProfileActionRow(
+                          onFollow: () {},
+                          onShare: _shareProfile,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 58),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
@@ -168,55 +205,7 @@ class _RecruiterPublicViewScreenState extends State<RecruiterPublicViewScreen> {
                             .toList(),
                       ),
                       const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          SizedBox(
-                            height: 44,
-                            width: 96,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                elevation: 0,
-                                backgroundColor: const Color(0xFF2B7FD0),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                'Follow',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          InkWell(
-                            onTap: _shareProfile,
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              height: 44,
-                              width: 44,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: const Color(0xFF8ABAF0),
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(
-                                Icons.share_outlined,
-                                color: Color(0xFF2B7FD0),
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       Text(
                         "${user.firstName} ${user.sureName}",
                         style: const TextStyle(
@@ -226,34 +215,32 @@ class _RecruiterPublicViewScreenState extends State<RecruiterPublicViewScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        user.title,
-                        style: const TextStyle(
-                          fontSize: 15,
+                      if (user.title.isNotEmpty) ...[
+                        Text(
+                          user.title,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                      ],
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on, size: 16),
+                          const SizedBox(width: 4),
+                          Text("${user.city}, ${user.country}"),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        "Elevator Pitch",
+                        style: TextStyle(
+                          fontSize: 20,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "${user.city}, ${user.country}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF898989),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        _parseHtmlString(user.bio),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF898989),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Divider(color: Color(0xFF999999)),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -289,6 +276,23 @@ class _RecruiterPublicViewScreenState extends State<RecruiterPublicViewScreen> {
                               );
                             },
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 34),
+                      const Text(
+                        "About",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      Text(
+                        _parseHtmlString(user.bio),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF666666),
                         ),
                       ),
                     ],
