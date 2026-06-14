@@ -6,6 +6,7 @@ class AppNotificationModel {
     this.createdAt,
     this.type,
     this.to,
+    this.relatedId,
   });
 
   final String id;
@@ -15,6 +16,12 @@ class AppNotificationModel {
   final String? type;
   final String? to;
 
+  /// Id of the entity this notification is ABOUT (a Job, AppliedJob, plan, ...),
+  /// taken from the backend's `id` field. Distinct from [id], which is the
+  /// notification document's own `_id`. Used to deep-link a tap to the right
+  /// screen.
+  final String? relatedId;
+
   factory AppNotificationModel.fromJson(Map<String, dynamic> json) {
     return AppNotificationModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
@@ -23,6 +30,7 @@ class AppNotificationModel {
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
       type: json['type']?.toString(),
       to: json['to']?.toString(),
+      relatedId: json['id']?.toString(),
     );
   }
 
@@ -33,6 +41,7 @@ class AppNotificationModel {
     DateTime? createdAt,
     String? type,
     String? to,
+    String? relatedId,
   }) {
     return AppNotificationModel(
       id: id ?? this.id,
@@ -41,6 +50,7 @@ class AppNotificationModel {
       createdAt: createdAt ?? this.createdAt,
       type: type ?? this.type,
       to: to ?? this.to,
+      relatedId: relatedId ?? this.relatedId,
     );
   }
 }

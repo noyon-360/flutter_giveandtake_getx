@@ -237,6 +237,16 @@ class CompanyDetailsController extends BaseController {
     setLoading(true);
     setError("");
     venue.clear();
+
+    final accessToken = await _authStorageService.getAccessToken();
+    final refreshToken = await _authStorageService.getRefreshToken();
+    if ((accessToken == null || accessToken.trim().isEmpty) &&
+        (refreshToken == null || refreshToken.trim().isEmpty)) {
+      setError('Your session has expired. Please log in again.');
+      setLoading(false);
+      return;
+    }
+
     final result = await _companyRepo.applicantJob(jobId.value);
 
     result.fold(

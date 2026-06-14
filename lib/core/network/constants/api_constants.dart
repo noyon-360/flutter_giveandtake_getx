@@ -1,7 +1,7 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'http://10.10.26.127:5002';
-  // static const String baseDomain = 'https://test.evpitch.com';
+  // static const String baseDomain = 'http://10.10.26.127:5002';
+  static const String baseDomain = 'https://test.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
   static const String socketUrl = baseDomain;
 
@@ -148,7 +148,7 @@ class AuthEndpoints {
   final String login = '$_base/login';
   final String register = '$_base/register';
   final String verify = '$_base/verify';
-  final String refreshToken = '${ApiConstants.baseUrl}/auth/refresh-token';
+  final String refreshToken = '${ApiConstants.baseUrl}/refresh-token';
 
   // Password Reset Flow
   final String resetPass = '$_base/forget'; // Send OTP for forgot password
@@ -196,6 +196,8 @@ class NotificationEndpoints {
 class MessagingEndpoints {
   static const String _messageBase = '${ApiConstants.baseUrl}/message';
   static const String _roomBase = '${ApiConstants.baseUrl}/message-room';
+
+  String get createRoom => '$_roomBase/create-message-room';
 
   String rooms({
     required String role,

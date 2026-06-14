@@ -27,6 +27,26 @@ class MessagingRepository {
     return dio;
   }
 
+  /// Create a conversation with [otherUserId]. The backend forces the
+  /// authenticated user into their own participant slot (by role), so we only
+  /// send the counterpart's id. Returns the new room id, or null when the room
+  /// already exists (HTTP 409) — the caller then locates it from the room list.
+  Future<String?> createRoom({required String otherUserId}) async {
+    final dio = await _dio();
+    try {
+      final response = await dio.post(
+        ApiConstants.messaging.createRoom,
+        data: {'userId': otherUserId},
+      );
+      final data = response.data is Map ? response.data['data'] : null;
+      final id = data is Map ? (data['_id'] ?? data['id']) : null;
+      return id?.toString();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) return null;
+      rethrow;
+    }
+  }
+
   Future<List<MessageRoomModel>> fetchRooms({
     required String role,
     required String userId,

@@ -265,197 +265,315 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 46),
+                const SizedBox(height: 16),
 
                 /// ================= HEADER =================
                 Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade200),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: Offset(0, 2),
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.all(10),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// ───────── Avatar ─────────
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(company.clogo),
+                      /// ───────── Avatar (with gradient ring + fallback) ─────────
+                      Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF2B7FD0), Color(0xFF4DA3F0)],
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 32,
+                          backgroundColor: Colors.grey.shade100,
+                          backgroundImage: company.clogo.isNotEmpty
+                              ? NetworkImage(company.clogo)
+                              : null,
+                          child: company.clogo.isEmpty
+                              ? Text(
+                                  company.cname.isNotEmpty
+                                      ? company.cname[0].toUpperCase()
+                                      : "C",
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2B7FD0),
+                                  ),
+                                )
+                              : null,
+                        ),
                       ),
+                      const SizedBox(width: 14),
 
-                      /// ───────── Company Name + Location ─────────
-                      /// ================= HEADER =================
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      /// ───────── Name + Industry + Chips ─────────
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Company name
                             Text(
                               company.cname,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                color: Color(0xFF1A1A1A),
                               ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
-
-                            const SizedBox(height: 4),
-
-                            // Industry
-                            Text(
-                              company.industry ?? "No industry info",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black54,
+                            if (company.industry.trim().isNotEmpty) ...[
+                              const SizedBox(height: 3),
+                              Text(
+                                company.industry,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            // Location + Recruiters row
-                            Row(
+                            ],
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
                               children: [
-                                Icon(
-                                  Icons.location_on,
-                                  size: 14,
-                                  color: Colors.black54,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
+                                _headerChip(
+                                  Icons.location_on_outlined,
                                   "${company.city}, ${company.country}",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black54,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
                                 ),
-                                const SizedBox(width: 12),
-                                Icon(
-                                  Icons.people,
-                                  size: 14,
-                                  color: Colors.black54,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  "${company.employeesId.length} recruiter${company.employeesId.length > 1 ? "s" : ""}",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black54,
-                                  ),
+                                _headerChip(
+                                  Icons.people_outline,
+                                  "${company.employeesId.length} recruiter${company.employeesId.length == 1 ? '' : 's'}",
                                 ),
                               ],
                             ),
                           ],
                         ),
                       ),
-
-                      const SizedBox(width: 10),
                     ],
                   ),
                 ),
 
-                /// ================= PROMO SECTION =================
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
+                const SizedBox(height: 16),
+
+                /// ================= PROMO CARD =================
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF2B7FD0), Color(0xFF1B6FC0)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2B7FD0).withOpacity(0.30),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 18),
-
-                      /// 🔹 Promo text
-                      Text(
-                        "Post Your First Job at No Cost!",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.rocket_launch,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              "Post Your First Job at No Cost!",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 6),
-
-                      Text(
+                      const SizedBox(height: 10),
+                      const Text(
                         "Easily post job openings & reach the right talent fast.",
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF727272),
+                          fontSize: 13,
+                          color: Color(0xFFE8F1FB),
+                          height: 1.4,
                         ),
                       ),
-
-                      const SizedBox(height: 20),
-
-                      // ----- Social Media -----
-                      buildSocialLinks(company),
-
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => Get.to(() => CreateJobScreen()),
+                          icon: const Icon(
+                            Icons.add,
+                            size: 18,
+                            color: Color(0xFF2B7FD0),
+                          ),
+                          label: const Text(
+                            "Post a Job",
+                            style: TextStyle(
+                              color: Color(0xFF2B7FD0),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
 
+                const SizedBox(height: 18),
+
+                /// ================= SOCIAL LINKS =================
+                Text(
+                  "Connect with us",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                buildSocialLinks(company),
+                const SizedBox(height: 20),
+
                 /// ================= Elevator Pitch =================
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: const Color(0xFF999999),
-                        width: 1,
+                ElevatorPitchSection(
+                  isOwnProfile: true, // Enable managing the pitch
+                  onDelete: () async {
+                    await Future.delayed(const Duration(milliseconds: 500));
+                    await controller.fetchCompanyProfile();
+                  },
+                  onUpload: () async {
+                    await Future.delayed(const Duration(milliseconds: 1000));
+                    await controller.fetchCompanyProfile();
+                  },
+                  videoUrl: company.elevatorPitch?.id != null
+                      ? "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch!.id}"
+                      : null,
+                  httpHeaders: {
+                    "Custom-Header": "value",
+                    if (_accessToken != null) ...{
+                      "Authorization": "Bearer $_accessToken",
+                    },
+                  },
+                ),
+
+                const SizedBox(height: 22),
+
+                /// ================= ABOUT US =================
+                sectionTitle("About us"),
+                const SizedBox(height: 6),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.grey.shade200),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
-                        color: const Color(0xFF191919),
-                      ),
-                      height: 280,
-                      width: double.infinity,
-                      child: ElevatorPitchSection(
-                        isOwnProfile: true, // Enable managing the pitch
-                        onDelete: () async {
-                          await Future.delayed(const Duration(milliseconds: 500));
-                          await controller.fetchCompanyProfile();
-                        },
-                        onUpload: () async {
-                          await Future.delayed(const Duration(milliseconds: 1000));
-                          await controller.fetchCompanyProfile();
-                        },
-                        videoUrl: company.elevatorPitch?.id != null
-                            ? "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch!.id}"
-                            : null,
-                        httpHeaders: {
-                          "Custom-Header": "value",
-                          if (_accessToken != null) ...{
-                            "Authorization": "Bearer $_accessToken",
-                          },
-                        },
-                      ),
+                    ],
+                  ),
+                  child: Text(
+                    stripHtmlTags(company.aboutUs),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      color: Colors.black87,
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-                SizedBox(height: 20),
-
-                /// ================= COMPANY DETAILS =================
-                infoTile("About us", stripHtmlTags(company.aboutUs)),
-                SizedBox(height: 20),
 
                 /// ================= Employees =================
-                sectionTitle("Internal Recruiters"),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Internal Recruiters",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => Get.to(() => const CompanyEmployeesScreen()),
+                        borderRadius: BorderRadius.circular(8),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "See more",
+                                style: TextStyle(
+                                  color: Color(0xFF2B7FD0),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(width: 3),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 13,
+                                color: Color(0xFF2B7FD0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 12),
 
                 // Full-width Beautiful Table Card
@@ -843,6 +961,31 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
           child: SocialMedia(image: _getSocialIcon(link.label)),
         );
       }).toList(),
+    );
+  }
+
+  Widget _headerChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F6FC),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: const Color(0xFF2B7FD0)),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11.5,
+              color: Color(0xFF445566),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

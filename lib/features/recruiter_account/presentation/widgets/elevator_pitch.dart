@@ -123,12 +123,17 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
                     autoPlay: false,
                     looping: false,
                     aspectRatio: _videoController!.value.aspectRatio,
-                    placeholder: Container(
-                      color: Colors.black,
-                      child: const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
+                    // Cleaner controls: brand-coloured scrubber, no options menu
+                    // or speed picker clutter.
+                    showOptions: false,
+                    allowPlaybackSpeedChanging: false,
+                    materialProgressColors: ChewieProgressColors(
+                      playedColor: const Color(0xFF2B7FD0),
+                      handleColor: const Color(0xFF2B7FD0),
+                      bufferedColor: Colors.white24,
+                      backgroundColor: Colors.white12,
                     ),
+                    placeholder: Container(color: Colors.black),
                     errorBuilder: (context, errorMessage) {
                       return _buildErrorWidget(errorMessage);
                     },
@@ -196,113 +201,158 @@ class _ElevatorPitchSectionState extends State<ElevatorPitchSection> {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasVideo =
+        widget.videoUrl != null &&
+        widget.videoUrl!.isNotEmpty &&
+        !widget.videoUrl!.endsWith('/');
+
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: const Color(0xFF191919),
-      ),
-      padding: const EdgeInsets.all(10),
       width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF222A36), Color(0xFF12161D)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Elevator Pitch",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2B7FD0).withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.play_circle_fill,
+                  color: Color(0xFF4DA3F0),
+                  size: 20,
                 ),
               ),
-              if (widget.isOwnProfile &&
-                  widget.videoUrl != null &&
-                  widget.videoUrl!.isNotEmpty &&
-                  !widget.videoUrl!.endsWith('/'))
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  "Elevator Pitch",
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              if (widget.isOwnProfile && hasVideo)
                 Obx(
-                  () => IconButton(
-                    onPressed: recruiterController.isVideoUploading.value
-                        ? null
-                        : () async {
-                            await recruiterController.deleteElevatorVideo();
-                            widget.onDelete?.call();
-                          },
-                    icon: Icon(
-                      Icons.delete,
-                      color: recruiterController.isVideoUploading.value
-                          ? Colors.grey
-                          : Colors.white,
+                  () => Material(
+                    color: Colors.white.withOpacity(0.08),
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: recruiterController.isVideoUploading.value
+                          ? null
+                          : () async {
+                              await recruiterController.deleteElevatorVideo();
+                              widget.onDelete?.call();
+                            },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.delete_outline,
+                          size: 20,
+                          color: recruiterController.isVideoUploading.value
+                              ? Colors.white38
+                              : Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
             ],
           ),
+          const SizedBox(height: 14),
+          if (hasVideo)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                height: 200,
+                width: double.infinity,
+                color: Colors.black,
+                child: _errorMessage != null
+                    ? _buildErrorWidget(_errorMessage!)
+                    : (_chewieController != null && _isInitialized)
+                    ? Chewie(controller: _chewieController!)
+                    : const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF4DA3F0),
+                        ),
+                      ),
+              ),
+            )
+          else if (widget.isOwnProfile)
+            _buildUploadPrompt()
+          else
+            Container(
+              height: 120,
+              alignment: Alignment.center,
+              child: const Text(
+                "No pitch added yet.",
+                style: TextStyle(fontSize: 15, color: Colors.white70),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUploadPrompt() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: Colors.white.withOpacity(0.04),
+        border: Border.all(color: Colors.white24, width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.videocam_outlined, color: Colors.white54, size: 38),
           const SizedBox(height: 10),
-          widget.videoUrl != null &&
-                  widget.videoUrl!.isNotEmpty &&
-                  !widget.videoUrl!.endsWith('/')
-              ? Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: _errorMessage != null
-                        ? _buildErrorWidget(_errorMessage!)
-                        : _chewieController != null && _isInitialized
-                        ? Chewie(controller: _chewieController!)
-                        : const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
-                )
-              : widget.isOwnProfile
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "No pitch added yet.",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.white70,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          await Get.to(() => const VideoUploadScreen());
-                          widget.onUpload?.call();
-                        },
-                        icon: const Icon(Icons.upload, color: Colors.white),
-                        label: const Text(
-                          "Upload New Video",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2B7FD0),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : const Text(
-                  "No pitch added yet.",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.white70,
-                    height: 1.4,
-                  ),
-                ),
+          const Text(
+            "No pitch added yet.",
+            style: TextStyle(fontSize: 15, color: Colors.white70, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () async {
+              await Get.to(() => const VideoUploadScreen());
+              widget.onUpload?.call();
+            },
+            icon: const Icon(Icons.upload, color: Colors.white, size: 18),
+            label: const Text(
+              "Upload New Video",
+              style: TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2B7FD0),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
         ],
       ),
     );

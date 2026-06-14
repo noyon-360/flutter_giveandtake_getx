@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/bottomNavbar/controllers/bottom_nav_controller.dart';
 import '../../data/models/chat_message_model.dart';
 import '../../data/models/message_room_model.dart';
 import '../controller/messaging_controller.dart';
@@ -24,8 +25,26 @@ class MessagingScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Messaging'),
-            automaticallyImplyLeading:
-                !isWide && controller.selectedRoom.value != null,
+            automaticallyImplyLeading: false,
+            leading: Obx(() {
+              // In a chat (narrow layout) -> back to the conversation list.
+              final inChat = !isWide && controller.selectedRoom.value != null;
+              return IconButton(
+                icon: const Icon(Icons.arrow_back),
+                tooltip: 'Back',
+                onPressed: () {
+                  if (inChat) {
+                    controller.selectedRoom.value = null;
+                  } else if (Navigator.canPop(context)) {
+                    // Opened as its own route (e.g. from "Message") -> pop it.
+                    Get.back();
+                  } else if (Get.isRegistered<BottomNavController>()) {
+                    // It's the bottom-nav tab -> fall back to the Home tab.
+                    Get.find<BottomNavController>().changeIndex(0);
+                  }
+                },
+              );
+            }),
           ),
           body: Obx(() {
             if (controller.isLoadingRooms.value &&
@@ -165,11 +184,6 @@ class _ChatArea extends StatelessWidget {
           ),
           child: Row(
             children: [
-              if (MediaQuery.of(context).size.width < 900)
-                IconButton(
-                  onPressed: () => controller.selectedRoom.value = null,
-                  icon: const Icon(Icons.arrow_back),
-                ),
               CircleAvatar(
                 child: Text(
                   (otherUser?.name?.isNotEmpty ?? false)

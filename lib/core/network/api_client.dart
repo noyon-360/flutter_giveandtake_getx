@@ -104,7 +104,7 @@ class ApiClient {
       }
 
       final response = await _dio.post(
-        '${ApiConstants.baseUrl}${ApiConstants.auth.refreshToken}',
+        ApiConstants.auth.refreshToken,
         data: {'refreshToken': refreshToken},
       );
 
@@ -194,7 +194,7 @@ class ApiClient {
         await completer.future;
       }
 
-      options = await _addAuthHeader(options);
+      options = await _addAuthHeader(options, endpoint);
 
       // Set headers for FormData if applicable
       if (isFormData) {
@@ -404,7 +404,7 @@ class ApiClient {
   );
 
   /// Helper Methods
-  Future<Options> _addAuthHeader(Options? options) async {
+  Future<Options> _addAuthHeader(Options? options, String endpoint) async {
     options ??= Options();
 
     final skipAuth = options.headers?['X-Skip-Auth'] == true;
@@ -419,9 +419,26 @@ class ApiClient {
 
     if (kDebugMode) DPrint.log("Current Access Token: $accessToken");
 
-    if (accessToken != null) {
+    if (accessToken != null && accessToken.trim().isNotEmpty) {
       options.headers ??= {};
       options.headers!['Authorization'] = 'Bearer $accessToken';
+    } else if (endpoint != ApiConstants.auth.refreshToken) {
+      final refreshToken = await _secureStoreServices.retrieveData(
+        KeyConstants.refreshToken,
+      );
+
+      if (refreshToken != null &&
+          refreshToken.trim().isNotEmpty &&
+          await _refreshToken()) {
+        final refreshedAccessToken = await _secureStoreServices.retrieveData(
+          KeyConstants.accessToken,
+        );
+        if (refreshedAccessToken != null &&
+            refreshedAccessToken.trim().isNotEmpty) {
+          options.headers ??= {};
+          options.headers!['Authorization'] = 'Bearer $refreshedAccessToken';
+        }
+      }
     }
     if (kDebugMode) DPrint.log("Authorization header : ${options.headers}");
     return options;

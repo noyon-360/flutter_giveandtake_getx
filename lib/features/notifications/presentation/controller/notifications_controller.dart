@@ -23,6 +23,9 @@ class NotificationsController extends GetxController {
   final error = RxnString();
 
   String? _userId;
+  // Cached so the list can route a tap by role synchronously (role is read from
+  // secure storage, which is async).
+  String? userRole;
   Function(dynamic)? _newNotificationHandler;
   Function(dynamic)? _countHandler;
 
@@ -35,6 +38,8 @@ class NotificationsController extends GetxController {
   Future<void> _initialize() async {
     _userId = await _authStorageService.getUserId();
     if (_userId == null || _userId!.isEmpty) return;
+
+    userRole = await _authStorageService.getUserRole();
 
     await loadNotifications();
     _socketService.joinNotification(_userId!);

@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import 'package:giveandtake/features/Home/presentation/screens/my_plan_screen.dart';
+import 'package:giveandtake/features/messaging/presentation/screens/messaging_screen.dart';
+import 'package:giveandtake/features/profile_dasboard/presentation/screens/job_history.dart';
+
 import '../../../../core/bottomNavbar/controllers/bottom_nav_controller.dart';
+import '../../data/models/app_notification_model.dart';
 import '../controller/notifications_controller.dart';
 
 class NotificationsScreen extends StatelessWidget {
@@ -67,9 +72,7 @@ class NotificationsScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final notification = controller.notifications[index];
               return InkWell(
-                onTap: notification.isViewed
-                    ? null
-                    : () => controller.markRead(notification.id),
+                onTap: () => _onNotificationTap(notification),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding: const EdgeInsets.all(16),
@@ -137,6 +140,45 @@ class NotificationsScreen extends StatelessWidget {
         );
       }),
     );
+  }
+
+  // Mark the tapped notification read (if needed) and route to the screen it
+  // relates to. Navigation only targets screens that initialise their own GetX
+  // controllers, so a tap can never crash on a missing dependency; anything we
+  // can't safely route just marks-as-read.
+  void _onNotificationTap(AppNotificationModel notification) {
+    if (!notification.isViewed) {
+      controller.markRead(notification.id);
+    }
+    final destination = _destinationFor(notification);
+    if (destination != null) {
+      Get.to(() => destination);
+    }
+  }
+
+  Widget? _destinationFor(AppNotificationModel notification) {
+    final role = controller.userRole;
+    final isOwner = role == 'recruiter' || role == 'company';
+
+    switch (notification.type) {
+      // Candidate: you applied / your application status changed -> applications.
+      case 'job_application_confirmation':
+        return const JobHistoryScreen();
+      case 'job_application_status':
+        // Owners also receive this (job approved/declined) but that destination
+        // needs controllers not guaranteed to be live here, so only the
+        // candidate case deep-links for now.
+        return isOwner ? null : const JobHistoryScreen();
+      // Billing / subscription -> the plan screen (where they can renew/upgrade).
+      case 'payg_expired':
+      case 'Subscription Expired':
+        return const MyPlanScreen();
+      // New chat message -> messaging.
+      case 'message':
+        return MessagingScreen();
+      default:
+        return null;
+    }
   }
 
   String _formatDate(DateTime? dateTime) {

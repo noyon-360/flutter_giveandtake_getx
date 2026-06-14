@@ -55,12 +55,15 @@ class _ElevatorPitchCompanySectionState
         looping: false,
         aspectRatio: _videoController!.value.aspectRatio,
         showControls: true,
-        placeholder: Container(
-          color: Colors.black,
-          child: const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          ),
+        showOptions: false,
+        allowPlaybackSpeedChanging: false,
+        materialProgressColors: ChewieProgressColors(
+          playedColor: const Color(0xFF2B7FD0),
+          handleColor: const Color(0xFF2B7FD0),
+          bufferedColor: Colors.white24,
+          backgroundColor: Colors.white12,
         ),
+        placeholder: Container(color: Colors.black),
         errorBuilder: (context, errorMessage) {
           return _errorWidget(errorMessage);
         },

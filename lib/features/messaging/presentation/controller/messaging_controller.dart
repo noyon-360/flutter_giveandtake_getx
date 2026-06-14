@@ -42,6 +42,11 @@ class MessagingController extends GetxController {
   String? _joinedRoomId;
   Function(dynamic)? _newMessageHandler;
 
+  // The flag used to open a freshly-created (or already-existing) conversation
+  // once the room list has been (re)loaded.
+  String? _pendingOpenUserId;
+  final isOpeningConversation = false.obs;
+
   String? get userId => _userId;
   String? get userRole => _userRole;
 
@@ -107,6 +112,44 @@ class MessagingController extends GetxController {
     } finally {
       isLoadingRooms.value = false;
     }
+  }
+
+  /// Create-or-open a conversation with [otherUserId] (e.g. a candidate a
+  /// recruiter is viewing) and select it. Safe to call right after navigating
+  /// to the messaging screen.
+  Future<void> openConversationWith(String otherUserId) async {
+    if (otherUserId.isEmpty) return;
+    isOpeningConversation.value = true;
+    try {
+      _userId ??= await _authStorageService.getUserId();
+      _userRole ??= await _authStorageService.getUserRole();
+
+      _pendingOpenUserId = otherUserId;
+      try {
+        // Idempotent: returns the new room id, or null (409) if it already exists.
+        await _repository.createRoom(otherUserId: otherUserId);
+      } catch (e) {
+        error.value = e.toString();
+      }
+
+      await loadRooms();
+
+      final target = _findRoomByOtherUser(otherUserId);
+      _pendingOpenUserId = null;
+      if (target != null) {
+        await selectRoom(target);
+      }
+    } finally {
+      isOpeningConversation.value = false;
+    }
+  }
+
+  MessageRoomModel? _findRoomByOtherUser(String otherUserId) {
+    final me = _userId ?? '';
+    for (final room in rooms) {
+      if (room.otherUser(me)?.id == otherUserId) return room;
+    }
+    return null;
   }
 
   Future<void> selectRoom(MessageRoomModel room) async {

@@ -1,8 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
+import 'package:giveandtake/core/network/services/auth_storage_service.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
 import 'package:giveandtake/features/company/presentation/widget/elevator-pitch_company_widget.dart';
+import 'package:giveandtake/features/messaging/presentation/controller/messaging_controller.dart';
+import 'package:giveandtake/features/messaging/presentation/screens/messaging_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,6 +29,10 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
   final CompanyDetailsController controller =
       Get.find<CompanyDetailsController>();
 
+  // The viewer's access token, needed to authorise the candidate's HLS pitch
+  // stream (and the signed resume download).
+  String? _accessToken;
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +44,11 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
   Future<void> _loadCandidateData() async {
     final user = widget.applicant.user;
 
+    // Resolve the token first so the pitch stream URL is ready by the time the
+    // candidate view (which gates the video) finishes loading.
+    final token = await AuthStorageService().getAccessToken();
+    if (mounted) setState(() => _accessToken = token);
+
     // Fetch the resume (PDF) for THIS applicant.
     if (user.id.isNotEmpty) {
       await controller.fetchResume(user.id);
@@ -44,6 +58,72 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
     if (user.slug.isNotEmpty) {
       await controller.getCandidatePublicView(user.slug);
     }
+  }
+
+  /// Resume files live in a private bucket, so the raw `file.url` is not
+  /// directly downloadable — request a short-lived signed URL first.
+  Future<void> _downloadResume() async {
+    final resumes = controller.resume;
+    if (resumes.isEmpty || resumes.first.file.isEmpty) {
+      Get.snackbar(
+        "Unavailable",
+        "Resume not found",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final resume = resumes.first;
+    final fallbackName = resume.file.first.filename;
+    try {
+      final token = _accessToken ?? await AuthStorageService().getAccessToken();
+      final response = await Dio().get(
+        '${ApiConstants.baseUrl}/resume/${resume.id}/download',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      final data = response.data is Map ? response.data['data'] : null;
+      final url = (data is Map ? data['url'] : null)?.toString();
+      final filename =
+          (data is Map ? data['filename'] : null)?.toString() ?? fallbackName;
+
+      if (url == null || url.isEmpty) {
+        Get.snackbar(
+          "Unavailable",
+          "Resume link is unavailable",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      await downloadAndOpenPdf(url, filename);
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Failed to download resume",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  /// Open (creating if needed) a conversation with this candidate, mirroring the
+  /// web "Message" button.
+  Future<void> _startConversation() async {
+    final candidateUserId = widget.applicant.user.id;
+    if (candidateUserId.isEmpty) {
+      Get.snackbar(
+        "Unavailable",
+        "Cannot message this candidate",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final messaging = Get.isRegistered<MessagingController>()
+        ? Get.find<MessagingController>()
+        : Get.put(MessagingController(Get.find(), Get.find(), Get.find()));
+
+    Get.to(() => MessagingScreen());
+    await messaging.openConversationWith(candidateUserId);
   }
 
   Future<void> _onRefresh() async {
@@ -80,9 +160,6 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // Resume PDF list for THIS applicant.
-        final resumeData = controller.resume;
-
         // The applicant-list endpoint does NOT embed the full resume, so
         // `applicant.resume` is usually null and the header rendered blank.
         // Prefer the public candidate view fetched by slug (which DOES carry
@@ -105,9 +182,20 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
         // Elevator pitch comes from the public candidate view (fetched by slug).
         final candidatePublic = controller.candidateView.value;
         final elevatorPitches = candidatePublic?.elevatorPitch ?? const [];
-        final hasElevatorPitch =
-            elevatorPitches.isNotEmpty &&
-            elevatorPitches.first.video?.hlsUrl != null;
+        final pitch = elevatorPitches.isNotEmpty ? elevatorPitches.first : null;
+
+        // A candidate's pitch is access-controlled: it must be streamed through
+        // the API (`/elevator-pitch/stream/:id`) with the viewer's token — never
+        // the raw private `hlsUrl`. Native HLS players drop auth headers on
+        // segment requests, so the token goes in the query string; the backend
+        // then signs the segment/key URLs it returns.
+        final pitchId = pitch?.id;
+        final streamUrl =
+            (pitchId != null &&
+                pitch?.video?.hlsUrl != null &&
+                (_accessToken ?? '').isNotEmpty)
+            ? '${ApiConstants.baseUrl}/elevator-pitch/stream/$pitchId?token=$_accessToken'
+            : null;
 
         return RefreshIndicator(
           onRefresh: _onRefresh,
@@ -206,25 +294,7 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: ElevatedButton.icon(
-                            onPressed: () {
-                              if (resumeData.isNotEmpty &&
-                                  resumeData.first.file.isNotEmpty &&
-                                  resumeData.first.file.first.url.isNotEmpty) {
-                                final fileUrl = resumeData.first.file.first.url;
-
-                                downloadAndOpenPdf(
-                                  fileUrl,
-                                  resumeData.first.file.first.filename,
-                                );
-                              } else {
-                                Get.snackbar(
-                                  "Unavailable",
-                                  "Resume not found",
-                                  snackPosition: SnackPosition.BOTTOM,
-                                );
-                              }
-                            },
-
+                            onPressed: _downloadResume,
                             icon: const Icon(
                               Icons.download,
                               color: Colors.white,
@@ -276,7 +346,7 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                 sectionTitle("Elevator Pitch", canDelete: false),
                 const SizedBox(height: 12),
 
-                if (hasElevatorPitch)
+                if (streamUrl != null)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
@@ -284,16 +354,10 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                       width: double.infinity,
                       color: Colors.black,
                       child: ElevatorPitchCompanySection(
-                        videoUrl: elevatorPitches.first.video!.hlsUrl!,
-                        httpHeaders:
-                            elevatorPitches.first.video!.encryptionKeyUrl !=
-                                null
-                            ? {
-                                "Authorization":
-                                    "Bearer ${elevatorPitches.first.video!.encryptionKeyUrl}",
-                                "Accept": "*/*",
-                              }
-                            : {"Accept": "*/*"},
+                        // Re-create the player whenever the URL changes.
+                        key: ValueKey(streamUrl),
+                        videoUrl: streamUrl,
+                        httpHeaders: const {"Accept": "*/*"},
                       ),
                     ),
                   )
@@ -394,6 +458,28 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                   ),
                   const SizedBox(height: 24),
                 ],
+
+                // ==================== MESSAGE ====================
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: _startConversation,
+                    icon: const Icon(
+                      Icons.message_outlined,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    label: const Text("Message"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2B7FD0),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
               ],
             ),
           ),
