@@ -518,6 +518,9 @@ import '../../company/presentation/controller/company_details_controller.dart';
 import '../models/get_resume_public_view_response_model.dart';
 import '../widgets/public_profile_action_row.dart';
 
+const Color _mediaPlaceholderBg = Color(0xFFDBEAFE);
+const Color _mediaPlaceholderText = Color(0xFF1E3A8A);
+
 class PublicViewCandidateScreen extends StatefulWidget {
   final String slug;
   const PublicViewCandidateScreen({super.key, required this.slug});
@@ -588,7 +591,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                   Container(
                     height: 200,
                     width: double.infinity,
-                    color: Colors.grey.shade200,
+                    color: _mediaPlaceholderBg,
                     child: resume.banner != null && resume.banner!.isNotEmpty
                         ? Image.network(resume.banner!, fit: BoxFit.cover)
                         : null,
@@ -620,11 +623,11 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                                 fit: BoxFit.cover,
                               )
                             : Container(
-                                color: Colors.grey.shade300,
+                                color: _mediaPlaceholderBg,
                                 child: const Icon(
                                   Icons.person,
                                   size: 50,
-                                  color: Colors.grey,
+                                  color: _mediaPlaceholderText,
                                 ),
                               ),
                       ),
@@ -641,6 +644,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                           isFollowing: controller.isFollowing.value,
                           onFollow: controller.toggleFollow,
                           onShare: _shareProfile,
+                          showFollow: false,
                         ),
                       ),
                     ),
@@ -661,7 +665,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
 
               /// ================= NAME =================
               Padding(
@@ -710,7 +714,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               /// ================= ABOUT =================
               _sectionTitle("About"),
@@ -723,7 +727,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               /// ================= SKILLS =================
               if (resume.skills != null && resume.skills!.isNotEmpty) ...[
@@ -739,7 +743,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                 ),
               ],
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               /// ================= EXPERIENCE =================
               _divider(),
@@ -754,7 +758,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                   child: Text("No Experience Added"),
                 ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               /// ================= EDUCATION =================
               _divider(),
@@ -769,7 +773,7 @@ class _PublicViewCandidateScreenState extends State<PublicViewCandidateScreen> {
                   child: Text("No Education Added"),
                 ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
             ],
           ),
           );

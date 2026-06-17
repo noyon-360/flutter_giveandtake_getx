@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
+import 'package:giveandtake/core/network/constants/api_constants.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:giveandtake/core/services/get_user_profile_service.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/auth/data/models/user_model.dart';
 import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
 import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart';
+import 'package:giveandtake/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
 import 'package:giveandtake/features/elevator/presentation/controller/resume_check_controller.dart';
@@ -105,6 +107,25 @@ class _AppDrawerState extends State<AppDrawer> {
       _isLoggedIn = accessToken != null && accessToken.isNotEmpty;
       _role = role;
     });
+
+    if (_isLoggedIn && role?.toLowerCase() == 'candidate') {
+      await _ensureCandidateProfilePhotoLoaded();
+    }
+  }
+
+  Future<void> _ensureCandidateProfilePhotoLoaded() async {
+    final controller = Get.isRegistered<CandidateDashboardController>()
+        ? Get.find<CandidateDashboardController>()
+        : Get.put(CandidateDashboardController());
+
+    final existingPhoto = controller.resumeData.value?.resume?.photo?.trim();
+    if (existingPhoto != null && existingPhoto.isNotEmpty) return;
+    if (controller.isLoadingResume.value) return;
+
+    final userId = await _authController.authStorageService.getUserId();
+    if (userId == null || userId.isEmpty) return;
+
+    await controller.fetchResume(userId);
   }
 
   @override
@@ -217,6 +238,14 @@ class _AppDrawerState extends State<AppDrawer> {
         onTap: () {
           Get.back();
           Get.to(() => const CandidateProfileScreen());
+        },
+      ),
+      ListTileForNav(
+        icon: Icons.video_library_outlined,
+        title: "Elevator & pitch",
+        onTap: () {
+          Get.back();
+          _handleElevatorPitch();
         },
       ),
       ListTileForNav(
@@ -508,7 +537,6 @@ class _AppDrawerState extends State<AppDrawer> {
           : 'Your account';
       final avatarUrl = _resolveHeaderAvatarUrl(user);
       final role = (user?.role ?? '').trim();
-      final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
 
       return Container(
         padding: const EdgeInsets.fromLTRB(16, 8, 8, 12),
@@ -518,21 +546,7 @@ class _AppDrawerState extends State<AppDrawer> {
             Align(alignment: Alignment.centerRight, child: closeButton),
             Row(
               children: [
-                CircleAvatar(
-                  radius: 26,
-                  backgroundColor: Colors.grey.shade300,
-                  backgroundImage: hasAvatar ? NetworkImage(avatarUrl) : null,
-                  child: !hasAvatar
-                      ? Text(
-                          (name.isNotEmpty ? name[0] : '?').toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        )
-                      : null,
-                ),
+                _headerAvatar(name: name, avatarUrl: avatarUrl),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -603,27 +617,103 @@ class _AppDrawerState extends State<AppDrawer> {
   String? _resolveHeaderAvatarUrl(UserModel? user) {
     final role = (user?.role ?? '').toLowerCase();
 
+    if (role == 'candidate' &&
+        Get.isRegistered<CandidateDashboardController>()) {
+      final resume = Get.find<CandidateDashboardController>()
+          .resumeData
+          .value
+          ?.resume;
+      final photo = resume?.photo?.trim();
+      if (photo != null && photo.isNotEmpty) {
+        return _absoluteImageUrl(photo);
+      }
+    }
+
     if (role == 'company' && Get.isRegistered<CompanyDetailsController>()) {
       final companyInfo = Get.find<CompanyDetailsController>().userInfo.value;
       final companies = companyInfo?.companies ?? const [];
       if (companies.isNotEmpty && companies.first.clogo.trim().isNotEmpty) {
-        return companies.first.clogo.trim();
+        return _absoluteImageUrl(companies.first.clogo.trim());
       }
     }
 
     if (role == 'recruiter' && Get.isRegistered<RecruiterController>()) {
       final recruiter = Get.find<RecruiterController>().userInfo.value;
       if (recruiter != null && recruiter.photo.trim().isNotEmpty) {
-        return recruiter.photo.trim();
+        return _absoluteImageUrl(recruiter.photo.trim());
       }
     }
 
     final profileImage = user?.profileImage?.trim();
     if (profileImage != null && profileImage.isNotEmpty) {
-      return profileImage;
+      return _absoluteImageUrl(profileImage);
     }
 
     return null;
+  }
+
+  String _absoluteImageUrl(String url) {
+    final trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('/')) {
+      return '${ApiConstants.baseDomain}$trimmed';
+    }
+    return '${ApiConstants.baseDomain}/$trimmed';
+  }
+
+  Widget _headerAvatar({
+    required String name,
+    required String? avatarUrl,
+  }) {
+    const size = 52.0;
+    final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
+
+    if (!hasAvatar) {
+      return _fallbackHeaderAvatar(name: name, size: size);
+    }
+
+    return ClipOval(
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Image.network(
+          avatarUrl,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _fallbackHeaderAvatar(name: name, size: size);
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return _fallbackHeaderAvatar(name: name, size: size);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _fallbackHeaderAvatar({
+    required String name,
+    required double size,
+  }) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        color: Color(0xFFDBEAFE),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        (name.isNotEmpty ? name[0] : '?').toUpperCase(),
+        style: const TextStyle(
+          color: Color(0xFF1E3A8A),
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 
   /// Small uppercase label that introduces a group of drawer items.
@@ -736,20 +826,23 @@ class _AppDrawerState extends State<AppDrawer> {
                               itemCount: users.length,
                               itemBuilder: (context, index) {
                                 final user = users[index];
+                                final avatarUrl = user.avatar?.url?.trim();
+                                final hasAvatar = avatarUrl != null &&
+                                    avatarUrl.isNotEmpty;
                                 return ListTile(
                                   dense: true,
                                   leading: CircleAvatar(
                                     radius: 20,
-                                    backgroundColor: Colors.grey[300],
-                                    backgroundImage: user.avatar?.url != null
-                                        ? NetworkImage(user.avatar!.url!)
+                                    backgroundColor: const Color(0xFFDBEAFE),
+                                    backgroundImage: hasAvatar
+                                        ? NetworkImage(avatarUrl)
                                         : null,
-                                    child: user.avatar?.url == null
+                                    child: !hasAvatar
                                         ? Text(
                                             (user.name?[0] ?? '?')
                                                 .toUpperCase(),
                                             style: const TextStyle(
-                                              color: Colors.white,
+                                              color: Color(0xFF1E3A8A),
                                             ),
                                           )
                                         : null,

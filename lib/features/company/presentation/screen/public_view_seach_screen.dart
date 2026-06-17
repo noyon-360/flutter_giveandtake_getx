@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/network/constants/api_constants.dart';
 import '../../../job_listing/presentation/controllers/job_details_controller.dart';
 import '../../../job_listing/presentation/screens/job_details_screen.dart';
+import '../../../public_view/services/public_profile_follow_service.dart';
 import '../../../public_view/widgets/public_profile_action_row.dart';
 import '../../../recruiter_account/presentation/widgets/social_media.dart';
 import '../../data/model/public_view_search_response_model.dart';
 import '../controller/company_details_controller.dart';
 import '../widget/elevator-pitch_company_widget.dart';
 import '../widget/search_job_card.dart';
+
+const Color _mediaPlaceholderBg = Color(0xFFDBEAFE);
+const Color _mediaPlaceholderText = Color(0xFF1E3A8A);
 
 class PublicViewSeachScreen extends StatefulWidget {
   final String slug;
@@ -26,6 +30,13 @@ class PublicViewSeachScreen extends StatefulWidget {
 class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
   final CompanyDetailsController controller =
       Get.find<CompanyDetailsController>();
+  final PublicProfileFollowService _followService =
+      PublicProfileFollowService();
+
+  bool _isFollowing = false;
+  bool _isFollowBusy = false;
+  bool _isOwnProfile = false;
+  int _followerCount = 0;
 
   @override
   void initState() {
@@ -36,8 +47,10 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
       // fetch company jobs after getting company info
       if (controller.publicView.value != null &&
           controller.publicView.value!.companies.isNotEmpty) {
-        final companyId = controller.publicView.value!.companies.first.id;
+        final company = controller.publicView.value!.companies.first;
+        final companyId = company.id;
         await controller.fetchPublicJobs(companyId);
+        await _loadCompanyFollowStatus(company);
       }
     });
   }
@@ -90,9 +103,13 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                       company.banner,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: Colors.grey.shade300,
+                        color: _mediaPlaceholderBg,
                         alignment: Alignment.center,
-                        child: const Icon(Icons.image_not_supported, size: 40),
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: _mediaPlaceholderText,
+                          size: 40,
+                        ),
                       ),
                     ),
                   ),
@@ -119,9 +136,13 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                           company.clogo,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey.shade300,
+                            color: _mediaPlaceholderBg,
                             alignment: Alignment.center,
-                            child: const Icon(Icons.business, size: 32),
+                            child: const Icon(
+                              Icons.business,
+                              color: _mediaPlaceholderText,
+                              size: 32,
+                            ),
                           ),
                         ),
                       ),
@@ -133,12 +154,13 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                     right: 16,
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: Obx(
-                        () => PublicProfileActionRow(
-                          isFollowing: controller.isFollowing.value,
-                          onFollow: controller.toggleFollow,
-                          onShare: () => _showShareOptions(context, company),
-                        ),
+                      child: PublicProfileActionRow(
+                        isFollowing: _isFollowing,
+                        isBusy: _isFollowBusy,
+                        showFollow: !_isOwnProfile,
+                        followerCount: _followerCount,
+                        onFollow: () => _handleCompanyFollow(company),
+                        onShare: () => _shareProfile(company),
                       ),
                     ),
                   ),
@@ -155,7 +177,7 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                   children: [
                     // ----- Social links + Follow + Share (after profile image) -----
                     buildSocialLinks(company),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 12),
                     Text(
                       company.cname,
                       style: const TextStyle(
@@ -179,7 +201,7 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                         Text(company.industry),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
                     sectionTitle("Elevator Pitch"),
                     const SizedBox(height: 12),
@@ -195,7 +217,7 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                             "${ApiConstants.baseUrl}/elevator-pitch/stream/${company.elevatorPitch?.id ?? ""}",
                       ),
                     ),
-                    const SizedBox(height: 34),
+                    const SizedBox(height: 20),
                     const Text(
                       "About",
                       style: TextStyle(
@@ -206,7 +228,7 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
                     const Divider(),
                     const SizedBox(height: 8),
                     Text(company.aboutUs),
-                    const SizedBox(height: 34),
+                    const SizedBox(height: 20),
                     sectionTitle("Company Jobs"),
                     const SizedBox(height: 12),
 
@@ -366,167 +388,62 @@ class _PublicViewSeachScreenState extends State<PublicViewSeachScreen> {
     );
   }
 
-  void _showShareOptions(BuildContext context, Company company) {
-    // Public company profile link on the website.
-    final String profileUrl = "${ApiConstants.webBaseUrl}/cmp/${widget.slug}";
-    final String shareText = "Check out ${company.cname} on our platform!";
+  Future<void> _loadCompanyFollowStatus(Company company) async {
+    if (company.userId.isEmpty) return;
 
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Share profile",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _ShareButton(
-                    imagePath: 'assets/icons/facebook.png',
-                    label: "Facebook",
-                    onTap: () async {
-                      final url = Uri.parse(
-                        "https://www.facebook.com/sharer/sharer.php?u=$profileUrl",
-                      );
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _ShareButton(
-                    imagePath: 'assets/icons/twitter.png',
-                    label: "Twitter",
-                    onTap: () async {
-                      final url = Uri.parse(
-                        "https://twitter.com/intent/tweet?text=$shareText&url=$profileUrl",
-                      );
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _ShareButton(
-                    imagePath: 'assets/icons/linkedin.png',
-                    label: "LinkedIn",
-                    onTap: () async {
-                      final url = Uri.parse(
-                        "https://www.linkedin.com/sharing/share-offsite/?url=$profileUrl",
-                      );
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _ShareButton(
-                    imagePath: 'assets/icons/telegram.png',
-                    label: "Telegram",
-                    onTap: () async {
-                      final url = Uri.parse(
-                        "https://t.me/share/url?url=$profileUrl&text=$shareText",
-                      );
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              OutlinedButton.icon(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: profileUrl));
-                  Get.snackbar(
-                    "Copied!",
-                    "Profile link copied to clipboard",
-                    snackPosition: SnackPosition.BOTTOM,
-                    duration: const Duration(seconds: 2),
-                  );
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.copy),
-                label: const Text("Copy link"),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
-        );
-      },
-    );
+    final results = await Future.wait([
+      _followService.isOwnProfile(company.userId),
+      _followService.isFollowing(company.userId),
+      _followService.followerCount(company.userId),
+    ]);
+
+    if (mounted) {
+      setState(() {
+        _isOwnProfile = results[0] as bool;
+        _isFollowing = results[1] as bool;
+        _followerCount = results[2] as int;
+      });
+    }
   }
-}
 
-// Share button widget
-class _ShareButton extends StatelessWidget {
-  final String imagePath;
-  final String label;
-  final VoidCallback onTap;
+  Future<void> _handleCompanyFollow(Company company) async {
+    if (_isFollowBusy) return;
 
-  const _ShareButton({
-    required this.imagePath,
-    required this.label,
-    required this.onTap,
-  });
+    setState(() => _isFollowBusy = true);
+    try {
+      final nextState = await _followService.toggleCompany(
+        targetUserId: company.userId,
+        companyObjectId: company.id,
+        currentlyFollowing: _isFollowing,
+      );
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 66,
-            height: 66,
-            // decoration: BoxDecoration(
-            //   color: Colors.white,
-            //   shape: BoxShape.circle,
-            //   border: Border.all(color: Colors.grey.shade300, width: 1),
-            // ),
-            padding: const EdgeInsets.all(12),
-            child: ClipOval(
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.share, color: Colors.grey),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
+      if (!mounted) return;
+      setState(() {
+        _isFollowing = nextState;
+        // Keep the visible follower count in sync with the action just taken.
+        _followerCount = (_followerCount + (nextState ? 1 : -1))
+            .clamp(0, 1 << 31);
+      });
+      Get.snackbar(
+        nextState ? 'Followed' : 'Unfollowed',
+        nextState
+            ? 'You are now following this company.'
+            : 'You have unfollowed this company.',
+      );
+    } on PublicProfileFollowException catch (e) {
+      Get.snackbar('Follow unavailable', e.message);
+    } finally {
+      if (mounted) {
+        setState(() => _isFollowBusy = false);
+      }
+    }
+  }
+
+  Future<void> _shareProfile(Company company) async {
+    final url = "${ApiConstants.webBaseUrl}/cmp/${widget.slug}";
+    await Share.share(
+      "Check out ${company.cname} on EVPitch:\n$url",
+      subject: 'EVPitch profile',
     );
   }
 }

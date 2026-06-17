@@ -86,6 +86,13 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final avatar = json['avatar'];
+    final normalizedProfileImage = avatar is Map
+        ? avatar['url']?.toString()
+        : avatar is String
+            ? avatar
+            : json['profileImage']?.toString() ?? json['photo']?.toString();
+
     return UserModel(
       otp: json['otp'] as String?,
       otpExpiry: json['otpExpiry'] as String?,
@@ -93,7 +100,7 @@ class UserModel {
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
       password: json['password'] as String? ?? '',
-      profileImage: json['profileImage'] as String?,
+      profileImage: normalizedProfileImage,
       role: json['role'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String? ?? '',
       isVerified: json['isVerified'] as bool? ?? false,
