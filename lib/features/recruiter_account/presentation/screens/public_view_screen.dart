@@ -166,31 +166,10 @@ class _PublicViewScreenState extends State<PublicViewScreen> {
                             .toList(),
                       ),
                       const SizedBox(height: 14),
+                      // This is the owner's own public profile, so there is no
+                      // Follow action (you cannot follow yourself) — only Share.
                       Row(
                         children: [
-                          SizedBox(
-                            height: 44,
-                            width: 96,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                elevation: 0,
-                                backgroundColor: const Color(0xFF2B7FD0),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                'Follow',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
                           InkWell(
                             onTap: _shareProfile,
                             borderRadius: BorderRadius.circular(10),

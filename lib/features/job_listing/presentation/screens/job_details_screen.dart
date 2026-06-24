@@ -5,7 +5,9 @@ import 'package:giveandtake/core/theme/app_colors.dart';
 import 'package:giveandtake/features/company/presentation/screen/public_view_seach_screen.dart';
 import 'package:giveandtake/features/job_listing/presentation/screens/bookmark_jobs_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/recruiter_public_view.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/network/constants/api_constants.dart';
 import '../../../../core/network/services/auth_storage_service.dart';
 import '../controllers/bookmark_controller.dart';
 import '../controllers/job_details_controller.dart';
@@ -14,6 +16,28 @@ class JobDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> jobData;
 
   const JobDetailsScreen({super.key, required this.jobData});
+
+  Future<void> _shareJob({
+    required Map<String, dynamic> raw,
+    required String? title,
+    required String? company,
+  }) async {
+    final jobId = raw['_id'] ?? jobData['_id'] ?? jobData['id'] ?? '';
+    if (jobId.toString().isEmpty) {
+      Get.snackbar('Share unavailable', 'This job link is not available.');
+      return;
+    }
+
+    final url = '${ApiConstants.webBaseUrl}/alljobs/$jobId';
+    final text = [
+      'Check out this job on EVPitch:',
+      if ((title ?? '').trim().isNotEmpty) title!.trim(),
+      if ((company ?? '').trim().isNotEmpty) 'at ${company!.trim()}',
+      url,
+    ].join('\n');
+
+    await Share.share(text, subject: 'EVPitch job');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -319,6 +343,29 @@ class JobDetailsScreen extends StatelessWidget {
                           },
                         ),
                       ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _shareJob(
+                        raw: raw,
+                        title: title,
+                        company: company,
+                      ),
+                      icon: const Icon(Icons.share_outlined),
+                      label: const Text('Share job'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF2563EB),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                   ),
 

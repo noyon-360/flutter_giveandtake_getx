@@ -24,6 +24,8 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
   final RecruiterController recruiterController =
       Get.find<RecruiterController>();
   final ScrollController horizontalScrollController = ScrollController();
+  static const Color _mediaPlaceholderBg = Color(0xFFDBEAFE);
+  static const Color _mediaPlaceholderText = Color(0xFF1E3A8A);
 
   String _parseHtmlString(String htmlString) {
     final document = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
@@ -88,6 +90,7 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
           }
 
           final user = recruiterController.userInfo.value!;
+          final initials = _initials(user.firstName, user.sureName);
 
           /// ✅ FILTER VALID SOCIAL LINKS
           final socialLinks = user.sLink
@@ -99,14 +102,13 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 10),
-                // Banner + Photo + Edit Button
+                // Banner + Photo — banner is full-width and flush to the top.
                 SizedBox(
-                  height: 300,
+                  height: 260,
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      // Banner
+                      // Banner (full width, no rounded corners / no top gap)
                       Positioned(
                         top: 0,
                         left: 0,
@@ -114,8 +116,7 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                         height: 200,
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: Colors.grey.shade300,
+                            color: _mediaPlaceholderBg,
                             image: user.banner.isNotEmpty
                                 ? DecorationImage(
                                     image: NetworkImage(user.banner),
@@ -126,24 +127,35 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                         ),
                       ),
 
-                      // Avatar
+                      // Avatar (sits across the banner edge — small gap below it)
                       Positioned(
-                        left: 20,
-                        bottom: 30,
+                        left: 8,
+                        bottom: 0,
                         child: Container(
                           height: 130,
                           width: 130,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.white, width: 2),
-                            color: Colors.grey.shade300,
+                            color: _mediaPlaceholderBg,
                             image: user.photo.isNotEmpty
                                 ? DecorationImage(
                                     image: NetworkImage(user.photo),
                                     fit: BoxFit.cover,
-                                  )
+                                )
                                 : null,
                           ),
+                          alignment: Alignment.center,
+                          child: user.photo.isEmpty
+                              ? Text(
+                                  initials,
+                                  style: const TextStyle(
+                                    color: _mediaPlaceholderText,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                )
+                              : null,
                         ),
                       ),
 
@@ -173,65 +185,50 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
 
                 // ----- Basic Info -----
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${user.firstName.capitalizeFirst} ${user.sureName.capitalizeFirst}",
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      user.title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      "${user.city}, ${user.country}",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF898989),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(
-                          width: 1, color: Colors.grey
-                        )
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          _parseHtmlString(user.bio),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF898989),
-                          ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${user.firstName.capitalizeFirst} ${user.sureName.capitalizeFirst}",
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        user.title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "${user.city}, ${user.country}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF898989),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
 
                 // ----- Social Media -----
                 if (socialLinks.isNotEmpty)
-                  Wrap(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Wrap(
                     spacing: 12,
                     runSpacing: 12,
                     children: socialLinks.map((link) {
@@ -257,6 +254,7 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                         ),
                       );
                     }).toList(),
+                    ),
                   ),
 
                 // Wrap(
@@ -284,56 +282,84 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
                 //       )
                 //       .toList(),
                 // ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
 
-                Divider(color: Color(0xFF999999)),
+                const Divider(color: Color(0xFF999999)),
 
-                SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFF999999),
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                const SizedBox(height: 12),
 
-                  //fetch elevated pitch e
+                // ----- Elevator Pitch (shown ABOVE the bio) -----
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: const Color(0xFF191919),
+                      color: Colors.white,
+                      border: Border.all(
+                        color: const Color(0xFF999999),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    height: 280,
-                    width: double.infinity,
-                    child: Builder(
-                      builder: (context) {
-                        DPrint.log("DEBUG: VIDEO INFO CLEAN TEST");
-                        DPrint.log(
-                          "Video URL: ${ApiConstants.baseUrl}/elevator-pitch/stream/${user.elevatorPitch?.id ?? ''}",
-                        );
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xFF191919),
+                      ),
+                      height: 280,
+                      width: double.infinity,
+                      child: Builder(
+                        builder: (context) {
+                          DPrint.log("DEBUG: VIDEO INFO CLEAN TEST");
+                          DPrint.log(
+                            "Video URL: ${ApiConstants.baseUrl}/elevator-pitch/stream/${user.elevatorPitch?.id ?? ''}",
+                          );
 
-                        return ElevatorPitchSection(
-                          isOwnProfile: true,
-                          videoUrl: user.elevatorPitch?.id != null
-                              ? "${ApiConstants.baseUrl}/elevator-pitch/stream/${user.elevatorPitch!.id}"
-                              : null,
-                          httpHeaders: {
-                            "Custom-Header": "value",
-                            if (_accessToken != null) ...{
-                              "Authorization": "Bearer $_accessToken",
+                          return ElevatorPitchSection(
+                            isOwnProfile: true,
+                            videoUrl: user.elevatorPitch?.id != null
+                                ? "${ApiConstants.baseUrl}/elevator-pitch/stream/${user.elevatorPitch!.id}"
+                                : null,
+                            httpHeaders: {
+                              "Custom-Header": "value",
+                              if (_accessToken != null) ...{
+                                "Authorization": "Bearer $_accessToken",
+                              },
                             },
-                          },
-                        );
-                      },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // ----- Bio (shown BELOW the elevator pitch) -----
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(width: 1, color: Colors.grey),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        _parseHtmlString(user.bio),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF898989),
+                        ),
+                      ),
                     ),
                   ),
                 ),
 
                 // here make me your job list that fetched from backend and will show like listview
                 // Inside your Column in RecruiterPageScreen, after ElevatorPitchSection
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
                 // Obx(() {
                 //   if (recruiterController.isLoading.value) {
@@ -483,6 +509,16 @@ class _RecruiterPageScreenState extends State<RecruiterPageScreen> {
       default:
         return 'assets/icons/world.png';
     }
+  }
+
+  String _initials(String firstName, String surname) {
+    final parts = [firstName, surname]
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .toList();
+    final value = parts.map((part) => part[0]).join().toUpperCase();
+    if (value.isEmpty) return 'EV';
+    return value.length > 2 ? value.substring(0, 2) : value;
   }
 
   // /// Safe date formatter — accepts String or DateTime (or null)

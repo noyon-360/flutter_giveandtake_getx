@@ -482,7 +482,7 @@ class RecruiterController extends BaseController {
     );
   }
 
-  Future follow(final String recruiterId, final String userId) async {
+  Future<bool> follow(final String recruiterId, final String userId) async {
     setLoading(true);
     setError("");
 
@@ -492,16 +492,19 @@ class RecruiterController extends BaseController {
     );
     final result = await _recruiterRepo.follow(request);
 
-    result.fold(
+    return result.fold(
       (fail) {
         setError(fail.message);
         DPrint.log("Follow success result : ${fail.message}");
         setLoading(false);
+        Get.snackbar('Follow failed', fail.message);
+        return false;
       },
       (success) {
         DPrint.log("Follow success result : ${success.message}");
-        Get.back();
         setLoading(false);
+        Get.snackbar('Followed', success.message);
+        return true;
       },
     );
   }
