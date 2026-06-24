@@ -231,12 +231,10 @@ class _CreateRecruiterAccountState extends State<CreateRecruiterAccount> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const SizedBox(
-                                height: 18,
-                                width: 18,
-                                child: Image(
-                                  image: AssetImage('assets/icons/gallery.png'),
-                                ),
+                              const Icon(
+                                Icons.image_outlined,
+                                color: Colors.white,
+                                size: 24,
                               ),
                               const SizedBox(height: 7),
                               const Text(
@@ -622,7 +620,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.url,
+                        // validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -647,7 +645,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.url,
+                        // validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -672,7 +670,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.url,
+                        // validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -697,7 +695,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.url,
+                        // validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -722,7 +720,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.url,
+                        // validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -747,7 +745,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.url,
+                        // validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -772,7 +770,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.url,
+                        // validator: Validators.url,
                       ),
 
                       SizedBox(height: 12),
@@ -797,7 +795,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.url,
+                        // validator: Validators.url,
                       ),
                     ],
                   ),

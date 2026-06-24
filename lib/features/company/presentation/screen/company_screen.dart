@@ -129,9 +129,16 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(10),
-        child: Form(
+      body: Obx(() {
+        final bool isLoading = controller.isLoading.value ||
+            recruiterController.isLoading.value ||
+            jobController.isLoadingCountries.value;
+
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(10),
+              child: Form(
           key: controller.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -206,12 +213,10 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: Image(
-                              image: AssetImage('assets/icons/gallery.png'),
-                            ),
+                          const Icon(
+                            Icons.image_outlined,
+                            color: Colors.white,
+                            size: 24,
                           ),
                           const SizedBox(height: 7),
                           const Text(
@@ -297,9 +302,11 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
 
                   SizedBox(width: 15),
 
-                  Bio(
-                    descriptionTController: _descriptionTController,
-                    descriptionController: descriptionController,
+                  Expanded(
+                    child: Bio(
+                      descriptionTController: _descriptionTController,
+                      descriptionController: descriptionController,
+                    ),
                   ),
                 ],
               ),
@@ -674,8 +681,7 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Expanded(
-                                child: GestureDetector(
+                              child: GestureDetector(
                                   onTap: () => controller.fetchUsers(),
                                   child: AbsorbPointer(
                                     child: CustomTextField(
@@ -687,7 +693,6 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
                                           controller.employeeControllers[index],
                                       readOnly: true,
                                     ),
-                                  ),
                                 ),
                               ),
                             ),
@@ -1053,8 +1058,17 @@ class _CreateCompanyAccountPageState extends State<CreateCompanyAccountPage> {
           ),
         ),
       ),
-    );
-  }
+      if (isLoading)
+        const AbsorbPointer(
+          child: Center(
+            child: CircularProgressIndicator(color: Color(0xFF2B7FD0)),
+          ),
+        ),
+    ],
+  );
+}),
+);
+}
 }
 
 class SocialLink extends StatelessWidget {
@@ -1196,7 +1210,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        // validator: Validators.name,
                       ),
 
                       SizedBox(height: 12),
@@ -1246,7 +1260,7 @@ class SocialLink extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        validator: Validators.name,
+                        // validator: Validators.name,
                       ),
 
                       SizedBox(height: 12),
@@ -1341,7 +1355,6 @@ class SocialLink extends StatelessWidget {
                           hintStyle: TextStyle(
                             color: Color(0xFF787878),
                             fontSize: 14,
-                            fontWeight: FontWeight.w400,
                           ),
                         ),
                         // validator: Validators.name,

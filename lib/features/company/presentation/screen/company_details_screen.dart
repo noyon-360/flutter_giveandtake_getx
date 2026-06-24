@@ -49,14 +49,18 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
       Get.find<NotificationsController>();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await controller.fetchCompanyProfile();
-      await controller.fetchEmployee();
+      await Future.wait([
+        controller.fetchCompanyProfile(),
+        controller.fetchEmployee(),
+      ]);
     });
   }
 
   Future<void> _onRefresh() async {
-    await controller.fetchCompanyProfile();
-    await controller.fetchEmployee();
+    await Future.wait([
+      controller.fetchCompanyProfile(),
+      controller.fetchEmployee(),
+    ]);
   }
 
   void _confirmRemoveRecruiter(String employeeId, String name) {
@@ -258,10 +262,11 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
 
         final company = controller.userInfo.value!.companies.first;
 
-        return RefreshIndicator(
-          onRefresh: _onRefresh,
-          color: Colors.blue,
-          child: SingleChildScrollView(
+        return ExcludeSemantics(
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: Colors.blue,
+            child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -594,13 +599,6 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Obx(() {
-                      if (controller.isLoading.value) {
-                        return const Padding(
-                          padding: EdgeInsets.all(40),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-
                       final emp = controller.employee.value;
 
                       if (emp == null || emp.employees.isEmpty) {
@@ -619,138 +617,113 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                       }
 
                       return SingleChildScrollView(
-                        // scrollDirection: Axis .horizontal, // Only scroll horizontally if content overflows
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
-                            minWidth:
-                                MediaQuery.of(context).size.width -
-                                32, // Full width minus margins
+                            minWidth: MediaQuery.of(context).size.width - 32,
                           ),
-                          child: DataTable(
-                            headingRowHeight: 56,
-                            headingRowColor: MaterialStateProperty.all(
-                              const Color(0xFFF8F9FB),
-                            ),
-                            dataRowHeight: 68,
-                            columnSpacing: 16,
-                            dividerThickness: 0,
-                            columns: const [
-                              DataColumn(
-                                label: Padding(
-                                  padding: EdgeInsets.only(left: 12),
-                                  child: Text(
-                                    "Recruiter Name",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
+                          child: ExcludeSemantics(
+                            child: DataTable(
+                              headingRowHeight: 56,
+                              headingRowColor: MaterialStateProperty.all(
+                                const Color(0xFFF8F9FB),
                               ),
-
-                              DataColumn(
-                                label: Center(
-                                  child: Text(
-                                    "Role",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              DataColumn(
-                                label: Text(
-                                  "Action",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            rows: emp.employees.map((e) {
-                              return DataRow(
-                                cells: [
-                                  DataCell(
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                        horizontal: 12,
+                              dataRowHeight: 68,
+                              columnSpacing: 16,
+                              dividerThickness: 0,
+                              columns: const [
+                                DataColumn(
+                                  label: Padding(
+                                    padding: EdgeInsets.only(left: 12),
+                                    child: Text(
+                                      "Recruiter Name",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
                                       ),
-                                      child: Row(
-                                        children: [
-                                          // CircleAvatar(
-                                          //   radius: 18,
-                                          //   backgroundColor: Colors.grey.shade200,
-                                          //   backgroundImage:
-                                          //       e.avatarUrl.isNotEmpty
-                                          //       ? NetworkImage(e.avatarUrl)
-                                          //       : null,
-                                          //   child: e.avatarUrl.isEmpty
-                                          //       ? Text(
-                                          //           e.name.isNotEmpty
-                                          //               ? e.name[0].toUpperCase()
-                                          //               : "R",
-                                          //           style: const TextStyle(
-                                          //             fontWeight: FontWeight.bold,
-                                          //             color: Colors.black54,
-                                          //           ),
-                                          //         )
-                                          //       : null,
-                                          // ),
-                                          Expanded(
-                                            child: Text(
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Center(
+                                    child: Text(
+                                      "Role",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    "Action",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              rows: emp.employees.map((e) {
+                                return DataRow(
+                                  cells: [
+                                    DataCell(
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 12,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Text(
                                               e.name,
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.w500,
                                               ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  DataCell(
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFFE3F2FD,
-                                        ), // Exact light-blue background
-                                        borderRadius: BorderRadius.circular(
-                                          20,
-                                        ), // Pill shape
-                                        border: Border.all(
+                                    DataCell(
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
                                           color: const Color(
-                                            0xFFBBDEFB,
-                                          ), // Slightly darker blue border
-                                          width: 1.5,
+                                            0xFFE3F2FD,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          border: Border.all(
+                                            color: const Color(
+                                              0xFFBBDEFB,
+                                            ),
+                                            width: 1.5,
+                                          ),
                                         ),
-                                      ),
-                                      child: Text(
-                                        e.role,
-                                        style: const TextStyle(
-                                          color: Color(
-                                            0xFF1976D2,
-                                          ), // Deep blue text (matches your design)
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.3,
+                                        child: Text(
+                                          e.role,
+                                          style: const TextStyle(
+                                            color: Color(
+                                              0xFF1976D2,
+                                            ),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.3,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  DataCell(
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 12),
-                                      child: GestureDetector(
-                                        onTap: () =>
-                                            _confirmRemoveRecruiter(e.id, e.name),
+                                    DataCell(
+                                      Padding(
+                                        padding: const EdgeInsets.only(right: 12),
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 10,
@@ -775,11 +748,13 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                           ),
                                         ),
                                       ),
+                                      onTap: () =>
+                                          _confirmRemoveRecruiter(e.id, e.name),
                                     ),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
                           ),
                         ),
                       );
@@ -922,10 +897,11 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
               ],
             ),
           ),
-        );
-      }),
-    );
-  }
+        ),
+      );
+    }),
+  );
+}
   // ================= SOCIAL MEDIA LINKS =================
 
   Widget buildSocialLinks(Company company) {

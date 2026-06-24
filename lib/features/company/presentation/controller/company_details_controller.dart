@@ -70,8 +70,8 @@ class CompanyDetailsController extends BaseController {
   final RxBool isFollowing = false.obs;
 
   Future<void> fetchCompanyProfile() async {
+    if (isLoading.value) return; // Avoid concurrent loads triggering flickers
     setLoading(true);
-    // isCompanyLoading.value = true;
     setError("");
 
     final userId = await _authStorageService.getUserId();
@@ -79,7 +79,6 @@ class CompanyDetailsController extends BaseController {
       setError('User ID not found. Please log in again.');
       Get.snackbar('Error', 'User ID not found. Please log in again.');
       setLoading(false);
-      // isCompanyLoading.value = false;
       return;
     }
 
@@ -90,33 +89,29 @@ class CompanyDetailsController extends BaseController {
         setError(fail.message);
         DPrint.log('data fetch failed: ${fail.message}');
         setLoading(false);
-        // isCompanyLoading.value = false;
       },
       (success) {
-        // success is NetworkSuccess<SingleCompanyResponseModel>
-        // → extract the actual model using .data
         userInfo.value = success.data;
-        userInfo.refresh(); // ← THIS IS THE CORRECT WAY
+        userInfo.refresh();
 
         DPrint.log("Loaded ${success.data.companies.length} companies");
         DPrint.log("Loaded ${success.data.honors.length} honors");
         setLoading(false);
-        // isCompanyLoading.value = false;
       },
     );
   }
 
   Future<void> fetchEmployee() async {
-    setLoading(true);
-    // isEmployeeLoading.value = true;
+    // If we're already loading, we don't want to call setLoading(true) again
+    // but we still want to finish this fetch. However, for initial load,
+    // they are called sequentially.
+    // setLoading(true);
     setError("");
 
     final userId = await _authStorageService.getUserId();
     if (userId == null || userId.isEmpty) {
       setError('User ID not found. Please log in again.');
-      Get.snackbar('Error', 'User ID not found. Please log in again.');
       setLoading(false);
-      // isEmployeeLoading.value = false;
       return;
     }
 
@@ -126,18 +121,14 @@ class CompanyDetailsController extends BaseController {
       (fail) {
         setError(fail.message);
         DPrint.log('data fetch failed: ${fail.message}');
-        setLoading(false);
-        // isEmployeeLoading.value = false;
+        // setLoading(false);
       },
       (success) {
         DPrint.log('data fetch successfully: ${success.message}');
-        // success is NetworkSuccess<SingleCompanyResponseModel>
-        // → extract the actual model using .data
         employee.value = success.data;
-        employee.refresh(); // ← THIS IS THE CORRECT WAY
+        employee.refresh();
 
-        setLoading(false);
-        // isEmployeeLoading.value = false;
+        // setLoading(false);
       },
     );
   }

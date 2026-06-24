@@ -89,6 +89,7 @@ class _CompanyEmployeesScreenState extends State<CompanyEmployeesScreen> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: IntrinsicWidth(
+            child: ExcludeSemantics(
               child: DataTable(
                 headingRowColor: MaterialStateProperty.all(
                   Colors.grey.shade100,
@@ -192,6 +193,7 @@ class _CompanyEmployeesScreenState extends State<CompanyEmployeesScreen> {
                   );
                 }).toList(),
               ),
+            ),
             ),
           ),
         );

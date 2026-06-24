@@ -242,7 +242,7 @@ class _AppDrawerState extends State<AppDrawer> {
       ),
       ListTileForNav(
         icon: Icons.video_library_outlined,
-        title: "Elevator & pitch",
+        title: "Elevator Video Pitch",
         onTap: () {
           Get.back();
           _handleElevatorPitch();

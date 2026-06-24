@@ -1,7 +1,7 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'http://10.10.26.127:5002';
-  // static const String baseDomain = 'https://test.evpitch.com';
+  // static const String baseDomain = 'http://10.10.26.127:5002';
+  static const String baseDomain = 'https://api.evpitch.com';
   static const String baseUrl = '$baseDomain/api/v1';
   static const String socketUrl = baseDomain;
 

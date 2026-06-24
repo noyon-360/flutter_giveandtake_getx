@@ -20,20 +20,34 @@ class Bio extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'About me',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF000000),
+        RichText(
+          text: TextSpan(
+            text: 'About me',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF000000),
+            ),
+            children: [
+              const TextSpan(
+                text: ' *',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
         ),
 
         SizedBox(height: 4),
-        TextField(
+        TextFormField(
           controller: _descriptionTController,
           maxLines: 8,
           minLines: 3,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'About me is required';
+            }
+            return null;
+          },
           inputFormatters: [
             TextInputFormatter.withFunction((oldValue, newValue) {
               int newWords = descriptionController.countWords(newValue.text);
@@ -46,14 +60,14 @@ class Bio extends StatelessWidget {
             }),
           ],
           onChanged: (value) {
-            descriptionController.wordCount.value = descriptionController.countWords(value);
+            descriptionController.wordCount.value =
+                descriptionController.countWords(value);
           },
 
           decoration: InputDecoration(
             filled: true,
             fillColor: const Color(0xFFFAFAFA),
-            hintText:
-            'Write your description (max 400 words)',
+            hintText: 'Write your description (max 400 words)',
             hintStyle: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -63,8 +77,7 @@ class Bio extends StatelessWidget {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               //  Makes it circular
-              borderSide:
-              BorderSide.none, // Removes border line
+              borderSide: BorderSide.none, // Removes border line
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

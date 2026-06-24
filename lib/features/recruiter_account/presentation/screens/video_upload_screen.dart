@@ -45,10 +45,10 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: Image.asset('assets/icons/gallery.png'),
+                            const Icon(
+                              Icons.image_outlined,
+                              color: Colors.white,
+                              size: 24,
                             ),
                             const SizedBox(height: 8),
                             const Text(

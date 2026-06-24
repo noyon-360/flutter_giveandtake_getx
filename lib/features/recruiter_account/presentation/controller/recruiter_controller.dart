@@ -175,6 +175,13 @@ class RecruiterController extends BaseController {
       (fail) {
         setError(fail.message);
         setLoading(false);
+        Get.snackbar(
+          'Error',
+          fail.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       },
       (success) {
         category.value = success.data.category;
