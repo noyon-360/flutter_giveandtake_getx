@@ -9,13 +9,24 @@ import '../widgets/job_description_step.dart';
 import '../widgets/job_details_step.dart';
 import '../widgets/job_stepper.dart';
 
-class CreateJobScreen extends StatelessWidget {
+class CreateJobScreen extends StatefulWidget {
   const CreateJobScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(JobPostingController());
+  State<CreateJobScreen> createState() => _CreateJobScreenState();
+}
 
+class _CreateJobScreenState extends State<CreateJobScreen> {
+  late final JobPostingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(JobPostingController());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(

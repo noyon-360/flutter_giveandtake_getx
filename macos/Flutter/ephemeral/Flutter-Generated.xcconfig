@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=C:\Users\bdcalling\flutter
-FLUTTER_APPLICATION_PATH=C:\sozib\web_development\giveandtake\flutter_giveandtake_getx
+FLUTTER_ROOT=/Users/betopia/development/flutter
+FLUTTER_APPLICATION_PATH=/Users/betopia/Documents/Flutter/flutter_giveandtake_getx
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0

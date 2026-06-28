@@ -87,13 +87,13 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
           final resumeData = controller.resumeData.value;
           final resume = resumeData?.resume;
           final elevatorPitches = resumeData?.elevatorPitch ?? [];
-            final firstPitch = elevatorPitches.isNotEmpty
+          final firstPitch = elevatorPitches.isNotEmpty
               ? elevatorPitches.first
               : null;
-            final hasElevatorPitch =
+          final hasElevatorPitch =
               firstPitch != null &&
               ((firstPitch.id?.isNotEmpty ?? false) ||
-                (firstPitch.video?.hlsUrl?.isNotEmpty ?? false));
+                  (firstPitch.video?.hlsUrl?.isNotEmpty ?? false));
 
           // Log what's being displayed
           if (resumeData == null) {
@@ -112,769 +112,811 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(0),
               child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ==================== BANNER & PROFILE PHOTO ====================
-                SizedBox(
-                  height: 230,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      // Banner Image
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 150,
-                        child:
-                            resume?.banner != null && resume!.banner!.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: resume.banner!,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    Container(color: Colors.grey.shade300),
-                                errorWidget: (context, url, error) =>
-                                    Container(color: Colors.grey.shade300),
-                              )
-                            : Container(color: Colors.grey.shade300),
-                      ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ==================== BANNER & PROFILE PHOTO ====================
+                  SizedBox(
+                    height: 230,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Banner Image
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: 150,
+                          child:
+                              resume?.banner != null &&
+                                  resume!.banner!.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: resume.banner!,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) =>
+                                      Container(color: Colors.grey.shade300),
+                                  errorWidget: (context, url, error) =>
+                                      Container(color: Colors.grey.shade300),
+                                )
+                              : Container(color: Colors.grey.shade300),
+                        ),
 
-                      // Profile Photo (overlapping banner)
-                      Positioned(
-                        left: 16,
-                        bottom: 50,
-                        child: Container(
-                          height: 100,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white, width: 3),
-                            color: Colors.grey.shade300,
-                            image:
-                                (resume?.photo != null &&
-                                    resume!.photo!.isNotEmpty)
-                                ? DecorationImage(
-                                    image: CachedNetworkImageProvider(
-                                      resume.photo!,
-                                    ),
-                                    fit: BoxFit.cover,
+                        // Profile Photo (overlapping banner)
+                        Positioned(
+                          left: 16,
+                          bottom: 50,
+                          child: Container(
+                            height: 100,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.white, width: 3),
+                              color: Colors.grey.shade300,
+                              image:
+                                  (resume?.photo != null &&
+                                      resume!.photo!.isNotEmpty)
+                                  ? DecorationImage(
+                                      image: CachedNetworkImageProvider(
+                                        resume.photo!,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                            ),
+                            child:
+                                (resume?.photo == null ||
+                                    resume!.photo!.isEmpty)
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.grey,
                                   )
                                 : null,
                           ),
-                          child:
-                              (resume?.photo == null || resume!.photo!.isEmpty)
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: Colors.grey,
-                                )
-                              : null,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Name below the banner/profile section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    "${resume?.firstName ?? ''} ${resume?.lastName ?? ''}"
-                            .trim()
-                            .isEmpty
-                        ? "Candidate Name"
-                        : "${resume?.firstName ?? ''} ${resume?.lastName ?? ''}",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      ],
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 16),
-
-                // ==================== SOCIAL MEDIA SECTION ====================
-                if (resume?.sLink != null && resume!.sLink.isNotEmpty)
+                  // Name below the banner/profile section
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: resume.sLink.where((link) => link.url.trim().isNotEmpty).map((link) {
-                        return GestureDetector(
-                          onTap: () async {
-                            final uri = Uri.parse(link.url.trim());
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(
-                                uri,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            } else {
-                              Get.snackbar(
-                                "Error",
-                                "Could not open ${link.label}",
-                                snackPosition: SnackPosition.BOTTOM,
-                              );
-                            }
-                          },
-                          child: Tooltip(
-                            message: link.label,
-                            child: SocialMedia(image: _getSocialIcon(link.label)),
-                          ),
-                        );
-                      }).toList(),
+                    child: Text(
+                      "${resume?.firstName ?? ''} ${resume?.lastName ?? ''}"
+                              .trim()
+                              .isEmpty
+                          ? "Candidate Name"
+                          : "${resume?.firstName ?? ''} ${resume?.lastName ?? ''}",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-                // ==================== CONTACT INFO SECTION ====================
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Contact Info",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
+                  // ==================== SOCIAL MEDIA SECTION ====================
+                  if (resume?.sLink != null && resume!.sLink.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: resume.sLink
+                            .where((link) => link.url.trim().isNotEmpty)
+                            .map((link) {
+                              return GestureDetector(
+                                onTap: () async {
+                                  final uri = Uri.parse(link.url.trim());
+                                  if (await canLaunchUrl(uri)) {
+                                    await launchUrl(
+                                      uri,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  } else {
+                                    Get.snackbar(
+                                      "Error",
+                                      "Could not open ${link.label}",
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                  }
+                                },
+                                child: Tooltip(
+                                  message: link.label,
+                                  child: SocialMedia(
+                                    image: _getSocialIcon(link.label),
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(),
                       ),
-                      TextButton.icon(
-                        onPressed: () async {
-                          // Navigate to edit candidate profile screen
-                          await Get.to(
-                            () => const EditCandidateProfileScreen(), 
-                            arguments: controller.resumeData.value
-                          );
-                          // Refresh data when returning from edit screen
-                          print('🔄 [CandidateDashboardScreen] Returned from edit screen, refreshing...');
-                          await controller.fetchDashboardData();
-                        },
-                        icon: const Icon(
-                          Icons.edit,
-                          size: 16,
-                          color: Colors.white,
+                    ),
+
+                  const SizedBox(height: 24),
+
+                  // ==================== CONTACT INFO SECTION ====================
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Contact Info",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
                         ),
-                        label: const Text(
-                          "Edit",
-                          style: TextStyle(color: Colors.white),
+                        TextButton.icon(
+                          onPressed: () async {
+                            // Navigate to edit candidate profile screen
+                            await Get.to(
+                              () => const EditCandidateProfileScreen(),
+                              arguments: controller.resumeData.value,
+                            );
+                            // Refresh data when returning from edit screen
+                            print(
+                              '🔄 [CandidateDashboardScreen] Returned from edit screen, refreshing...',
+                            );
+                            await controller.fetchDashboardData();
+                          },
+                          icon: const Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          label: const Text(
+                            "Edit",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: TextButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
                         ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: AppColors.primaryBlue,
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Location
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: _buildInfoRow(
+                      "Location",
+                      "${resume?.city ?? ''}, ${resume?.country ?? ''}".trim(),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Email
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: _buildInfoRow(
+                      "Email",
+                      resume?.email ?? "test@gmail.com",
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // ==================== ELEVATOR VIDEO PITCH ====================
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        const Text(
+                          "Elevator Video Pitch",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                            horizontal: 8,
+                            vertical: 2,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: Colors.grey,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
-                // Location
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: _buildInfoRow(
-                    "Location",
-                    "${resume?.city ?? ''}, ${resume?.country ?? ''}".trim(),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      "Upload or view a short video introducing yourself.",
+                      style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
-                // Email
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: _buildInfoRow(
-                    "Email",
-                    resume?.email ?? "test@gmail.com",
-                  ),
-                ),
+                  // Video Upload/Display Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: hasElevatorPitch
+                        ? Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: const Color(0xFF999999),
+                                    width: 1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
 
-                const SizedBox(height: 32),
+                                //fetch elevated pitch e
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: const Color(0xFF191919),
+                                  ),
+                                  height: 280,
+                                  width: double.infinity,
+                                  child: Builder(
+                                    builder: (context) {
+                                      DPrint.log(
+                                        "DEBUG: VIDEO INFO CLEAN TEST",
+                                      );
+                                      DPrint.log(
+                                        "Video URL: ${ApiConstants.baseUrl}/elevator-pitch/stream/${firstPitch.id ?? ''}",
+                                      );
 
-                // ==================== ELEVATOR VIDEO PITCH ====================
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      const Text(
-                        "Elevator Video Pitch",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                                      return ElevatorPitchSection(
+                                        key: ValueKey(_accessToken),
+                                        videoUrl:
+                                            "${ApiConstants.baseUrl}/elevator-pitch/stream/${firstPitch.id ?? ''}",
+                                        // "https://test.evpitch.com/api/v1/elevator-pitch/stream/69674f57f7f512dd8539b9a2",
+                                        // httpHeaders: {
+                                        //   "Custom-Header": "value",
+                                        //   if (_accessToken != null) ...{
+                                        //     "Authorization": "Bearer $_accessToken",
+                                        //   },
+                                        // },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Obx(
+                                  () => Material(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(18),
+                                      onTap: controller.isDeletingVideo.value
+                                          ? null
+                                          : () async {
+                                              final shouldDelete =
+                                                  await Get.dialog<bool>(
+                                                    AlertDialog(
+                                                      title: const Text(
+                                                        'Delete Video',
+                                                      ),
+                                                      content: const Text(
+                                                        'Are you sure you want to delete your elevator video?',
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Get.back(
+                                                                result: false,
+                                                              ),
+                                                          child: const Text(
+                                                            'Cancel',
+                                                          ),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Get.back(
+                                                                result: true,
+                                                              ),
+                                                          child: const Text(
+                                                            'Delete',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
 
-                const SizedBox(height: 12),
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    "Upload or view a short video introducing yourself.",
-                    style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Video Upload/Display Section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: hasElevatorPitch
-                      ? Stack(
-                          children: [
-                            Container(
+                                              if (shouldDelete == true) {
+                                                await controller
+                                                    .deleteElevatorVideo();
+                                              }
+                                            },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: controller.isDeletingVideo.value
+                                            ? const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.white,
+                                                    ),
+                                              )
+                                            : const Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              // Navigate to video upload screen
+                              Get.to(() => const VideoUploadScreen());
+                            },
+                            child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
                                 border: Border.all(
                                   color: const Color(0xFF999999),
                                   width: 1,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
+                                color: Colors.white,
                               ),
-
-                              //fetch elevated pitch e
+                              height: 200,
+                              width: double.infinity,
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(4),
                                   color: const Color(0xFF191919),
                                 ),
-                                height: 280,
-                                width: double.infinity,
-                                child: Builder(
-                                  builder: (context) {
-                                    DPrint.log("DEBUG: VIDEO INFO CLEAN TEST");
-                                    DPrint.log(
-                                      "Video URL: ${ApiConstants.baseUrl}/elevator-pitch/stream/${firstPitch.id ?? ''}",
-                                    );
-
-                                    return ElevatorPitchSection(
-                                      key: ValueKey(_accessToken),
-                                      videoUrl:
-                                          "${ApiConstants.baseUrl}/elevator-pitch/stream/${firstPitch.id ?? ''}",
-                                      // "https://test.evpitch.com/api/v1/elevator-pitch/stream/69674f57f7f512dd8539b9a2",
-                                      // httpHeaders: {
-                                      //   "Custom-Header": "value",
-                                      //   if (_accessToken != null) ...{
-                                      //     "Authorization": "Bearer $_accessToken",
-                                      //   },
-                                      // },
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: Obx(
-                                () => Material(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(18),
-                                    onTap: controller.isDeletingVideo.value
-                                        ? null
-                                        : () async {
-                                            final shouldDelete = await Get.dialog<bool>(
-                                              AlertDialog(
-                                                title: const Text('Delete Video'),
-                                                content: const Text(
-                                                  'Are you sure you want to delete your elevator video?',
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () => Get.back(result: false),
-                                                    child: const Text('Cancel'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () => Get.back(result: true),
-                                                    child: const Text('Delete'),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-
-                                            if (shouldDelete == true) {
-                                              await controller.deleteElevatorVideo();
-                                            }
-                                          },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: controller.isDeletingVideo.value
-                                          ? const SizedBox(
-                                              width: 18,
-                                              height: 18,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : const Icon(
-                                              Icons.delete_outline,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : GestureDetector(
-                          onTap: () {
-                            // Navigate to video upload screen
-                            Get.to(() => const VideoUploadScreen());
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: const Color(0xFF999999),
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.white,
-                            ),
-                            height: 200,
-                            width: double.infinity,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: const Color(0xFF191919),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/icons/gallery.png',
-                                    height: 32,
-                                    width: 32,
-                                    color: Colors.white70,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    'Upload your elevator pitch',
-                                    style: TextStyle(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.image_outlined,
                                       color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
+                                      size: 24,
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    'Upload or view a short video',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                      'Upload your elevator pitch',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      'Upload or view a short video',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // ==================== ABOUT SECTION ====================
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    "About",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 32),
 
-                if (resume?.aboutUs != null && resume!.aboutUs!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Html(
-                      data: resume.aboutUs!,
-                      style: {
-                        "body": Style(
-                          fontSize: FontSize(14),
-                          color: const Color(0xFF4A5568),
-                          lineHeight: const LineHeight(1.5),
-                          margin: Margins.zero,
-                          padding: HtmlPaddings.zero,
-                        ),
-                        "p": Style(
-                          margin: Margins.zero,
-                          padding: HtmlPaddings.zero,
-                        ),
-                      },
-                    ),
-                  )
-                else
+                  // ==================== ABOUT SECTION ====================
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      "No about information available",
-                      style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
+                      "About",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 12),
 
-                // ==================== SKILLS SECTION ====================
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    "Skills",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                  if (resume?.aboutUs != null && resume!.aboutUs!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Html(
+                        data: resume.aboutUs!,
+                        style: {
+                          "body": Style(
+                            fontSize: FontSize(14),
+                            color: const Color(0xFF4A5568),
+                            lineHeight: const LineHeight(1.5),
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                          ),
+                          "p": Style(
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                          ),
+                        },
+                      ),
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        "No about information available",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF666666),
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 32),
+
+                  // ==================== SKILLS SECTION ====================
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      "Skills",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                if (resume?.skills != null && resume!.skills.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: resume.skills.map((skill) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFDCEDFF),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                  if (resume?.skills != null && resume!.skills.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: resume.skills.map((skill) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFDCEDFF),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              skill,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF1E40AF),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        "No skills added yet",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF666666),
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 32),
+
+                  // ==================== CERTIFICATIONS SECTION ====================
+                  if (resume?.certifications != null &&
+                      resume!.certifications.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
                           child: Text(
-                            skill,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF1E40AF),
+                            "Certifications",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  )
-                else
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      "No skills added yet",
-                      style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
-                    ),
-                  ),
-
-                const SizedBox(height: 32),
-
-                // ==================== CERTIFICATIONS SECTION ====================
-                if (resume?.certifications != null && resume!.certifications.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          "Certifications",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: resume.certifications.map((cert) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFDCEDFF),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                cert,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF1E40AF),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-
-                // ==================== LANGUAGES SECTION ====================
-                if (resume?.languages != null && resume!.languages.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          "Languages",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: resume.languages.map((lang) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE8F0FE),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                lang,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF1E40AF),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-
-                // ==================== EXPERIENCE SECTION ====================
-                if (resumeData?.experiences != null && resumeData!.experiences.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          "Experience",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ...resumeData.experiences.map((exp) {
-                        return Padding(
+                        const SizedBox(height: 12),
+                        Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                exp.position,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: resume.certifications.map((cert) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                exp.company,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF666666),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDCEDFF),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              // Text(
-                              //   '${_formatDate(exp.startDate)} - ${exp.endDate != null ? _formatDate(exp.endDate) : "Present"}',
-                              //   style: const TextStyle(
-                              //     fontSize: 12,
-                              //     color: Color(0xFF999999),
-                              //   ),
-                              // ),
-                              if (exp.city.isNotEmpty || exp.country.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    '${exp.city.isNotEmpty ? exp.city : ""}, ${exp.country.isNotEmpty ? exp.country : ""}'.trim(),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF999999),
-                                    ),
+                                child: Text(
+                                  cert,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF1E40AF),
                                   ),
                                 ),
-                              if (exp.jobDescription.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: Html(
-                                    data: exp.jobDescription,
-                                    style: {
-                                      "body": Style(
-                                        fontSize: FontSize(13),
-                                        color: const Color(0xFF4A5568),
-                                        lineHeight: const LineHeight(1.5),
-                                        margin: Margins.zero,
-                                        padding: HtmlPaddings.zero,
-                                      ),
-                                      "p": Style(
-                                        margin: Margins.zero,
-                                        padding: HtmlPaddings.zero,
-                                      ),
-                                    },
-                                  ),
-                                ),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-
-                // ==================== EDUCATION SECTION ====================
-                if (resumeData?.education != null && resumeData!.education.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          "Education",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                              );
+                            }).toList(),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      ...resumeData.education.map((edu) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                edu.degree,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                edu.instituteName,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF666666),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              if (edu.fieldOfStudy.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
-                                  child: Text(
-                                    'Field of Study: ${edu.fieldOfStudy}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF999999),
-                                    ),
-                                  ),
-                                ),
-                              Text(
-                                '${_formatDate(edu.startDate)} - ${edu.graduationDate != null ? _formatDate(edu.graduationDate) : "Present"}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF999999),
-                                ),
-                              ),
-                              if (edu.city.isNotEmpty || edu.country.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    '${edu.city.isNotEmpty ? edu.city : ""}, ${edu.country.isNotEmpty ? edu.country : ""}'.trim(),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF999999),
-                                    ),
-                                  ),
-                                ),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ],
-                  ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
 
-                const SizedBox(height: 40),
-              ],
-            ),
+                  // ==================== LANGUAGES SECTION ====================
+                  if (resume?.languages != null && resume!.languages.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            "Languages",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: resume.languages.map((lang) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE8F0FE),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  lang,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF1E40AF),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+
+                  // ==================== EXPERIENCE SECTION ====================
+                  if (resumeData?.experiences != null &&
+                      resumeData!.experiences.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            "Experience",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...resumeData.experiences.map((exp) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  exp.position,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  exp.company,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF666666),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                // Text(
+                                //   '${_formatDate(exp.startDate)} - ${exp.endDate != null ? _formatDate(exp.endDate) : "Present"}',
+                                //   style: const TextStyle(
+                                //     fontSize: 12,
+                                //     color: Color(0xFF999999),
+                                //   ),
+                                // ),
+                                if (exp.city.isNotEmpty ||
+                                    exp.country.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      '${exp.city.isNotEmpty ? exp.city : ""}, ${exp.country.isNotEmpty ? exp.country : ""}'
+                                          .trim(),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFF999999),
+                                      ),
+                                    ),
+                                  ),
+                                if (exp.jobDescription.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Html(
+                                      data: exp.jobDescription,
+                                      style: {
+                                        "body": Style(
+                                          fontSize: FontSize(13),
+                                          color: const Color(0xFF4A5568),
+                                          lineHeight: const LineHeight(1.5),
+                                          margin: Margins.zero,
+                                          padding: HtmlPaddings.zero,
+                                        ),
+                                        "p": Style(
+                                          margin: Margins.zero,
+                                          padding: HtmlPaddings.zero,
+                                        ),
+                                      },
+                                    ),
+                                  ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+
+                  // ==================== EDUCATION SECTION ====================
+                  if (resumeData?.education != null &&
+                      resumeData!.education.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            "Education",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...resumeData.education.map((edu) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  edu.degree,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  edu.instituteName,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF666666),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                if (edu.fieldOfStudy.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: Text(
+                                      'Field of Study: ${edu.fieldOfStudy}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFF999999),
+                                      ),
+                                    ),
+                                  ),
+                                Text(
+                                  '${_formatDate(edu.startDate)} - ${edu.graduationDate != null ? _formatDate(edu.graduationDate) : "Present"}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF999999),
+                                  ),
+                                ),
+                                if (edu.city.isNotEmpty ||
+                                    edu.country.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      '${edu.city.isNotEmpty ? edu.city : ""}, ${edu.country.isNotEmpty ? edu.country : ""}'
+                                          .trim(),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFF999999),
+                                      ),
+                                    ),
+                                  ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    ),
+
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           );
         }),

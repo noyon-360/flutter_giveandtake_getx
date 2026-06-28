@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:get/get.dart';
 
 import '../controller/elevator_resume_controller.dart';
@@ -75,174 +74,19 @@ class PhotoBioSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey.shade300),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ---------- TOOLBAR ----------
-              SizedBox(
-                height: 44,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 8),
-
-                      // Heading dropdown
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          switch (value) {
-                            case 'Heading 1':
-                              controller.aboutMeQuillController
-                                  .formatSelection(quill.Attribute.h1);
-                              break;
-                            case 'Heading 2':
-                              controller.aboutMeQuillController
-                                  .formatSelection(quill.Attribute.h2);
-                              break;
-                            case 'Heading 3':
-                              controller.aboutMeQuillController
-                                  .formatSelection(quill.Attribute.h3);
-                              break;
-                            default:
-                              controller.aboutMeQuillController
-                                  .formatSelection(quill.Attribute.header);
-                          }
-                        },
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(
-                            value: 'Heading 1',
-                            child: Text(
-                              'Heading 1',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'Heading 2',
-                            child: Text(
-                              'Heading 2',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'Heading 3',
-                            child: Text(
-                              'Heading 3',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'Normal',
-                            child: Text('Normal'),
-                          ),
-                        ],
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Row(
-                            children: const [
-                              Text('Normal'),
-                              SizedBox(width: 4),
-                              Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                size: 18,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        height: 24,
-                        child: const VerticalDivider(width: 1),
-                      ),
-                      const SizedBox(width: 4),
-
-                      _ToolbarIcon(
-                        icon: Icons.format_align_left,
-                        onTap: () => controller.aboutMeQuillController
-                            .formatSelection(quill.Attribute.leftAlignment),
-                      ),
-                      _ToolbarIcon(
-                        icon: Icons.format_align_center,
-                        onTap: () => controller.aboutMeQuillController
-                            .formatSelection(quill.Attribute.centerAlignment),
-                      ),
-                      _ToolbarIcon(
-                        icon: Icons.format_align_right,
-                        onTap: () => controller.aboutMeQuillController
-                            .formatSelection(quill.Attribute.rightAlignment),
-                      ),
-
-                      SizedBox(
-                        height: 24,
-                        child: const VerticalDivider(width: 1),
-                      ),
-
-                      _ToolbarIcon(
-                        icon: Icons.format_bold,
-                        onTap: () => controller.aboutMeQuillController
-                            .formatSelection(quill.Attribute.bold),
-                      ),
-                      _ToolbarIcon(
-                        icon: Icons.format_italic,
-                        onTap: () => controller.aboutMeQuillController
-                            .formatSelection(quill.Attribute.italic),
-                      ),
-                      _ToolbarIcon(
-                        icon: Icons.format_underlined,
-                        onTap: () => controller.aboutMeQuillController
-                            .formatSelection(quill.Attribute.underline),
-                      ),
-
-                      _ToolbarIcon(
-                        icon: Icons.format_list_bulleted,
-                        onTap: () => controller.aboutMeQuillController
-                            .formatSelection(quill.Attribute.ul),
-                      ),
-                      _ToolbarIcon(
-                        icon: Icons.format_list_numbered,
-                        onTap: () => controller.aboutMeQuillController
-                            .formatSelection(quill.Attribute.ol),
-                      ),
-
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: TextField(
+              controller: controller.aboutMeController,
+              maxLines: 6,
+              minLines: 4,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Write a short bio about yourself...',
               ),
-              const Divider(height: 1),
-
-              // ---------- QUILL EDITOR ----------
-              SizedBox(
-                height: 140,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  child: quill.QuillEditor.basic(
-                    controller: controller.aboutMeQuillController,
-                    focusNode: FocusNode(),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
 
@@ -301,27 +145,6 @@ class _PhotoPlaceholder extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ToolbarIcon extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onTap;
-
-  const _ToolbarIcon({
-    required this.icon,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onTap,
-      splashRadius: 18,
-      iconSize: 18,
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      icon: Icon(icon, color: Colors.grey.shade700),
     );
   }
 }

@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -30,7 +29,7 @@ class ElevatorResumeController extends GetxController {
   final MediaCropService _mediaCropService = Get.find<MediaCropService>();
 
   /// ================== ABOUT ME (QUILL) ==================
-  late final quill.QuillController aboutMeQuillController;
+  final aboutMeController = TextEditingController();
   var aboutMeWordCount = 0.obs;
 
   /// ================== SELECTED VALUES ==================
@@ -191,8 +190,7 @@ class ElevatorResumeController extends GetxController {
   void onInit() {
     super.onInit();
 
-    aboutMeQuillController = quill.QuillController.basic();
-    aboutMeQuillController.addListener(_updateWordCountFromQuill);
+    aboutMeController.addListener(_updateWordCountFromText);
 
     // Fetch dynamic data from APIs
     fetchCountriesWithCities();
@@ -208,8 +206,8 @@ class ElevatorResumeController extends GetxController {
     _setupUserProfileListener();
   }
 
-  void _updateWordCountFromQuill() {
-    final plain = aboutMeQuillController.document.toPlainText().trim();
+  void _updateWordCountFromText() {
+    final plain = aboutMeController.text.trim();
     if (plain.isEmpty) {
       aboutMeWordCount.value = 0;
     } else {
@@ -224,7 +222,7 @@ class ElevatorResumeController extends GetxController {
   void onClose() {
     print('========== ELEVATOR RESUME CONTROLLER CLOSING ==========');
     videoPlayerController?.dispose();
-    aboutMeQuillController.dispose();
+    aboutMeController.dispose();
     firstNameController.dispose();
     surnameController.dispose();
     emailController.dispose();
@@ -965,7 +963,7 @@ class ElevatorResumeController extends GetxController {
           .toLowerCase();
 
       // Get about me as plain text
-      final aboutMe = aboutMeQuillController.document.toPlainText().trim();
+      final aboutMe = aboutMeController.text.trim();
       print('About me text length: ${aboutMe.length}');
 
       // Get auth token
@@ -1279,8 +1277,8 @@ class ElevatorResumeController extends GetxController {
     fiverrController.clear();
     portfolioController.clear();
 
-    // Clear Quill controller
-    aboutMeQuillController.clear();
+    // Clear About Me text
+    aboutMeController.clear();
 
     // Reset selections
     selectedTitle.value = 'Mr.';
