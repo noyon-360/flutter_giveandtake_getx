@@ -43,23 +43,31 @@ class ContactCard extends StatelessWidget {
               // Social icons
               Row(
                 children: const [
-                  Icon(
+                  FaIcon(
                     FontAwesomeIcons.twitter,
                     size: 16,
                     color: Colors.lightBlue,
                   ),
                   SizedBox(width: 10),
-                  Icon(
+                  FaIcon(
                     FontAwesomeIcons.linkedin,
                     size: 16,
                     color: Colors.blueAccent,
                   ),
                   SizedBox(width: 10),
-                  Icon(FontAwesomeIcons.behance, size: 16, color: Colors.blue),
+                  FaIcon(
+                    FontAwesomeIcons.behance,
+                    size: 16,
+                    color: Colors.blue,
+                  ),
                   SizedBox(width: 10),
-                  Icon(FontAwesomeIcons.tiktok, size: 16, color: Colors.black),
+                  FaIcon(
+                    FontAwesomeIcons.tiktok,
+                    size: 16,
+                    color: Colors.black,
+                  ),
                   SizedBox(width: 10),
-                  Icon(FontAwesomeIcons.youtube, size: 16, color: Colors.red),
+                  FaIcon(FontAwesomeIcons.youtube, size: 16, color: Colors.red),
                 ],
               ),
             ],

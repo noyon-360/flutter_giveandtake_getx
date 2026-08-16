@@ -11,6 +11,9 @@ import 'package:giveandtake/features/auth/presentation/screens/login_screen.dart
 import 'package:giveandtake/features/Home/presentation/controllers/candidate_dashboard_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_details_controller.dart';
+import 'package:giveandtake/features/content_pages/data/models/content_page.dart';
+import 'package:giveandtake/features/content_pages/data/repositories/content_pages_repository.dart';
+import 'package:giveandtake/features/content_pages/domain/content_page_filter.dart';
 import 'package:giveandtake/features/elevator/presentation/controller/resume_check_controller.dart';
 import 'package:giveandtake/features/home_static_screens/data/models/contactus_model.dart';
 import 'package:giveandtake/features/home_static_screens/presentation/screen/contact_us_screen.dart';
@@ -70,6 +73,8 @@ class _AppDrawerState extends State<AppDrawer> {
   String? _role; // candidate / recruiter / company — drives the My Account flow
   GetUserProfileService? _profileService;
   late final AuthController _authController;
+  late final ContentPagesRepository _contentPagesRepository;
+  List<ContentPageSummary> _customPages = const [];
 
   final _searchController = TextEditingController();
 
@@ -79,6 +84,7 @@ class _AppDrawerState extends State<AppDrawer> {
   void initState() {
     super.initState();
     _authController = Get.find<AuthController>();
+    _contentPagesRepository = Get.find<ContentPagesRepository>();
     controller = Get.find<GlobalSearchController>();
     try {
       _profileService = Get.find<GetUserProfileService>();
@@ -86,6 +92,7 @@ class _AppDrawerState extends State<AppDrawer> {
       // Profile service not registered — header falls back to generic labels.
     }
     _loadAuthStatus();
+    _loadCustomPages();
 
     // Drive the server-backed (debounced) search from the text field.
     _searchController.addListener(() {
@@ -111,6 +118,14 @@ class _AppDrawerState extends State<AppDrawer> {
     if (_isLoggedIn && role?.toLowerCase() == 'candidate') {
       await _ensureCandidateProfilePhotoLoaded();
     }
+  }
+
+  Future<void> _loadCustomPages() async {
+    final pages = await _contentPagesRepository.fetchPublishedPages();
+    if (!mounted) return;
+    setState(() {
+      _customPages = pages.where(isCustomPage).toList(growable: false);
+    });
   }
 
   Future<void> _ensureCandidateProfilePhotoLoaded() async {
@@ -1001,6 +1016,17 @@ class _AppDrawerState extends State<AppDrawer> {
                 title: "Contact Us",
                 onTap: () {
                   Get.to(() => ContactUsScreen(member: EditProfileModel()));
+                },
+              ),
+            for (final page in _customPages)
+              ListTileForNav(
+                key: ValueKey(page.id),
+                icon: Icons.description_outlined,
+                title: page.title,
+                onTap: () {
+                  final slug = page.type;
+                  if (slug == null) return;
+                  Get.toNamed('/pages/${Uri.encodeComponent(slug)}');
                 },
               ),
 

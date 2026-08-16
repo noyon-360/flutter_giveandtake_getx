@@ -78,7 +78,7 @@ class PrivacyPolicy extends StatelessWidget {
 
         final content = controller.privacyContent.value;
         if (content == null) {
-          return const Center(child: Text('No content available'));
+          return const Center(child: Text('No content available')); 
         }
 
         return RefreshIndicator(

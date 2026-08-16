@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FaIconButton extends StatelessWidget {
-  final IconData icon;
+  final FaIconData icon;
   final Color color;
   final VoidCallback onPressed;
   final bool isLast;
@@ -13,7 +13,7 @@ class FaIconButton extends StatelessWidget {
     required this.color,
     required this.onPressed,
     this.isLast = false,
-    this.size=16,
+    this.size = 16,
     super.key,
   });
 
@@ -30,7 +30,7 @@ class FaIconButton extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onPressed,
-        child: FaIcon(icon, color: color, size: size ,),
+        child: FaIcon(icon, color: color, size: size),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:giveandtake/features/auth/data/repo/auth_repo_impl.dart';
 import 'package:giveandtake/features/auth/domain/repo/auth_repo.dart';
 import 'package:giveandtake/features/company/data/repo/company_impl.dart';
 import 'package:giveandtake/features/company/domain/repo/company_repo.dart';
+import 'package:giveandtake/features/content_pages/data/repositories/content_pages_repository.dart';
 import 'package:giveandtake/features/create_job/data/repo/category_rapo_impl.dart';
 import 'package:giveandtake/features/create_job/domain/category_repo.dart';
 import 'package:giveandtake/features/job_listing/data/repo/job_listing_repository_impl.dart';
@@ -23,6 +24,8 @@ import 'package:giveandtake/features/search/data/repo/search_repository_impl.dar
 import 'package:giveandtake/features/search/domain/repo/search_repository.dart';
 
 void setupRepository() {
+  Get.put<ContentPagesRepository>(ContentPagesRepository(), permanent: true);
+
   Get.lazyPut<AuthRepository>(
     () => AuthRepositoryImpl(apiClient: Get.find()),
     fenix: true,

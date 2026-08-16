@@ -2,6 +2,7 @@ import 'package:flutx_core/core/debug_print.dart';
 import 'package:get/get.dart';
 import 'package:giveandtake/core/bottomNavbar/screens/dashboard_screen.dart';
 import 'package:giveandtake/core/network/services/auth_storage_service.dart';
+import 'package:giveandtake/core/services/deep_link_service.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:giveandtake/features/company/presentation/controller/company_account_controller.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_recruiter_account.dart';
@@ -40,6 +41,8 @@ class SplashController extends GetxController {
     } else {
       Get.offAll(() => HomeScreen(), transition: Transition.fade);
     }
+
+    Get.find<DeepLinkService>().markAppReady();
   }
 
   /// Recruiter startup routing.

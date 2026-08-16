@@ -243,11 +243,14 @@ class ContentEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/content';
   final String about = '$_base/about';
   final String privacy = '$_base/privacy';
+  final String published = '$_base/published';
   // Terms endpoint - some environments spell it 'trems' accidentally; provide both keys
   final String terms = '$_base/terms';
   final String trems = '$_base/trems';
 
   String getContentByType(String type) => '$_base/$type';
+
+  String getCustomPage(String type) => '$_base/${Uri.encodeComponent(type)}';
 }
 
 // New payment endpoints

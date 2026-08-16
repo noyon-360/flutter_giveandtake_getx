@@ -6,6 +6,8 @@
     <!-- Internet Permission -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Internet Permission -->
+
+    <uses-permission android:name="com.android.vending.BILLING"/>
     
 
     <!-- Internet Check --> 
@@ -19,12 +21,21 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
 
-    <!-- Storage Permissino -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
-    <!-- Storage Permissino -->
-    
+    <!-- Remove storage/media permissions added by plugins; Google Play requires
+         one-time photo/video access to use the system picker instead. -->
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_AUDIO"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
+
     <application
         android:label="Give &amp; Take"
         android:name="${applicationName}"
@@ -48,6 +59,9 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -57,6 +71,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="com.pooelcentral.giveandtake" android:host="paypalpay" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="evpitch.com"
+                    android:pathPrefix="/pages/" />
             </intent-filter>
         </activity>
         <!-- image_cropper (UCrop) activity — required so cropImage() can launch

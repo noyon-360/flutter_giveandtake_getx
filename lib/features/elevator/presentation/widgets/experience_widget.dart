@@ -50,7 +50,7 @@ class ExperienceWidget extends StatelessWidget {
                             color: Color(0xFF0D6EFD),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: const FaIcon(
                             FontAwesomeIcons.briefcase,
                             color: Colors.white,
                             size: 18,

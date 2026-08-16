@@ -433,9 +433,11 @@ class _CandidateDetailsScreenState extends State<CandidateDetailsScreen> {
                     spacing: 16,
                     children: resume.sLink.map((link) {
                       final map = link is Map ? link : <String, dynamic>{};
-                      final label = (map['label'] ?? '').toString().toLowerCase();
+                      final label = (map['label'] ?? '')
+                          .toString()
+                          .toLowerCase();
                       final url = (map['url'] ?? '').toString();
-                      IconData icon = FontAwesomeIcons.globe;
+                      FaIconData icon = FontAwesomeIcons.globe;
                       if (label.contains("linkedin") ||
                           url.toLowerCase().contains("linkedin"))
                         icon = FontAwesomeIcons.linkedin;
