@@ -32,6 +32,8 @@
 	<string>Scan your card to add it automatically</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to select and upload images for your profile and posts</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location to show job opportunities and content near you</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

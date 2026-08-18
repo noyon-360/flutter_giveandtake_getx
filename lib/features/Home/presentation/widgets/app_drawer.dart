@@ -36,6 +36,7 @@ import '../../../profile_dasboard/presentation/screens/change_pass_screen.dart';
 import '../../../profile_dasboard/presentation/screens/job_history.dart';
 import '../../../profile_dasboard/presentation/screens/payment_history.dart';
 import '../../../public_view/screens/public_view_candidate_screens.dart';
+import '../../../subscription/screens/subscription_screen.dart';
 import '../screen/candidate_profile_screen.dart';
 import '../screens/my_plan_screen.dart';
 
@@ -370,7 +371,7 @@ class _AppDrawerState extends State<AppDrawer> {
         title: "My Plan",
         onTap: () {
           Get.back();
-          Get.to(() => PlanPricingScreen());
+          Get.to(() => SubscriptionScreen());
         },
       ),
       ListTileForNav(
@@ -428,7 +429,7 @@ class _AppDrawerState extends State<AppDrawer> {
         title: "My Plan",
         onTap: () {
           Get.back();
-          Get.to(() => PlanPricingScreen());
+          Get.to(() => SubscriptionScreen());
         },
       ),
       ListTileForNav(

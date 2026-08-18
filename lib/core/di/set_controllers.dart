@@ -14,6 +14,8 @@ import 'package:giveandtake/features/recruiter_account/presentation/controller/c
 import 'package:giveandtake/features/recruiter_account/presentation/controller/recruiter_controller.dart';
 import 'package:giveandtake/features/search/presentation/controller/search_controller.dart';
 
+import '../../features/subscription/controller/subscription_controller.dart';
+
 void setupController() {
   // Auth Controller
   Get.lazyPut<AuthController>(
@@ -80,6 +82,11 @@ void setupController() {
   // Global search (drawer typeahead + full results screen)
   Get.lazyPut<GlobalSearchController>(
     () => GlobalSearchController(Get.find()),
+    fenix: true,
+  );
+
+  Get.lazyPut<SubscriptionController>(
+    () => SubscriptionController(),
     fenix: true,
   );
 }

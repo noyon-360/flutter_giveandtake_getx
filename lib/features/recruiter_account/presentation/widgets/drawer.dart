@@ -8,6 +8,7 @@ import 'package:giveandtake/features/recruiter_account/presentation/screens/chan
 import 'package:giveandtake/features/recruiter_account/presentation/screens/company_info_screen.dart';
 import 'package:giveandtake/features/recruiter_account/presentation/screens/create_job_screen.dart';
 import '../../../company_pricing/presentation/screens/plan_pricing_screen(company).dart';
+import '../../../subscription/screens/subscription_screen.dart';
 import '../controller/recruiter_controller.dart';
 import '../screens/edit_profile_page.dart';
 import '../screens/public_view_screen.dart';
@@ -141,7 +142,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 onTap: () {
                   Navigator.pop(context);
                   Future.delayed(const Duration(milliseconds: 150), () {
-                    Get.dialog(PlanPricingScreen());
+                    Get.dialog(SubscriptionScreen());
                   });
                 },
               ),

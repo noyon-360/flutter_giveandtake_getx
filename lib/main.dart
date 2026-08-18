@@ -8,12 +8,16 @@ import 'package:giveandtake/core/theme/app_theme.dart';
 import 'package:giveandtake/features/auth/presentation/screens/splash_screen.dart';
 import 'package:giveandtake/features/content_pages/presentation/screens/content_page_screen.dart';
 
+
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   DeepLinkService.instance.initialize();
 
   // App initialize
   await AppInitializer.initializeApp();
+
+
 
   runApp(const MyApp());
 }

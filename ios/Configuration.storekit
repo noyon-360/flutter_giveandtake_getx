@@ -1,0 +1,142 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "61A45DBF",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6760217689",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_developerTeamID" : "3XK4GQ9A6R",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 808719250.73757899,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "22252062",
+      "localizations" : [
+
+      ],
+      "name" : "candidate annual",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "43.99",
+              "displayPrice" : "43.99",
+              "internalID" : "6793007508_BILLED_UPFRONT",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "43.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6793007508",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Annual access to Premium Candidate features.",
+              "displayName" : "Candidate Annual",
+              "locale" : "en_GB"
+            }
+          ],
+          "productID" : "com.pooelcentral.giveandtake.candidate.anual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "candidate annual",
+          "subscriptionGroupID" : "22252062",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "22252088",
+      "localizations" : [
+        {
+          "description" : "",
+          "displayName" : "EVPitch Subscription",
+          "locale" : "en_GB"
+        }
+      ],
+      "name" : "candidate monthly",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "3.99",
+              "displayPrice" : "3.99",
+              "internalID" : "6793000541_BILLED_UPFRONT",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "3.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6793000541",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Monthly access to EVPitch candidate features",
+              "displayName" : "Candidate Monthly",
+              "locale" : "en_GB"
+            }
+          ],
+          "productID" : "com.pooelcentral.giveandtake.candidate.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "candidate monthly",
+          "subscriptionGroupID" : "22252088",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 5,
+    "minor" : 0
+  }
+}
