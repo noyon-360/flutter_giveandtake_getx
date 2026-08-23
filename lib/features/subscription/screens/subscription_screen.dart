@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:giveandtake/core/common/widgets/app_scaffold.dart';
 import 'package:giveandtake/core/theme/app_colors.dart';
 
 import '../controller/subscription_controller.dart';
+
+/// Where a plan sends the user when the billing cycle they picked has no
+/// matching product configured in App Store/Play Console yet.
+const String _kWebFallbackUrl = 'https://evpitch.com/company-pricing';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -35,6 +40,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _buyProduct(ProductDetails product) async {
+    try {
+      await subscriptionController.buySubscription(product);
+    } catch (error) {
+      Get.snackbar(
+        'Purchase could not start',
+        error.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override
@@ -134,18 +151,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                 ),
                                 child: _SubscriptionPlanCard(
                                   product: product,
-                                  onBuy: () async {
-                                    try {
-                                      await subscriptionController
-                                          .buySubscription(product);
-                                    } catch (error) {
-                                      Get.snackbar(
-                                        'Purchase could not start',
-                                        error.toString(),
-                                        snackPosition: SnackPosition.BOTTOM,
-                                      );
-                                    }
-                                  },
+                                  allSubscriptions: subscriptions,
+                                  onBuyProduct: _buyProduct,
                                 ),
                               ),
                               const SizedBox(height: 60),
@@ -196,35 +203,215 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 }
 
+const Color _kPlanBlue = Color(0xff2E7DD1);
+const Color _kPriceBlack = Color(0xff1A1A1A);
+const Color _kMutedGray = Color(0xff8593A3);
+const Color _kFeatureGray = Color(0xff4A4A4A);
+
+/// Display-only content for each Non-Renewing Subscription plan.
+///
+/// Apple's In-App Purchase description field is capped at 45 characters,
+/// far too short for the full feature lists shown in the app, so the
+/// title/annual price/feature copy is kept here and only the purchasable
+/// monthly [ProductDetails.price] comes from the store.
+class _PlanContent {
+  const _PlanContent({
+    required this.title,
+    required this.features,
+    this.annualPrice,
+    this.annualNote,
+    this.annualProductId,
+  });
+
+  final String title;
+  final List<String> features;
+  final String? annualPrice;
+  final String? annualNote;
+
+  /// The Store Connect/Play Console product id for the annual cycle, if one
+  /// has been configured. None of the current plans have an annual product
+  /// yet, so this stays null until one is added — at which point the
+  /// matching id here is all that's needed to route "Annual" through the
+  /// native purchase flow instead of the web fallback.
+  final String? annualProductId;
+}
+
+const List<String> _kStandardFeatures = <String>[
+  '12 Months for the price of 11 Months!',
+  'All job posts free until April 2026!',
+  '60-Second company Elevator Video Pitch©',
+  'Intuitive company dashboard',
+  'Seamless job posting/closure/reopening',
+  'Scheduled job posts',
+  'Job applicants online screening',
+  'One-click applicant updates',
+];
+
+const String _kYearlyNote = '(Yearly plan — web purchase only)';
+
+final Map<String, _PlanContent> _kPlanContentById = <String, _PlanContent>{
+  'com.pooelcentral.giveandtake.company.payasyougo': const _PlanContent(
+    title: 'Pay as You Go',
+    features: <String>[
+      'All job posts free until April 2026!',
+      '60-Second company Elevator Video Pitch©',
+      'Intuitive company dashboard',
+      'Seamless job posting/closure/reopening',
+      'Scheduled posts',
+      'Job applicants online screening',
+      'One-click applicant updates',
+    ],
+  ),
+  'com.pooelcentral.giveandtake.company.basic': const _PlanContent(
+    title: 'Basic Plan (Up to 24 job posts per annual cycle)',
+    annualPrice: '\$2155.99 per annum',
+    annualNote: _kYearlyNote,
+    features: _kStandardFeatures,
+  ),
+  'com.pooelcentral.giveandtake.company.bronze': const _PlanContent(
+    title: 'Premium Bronze Plan (Up to 36 job posts per annual cycle)',
+    annualPrice: '\$2980.99 per annum',
+    annualNote: _kYearlyNote,
+    features: _kStandardFeatures,
+  ),
+  'com.pooelcentral.giveandtake.company.silver': const _PlanContent(
+    title: 'Premium Silver Plan (Up to 48 job posts per annual cycle)',
+    annualPrice: '\$3915.99 per annum',
+    annualNote: _kYearlyNote,
+    features: _kStandardFeatures,
+  ),
+  'com.pooelcentral.giveandtake.company.gold': const _PlanContent(
+    title: 'Premium Gold Plan (Up to 60 job posts per annual cycle)',
+    annualPrice: '\$4839.99 per annum',
+    annualNote: _kYearlyNote,
+    features: _kStandardFeatures,
+  ),
+  'com.pooelcentral.giveandtake.company.platinum': const _PlanContent(
+    title: 'Premium Platinum Plan (Unlimited job posts per annual cycle)',
+    annualPrice: '\$12319.99 per annum',
+    annualNote: _kYearlyNote,
+    features: <String>[
+      '12 Months for the price of 11 Months!',
+      'All job posts free until April 2026!',
+      '60-Second company Elevator Video Pitch©',
+      'Intuitive company dashboard',
+      'Seamless job posting/closure/reopening',
+      'Scheduled job posts',
+      'Job applicants online screening',
+      'One-click job applicant updates',
+    ],
+  ),
+};
+
 class _SubscriptionPlanCard extends StatelessWidget {
-  const _SubscriptionPlanCard({required this.product, required this.onBuy});
+  const _SubscriptionPlanCard({
+    required this.product,
+    required this.allSubscriptions,
+    required this.onBuyProduct,
+  });
 
   final ProductDetails product;
-  final VoidCallback onBuy;
 
-  List<String> get _features {
+  /// Every product the store actually returned, used to check whether the
+  /// billing cycle the user picks (monthly/annual) has a real, purchasable
+  /// product before starting an in-app purchase for it.
+  final List<ProductDetails> allSubscriptions;
+  final Future<void> Function(ProductDetails product) onBuyProduct;
+
+  ProductDetails? _findProductById(String? id) {
+    if (id == null) {
+      return null;
+    }
+    for (final ProductDetails candidate in allSubscriptions) {
+      if (candidate.id == id) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _openWebFallback() async {
+    final Uri uri = Uri.parse(_kWebFallbackUrl);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  void _handleSubscribeTap(BuildContext context, _PlanContent content) {
+    // Only Pay As You Go (and any plan without a known annual price) skips
+    // straight to purchasing the single available product.
+    if (content.annualPrice == null) {
+      onBuyProduct(product);
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext dialogContext) {
+        return _PaymentOptionDialog(
+          planTitle: content.title,
+          monthlyLabel: '${product.price} per month',
+          annualLabel: content.annualPrice!,
+          onMonthly: () {
+            Navigator.of(dialogContext).pop();
+            // The monthly product is exactly what's already loaded here —
+            // that's why this card exists — so it's always purchasable.
+            onBuyProduct(product);
+          },
+          onAnnual: () async {
+            Navigator.of(dialogContext).pop();
+            final ProductDetails? annualProduct = _findProductById(
+              content.annualProductId,
+            );
+            if (annualProduct != null) {
+              await onBuyProduct(annualProduct);
+            } else {
+              // No annual product configured in the store yet — send the
+              // user to complete the annual purchase on the website.
+              await _openWebFallback();
+            }
+          },
+        );
+      },
+    );
+  }
+
+  _PlanContent get _content {
+    final _PlanContent? predefined = _kPlanContentById[product.id];
+    if (predefined != null) {
+      return predefined;
+    }
+
+    // Fallback for any plan not covered above (e.g. company_month): parse
+    // whatever feature text the store returns instead of showing nothing.
     final List<String> lines = product.description
         .split(RegExp(r'[\n•]+'))
         .map((line) => line.trim())
         .where((line) => line.isNotEmpty)
         .toList();
 
-    return lines.isEmpty ? <String>[product.description] : lines;
+    return _PlanContent(
+      title: product.title,
+      features: lines.isEmpty ? <String>[product.description] : lines,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> features = _features;
+    final _PlanContent content = _content;
 
     return Container(
       width: MediaQuery.of(context).size.width * 0.8,
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xff3B9EFF), Color(0xff2B7FD9)],
-        ),
+        border: Border.all(color: const Color(0xffE5E9F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -233,108 +420,206 @@ class _SubscriptionPlanCard extends StatelessWidget {
         children: [
           // Plan title
           Text(
-            product.title.toUpperCase(),
+            content.title,
             style: const TextStyle(
-              fontSize: 11,
-              color: Colors.white,
+              fontSize: 15,
+              color: _kPlanBlue,
               fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Price (monthly price comes from the store; annual is informational)
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                '${product.price} per month',
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: _kPriceBlack,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (content.annualPrice != null) ...[
+                const Text(
+                  '  /  ',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: _kPriceBlack,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  content.annualPrice!,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: _kPriceBlack,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          if (content.annualNote != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              content.annualNote!,
+              style: const TextStyle(fontSize: 11, color: _kMutedGray),
+            ),
+          ],
+
+          const SizedBox(height: 18),
+          const Text(
+            'What you will get',
+            style: TextStyle(
+              fontSize: 12,
+              color: _kMutedGray,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 12),
 
-          // Price
-          Text(
-            product.price,
-            style: const TextStyle(
-              fontSize: 36,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'What you will get',
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.white,
-                fontWeight: FontWeight.w400,
+          // Full features list — all points from the plan are always shown.
+          ...content.features.map((feature) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.verified, color: _kPlanBlue, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      feature,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: _kFeatureGray,
+                        fontWeight: FontWeight.w400,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-          Divider(color: Colors.white.withOpacity(0.5), thickness: 1),
-          const SizedBox(height: 16),
-
-          // Features list (derived from the store product description)
-          ...features.asMap().entries.map((entry) {
-            final bool isLast = entry.key == features.length - 1;
-            return Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Color(0xff3B9EFF),
-                        size: 14,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        entry.value,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w400,
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (!isLast) const SizedBox(height: 12),
-              ],
             );
           }),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 8),
 
           // Subscribe button
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onBuy,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xff3B9EFF),
+            child: OutlinedButton(
+              onPressed: () => _handleSubscribeTap(context, content),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: _kPlanBlue,
+                side: const BorderSide(color: _kPlanBlue, width: 1.5),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),
-                elevation: 0,
               ),
               child: const Text(
                 'Subscribe',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Select Payment Option" dialog shown when a plan has both a monthly
+/// (in-app purchase) and an annual price to choose from.
+class _PaymentOptionDialog extends StatelessWidget {
+  const _PaymentOptionDialog({
+    required this.planTitle,
+    required this.monthlyLabel,
+    required this.annualLabel,
+    required this.onMonthly,
+    required this.onAnnual,
+  });
+
+  final String planTitle;
+  final String monthlyLabel;
+  final String annualLabel;
+  final VoidCallback onMonthly;
+  final VoidCallback onAnnual;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Select Payment Option for $planTitle',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: _kPriceBlack,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            _PaymentOptionButton(
+              label: 'Monthly: $monthlyLabel',
+              onTap: onMonthly,
+            ),
+            const SizedBox(height: 12),
+            _PaymentOptionButton(
+              label: 'Annual: $annualLabel',
+              onTap: onAnnual,
+            ),
+
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(fontSize: 14, color: _kMutedGray),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PaymentOptionButton extends StatelessWidget {
+  const _PaymentOptionButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _kPlanBlue,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 0,
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 13,
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

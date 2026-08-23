@@ -22,10 +22,31 @@ class SubscriptionController extends GetxController {
     'recruiter_month',
   };
 
+  // Non-Renewing Subscriptions configured in App Store Connect.
+  // Auto-renewable subscriptions are intentionally not queried/shown here.
   static const Set<String> _iosSubscriptionIds = <String>{
-    'com.pooelcentral.giveandtake.candidate.anual',
-    'com.pooelcentral.giveandtake.candidate.monthly',
+    'com.pooelcentral.giveandtake.company.payasyougo',
+    'com.pooelcentral.giveandtake.company.basic',
+    'com.pooelcentral.giveandtake.company.bronze',
+    'com.pooelcentral.giveandtake.company.silver',
+    'com.pooelcentral.giveandtake.company.gold',
+    'com.pooelcentral.giveandtake.company.platinum',
+    'company_month',
   };
+
+  // Display order matching the plans as they appear on
+  // evpitch.com/company-pricing. The store does not guarantee it returns
+  // products in the order they were queried, so results are re-sorted to
+  // match this every time. Any id not listed here (e.g. company_month) is
+  // shown last, in whatever order the store returned it.
+  static const List<String> _planDisplayOrder = <String>[
+    'com.pooelcentral.giveandtake.company.payasyougo',
+    'com.pooelcentral.giveandtake.company.basic',
+    'com.pooelcentral.giveandtake.company.bronze',
+    'com.pooelcentral.giveandtake.company.silver',
+    'com.pooelcentral.giveandtake.company.gold',
+    'com.pooelcentral.giveandtake.company.platinum',
+  ];
 
   @override
   void onInit() {
@@ -89,7 +110,17 @@ class SubscriptionController extends GetxController {
       );
     }
 
-    subscriptions.assignAll(response.productDetails);
+    final List<ProductDetails> orderedProducts = List<ProductDetails>.from(
+      response.productDetails,
+    )..sort((a, b) {
+      final int rankA = _planDisplayOrder.indexOf(a.id);
+      final int rankB = _planDisplayOrder.indexOf(b.id);
+      return (rankA == -1 ? _planDisplayOrder.length : rankA).compareTo(
+        rankB == -1 ? _planDisplayOrder.length : rankB,
+      );
+    });
+
+    subscriptions.assignAll(orderedProducts);
     notFoundIds.assignAll(response.notFoundIDs);
 
     DPrint.log(
@@ -189,12 +220,16 @@ class SubscriptionController extends GetxController {
   ) async {
     switch (purchase.productID) {
       case 'candidate_monthly':
-      case 'com.pooelcentral.giveandtake.candidate.anual':
-      case 'com.pooelcentral.giveandtake.candidate.monthly':
         DPrint.log('Grant candidate subscription access');
         break;
 
       case 'company_month':
+      case 'com.pooelcentral.giveandtake.company.basic':
+      case 'com.pooelcentral.giveandtake.company.payasyougo':
+      case 'com.pooelcentral.giveandtake.company.bronze':
+      case 'com.pooelcentral.giveandtake.company.gold':
+      case 'com.pooelcentral.giveandtake.company.platinum':
+      case 'com.pooelcentral.giveandtake.company.silver':
         DPrint.log('Grant company subscription access');
         break;
 
