@@ -9,8 +9,14 @@ import 'package:giveandtake/core/theme/app_colors.dart';
 import '../controller/subscription_controller.dart';
 
 /// Where a plan sends the user when the billing cycle they picked has no
-/// matching product configured in App Store/Play Console yet.
-const String _kWebFallbackUrl = 'https://evpitch.com/company-pricing';
+/// matching product configured in App Store/Play Console yet — one pricing
+/// page per audience, matching the site's own navigation.
+const Map<SubscriptionAudience, String> _kWebFallbackUrlByAudience =
+    <SubscriptionAudience, String>{
+      SubscriptionAudience.candidate: 'https://evpitch.com/user-pricing',
+      SubscriptionAudience.recruiter: 'https://evpitch.com/recruiter-pricing',
+      SubscriptionAudience.company: 'https://evpitch.com/company-pricing',
+    };
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -152,6 +158,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                 child: _SubscriptionPlanCard(
                                   product: product,
                                   allSubscriptions: subscriptions,
+                                  audience: subscriptionController.audience,
                                   onBuyProduct: _buyProduct,
                                 ),
                               ),
@@ -221,6 +228,7 @@ class _PlanContent {
     this.annualPrice,
     this.annualNote,
     this.annualProductId,
+    this.buttonLabel = 'Subscribe',
   });
 
   final String title;
@@ -234,6 +242,10 @@ class _PlanContent {
   /// matching id here is all that's needed to route "Annual" through the
   /// native purchase flow instead of the web fallback.
   final String? annualProductId;
+
+  /// Matches the site's own button copy — every plan says "Subscribe"
+  /// except Recruiter Pay as You Go, which says "Purchase".
+  final String buttonLabel;
 }
 
 const List<String> _kStandardFeatures = <String>[
@@ -301,12 +313,119 @@ final Map<String, _PlanContent> _kPlanContentById = <String, _PlanContent>{
       'One-click job applicant updates',
     ],
   ),
+
+  // --- Recruiter plans (evpitch.com/recruiter-pricing) ---
+  'com.pooelcentral.giveandtake.recruiter.payasyougo': const _PlanContent(
+    title: 'Pay as You Go',
+    buttonLabel: 'Purchase',
+    features: <String>[
+      'All job posts free until April 2026!',
+      '60-second Elevator Video Pitch©',
+      'Intuitive recruiter dashboard',
+      'Seamless job posting/closure/reopening',
+      'Scheduled job posts',
+      'Job applicants online screening',
+      'One-click applicant updates',
+    ],
+  ),
+  'com.pooelcentral.giveandtake.recruiter.basic': const _PlanContent(
+    title: 'Basic Plan (Up to 24 job posts per annual cycle)',
+    annualPrice: '\$2155.99 per annum',
+    annualNote: _kYearlyNote,
+    features: <String>[
+      '12 Months for the price of 11 Months!',
+      'All job posts free until April 2026!',
+      '60-Second Elevator Video Pitch©',
+      'Intiutive recruiter dashboard',
+      'Seamless job posting/closure/reopening',
+      'Scheduled job posts',
+      'Job applicants online screening',
+      'One-click applicant updates',
+    ],
+  ),
+  'com.pooelcentral.giveandtake.recruiter.bronze': const _PlanContent(
+    title: 'Premium Bronze Plan (Up to 36 job posts per annual cycle)',
+    annualPrice: '\$2980.99 per annum',
+    annualNote: _kYearlyNote,
+    features: <String>[
+      '12 months for the price of 11 Months!',
+      'All job posts free until April 2026!',
+      '60-second Elevator Video Pitch©',
+      "Intuitive Recruiter's dashboard",
+      'Seamless job posting/closure/reopening',
+      'Scheduled job posts',
+      'Job applicants online screening',
+      'One-click applicant updates',
+    ],
+  ),
+  'com.pooelcentral.giveandtake.recruiter.silver': const _PlanContent(
+    title: 'Premium Silver Plan (Up to 48 job posts per annual cycle)',
+    annualPrice: '\$3915.99 per annum',
+    annualNote: _kYearlyNote,
+    features: <String>[
+      '12 Months for the price of 11 Months!',
+      'All job posts free until April 2026!',
+      '60-second Elevator Video Pitch©',
+      'Intuitive recruiter dashboard',
+      'Seamless job posting/closure/reopening',
+      'Scheduled job posts',
+      'Job applicants online screening',
+      'One-click applicant updates',
+    ],
+  ),
+  'com.pooelcentral.giveandtake.recruiter.gold': const _PlanContent(
+    title: 'Premium Gold Plan (Up to 60 job posts per annual cycle)',
+    annualPrice: '\$4839.99 per annum',
+    annualNote: _kYearlyNote,
+    features: <String>[
+      '12 Months for the price of 11 Months!',
+      'All job posts free until April 2026!',
+      '60-Second recruiter Elevator Video Pitch©',
+      'Intuitive recruiter dashboard',
+      'Seamless job posting/closure/reopening',
+      'Scheduled job posts',
+      'Job applicants online screening',
+      'One-click applicant updates',
+    ],
+  ),
+  'com.pooelcentral.giveandtake.recruiter.platinum': const _PlanContent(
+    title: 'Premium Platinum Plan (Unlimited job posts per annual cycle)',
+    // Apple caps Non-Renewing Subscription IAPs at $999.99, so the native
+    // monthly purchase is $999.99 even though the web price is $1199.99 —
+    // see subscription_controller.dart's price-point notes.
+    annualPrice: '\$12319.99 per annum',
+    annualNote: _kYearlyNote,
+    features: <String>[
+      '12 Months for the price of 11 Months!',
+      'All job posts free until April 2026!',
+      '60-Second recruiter Elevator Video Pitch©',
+      'Intuitive recruiter dashboard',
+      'Seamless job posting/closure/reopening',
+      'Scheduled job posts',
+      'Job applicants online screening',
+      'One-click applicant updates',
+    ],
+  ),
+
+  // --- Candidate plan (evpitch.com/user-pricing) ---
+  'com.pooelcentral.giveandtake.candidate.premium': const _PlanContent(
+    title: 'Premium Plan',
+    annualPrice: '\$43.99 per annum',
+    annualNote: _kYearlyNote,
+    features: <String>[
+      '12 months for the price of 11 Months!',
+      '60-second Elevator Video Pitch©',
+      'Admin EVPitch review & feedback (annual subscribers only)',
+      'Full CV review and redraft (annual subscribers only)',
+    ],
+  ),
 };
 
 class _SubscriptionPlanCard extends StatelessWidget {
   const _SubscriptionPlanCard({
     required this.product,
     required this.allSubscriptions,
+    required this.audience,
     required this.onBuyProduct,
   });
 
@@ -316,6 +435,9 @@ class _SubscriptionPlanCard extends StatelessWidget {
   /// billing cycle the user picks (monthly/annual) has a real, purchasable
   /// product before starting an in-app purchase for it.
   final List<ProductDetails> allSubscriptions;
+
+  /// Which pricing page (candidate/recruiter/company) to fall back to.
+  final SubscriptionAudience? audience;
   final Future<void> Function(ProductDetails product) onBuyProduct;
 
   ProductDetails? _findProductById(String? id) {
@@ -331,7 +453,10 @@ class _SubscriptionPlanCard extends StatelessWidget {
   }
 
   Future<void> _openWebFallback() async {
-    final Uri uri = Uri.parse(_kWebFallbackUrl);
+    final String url =
+        _kWebFallbackUrlByAudience[audience] ??
+        _kWebFallbackUrlByAudience[SubscriptionAudience.company]!;
+    final Uri uri = Uri.parse(url);
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
@@ -521,9 +646,12 @@ class _SubscriptionPlanCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              child: const Text(
-                'Subscribe',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              child: Text(
+                content.buttonLabel,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
