@@ -285,7 +285,7 @@ class _AppDrawerState extends State<AppDrawer> {
         title: "All Plans",
         onTap: () {
           Get.back();
-          Get.to(() => const MyPlanScreen());
+          Get.to(() => const SubscriptionScreen());
         },
       ),
       ListTileForNav(

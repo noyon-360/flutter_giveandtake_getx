@@ -5,6 +5,13 @@ import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+import 'package:giveandtake/core/services/get_user_profile_service.dart';
+import 'package:giveandtake/features/auth/presentation/controller/auth_controller.dart';
+
+/// Which set of Non-Renewing Subscriptions to show, based on the logged-in
+/// user's account type.
+enum SubscriptionAudience { candidate, recruiter, company }
+
 class SubscriptionController extends GetxController {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
 
@@ -16,37 +23,82 @@ class SubscriptionController extends GetxController {
   final RxList<ProductDetails> subscriptions = <ProductDetails>[].obs;
   final RxList<String> notFoundIds = <String>[].obs;
 
-  static const Set<String> _androidSubscriptionIds = <String>{
-    'candidate_monthly',
-    'company_month',
-    'recruiter_month',
+  /// Display order for each audience's plans, matching the corresponding
+  /// evpitch.com pricing page. Also doubles as the set of product ids
+  /// queried for that audience/platform — the store does not guarantee it
+  /// returns products in the order they were queried, so results are
+  /// re-sorted to match this every time.
+  static const Map<SubscriptionAudience, List<String>>
+  _androidProductIdsByAudience = <SubscriptionAudience, List<String>>{
+    SubscriptionAudience.candidate: <String>['candidate_monthly'],
+    SubscriptionAudience.recruiter: <String>['recruiter_month'],
+    SubscriptionAudience.company: <String>['company_month'],
   };
 
   // Non-Renewing Subscriptions configured in App Store Connect.
   // Auto-renewable subscriptions are intentionally not queried/shown here.
-  static const Set<String> _iosSubscriptionIds = <String>{
-    'com.pooelcentral.giveandtake.company.payasyougo',
-    'com.pooelcentral.giveandtake.company.basic',
-    'com.pooelcentral.giveandtake.company.bronze',
-    'com.pooelcentral.giveandtake.company.silver',
-    'com.pooelcentral.giveandtake.company.gold',
-    'com.pooelcentral.giveandtake.company.platinum',
-    'company_month',
+  static const Map<SubscriptionAudience, List<String>>
+  _iosProductIdsByAudience = <SubscriptionAudience, List<String>>{
+    SubscriptionAudience.candidate: <String>[
+      'com.pooelcentral.giveandtake.candidate.premium',
+    ],
+    SubscriptionAudience.recruiter: <String>[
+      'com.pooelcentral.giveandtake.recruiter.payasyougo',
+      'com.pooelcentral.giveandtake.recruiter.basic',
+      'com.pooelcentral.giveandtake.recruiter.bronze',
+      'com.pooelcentral.giveandtake.recruiter.silver',
+      'com.pooelcentral.giveandtake.recruiter.gold',
+      'com.pooelcentral.giveandtake.recruiter.platinum',
+    ],
+    SubscriptionAudience.company: <String>[
+      'com.pooelcentral.giveandtake.company.payasyougo',
+      'com.pooelcentral.giveandtake.company.basic',
+      'com.pooelcentral.giveandtake.company.bronze',
+      'com.pooelcentral.giveandtake.company.silver',
+      'com.pooelcentral.giveandtake.company.gold',
+      'com.pooelcentral.giveandtake.company.platinum',
+      'company_month',
+    ],
   };
 
-  // Display order matching the plans as they appear on
-  // evpitch.com/company-pricing. The store does not guarantee it returns
-  // products in the order they were queried, so results are re-sorted to
-  // match this every time. Any id not listed here (e.g. company_month) is
-  // shown last, in whatever order the store returned it.
-  static const List<String> _planDisplayOrder = <String>[
-    'com.pooelcentral.giveandtake.company.payasyougo',
-    'com.pooelcentral.giveandtake.company.basic',
-    'com.pooelcentral.giveandtake.company.bronze',
-    'com.pooelcentral.giveandtake.company.silver',
-    'com.pooelcentral.giveandtake.company.gold',
-    'com.pooelcentral.giveandtake.company.platinum',
-  ];
+  /// The audience resolved for the current user, set once
+  /// [loadSubscriptions] has run.
+  SubscriptionAudience? audience;
+
+  /// Mirrors the role precedence used by the app drawer's
+  /// `_effectiveRole` (see app_drawer.dart): the reactive profile role
+  /// first, falling back to the role persisted at login if the profile
+  /// hasn't loaded yet. Defaults to candidate, same as the drawer's switch.
+  Future<SubscriptionAudience> _resolveAudience() async {
+    String role = '';
+
+    if (Get.isRegistered<GetUserProfileService>()) {
+      role = (Get.find<GetUserProfileService>().userInfo?.role ?? '')
+          .toLowerCase();
+    }
+
+    if (role.isEmpty && Get.isRegistered<AuthController>()) {
+      try {
+        role =
+            (await Get.find<AuthController>().authStorageService
+                    .getUserRole()) ??
+            '';
+        role = role.toLowerCase();
+      } catch (error) {
+        DPrint.log('Could not read stored user role: $error');
+      }
+    }
+
+    switch (role) {
+      case 'recruiter':
+        return SubscriptionAudience.recruiter;
+      case 'company':
+        return SubscriptionAudience.company;
+      case 'candidate':
+      default:
+        return SubscriptionAudience.candidate;
+    }
+  }
 
   @override
   void onInit() {
@@ -89,17 +141,25 @@ class SubscriptionController extends GetxController {
   }
 
   Future<List<ProductDetails>> loadSubscriptions() async {
-    final Set<String> subscriptionIds;
+    final SubscriptionAudience resolvedAudience = await _resolveAudience();
+    audience = resolvedAudience;
+    DPrint.log('Subscription audience resolved: $resolvedAudience');
+
+    final Map<SubscriptionAudience, List<String>> idsByAudience;
 
     if (Platform.isAndroid) {
-      subscriptionIds = _androidSubscriptionIds;
+      idsByAudience = _androidProductIdsByAudience;
     } else if (Platform.isIOS) {
-      subscriptionIds = _iosSubscriptionIds;
+      idsByAudience = _iosProductIdsByAudience;
     } else {
       throw UnsupportedError(
         'In-app subscriptions are supported only on Android and iOS.',
       );
     }
+
+    final List<String> planDisplayOrder =
+        idsByAudience[resolvedAudience] ?? const <String>[];
+    final Set<String> subscriptionIds = planDisplayOrder.toSet();
 
     final ProductDetailsResponse response =
         await _inAppPurchase.queryProductDetails(subscriptionIds);
@@ -113,10 +173,10 @@ class SubscriptionController extends GetxController {
     final List<ProductDetails> orderedProducts = List<ProductDetails>.from(
       response.productDetails,
     )..sort((a, b) {
-      final int rankA = _planDisplayOrder.indexOf(a.id);
-      final int rankB = _planDisplayOrder.indexOf(b.id);
-      return (rankA == -1 ? _planDisplayOrder.length : rankA).compareTo(
-        rankB == -1 ? _planDisplayOrder.length : rankB,
+      final int rankA = planDisplayOrder.indexOf(a.id);
+      final int rankB = planDisplayOrder.indexOf(b.id);
+      return (rankA == -1 ? planDisplayOrder.length : rankA).compareTo(
+        rankB == -1 ? planDisplayOrder.length : rankB,
       );
     });
 
@@ -220,6 +280,7 @@ class SubscriptionController extends GetxController {
   ) async {
     switch (purchase.productID) {
       case 'candidate_monthly':
+      case 'com.pooelcentral.giveandtake.candidate.premium':
         DPrint.log('Grant candidate subscription access');
         break;
 
@@ -234,6 +295,12 @@ class SubscriptionController extends GetxController {
         break;
 
       case 'recruiter_month':
+      case 'com.pooelcentral.giveandtake.recruiter.basic':
+      case 'com.pooelcentral.giveandtake.recruiter.payasyougo':
+      case 'com.pooelcentral.giveandtake.recruiter.bronze':
+      case 'com.pooelcentral.giveandtake.recruiter.gold':
+      case 'com.pooelcentral.giveandtake.recruiter.platinum':
+      case 'com.pooelcentral.giveandtake.recruiter.silver':
         DPrint.log('Grant recruiter subscription access');
         break;
 
